@@ -193,6 +193,15 @@ p {
   align-items: center;
   gap: 8px;
   min-height: 44px;
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.button:hover,
+.choice-btn:hover,
+.tile-btn:hover,
+.letter-btn:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.08);
 }
 
 .button.primary {
@@ -330,6 +339,24 @@ p {
   font-weight: 700;
 }
 
+.flashcard {
+  margin: 10px 0;
+  border: 2px dashed #b8c7ff;
+  border-radius: 16px;
+  min-height: 120px;
+  padding: 12px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: linear-gradient(180deg, #fdf9ff, #eef4ff);
+}
+
+.flash-dev {
+  font-size: 2.3rem;
+  margin: 0;
+  font-weight: 800;
+}
+
 .star-box {
   display: inline-flex;
   align-items: center;
@@ -378,6 +405,40 @@ p {
 .footer-note {
   color: #354178;
   font-size: 0.92rem;
+}
+
+.applause-burst {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 0;
+  font-size: 2.1rem;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.applause-burst::before {
+  content: "👏 ⭐ 🎉";
+}
+
+.applause-burst.show {
+  animation: burst 0.85s ease-out forwards;
+}
+
+@keyframes burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -60%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -95%) scale(1.2);
+  }
 }
 
 @media (max-width: 860px) {

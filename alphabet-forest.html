@@ -22,7 +22,7 @@
   <main id="main-content" class="page-wrap">
     <section class="panel">
       <h1>Alphabet Forest</h1>
-      <p>Choose letters, listen, play 3 activities, and earn stars.</p>
+      <p>Choose letters, listen, play games, and earn stars.</p>
       <p class="privacy-note">
         Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
       </p>
@@ -50,7 +50,8 @@
     <section class="panel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/3</div>
+        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/4</div>
+        <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
       </div>
       <div class="progress-meter" aria-hidden="true">
         <div id="progressFill" class="progress-fill"></div>
@@ -96,10 +97,24 @@
     </section>
 
     <section class="panel">
+      <h2>Activity 4: Flashcard Flip</h2>
+      <div class="activity">
+        <p>Flip the flashcard, then choose the correct English meaning.</p>
+        <button id="flipFlashcard" class="button secondary" type="button">Flip Card</button>
+        <div id="flashcard" class="flashcard" aria-live="polite"></div>
+        <div id="flashChoices" class="choices"></div>
+        <p id="flashStatus" class="status" aria-live="polite"></p>
+        <button id="nextFlashcard" class="button ghost" type="button">Next flashcard</button>
+      </div>
+    </section>
+
+    <section class="panel">
       <h2>Review Notes</h2>
       <ul id="reviewList" class="review-list"></ul>
     </section>
   </main>
+
+  <div id="applauseBurst" class="applause-burst" aria-hidden="true"></div>
 
   <script src="assets/common.js"></script>
   <script src="assets/lesson-data.js"></script>

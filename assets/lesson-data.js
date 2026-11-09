@@ -35,6 +35,12 @@ window.ALPHABET_LESSON = {
       { word: "कमलम्", meaning: "lotus", tiles: ["ल", "क", "म्", "म"] },
       { word: "माता", meaning: "mother", tiles: ["ता", "मा"] },
       { word: "योगः", meaning: "yoga", tiles: ["गः", "यो"] }
+    ],
+    flashcards: [
+      { devanagari: "गजः", transliteration: "gajah", meaning: "elephant", options: ["elephant", "lotus", "river"] },
+      { devanagari: "कमलम्", transliteration: "kamalam", meaning: "lotus", options: ["moon", "lotus", "mother"] },
+      { devanagari: "नदी", transliteration: "nadee", meaning: "river", options: ["river", "chariot", "yoga"] },
+      { devanagari: "माता", transliteration: "maataa", meaning: "mother", options: ["rainbow", "mother", "fire"] }
     ]
   }
 };
