@@ -9,9 +9,6 @@
   const SAFE_START = { stars: 0, streak: 0, done: { hear: false, picture: false, arrange: false, flash: false } };
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
-  const LOCAL_PRONUNCIATION_FILES = {
-    namaste: "assets/audio/reference/swara-sanskrit.mp3"
-  };
 
   const ui = {
     audioDisclaimer: document.getElementById("audioDisclaimer"),
@@ -195,12 +192,7 @@
   }
 
   function playLocalPronunciation(key, onFail) {
-    const file = LOCAL_PRONUNCIATION_FILES[key];
-    if (!file) {
-      if (onFail) onFail();
-      return;
-    }
-    const audio = new Audio(file);
+    const audio = new Audio("assets/audio/pronunciation/" + key + ".mp3");
     audio.play().catch(function () {
       if (onFail) onFail();
     });
