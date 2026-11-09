@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SanskritParichay | Home</title>
-  <meta name="description" content="A joyful Sanskrit learning adventure for children aged 5–12.">
+  <meta name="description" content="A magical Sanskrit learning adventure for children aged 5–12.">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
@@ -19,45 +19,112 @@
     <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
   </header>
 
-  <main id="main-content" class="page-wrap">
-    <section class="hero-card">
-      <div class="hero-guide" aria-hidden="true">
-        <div class="guide-face">
-          <span class="eye left"></span>
-          <span class="eye right"></span>
-          <span class="smile"></span>
+  <main id="main-content" class="page-wrap home-adventure">
+    <section class="magic-hero panel">
+      <div class="sky-decor" aria-hidden="true">
+        <span class="cloud cloud-a"></span>
+        <span class="cloud cloud-b"></span>
+        <span class="rainbow"></span>
+        <span class="butterfly b-one">🦋</span>
+        <span class="butterfly b-two">🦋</span>
+        <span class="butterfly b-three">🦋</span>
+        <span class="spark s1">अ</span>
+        <span class="spark s2">आ</span>
+        <span class="spark s3">क</span>
+        <span class="spark s4">म</span>
+      </div>
+
+      <div class="hero-layout">
+        <div id="mascot" class="parrot-mascot state-wave" aria-live="polite">
+          <div class="parrot-body">
+            <span class="parrot-wing wing-left"></span>
+            <span class="parrot-wing wing-right"></span>
+            <span class="parrot-eye eye-left"></span>
+            <span class="parrot-eye eye-right"></span>
+            <span class="parrot-beak"></span>
+            <span class="parrot-feet"></span>
+          </div>
+          <p id="mascotSpeech" class="mascot-speech">Namaste! I am Mitthu the Parrot. Let's begin your first Sanskrit adventure!</p>
+        </div>
+
+        <div class="hero-copy">
+          <p class="hero-badge">SanskritParichay Learning Adventure</p>
+          <h1>A Magical Sanskrit Quest</h1>
+          <p>Explore colourful worlds, play interactive mini-games, earn XP, and learn Sanskrit one joyful step at a time.</p>
+          <div class="hero-actions">
+            <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Play!</a>
+            <button class="button ghost big-action" id="continueBtn" type="button">Continue Adventure</button>
+            <button class="button secondary big-action" id="exploreBtn" type="button">Explore Learning Worlds</button>
+            <button class="button challenge big-action" id="challengeBtn" type="button">Today's Challenge</button>
+          </div>
+
+          <div class="hero-actions">
+            <div class="star-box">⭐ Stars: <span id="homeStars">0</span></div>
+            <div class="star-box">⚡ XP: <span id="homeXp">0</span></div>
+          </div>
         </div>
       </div>
-      <div class="hero-copy">
-        <p class="hero-badge">SanskritParichay Learning Adventure</p>
-        <h1>Enter Alphabet Forest</h1>
-        <p>
-          Learn Sanskrit through playful activities, kind feedback, and tiny wins.
-          No sign-up needed.
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="alphabet-forest.html">Start Playing</a>
-          <a class="button ghost" href="https://www.youtube.com/@BhagwadGitaForKids" target="_blank" rel="noopener">KidLearning World Wisdom</a>
-        </div>
+
+      <div class="island-strip" aria-hidden="true">
+        <span class="island-tree">🌳</span>
+        <span class="island-flower">🌸</span>
+        <span class="island-animal">🦚</span>
+        <span class="island-flower">🌼</span>
+        <span class="island-tree">🌴</span>
       </div>
     </section>
 
-    <section class="feature-grid" aria-label="Features">
-      <article class="feature-card">
-        <h2>See Clearly</h2>
-        <p>Every letter shows Devanagari, transliteration, and meaning.</p>
-      </article>
-      <article class="feature-card">
-        <h2>Hear Sound</h2>
-        <p>Tap to hear pronunciation with visible fallback if audio is unavailable.</p>
-      </article>
-      <article class="feature-card">
-        <h2>Keep Progress</h2>
-        <p>Your stars and completed activities are saved on this device only.</p>
-      </article>
+    <section id="worlds" class="panel">
+      <h2>Choose a Learning World</h2>
+      <p>Every world card is interactive. Start with Alphabet Forest or try a quick preview challenge.</p>
+      <div class="world-grid">
+        <button class="world-card world-alphabet" data-world="alphabet" type="button">
+          <span class="world-icon">🌲</span>
+          <span class="world-title">Alphabet Forest</span>
+          <span class="world-text">Playable full lesson</span>
+        </button>
+        <button class="world-card world-jungle" data-world="animals" type="button">
+          <span class="world-icon">🦁</span>
+          <span class="world-title">Animal Jungle</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+        <button class="world-card world-galaxy" data-world="numbers" type="button">
+          <span class="world-icon">🚀</span>
+          <span class="world-title">Number Galaxy</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+        <button class="world-card world-colour" data-world="colours" type="button">
+          <span class="world-icon">🌈</span>
+          <span class="world-title">Colour Kingdom</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+        <button class="world-card world-word" data-world="words" type="button">
+          <span class="world-icon">📚</span>
+          <span class="world-title">Word Wonderland</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+        <button class="world-card world-sentence" data-world="sentences" type="button">
+          <span class="world-icon">🏰</span>
+          <span class="world-title">Sentence Castle</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+        <button class="world-card world-story" data-world="stories" type="button">
+          <span class="world-icon">🏝️</span>
+          <span class="world-title">Story Island</span>
+          <span class="world-text">Preview challenge</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="previewPanel" class="panel preview-panel">
+      <h2 id="previewTitle">World Preview</h2>
+      <p id="previewText">Select a world card to open its mini challenge.</p>
+      <div id="previewChoices" class="choices"></div>
+      <p id="previewStatus" class="status"></p>
     </section>
   </main>
 
   <script src="assets/common.js"></script>
+  <script src="assets/home.js"></script>
 </body>
 </html>

@@ -129,6 +129,35 @@
     }, 500);
   };
 
+  window.spSuccessTone = function spSuccessTone() {
+    if (window.SP_STATE.muted) return;
+    if (!window.AudioContext && !window.webkitAudioContext) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    function tone(frequency, start, duration) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration + 0.01);
+    }
+
+    tone(660, now, 0.11);
+    tone(880, now + 0.12, 0.12);
+    tone(990, now + 0.26, 0.12);
+    setTimeout(function closeCtx() {
+      ctx.close();
+    }, 520);
+  };
+
   if (hasSpeechSupport()) {
     window.speechSynthesis.onvoiceschanged = function onVoicesChanged() {
       renderMute();

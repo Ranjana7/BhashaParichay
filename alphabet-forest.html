@@ -23,6 +23,17 @@
     <section class="panel">
       <h1>Alphabet Forest</h1>
       <p>Choose letters, listen, play games, and earn stars.</p>
+      <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
+        <div class="parrot-body">
+          <span class="parrot-wing wing-left"></span>
+          <span class="parrot-wing wing-right"></span>
+          <span class="parrot-eye eye-left"></span>
+          <span class="parrot-eye eye-right"></span>
+          <span class="parrot-beak"></span>
+          <span class="parrot-feet"></span>
+        </div>
+        <p id="lessonMascotSpeech" class="mascot-speech">Namaste! I am Mitthu. I will celebrate every correct answer with you.</p>
+      </div>
       <p class="privacy-note">
         Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
       </p>
@@ -61,7 +72,11 @@
         <div id="progressFill" class="progress-fill"></div>
       </div>
       <p id="progressText" class="footer-note">Keep going! Finish all activities to complete Alphabet Forest.</p>
-      <div id="doneBanner" class="done-banner" aria-live="polite">Wonderful! You completed Alphabet Forest! ⭐</div>
+      <div id="doneBanner" class="done-banner" aria-live="polite">
+        Wonderful! You completed Alphabet Forest! ⭐
+        <span id="earnedStars"></span>
+        <button id="nextAdventureBtn" class="button primary" type="button">Next Adventure</button>
+      </div>
     </section>
 
     <section class="panel">
@@ -119,6 +134,7 @@
   </main>
 
   <div id="applauseBurst" class="applause-burst" aria-hidden="true"></div>
+  <div id="lessonConfetti" class="confetti-zone" aria-hidden="true"></div>
 
   <script src="assets/common.js"></script>
   <script src="assets/lesson-data.js"></script>

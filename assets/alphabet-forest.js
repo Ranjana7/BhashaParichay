@@ -3,6 +3,8 @@
   if (!lesson) return;
 
   const PROGRESS_KEY = "sanskritParichay.alphabetForest.progress";
+  const HOME_KEY = "sanskritParichay.home.progress";
+  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const TOTAL_ACTIVITIES = 4;
   const SAFE_START = {
     stars: 0,
@@ -14,6 +16,8 @@
     audioDisclaimer: document.getElementById("audioDisclaimer"),
     audioDebug: document.getElementById("audioDebug"),
     testSoundBtn: document.getElementById("testSoundBtn"),
+    lessonMascot: document.getElementById("lessonMascot"),
+    lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
     letterGrid: document.getElementById("letterGrid"),
     selectedDev: document.getElementById("selectedDev"),
     selectedTran: document.getElementById("selectedTran"),
@@ -24,6 +28,8 @@
     starCount: document.getElementById("starCount"),
     doneCount: document.getElementById("doneCount"),
     streakCount: document.getElementById("streakCount"),
+    earnedStars: document.getElementById("earnedStars"),
+    nextAdventureBtn: document.getElementById("nextAdventureBtn"),
     progressFill: document.getElementById("progressFill"),
     progressText: document.getElementById("progressText"),
     doneBanner: document.getElementById("doneBanner"),
@@ -48,7 +54,8 @@
     flashStatus: document.getElementById("flashStatus"),
     nextFlashcard: document.getElementById("nextFlashcard"),
     reviewList: document.getElementById("reviewList"),
-    applauseBurst: document.getElementById("applauseBurst")
+    applauseBurst: document.getElementById("applauseBurst"),
+    lessonConfetti: document.getElementById("lessonConfetti")
   };
 
   const state = {
@@ -59,7 +66,8 @@
     arrangeIndex: 0,
     flashIndex: 0,
     arrangeSelected: [],
-    flashFront: true
+    flashFront: true,
+    lessonCelebrated: false
   };
 
   function cloneSafeStart() {
@@ -99,9 +107,48 @@
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(state.progress));
   }
 
+  function awardHomeXp(xp) {
+    try {
+      const raw = localStorage.getItem(HOME_KEY);
+      const home = raw ? JSON.parse(raw) : { stars: 0, xp: 0, completed: [] };
+      home.xp = Number(home.xp || 0) + xp;
+      home.stars = Number(home.stars || 0) + 1;
+      localStorage.setItem(HOME_KEY, JSON.stringify(home));
+    } catch (error) {
+      console.warn("Unable to update home XP.", error);
+    }
+  }
+
+  function setLessonMascot(stateName, speech) {
+    if (!ui.lessonMascot) return;
+    ui.lessonMascot.classList.remove("state-wave", "state-celebrate", "state-dance");
+    ui.lessonMascot.classList.add(stateName);
+    if (ui.lessonMascotSpeech) {
+      ui.lessonMascotSpeech.textContent = speech;
+    }
+  }
+
+  function launchConfetti() {
+    if (!ui.lessonConfetti) return;
+    ui.lessonConfetti.innerHTML = "";
+    const symbols = ["🎉", "⭐", "✨", "🌟", "🎊"];
+    for (let i = 0; i < 28; i += 1) {
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      piece.textContent = symbols[i % symbols.length];
+      piece.style.left = Math.floor(Math.random() * 100) + "%";
+      piece.style.animationDelay = (Math.random() * 0.35).toFixed(2) + "s";
+      ui.lessonConfetti.appendChild(piece);
+    }
+    setTimeout(function clearConfetti() {
+      ui.lessonConfetti.innerHTML = "";
+    }, 1800);
+  }
+
   function celebrate(statusEl, message) {
     if (statusEl) statusEl.textContent = message;
-    if (window.spApplause) window.spApplause();
+    if (window.spSuccessTone) window.spSuccessTone();
+    setLessonMascot("state-celebrate", "Brilliant! You got that right.");
     if (!ui.applauseBurst) return;
     ui.applauseBurst.classList.remove("show");
     void ui.applauseBurst.offsetWidth;
@@ -114,6 +161,7 @@
   function handleCorrect(activityId, stars, statusEl, message) {
     state.progress.streak += 1;
     state.progress.stars += stars;
+    awardHomeXp(8);
     if (!state.progress.done[activityId]) {
       state.progress.done[activityId] = true;
       state.progress.stars += 1;
@@ -128,6 +176,18 @@
     saveProgress();
     renderProgress();
     if (statusEl) statusEl.textContent = message;
+    setLessonMascot("state-wave", "Great effort. Try again and you'll get it!");
+  }
+
+  function onLessonComplete() {
+    if (state.lessonCelebrated) return;
+    state.lessonCelebrated = true;
+    setLessonMascot("state-dance", "You completed Alphabet Forest! Let's dance!");
+    if (window.spApplause) window.spApplause();
+    launchConfetti();
+    if (ui.earnedStars) {
+      ui.earnedStars.textContent = " Earned Stars: " + String(state.progress.stars);
+    }
   }
 
   function renderProgress() {
@@ -141,9 +201,11 @@
     if (doneTotal === TOTAL_ACTIVITIES) {
       ui.progressText.textContent = "Legendary! You completed all Alphabet Forest activities!";
       ui.doneBanner.classList.add("show");
+      onLessonComplete();
     } else {
       ui.progressText.textContent = "Keep going! Finish all activities to complete Alphabet Forest.";
       ui.doneBanner.classList.remove("show");
+      state.lessonCelebrated = false;
     }
   }
 
@@ -354,6 +416,10 @@
     setupFlashcard();
   }
 
+  function goNextAdventure() {
+    window.location.href = "index.html#worlds";
+  }
+
   function renderReviewList() {
     ui.reviewList.innerHTML = "";
     const notes = [
@@ -391,6 +457,7 @@
   }
 
   function init() {
+    localStorage.setItem(LAST_WORLD_KEY, "alphabet");
     ui.audioDisclaimer.textContent = lesson.disclaimer;
     renderLetterDetail(state.selectedLetter);
     renderLetterGrid();
@@ -413,6 +480,9 @@
     ui.nextArrange.addEventListener("click", nextArrangeWord);
     ui.flipFlashcard.addEventListener("click", flipFlashcard);
     ui.nextFlashcard.addEventListener("click", nextFlashcard);
+    if (ui.nextAdventureBtn) {
+      ui.nextAdventureBtn.addEventListener("click", goNextAdventure);
+    }
     document.addEventListener("visibilitychange", function onVisibility() {
       if (!document.hidden) renderAudioDebug();
     });
