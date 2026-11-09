@@ -627,19 +627,11 @@ th {
 
 .lesson-mascot-floating {
   position: fixed;
-  top: 88px;
+  top: 84px;
   right: max(10px, calc((100vw - min(1100px, 94vw)) / 2 + 8px));
-  width: min(260px, 36vw);
+  width: min(240px, 34vw);
   z-index: 26;
   box-shadow: 0 12px 28px rgba(33, 79, 152, 0.24);
-}
-
-.lesson-mascot-placeholder {
-  display: none;
-}
-
-.lesson-mascot-placeholder.active {
-  display: block;
 }
 
 .mithu-svg {
@@ -1055,10 +1047,6 @@ th {
     position: static;
     width: auto;
     box-shadow: none;
-  }
-
-  .lesson-mascot-placeholder.active {
-    display: none;
   }
 }
 

@@ -229,9 +229,26 @@
 
   function playLocalPronunciation(key, onFail) {
     const audio = new Audio("assets/audio/pronunciation/" + key + ".mp3");
-    audio.play().catch(function () {
+    audio.preload = "auto";
+    audio.volume = 1;
+    let failed = false;
+    function failover() {
+      if (failed) return;
+      failed = true;
       if (onFail) onFail();
-    });
+    }
+    audio.addEventListener("error", failover, { once: true });
+    audio.addEventListener("stalled", failover, { once: true });
+    const playAttempt = audio.play();
+    if (playAttempt && typeof playAttempt.catch === "function") {
+      playAttempt.catch(failover);
+    }
+    setTimeout(function () {
+      if (failed) return;
+      if (audio.paused || audio.currentTime <= 0) {
+        failover();
+      }
+    }, 850);
   }
 
   function speakSelectedLetter() {
@@ -664,41 +681,57 @@
 
     const hostPanel = ui.lessonMascot.closest(".panel");
     if (!hostPanel) return;
-    const placeholder = document.createElement("div");
-    placeholder.className = "lesson-mascot-placeholder";
-    ui.lessonMascot.insertAdjacentElement("afterend", placeholder);
-
-    function syncPlaceholderHeight() {
-      if (ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
-        placeholder.style.height = ui.lessonMascot.offsetHeight + 10 + "px";
-      }
-    }
 
     function updateMode() {
       const panelBottom = hostPanel.getBoundingClientRect().bottom;
-      const shouldFloat = panelBottom > 240;
+      const shouldFloat = window.scrollY > 140 && panelBottom > 240;
       if (shouldFloat) {
-        if (!ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
-          ui.lessonMascot.classList.add("lesson-mascot-floating");
-          placeholder.classList.add("active");
-        }
-        syncPlaceholderHeight();
+        ui.lessonMascot.classList.add("lesson-mascot-floating");
         const sway = Math.sin(window.scrollY / 110) * 6;
         ui.lessonMascot.style.transform = "translateY(" + sway.toFixed(1) + "px)";
       } else {
         ui.lessonMascot.classList.remove("lesson-mascot-floating");
-        placeholder.classList.remove("active");
-        placeholder.style.height = "0px";
         ui.lessonMascot.style.transform = "";
       }
     }
 
     window.addEventListener("scroll", updateMode, { passive: true });
-    window.addEventListener("resize", function () {
-      syncPlaceholderHeight();
-      updateMode();
-    });
+    window.addEventListener("resize", updateMode);
     updateMode();
+  }
+
+  function setupScrollSpeechHints() {
+    const sections = [
+      { selector: ".forest-layout", message: "Pick any letter tile. It will speak when you tap." },
+      { selector: "section.panel:nth-of-type(3)", message: "Track stars and finish all six activities to unlock next lesson." },
+      { selector: "section.panel:nth-of-type(4)", message: "Listen carefully and pick the matching letter." },
+      { selector: "section.panel:nth-of-type(5)", message: "Match Sanskrit words with picture clues." },
+      { selector: "section.panel:nth-of-type(6)", message: "Build the Sanskrit word by ordering tiles." },
+      { selector: "section.panel:nth-of-type(7)", message: "Flip the flashcard and choose the right meaning." },
+      { selector: "section.panel:nth-of-type(8)", message: "Feed Mithu the correct fruit letter." },
+      { selector: "section.panel:nth-of-type(9)", message: "Find hidden target letters to complete the hunt." }
+    ];
+
+    let lastMessage = "";
+    function updateSpeechFromScroll() {
+      const focusY = 170;
+      let activeMessage = "";
+      sections.forEach(function (item) {
+        const el = document.querySelector(item.selector);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= focusY && rect.bottom >= focusY) {
+          activeMessage = item.message;
+        }
+      });
+      if (activeMessage && activeMessage !== lastMessage) {
+        lastMessage = activeMessage;
+        setMascotSpeech(activeMessage);
+      }
+    }
+
+    window.addEventListener("scroll", updateSpeechFromScroll, { passive: true });
+    updateSpeechFromScroll();
   }
 
   function goNextAdventure() {
@@ -722,6 +755,7 @@
     setupFeedMithu();
     setupHiddenHunt();
     setupMascotFollowOnScroll();
+    setupScrollSpeechHints();
     setMascotState("idle");
     setMascotSpeech("Namaste! I am Mitthu. Let's learn one lesson at a time.");
 
