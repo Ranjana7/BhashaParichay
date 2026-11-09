@@ -5,14 +5,15 @@
   const PROGRESS_KEY = "sanskritParichay.alphabetForest.progress";
   const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
+  const TREE_PROGRESS_KEY = "sanskritParichay.alphabetForest.tree.progress";
   const TOTAL_ACTIVITIES = 7;
   const LESSONS = [
-    { id: 0, name: "Sprout Lesson", objective: "Learn first 5 vowels", letters: ["अ", "आ", "इ", "ई", "उ"] },
-    { id: 1, name: "River Lesson", objective: "Learn next vowels", letters: ["ऊ", "ऋ", "ए", "ऐ", "ओ", "औ"] },
-    { id: 2, name: "Parrot Lesson", objective: "Learn first consonants", letters: ["क", "ख", "ग", "घ", "ङ"] },
-    { id: 3, name: "Moon Lesson", objective: "Learn palatal sounds", letters: ["च", "छ", "ज", "झ", "ञ"] },
-    { id: 4, name: "Sun Lesson", objective: "Learn retroflex + dental", letters: ["ट", "ठ", "ड", "ढ", "ण", "त", "थ", "द", "ध", "न"] },
-    { id: 5, name: "Rainbow Lesson", objective: "Learn remaining letters", letters: ["प", "फ", "ब", "भ", "म", "य", "र", "ल", "व", "श", "ष", "स", "ह", "क्ष", "त्र", "ज्ञ"] }
+    { id: 0, name: "Sprout Lesson", objective: "Learn first 5 vowels", selector: { type: "vowel-range", start: 0, count: 5 } },
+    { id: 1, name: "River Lesson", objective: "Learn remaining vowels and signs", selector: { type: "vowel-range", start: 5, count: 10 } },
+    { id: 2, name: "Parrot Lesson", objective: "Learn क-वर्ग", selector: { type: "subgroup", subgroup: "ka-varga" } },
+    { id: 3, name: "Moon Lesson", objective: "Learn च-वर्ग", selector: { type: "subgroup", subgroup: "ca-varga" } },
+    { id: 4, name: "Sun Lesson", objective: "Learn ट-वर्ग and त-वर्ग", selector: { type: "subgroups", subgroups: ["tta-varga", "ta-varga"] } },
+    { id: 5, name: "Rainbow Lesson", objective: "Learn प-वर्ग, अन्तःस्थाः, ऊष्माणः", selector: { type: "subgroups", subgroups: ["pa-varga", "antastha", "ushmana"] } }
   ];
   const SAFE_START = {
     stars: 0,
@@ -55,6 +56,18 @@
     "योगः": "yogah",
     "रथः": "rathah"
   };
+  const GROUP_ORDER = ["vowels", "vowel-signs", "ka-varga", "ca-varga", "tta-varga", "ta-varga", "pa-varga", "antastha", "ushmana"];
+  const GROUP_LABELS = {
+    vowels: "Vowels (स्वराः)",
+    "vowel-signs": "Signs (अं, अः)",
+    "ka-varga": "क-वर्गः",
+    "ca-varga": "च-वर्गः",
+    "tta-varga": "ट-वर्गः",
+    "ta-varga": "त-वर्गः",
+    "pa-varga": "प-वर्गः",
+    antastha: "अन्तःस्थाः",
+    ushmana: "ऊष्माणः"
+  };
 
   const ui = {
     audioDisclaimer: document.getElementById("audioDisclaimer"),
@@ -62,6 +75,9 @@
     testSoundBtn: document.getElementById("testSoundBtn"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
+    magicalTreeLetters: document.getElementById("magicalTreeLetters"),
+    treeCounter: document.getElementById("treeCounter"),
+    treeStatus: document.getElementById("treeStatus"),
     lessonName: document.getElementById("lessonName"),
     lessonObjective: document.getElementById("lessonObjective"),
     lessonIndex: document.getElementById("lessonIndex"),
@@ -72,6 +88,7 @@
     replayLetterBtn: document.getElementById("replayLetterBtn"),
     slowLetterBtn: document.getElementById("slowLetterBtn"),
     letterCategoryTabs: document.querySelectorAll(".category-tab"),
+    gardenCoverage: document.getElementById("gardenCoverage"),
     letterGrid: document.getElementById("letterGrid"),
     selectedDev: document.getElementById("selectedDev"),
     selectedTran: document.getElementById("selectedTran"),
@@ -129,7 +146,7 @@
   };
 
   const state = {
-    selectedLetter: lesson.letters[0],
+    selectedLetter: null,
     progress: loadProgress(),
     hearIndex: 0,
     pictureIndex: 0,
@@ -144,35 +161,101 @@
     flashFront: true,
     lessonCelebrated: false,
     activeMascotSection: "",
-    speechLockUntil: 0
+    speechLockUntil: 0,
+    treeDiscovered: new Set(),
+    treeCompletionAwarded: false
   };
 
   let completionAnim = null;
+  const canonicalLetters = buildCanonicalInventory();
+  const inventoryById = new Map(canonicalLetters.map(function (item) { return [item.id, item]; }));
+  state.selectedLetter = canonicalLetters[0] || lesson.letters[0];
 
   function currentLesson() {
     return LESSONS[Math.max(0, Math.min(LESSONS.length - 1, state.progress.lessonIndex || 0))];
   }
 
+  function buildCanonicalInventory() {
+    if (window.SP_PDF_LETTER_INVENTORY && Array.isArray(window.SP_PDF_LETTER_INVENTORY.items)) {
+      return window.SP_PDF_LETTER_INVENTORY.items.map(function (item, index) {
+        const example = item.example || {};
+        return {
+          id: item.id,
+          order: index,
+          devanagari: item.symbol,
+          transliteration: item.transliteration,
+          example: example.sanskrit || item.symbol,
+          meaning: example.meaning || "Needs review",
+          audioKey: item.pronunciation && item.pronunciation.audioKey ? item.pronunciation.audioKey : item.transliteration,
+          category: item.category,
+          subgroup: item.subgroup,
+          varga: item.varga,
+          sourcePage: item.sourcePage,
+          reviewStatus: item.sanskritReviewStatus
+        };
+      });
+    }
+    if (Array.isArray(lesson.letters) && lesson.letters.length) {
+      return lesson.letters.map(function (entry, index) {
+        return {
+          id: "legacy-" + index + "-" + entry.transliteration,
+          order: index,
+          devanagari: entry.devanagari,
+          transliteration: entry.transliteration,
+          example: entry.example,
+          meaning: entry.meaning,
+          audioKey: entry.transliteration,
+          category: letterCategory(entry),
+          subgroup: "legacy",
+          varga: "Legacy",
+          sourcePage: null,
+          reviewStatus: "legacy_import_needs_review"
+        };
+      });
+    }
+    return [];
+  }
+
   function lessonLetters() {
-    const allowed = new Set(currentLesson().letters);
-    const items = lesson.letters.filter(function (l) {
-      return allowed.has(l.devanagari);
+    const current = currentLesson();
+    const selector = current.selector || {};
+    const vowelsAndSigns = canonicalLetters.filter(function (item) {
+      return item.category === "vowel" || item.category === "sign";
     });
-    return items.length ? items : lesson.letters.slice(0, 5);
+    if (selector.type === "vowel-range") {
+      const subset = vowelsAndSigns.slice(selector.start, selector.start + selector.count);
+      return subset.length ? subset : canonicalLetters.slice(0, Math.min(8, canonicalLetters.length));
+    }
+    if (selector.type === "subgroup") {
+      const subset = canonicalLetters.filter(function (item) {
+        return item.subgroup === selector.subgroup;
+      });
+      return subset.length ? subset : canonicalLetters.slice(0, Math.min(8, canonicalLetters.length));
+    }
+    if (selector.type === "subgroups") {
+      const allowed = new Set(selector.subgroups || []);
+      const subset = canonicalLetters.filter(function (item) {
+        return allowed.has(item.subgroup);
+      });
+      return subset.length ? subset : canonicalLetters.slice(0, Math.min(8, canonicalLetters.length));
+    }
+    return canonicalLetters.slice(0, Math.min(8, canonicalLetters.length));
   }
 
   function letterCategory(letter) {
-    const vowels = new Set(["अ","आ","इ","ई","उ","ऊ","ऋ","ॠ","ऌ","ए","ऐ","ओ","औ"]);
-    const signs = new Set(["अं","अः"]);
-    const combos = new Set(["क्ष","त्र","ज्ञ"]);
+    if (letter.category === "vowel") return "vowels";
+    if (letter.category === "sign") return "signs";
+    if (letter.category === "consonant") return "consonants";
+    if (letter.subgroup === "combinations") return "combinations";
+    const vowels = new Set(["अ", "आ", "इ", "ई", "उ", "ऊ", "ऋ", "ॠ", "ऌ", "ए", "ऐ", "ओ", "औ"]);
+    const signs = new Set(["अं", "अः"]);
     if (vowels.has(letter.devanagari)) return "vowels";
     if (signs.has(letter.devanagari)) return "signs";
-    if (combos.has(letter.devanagari)) return "combinations";
     return "consonants";
   }
 
-  function visibleLessonLetters() {
-    const letters = lessonLetters();
+  function visibleGardenLetters() {
+    const letters = canonicalLetters.slice();
     if (state.letterCategory === "all") return letters;
     return letters.filter(function (l) {
       return letterCategory(l) === state.letterCategory;
@@ -350,9 +433,15 @@
     const letter = state.selectedLetter;
     ui.audioFallback.textContent = "Playing pronunciation...";
     setMascotState("listening");
-    playLocalPronunciation(letter.transliteration, function () {
+    playLocalPronunciation(letter.audioKey || letter.transliteration, function () {
       ui.audioFallback.textContent = "Local clip unavailable. Using device voice.";
-      window.spSpeak(letter.devanagari, "hi-IN", null, letter.transliteration);
+      const ok = window.spSpeak(letter.devanagari, "hi-IN", null, letter.transliteration);
+      if (!ok) {
+        ui.audioFallback.textContent =
+          window.SP_STATE && window.SP_STATE.muted
+            ? "Sound is muted. Tap Sound: Off to unmute."
+            : "Audio unavailable. Please check browser voice settings.";
+      }
     }, 1);
     setTimeout(function () {
       if (ui.audioFallback.textContent === "Playing pronunciation...") {
@@ -365,10 +454,16 @@
     const letter = state.selectedLetter;
     ui.audioFallback.textContent = "Playing slow pronunciation...";
     setMascotState("listening");
-    playLocalPronunciation(letter.transliteration, function () {
+    playLocalPronunciation(letter.audioKey || letter.transliteration, function () {
       ui.audioFallback.textContent = "Local clip unavailable. Using slow device voice.";
       if (window.spSpeak) {
-        window.spSpeak(letter.devanagari + " ... " + letter.devanagari, "hi-IN", null, letter.transliteration);
+        const ok = window.spSpeak(letter.devanagari + " ... " + letter.devanagari, "hi-IN", null, letter.transliteration);
+        if (!ok) {
+          ui.audioFallback.textContent =
+            window.SP_STATE && window.SP_STATE.muted
+              ? "Sound is muted. Tap Sound: Off to unmute."
+              : "Audio unavailable. Please check browser voice settings.";
+        }
       }
     }, 0.72);
     setTimeout(function () {
@@ -381,18 +476,30 @@
   function speakText(textKey, displayText, fallbackEl) {
     playLocalPronunciation(textKey, function () {
       if (fallbackEl) fallbackEl.textContent = "Local clip unavailable. Using device voice.";
-      window.spSpeak(displayText, "hi-IN", null, textKey);
+      const ok = window.spSpeak(displayText, "hi-IN", null, textKey);
+      if (!ok && fallbackEl) {
+        fallbackEl.textContent =
+          window.SP_STATE && window.SP_STATE.muted
+            ? "Sound is muted. Tap Sound: Off to unmute."
+            : "Audio unavailable. Please check browser voice settings.";
+      }
     });
   }
 
   function playPromptLetter(promptLetter) {
-    const match = lesson.letters.find(function (entry) {
+    const match = canonicalLetters.find(function (entry) {
       return entry.devanagari === promptLetter;
     });
-    const key = match ? match.transliteration : promptLetter;
+    const key = match ? match.audioKey : promptLetter;
     playLocalPronunciation(key, function () {
       ui.hearStatus.textContent = "Local clip unavailable. Using device voice.";
-      window.spSpeak(promptLetter, "hi-IN", null, key);
+      const ok = window.spSpeak(promptLetter, "hi-IN", null, key);
+      if (!ok) {
+        ui.hearStatus.textContent =
+          window.SP_STATE && window.SP_STATE.muted
+            ? "Sound is muted. Tap Sound: Off to unmute."
+            : "Audio unavailable. Please check browser voice settings.";
+      }
     });
   }
 
@@ -494,40 +601,164 @@
   }
 
   function renderLetterDetail(letter) {
+    if (!letter) return;
     state.selectedLetter = letter;
     ui.selectedDev.textContent = letter.devanagari;
     ui.selectedTran.textContent = letter.transliteration;
-    ui.selectedExample.textContent = letter.example;
-    ui.selectedMeaning.textContent = letter.meaning;
+    ui.selectedExample.textContent = letter.example || letter.devanagari;
+    ui.selectedMeaning.textContent = letter.meaning || "Needs Sanskrit review";
     if (ui.selectedExampleArt) ui.selectedExampleArt.textContent = LETTER_ART[letter.devanagari] || "🌼";
     ui.selectedDev.setAttribute("data-sanskrit", letter.devanagari);
-    ui.selectedExample.setAttribute("data-sanskrit", letter.example);
+    ui.selectedExample.setAttribute("data-sanskrit", letter.example || letter.devanagari);
     ui.audioFallback.textContent = "";
   }
 
   function renderLetterGrid() {
-    const letters = visibleLessonLetters();
+    const letters = visibleGardenLetters();
     if (!letters.some(function (l) { return l.devanagari === state.selectedLetter.devanagari; })) {
       state.selectedLetter = letters[0];
     }
     ui.letterGrid.innerHTML = "";
+    if (ui.gardenCoverage) {
+      ui.gardenCoverage.textContent = "Showing " + letters.length + " of " + canonicalLetters.length + " PDF inventory items";
+    }
+
+    const grouped = {};
     letters.forEach(function (letter) {
+      const key = letter.category === "consonant" ? letter.subgroup : (letter.varga === "vowel-signs" ? "vowel-signs" : "vowels");
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(letter);
+    });
+
+    GROUP_ORDER.forEach(function (groupKey) {
+      if (!grouped[groupKey] || grouped[groupKey].length === 0) return;
+      const section = document.createElement("section");
+      section.className = "letter-group";
+      const heading = document.createElement("h3");
+      heading.className = "letter-group-title";
+      heading.textContent = GROUP_LABELS[groupKey] || groupKey;
+      section.appendChild(heading);
+      const groupGrid = document.createElement("div");
+      groupGrid.className = "letter-group-grid";
+      grouped[groupKey].forEach(function (letter) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "letter-btn";
+        button.setAttribute("data-letter-id", letter.id);
+        button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
+        if (letter.devanagari === state.selectedLetter.devanagari) button.classList.add("active");
+        button.innerHTML =
+          '<span class="flower-core" aria-hidden="true"></span>' +
+          '<span class="dev">' + letter.devanagari + "</span>" +
+          '<span class="tran">' + letter.transliteration + "</span>";
+        button.addEventListener("click", function () {
+          animate(button, { transform: ["scale(1)", "scale(1.08)", "scale(1)"] }, { duration: 0.32, easing: "ease-out" });
+          renderLetterDetail(letter);
+          renderLetterGrid();
+          setMascotState("pointing");
+          speakSelectedLetter();
+          setMascotSpeech("Great choice. Listen to the pronunciation.");
+        });
+        groupGrid.appendChild(button);
+      });
+      section.appendChild(groupGrid);
+      ui.letterGrid.appendChild(section);
+    });
+    if (!state.selectedLetter && letters.length) {
+      state.selectedLetter = letters[0];
+    }
+    renderLetterDetail(state.selectedLetter);
+  }
+
+  function loadTreeProgress() {
+    try {
+      const raw = localStorage.getItem(TREE_PROGRESS_KEY);
+      if (!raw) return { discoveredIds: [], completionAwarded: false };
+      const parsed = JSON.parse(raw);
+      return {
+        discoveredIds: Array.isArray(parsed.discoveredIds) ? parsed.discoveredIds : [],
+        completionAwarded: Boolean(parsed.completionAwarded)
+      };
+    } catch (_error) {
+      return { discoveredIds: [], completionAwarded: false };
+    }
+  }
+
+  function saveTreeProgress() {
+    localStorage.setItem(
+      TREE_PROGRESS_KEY,
+      JSON.stringify({
+        discoveredIds: Array.from(state.treeDiscovered),
+        completionAwarded: state.treeCompletionAwarded
+      })
+    );
+  }
+
+  function renderTreeCounter() {
+    if (!ui.treeCounter) return;
+    ui.treeCounter.textContent =
+      "Discovered " + state.treeDiscovered.size + " of " + canonicalLetters.length + " PDF letters";
+  }
+
+  function handleTreeCompletionOnce() {
+    if (state.treeCompletionAwarded) return;
+    if (state.treeDiscovered.size < canonicalLetters.length) return;
+    state.treeCompletionAwarded = true;
+    state.progress.stars += 5;
+    updateHomeXp(20);
+    saveProgress();
+    saveTreeProgress();
+    renderProgress();
+    setMascotState("dancing");
+    setMascotSpeech("Magical Tree complete! You discovered every PDF letter.");
+    celebrateSmall();
+    if (ui.treeStatus) ui.treeStatus.textContent = "Tree complete! +5 stars awarded once.";
+  }
+
+  function renderMagicalTree() {
+    if (!ui.magicalTreeLetters) return;
+    ui.magicalTreeLetters.innerHTML = "";
+    canonicalLetters.forEach(function (letter) {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "letter-btn";
-      if (letter.devanagari === state.selectedLetter.devanagari) button.classList.add("active");
-      button.innerHTML = '<span class="dev">' + letter.devanagari + "</span>" + letter.transliteration;
-      button.addEventListener("click", function () {
-        animate(button, { transform: ["scale(1)", "scale(1.08)", "scale(1)"] }, { duration: 0.32, easing: "ease-out" });
-        renderLetterDetail(letter);
-        renderLetterGrid();
-        setMascotState("pointing");
-        speakSelectedLetter();
-        setMascotSpeech("Great choice. Listen to the pronunciation.");
-      });
-      ui.letterGrid.appendChild(button);
+      button.className = "tree-letter-btn";
+      button.setAttribute("data-tree-id", letter.id);
+      button.setAttribute("data-sanskrit", letter.devanagari);
+      button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
+      button.innerHTML = '<span class="tree-dev">' + letter.devanagari + '</span><span class="tree-tran">' + letter.transliteration + "</span>";
+      if (state.treeDiscovered.has(letter.id)) button.classList.add("discovered");
+      ui.magicalTreeLetters.appendChild(button);
     });
-    renderLetterDetail(state.selectedLetter);
+    renderTreeCounter();
+  }
+
+  function activateTreeLetterByButton(button) {
+    const letterId = button.getAttribute("data-tree-id");
+    const letter = inventoryById.get(letterId);
+    if (!letter) {
+      if (ui.treeStatus) ui.treeStatus.textContent = "Letter data missing for selected tree button.";
+      return;
+    }
+    animate(button, { transform: ["scale(1)", "scale(1.12)", "scale(1)"] }, { duration: 0.34, easing: "ease-out" });
+    renderLetterDetail(letter);
+    setMascotState("pointing");
+    setMascotSpeech("Listening to " + letter.devanagari + ".", 1200);
+    speakSelectedLetter();
+    if (!state.treeDiscovered.has(letter.id)) {
+      state.treeDiscovered.add(letter.id);
+      button.classList.add("discovered");
+      saveTreeProgress();
+      renderTreeCounter();
+    }
+    if (ui.treeStatus) {
+      ui.treeStatus.textContent = "Selected " + letter.devanagari + " (" + letter.transliteration + ").";
+      setTimeout(function () {
+        if (ui.audioFallback && ui.audioFallback.textContent) {
+          ui.treeStatus.textContent = ui.audioFallback.textContent;
+        }
+      }, 180);
+    }
+    handleTreeCompletionOnce();
   }
 
   function buildHearPrompt() {
@@ -882,6 +1113,57 @@
     }, 500);
   }
 
+  function runDataIntegrityChecks() {
+    const issues = [];
+    if (!canonicalLetters.length) issues.push("Canonical inventory is empty.");
+    const idSet = new Set();
+    canonicalLetters.forEach(function (item) {
+      if (!item.id) issues.push("Inventory item missing id for symbol " + (item.devanagari || "?"));
+      if (!item.devanagari) issues.push("Inventory item missing Devanagari symbol for id " + (item.id || "?"));
+      if (idSet.has(item.id)) issues.push("Duplicate inventory id found: " + item.id);
+      idSet.add(item.id);
+    });
+
+    const treeButtons = ui.magicalTreeLetters ? ui.magicalTreeLetters.querySelectorAll("[data-tree-id]") : [];
+    if (treeButtons.length !== canonicalLetters.length) {
+      issues.push("Tree rendered count " + treeButtons.length + " does not match inventory " + canonicalLetters.length + ".");
+    }
+    treeButtons.forEach(function (btn) {
+      const id = btn.getAttribute("data-tree-id");
+      if (!inventoryById.has(id)) issues.push("Tree button mapped to unknown letter id: " + id);
+    });
+    if (state.treeCompletionAwarded && state.treeDiscovered.size < canonicalLetters.length) {
+      issues.push("Tree completion awarded state is inconsistent with discovered count.");
+    }
+
+    const gardenButtons = ui.letterGrid ? ui.letterGrid.querySelectorAll("[data-letter-id]") : [];
+    const expectedGarden = visibleGardenLetters().length;
+    if (gardenButtons.length !== expectedGarden) {
+      issues.push("Garden rendered count " + gardenButtons.length + " does not match expected " + expectedGarden + ".");
+    }
+    if (state.letterCategory === "all" && gardenButtons.length !== canonicalLetters.length) {
+      issues.push("Garden all-items view does not match canonical inventory total.");
+    }
+    gardenButtons.forEach(function (btn) {
+      const id = btn.getAttribute("data-letter-id");
+      if (!inventoryById.has(id)) issues.push("Garden button mapped to unknown letter id: " + id);
+    });
+
+    const idNodes = Array.from(document.querySelectorAll("[id]"));
+    const duplicateIds = idNodes
+      .map(function (el) { return el.id; })
+      .filter(function (id, index, arr) { return arr.indexOf(id) !== index; });
+    if (duplicateIds.length) {
+      issues.push("Duplicate DOM ids detected: " + Array.from(new Set(duplicateIds)).join(", "));
+    }
+
+    if (issues.length) {
+      console.error("[AlphabetForest integrity]", issues);
+    } else {
+      console.info("[AlphabetForest integrity] All checks passed.");
+    }
+  }
+
   function unlockNextLesson() {
     if (state.progress.lessonIndex >= LESSONS.length - 1) return;
     state.progress.lessonIndex += 1;
@@ -919,6 +1201,7 @@
     setupTraceActivity();
     setupHiddenHunt();
     renderProgress();
+    runDataIntegrityChecks();
   }
 
   function setupMascotFollowOnScroll() {
@@ -1036,9 +1319,17 @@
   function init() {
     localStorage.setItem(LAST_WORLD_KEY, "alphabet");
     ui.audioDisclaimer.textContent = lesson.disclaimer;
+    const treeProgress = loadTreeProgress();
+    state.treeDiscovered = new Set(
+      treeProgress.discoveredIds.filter(function (id) {
+        return inventoryById.has(id);
+      })
+    );
+    state.treeCompletionAwarded = treeProgress.completionAwarded;
     initLottie();
     renderLessonHeader();
     renderLetterGrid();
+    renderMagicalTree();
     renderProgress();
     renderAudioDebug();
     refreshAudioDebugLater();
@@ -1053,6 +1344,7 @@
     setupMascotFollowOnScroll();
     setupScrollSpeechHints();
     runMascotEntrance();
+    runDataIntegrityChecks();
 
     ui.testSoundBtn.addEventListener("click", runAudioTest);
     if (ui.replayLetterBtn) ui.replayLetterBtn.addEventListener("click", speakSelectedLetter);
@@ -1078,7 +1370,23 @@
           tab.classList.add("active");
           state.letterCategory = tab.getAttribute("data-category") || "all";
           renderLetterGrid();
+          runDataIntegrityChecks();
         });
+      });
+    }
+    if (ui.magicalTreeLetters) {
+      ui.magicalTreeLetters.addEventListener("click", function (event) {
+        const button = event.target.closest(".tree-letter-btn");
+        if (!button) return;
+        activateTreeLetterByButton(button);
+      });
+      ui.magicalTreeLetters.addEventListener("keydown", function (event) {
+        const button = event.target.closest(".tree-letter-btn");
+        if (!button) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activateTreeLetterByButton(button);
+        }
       });
     }
     ui.playHearPrompt.addEventListener("click", function () {

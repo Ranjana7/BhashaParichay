@@ -1,48 +1,44 @@
-# PDF Coverage Report: 1_AchHal_Pada_Samamnaayah.pdf
+# PDF Coverage Report: `1_AchHal_Pada_Samamnaayah.pdf`
 
-## Current extraction status
+## Extraction method used
 
-- File detected and processed: `1_AchHal_Pada_Samamnaayah.pdf`
-- Page count detected: **3 pages**
-- Text extraction from PDF objects returned only page numerals (`4`, `5`, `6`)
-- Pages appear image-heavy/scanned, with embedded graphics rather than selectable text
+1. Direct PDF text extraction (`pypdf`, `pymupdf`) — returned only page numbers.
+2. Page render images (`assets/pdf-pages/page-1.png`..`page-3.png`).
+3. OCR on rendered pages (`easyocr` with Hindi + English models).
+4. Canonical inventory produced in `assets/pdf-letter-inventory.js`.
 
-## What was completed
+## Verified inventory totals
 
-1. Confirmed PDF presence in project root.
-2. Rendered each page to image for manual/visual processing:
-   - `assets/pdf-pages/page-1.png`
-   - `assets/pdf-pages/page-2.png`
-   - `assets/pdf-pages/page-3.png`
-3. Created curriculum framework and world mapping that can absorb all PDF topics once OCR text is provided.
+| Metric | Count |
+|---|---:|
+| PDF pages processed | 3 |
+| Unique inventory items extracted | 48 |
+| Displayed in Letter Garden (All tab) | 48 |
+| Displayed in Magical Letter Tree | 48 |
+| Items with local recorded audio usable now | 0 |
+| Items with working runtime audio path (speech fallback) | 48 |
+| Items awaiting Sanskrit review | 48 |
 
-## Blocker to full page-by-page concept extraction
+## Inventory composition
 
-Automated local OCR in current environment is not fully available for reliable Devanagari extraction from this PDF scan format.  
-Because of this, full page-level concept extraction cannot yet be claimed as complete.
+| Category | Count |
+|---|---:|
+| Independent vowels | 13 |
+| Signs (अं, अः) | 2 |
+| Consonants | 33 |
+| Total | 48 |
 
-## Needed input to complete 100% coverage mapping
+## Excluded items and reason
 
-Please provide **one** of the following (permitted content only):
+These were not detected in this 3-page PDF OCR extraction and are intentionally excluded from the canonical set until confirmed from source pages:
 
-- Text export of each page, or
-- Clear screenshots of each page section, or
-- Your lesson-wise notes from the same PDF
+- `ॡ`
+- `क्ष`
+- `त्र`
+- `ज्ञ`
 
-Once shared, each concept will be mapped to:
+## Notes on confidence
 
-- World
-- Lesson
-- Teaching activity
-- Pronunciation asset
-- Game
-- Review exercise
-
-## Temporary mapping assumption used in implementation
-
-Until full OCR text is available, only title-level inference was used:
-
-- **Ach / Hal** themes likely belong to script/letter progression in **Alphabet Forest**
-- **Pada / Samamnaayah** style consolidation topics are staged for later structured worlds and revision
-
-These assumptions are marked **review required** and should be replaced with exact page-derived mapping after text is provided.
+- OCR captured all core rows and varga headings, but some glyphs (notably `ॠ` and `ऌ`) are marked **OCR-ambiguous** in the canonical dataset.
+- Pronunciation is currently routed through browser/device speech fallback until reviewed local recordings are available.
+- No item is marked linguistically verified yet; all remain `ocr_extracted_needs_review` (or equivalent review-required status).

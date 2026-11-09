@@ -296,6 +296,7 @@ p {
   border-radius: 14px;
   background: radial-gradient(circle at 30% 20%, rgba(175, 251, 193, 0.7), rgba(140, 220, 177, 0.22) 55%, rgba(255, 255, 255, 0.8));
   overflow: hidden;
+  pointer-events: none;
 }
 
 .tree {
@@ -348,6 +349,54 @@ p {
 .g-two { left: 200px; top: 52px; animation-delay: -0.8s; }
 .g-three { left: 280px; top: 32px; animation-delay: -1.4s; }
 
+.magical-tree-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.tree-letter-btn {
+  border: 2px solid #d9defa;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #eef4ff);
+  min-height: 64px;
+  cursor: pointer;
+  font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 6px;
+}
+
+.tree-letter-btn .tree-dev {
+  font-size: 1.45rem;
+  line-height: 1.1;
+  color: #2b2361;
+}
+
+.tree-letter-btn .tree-tran {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #4f5a85;
+}
+
+.tree-letter-btn:hover {
+  border-color: #87a0ff;
+}
+
+.tree-letter-btn:focus-visible {
+  outline: 3px solid #4d7dff;
+  outline-offset: 2px;
+}
+
+.tree-letter-btn.discovered {
+  border-color: #2eaf61;
+  background: linear-gradient(180deg, #edfff2, #d7f7e1);
+}
+
 .trace-wrap {
   display: grid;
   grid-template-columns: 1fr 120px;
@@ -391,6 +440,23 @@ p {
 
 .letter-grid {
   display: grid;
+  gap: 10px;
+}
+
+.letter-group {
+  border: 1px solid #e2e8ff;
+  border-radius: 12px;
+  padding: 8px;
+  background: #f8faff;
+}
+
+.letter-group-title {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+
+.letter-group-grid {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
@@ -400,15 +466,43 @@ p {
   border-radius: 14px;
   background: #fff;
   cursor: pointer;
-  padding: 10px 6px;
-  min-height: 64px;
+  padding: 8px 6px;
+  min-height: 82px;
   font-size: 1.1rem;
   font-weight: 800;
+  position: relative;
+  font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
 }
 
 .letter-btn .dev {
   display: block;
-  font-size: 1.6rem;
+  font-size: 1.7rem;
+  color: #2b2361;
+  line-height: 1.15;
+  position: relative;
+  z-index: 2;
+}
+
+.letter-btn .tran {
+  display: block;
+  font-size: 0.8rem;
+  color: #4f5a85;
+  line-height: 1.1;
+  position: relative;
+  z-index: 2;
+}
+
+.flower-core {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffd266;
+  box-shadow: 0 0 0 7px rgba(255, 164, 200, 0.35);
+  z-index: 1;
 }
 
 .letter-btn.active {
@@ -1180,6 +1274,14 @@ th {
 
   .forest-layout {
     grid-template-columns: 1fr;
+  }
+
+  .magical-tree-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .letter-group-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .trace-wrap {

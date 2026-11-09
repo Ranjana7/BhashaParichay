@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SanskritParichay | Alphabet Forest</title>
   <meta name="description" content="Play Alphabet Forest and learn Sanskrit letters through games.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
@@ -75,6 +76,9 @@
         <span class="glow-letter g-two">क</span>
         <span class="glow-letter g-three">म</span>
       </div>
+      <p id="treeCounter" class="footer-note" aria-live="polite">Discovered 0 of 0 PDF letters</p>
+      <div id="magicalTreeLetters" class="magical-tree-grid" role="group" aria-label="Magical Letter Tree"></div>
+      <p id="treeStatus" class="status" aria-live="polite"></p>
     </section>
 
     <section class="forest-layout">
@@ -85,8 +89,8 @@
           <button class="button ghost category-tab" data-category="vowels" type="button">Vowels</button>
           <button class="button ghost category-tab" data-category="consonants" type="button">Consonants</button>
           <button class="button ghost category-tab" data-category="signs" type="button">Signs</button>
-          <button class="button ghost category-tab" data-category="combinations" type="button">Combinations</button>
         </div>
+        <p id="gardenCoverage" class="footer-note">Showing 0 of 0 PDF inventory items</p>
         <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
       </aside>
 
@@ -230,6 +234,7 @@
   <script src="assets/vendor/lottie.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/common.js"></script>
+  <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
   <script src="assets/alphabet-forest.js"></script>
 </body>
