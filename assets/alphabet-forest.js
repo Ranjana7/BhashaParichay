@@ -12,6 +12,8 @@
 
   const ui = {
     audioDisclaimer: document.getElementById("audioDisclaimer"),
+    audioDebug: document.getElementById("audioDebug"),
+    testSoundBtn: document.getElementById("testSoundBtn"),
     letterGrid: document.getElementById("letterGrid"),
     selectedDev: document.getElementById("selectedDev"),
     selectedTran: document.getElementById("selectedTran"),
@@ -175,6 +177,12 @@
   function speakSelectedLetter() {
     const letter = state.selectedLetter;
     window.spSpeak(letter.devanagari, "sa-IN", ui.audioFallback, letter.transliteration);
+  }
+
+  function runAudioTest() {
+    renderAudioDebug();
+    if (window.spApplause) window.spApplause();
+    window.spSpeak("नमस्ते", "sa-IN", ui.audioFallback, "namaste");
   }
 
   function setupHearAndPick() {
@@ -360,11 +368,35 @@
     });
   }
 
+  function renderAudioDebug() {
+    if (!ui.audioDebug || !window.spGetAudioDebug) return;
+    const details = window.spGetAudioDebug();
+    ui.audioDebug.textContent =
+      "Audio check: speech support = " +
+      (details.speechSupported ? "yes" : "no") +
+      ", voices detected = " +
+      details.voiceCount +
+      ", muted = " +
+      (details.muted ? "yes" : "no") +
+      ".";
+  }
+
+  function refreshAudioDebugLater() {
+    let tries = 0;
+    const timer = setInterval(function updateDebug() {
+      tries += 1;
+      renderAudioDebug();
+      if (tries >= 8) clearInterval(timer);
+    }, 500);
+  }
+
   function init() {
     ui.audioDisclaimer.textContent = lesson.disclaimer;
     renderLetterDetail(state.selectedLetter);
     renderLetterGrid();
     renderProgress();
+    renderAudioDebug();
+    refreshAudioDebugLater();
     setupHearAndPick();
     setupPictureMatch();
     setupArrangeWord();
@@ -372,6 +404,7 @@
     renderReviewList();
 
     ui.speakLetterBtn.addEventListener("click", speakSelectedLetter);
+    ui.testSoundBtn.addEventListener("click", runAudioTest);
     ui.playHearPrompt.addEventListener("click", playHearPrompt);
     ui.nextHear.addEventListener("click", nextHearPrompt);
     ui.nextPicture.addEventListener("click", nextPictureMatch);
@@ -380,6 +413,9 @@
     ui.nextArrange.addEventListener("click", nextArrangeWord);
     ui.flipFlashcard.addEventListener("click", flipFlashcard);
     ui.nextFlashcard.addEventListener("click", nextFlashcard);
+    document.addEventListener("visibilitychange", function onVisibility() {
+      if (!document.hidden) renderAudioDebug();
+    });
   }
 
   init();

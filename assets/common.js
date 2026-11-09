@@ -48,6 +48,17 @@
     return enVoice || voices[0];
   }
 
+  function isIndicVoice(voice) {
+    if (!voice || !voice.lang) return false;
+    const v = voice.lang.toLowerCase();
+    return v.startsWith("sa") || v.startsWith("hi") || v.startsWith("mr") || v.startsWith("ne");
+  }
+
+  function getVoiceCount() {
+    if (!hasSpeechSupport()) return 0;
+    return window.speechSynthesis.getVoices().length;
+  }
+
   window.spSpeak = function spSpeak(text, lang, fallbackEl, transliteration) {
     if (window.SP_STATE.muted) {
       if (fallbackEl) fallbackEl.textContent = "Sound is muted. Tap Sound: Off to unmute.";
@@ -60,22 +71,32 @@
     }
 
     if (fallbackEl) fallbackEl.textContent = "";
+    window.speechSynthesis.getVoices();
     const bestVoice = getBestVoice(lang || "sa-IN");
-    const speechText = bestVoice && bestVoice.lang && bestVoice.lang.toLowerCase().startsWith("en")
-      ? (transliteration || text)
-      : text;
+    const shouldUseTransliteration = !bestVoice || !isIndicVoice(bestVoice);
+    const speechText = shouldUseTransliteration ? (transliteration || text) : text;
     const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.lang = (bestVoice && bestVoice.lang) || lang || "en-US";
+    utterance.lang = shouldUseTransliteration ? "en-US" : ((bestVoice && bestVoice.lang) || lang || "en-US");
     utterance.rate = 0.75;
     utterance.pitch = 1;
     if (bestVoice) utterance.voice = bestVoice;
 
+    let started = false;
+    utterance.onstart = function onSpeechStart() {
+      started = true;
+    };
     utterance.onerror = function onSpeechError() {
       if (fallbackEl) fallbackEl.textContent = "Audio blocked here. Please tap once on page and try again.";
     };
 
     window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
+    setTimeout(function checkSpeechStarted() {
+      if (!started && fallbackEl) {
+        fallbackEl.textContent = "No speech voice started. Check device volume and try Chrome/Edge.";
+      }
+    }, 1200);
     return true;
   };
 
@@ -113,6 +134,14 @@
       renderMute();
     };
   }
+
+  window.spGetAudioDebug = function spGetAudioDebug() {
+    return {
+      muted: window.SP_STATE.muted,
+      speechSupported: hasSpeechSupport(),
+      voiceCount: getVoiceCount()
+    };
+  };
 
   if (toggle) {
     toggle.addEventListener("click", function onToggleMute() {
