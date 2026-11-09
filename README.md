@@ -25,6 +25,7 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
   - Colour Kingdom
   - Sentence Castle
   - Story Island
+  - Sanskrit and Culture
 
 ## Run locally
 
@@ -59,6 +60,11 @@ git push -u origin main
 - Progress is stored locally in browser storage.
 - Progress does not sync across devices or browsers.
 - No personal data collection is implemented in this project.
+
+## Curriculum and coverage documents
+
+- `CURRICULUM_MAP.md` — world-by-world curriculum progression map.
+- `PDF_COVERAGE_REPORT.md` — extraction status and coverage mapping plan for `1_AchHal_Pada_Samamnaayah.pdf`.
 
 ## Content quality notes
 

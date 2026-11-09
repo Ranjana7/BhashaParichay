@@ -5,7 +5,7 @@
   const PROGRESS_KEY = "sanskritParichay.alphabetForest.progress";
   const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
-  const TOTAL_ACTIVITIES = 6;
+  const TOTAL_ACTIVITIES = 7;
   const LESSONS = [
     { id: 0, name: "Sprout Lesson", objective: "Learn first 5 vowels", letters: ["अ", "आ", "इ", "ई", "उ"] },
     { id: 1, name: "River Lesson", objective: "Learn next vowels", letters: ["ऊ", "ऋ", "ए", "ऐ", "ओ", "औ"] },
@@ -18,8 +18,14 @@
     stars: 0,
     streak: 0,
     lessonIndex: 0,
-    done: { hear: false, picture: false, arrange: false, flash: false, feed: false, hunt: false }
+    done: { hear: false, picture: false, arrange: false, flash: false, feed: false, trace: false, hunt: false }
   };
+  const FRUITS = [
+    { dev: "सेवफलम्", transliteration: "sevaphalam", meaning: "apple", emoji: "🍎" },
+    { dev: "कदलीफलम्", transliteration: "kadaliphalam", meaning: "banana", emoji: "🍌" },
+    { dev: "आम्रम्", transliteration: "aamram", meaning: "mango", emoji: "🥭" },
+    { dev: "द्राक्षा", transliteration: "draksha", meaning: "grapes", emoji: "🍇" }
+  ];
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
 
@@ -32,8 +38,13 @@
     lessonName: document.getElementById("lessonName"),
     lessonObjective: document.getElementById("lessonObjective"),
     lessonIndex: document.getElementById("lessonIndex"),
+    prevLessonTopBtn: document.getElementById("prevLessonTopBtn"),
     nextLessonBtn: document.getElementById("nextLessonBtn"),
     nextLessonTopBtn: document.getElementById("nextLessonTopBtn"),
+    continueAdventureTopBtn: document.getElementById("continueAdventureTopBtn"),
+    replayLetterBtn: document.getElementById("replayLetterBtn"),
+    slowLetterBtn: document.getElementById("slowLetterBtn"),
+    letterCategoryTabs: document.querySelectorAll(".category-tab"),
     letterGrid: document.getElementById("letterGrid"),
     selectedDev: document.getElementById("selectedDev"),
     selectedTran: document.getElementById("selectedTran"),
@@ -76,6 +87,12 @@
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
     nextHunt: document.getElementById("nextHunt"),
+    tracePrompt: document.getElementById("tracePrompt"),
+    traceCanvas: document.getElementById("traceCanvas"),
+    traceTargetLetter: document.getElementById("traceTargetLetter"),
+    clearTraceBtn: document.getElementById("clearTraceBtn"),
+    checkTraceBtn: document.getElementById("checkTraceBtn"),
+    traceStatus: document.getElementById("traceStatus"),
     reviewList: document.getElementById("reviewList"),
     completionScreen: document.getElementById("completionScreen"),
     completionStars: document.getElementById("completionStars"),
@@ -92,6 +109,9 @@
     flashIndex: 0,
     feedIndex: 0,
     huntIndex: 0,
+    traceStrokeCount: 0,
+    traceDrawing: false,
+    letterCategory: "all",
     arrangeSelected: [],
     flashFront: true,
     lessonCelebrated: false
@@ -109,6 +129,24 @@
       return allowed.has(l.devanagari);
     });
     return items.length ? items : lesson.letters.slice(0, 5);
+  }
+
+  function letterCategory(letter) {
+    const vowels = new Set(["अ","आ","इ","ई","उ","ऊ","ऋ","ॠ","ऌ","ए","ऐ","ओ","औ"]);
+    const signs = new Set(["अं","अः"]);
+    const combos = new Set(["क्ष","त्र","ज्ञ"]);
+    if (vowels.has(letter.devanagari)) return "vowels";
+    if (signs.has(letter.devanagari)) return "signs";
+    if (combos.has(letter.devanagari)) return "combinations";
+    return "consonants";
+  }
+
+  function visibleLessonLetters() {
+    const letters = lessonLetters();
+    if (state.letterCategory === "all") return letters;
+    return letters.filter(function (l) {
+      return letterCategory(l) === state.letterCategory;
+    });
   }
 
   function cloneSafeStart() {
@@ -139,12 +177,26 @@
       animate(p.tail, { transform: ["rotate(0deg)", "rotate(7deg)", "rotate(0deg)"] }, { duration: 2, repeat: Infinity, easing: "ease-in-out" });
     } else if (kind === "greeting") {
       animate(p.wingRight, { transform: ["rotate(0deg)", "rotate(26deg)", "rotate(0deg)"] }, { duration: 0.6, repeat: 2, easing: "ease-in-out" });
+    } else if (kind === "flying") {
+      animate(ui.lessonMascot, { transform: ["translateX(0px) translateY(0px)", "translateX(12px) translateY(-6px)", "translateX(0px) translateY(0px)"] }, { duration: 0.8, easing: "ease-in-out" });
+      animate([p.wingLeft, p.wingRight], { transform: ["rotate(0deg)", "rotate(30deg)", "rotate(0deg)"] }, { duration: 0.3, repeat: 2, easing: "ease-in-out" });
+    } else if (kind === "listening") {
+      animate(p.body, { transform: ["rotate(0deg)", "rotate(2deg)", "rotate(0deg)"] }, { duration: 0.7, easing: "ease-in-out" });
+    } else if (kind === "pointing") {
+      animate(p.wingRight, { transform: ["rotate(0deg)", "rotate(24deg)", "rotate(16deg)", "rotate(0deg)"] }, { duration: 0.75, easing: "ease-in-out" });
     } else if (kind === "thinking") {
       animate(p.body, { transform: ["rotate(0deg)", "rotate(-4deg)", "rotate(0deg)"] }, { duration: 0.8, easing: "ease-in-out" });
+    } else if (kind === "encouraging") {
+      animate(p.body, { transform: ["translateY(0px)", "translateY(-4px)", "translateY(0px)"] }, { duration: 0.6, easing: "ease-in-out" });
+    } else if (kind === "eating") {
+      animate(p.body, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)", "translateY(-2px)", "translateY(0px)"] }, { duration: 0.8, easing: "ease-in-out" });
     } else if (kind === "correct") {
       animate(ui.lessonMascot, { transform: ["translateX(0px)", "translateX(20px)", "translateX(0px)"] }, { duration: 0.6, easing: "ease-out" });
       animate(p.body, { transform: ["translateY(0px)", "translateY(-14px)", "translateY(0px)"] }, { duration: 0.5, easing: "ease-out" });
       animate([p.wingLeft, p.wingRight], { transform: ["rotate(0deg)", "rotate(22deg)", "rotate(0deg)"] }, { duration: 0.45, easing: "ease-out" });
+    } else if (kind === "celebrating") {
+      animate(ui.lessonMascot, { transform: ["translateY(0px)", "translateY(-10px)", "translateY(0px)"] }, { duration: 0.5, easing: "ease-out" });
+      animate([p.wingLeft, p.wingRight], { transform: ["rotate(0deg)", "rotate(30deg)", "rotate(0deg)"] }, { duration: 0.4, repeat: 2, easing: "ease-in-out" });
     } else if (kind === "incorrect") {
       animate(p.body, { transform: ["rotate(0deg)", "rotate(3deg)", "rotate(-3deg)", "rotate(0deg)"] }, { duration: 0.7, easing: "ease-in-out" });
     } else if (kind === "dance") {
@@ -179,6 +231,7 @@
           arrange: Boolean(parsed.done && parsed.done.arrange),
           flash: Boolean(parsed.done && parsed.done.flash),
           feed: Boolean(parsed.done && parsed.done.feed),
+          trace: Boolean(parsed.done && parsed.done.trace),
           hunt: Boolean(parsed.done && parsed.done.hunt)
         }
       };
@@ -227,10 +280,11 @@
     if (window.spApplause) window.spApplause();
   }
 
-  function playLocalPronunciation(key, onFail) {
+  function playLocalPronunciation(key, onFail, playbackRate) {
     const audio = new Audio("assets/audio/pronunciation/" + key + ".mp3");
     audio.preload = "auto";
     audio.volume = 1;
+    audio.playbackRate = playbackRate || 1;
     let failed = false;
     function failover() {
       if (failed) return;
@@ -253,8 +307,37 @@
 
   function speakSelectedLetter() {
     const letter = state.selectedLetter;
+    ui.audioFallback.textContent = "Playing pronunciation...";
+    setMascotState("listening");
     playLocalPronunciation(letter.transliteration, function () {
       window.spSpeak(letter.devanagari, "hi-IN", ui.audioFallback, letter.transliteration);
+    }, 1);
+    setTimeout(function () {
+      if (ui.audioFallback.textContent === "Playing pronunciation...") {
+        ui.audioFallback.textContent = "";
+      }
+    }, 900);
+  }
+
+  function speakSelectedLetterSlow() {
+    const letter = state.selectedLetter;
+    ui.audioFallback.textContent = "Playing slow pronunciation...";
+    setMascotState("listening");
+    playLocalPronunciation(letter.transliteration, function () {
+      if (window.spSpeak) {
+        window.spSpeak(letter.devanagari + " ... " + letter.devanagari, "hi-IN", ui.audioFallback, letter.transliteration);
+      }
+    }, 0.72);
+    setTimeout(function () {
+      if (ui.audioFallback.textContent === "Playing slow pronunciation...") {
+        ui.audioFallback.textContent = "";
+      }
+    }, 1400);
+  }
+
+  function speakText(textKey, displayText, fallbackEl) {
+    playLocalPronunciation(textKey, function () {
+      window.spSpeak(displayText, "hi-IN", fallbackEl, textKey);
     });
   }
 
@@ -306,7 +389,7 @@
   }
 
   function resetActivityFlags() {
-    state.progress.done = { hear: false, picture: false, arrange: false, flash: false, feed: false, hunt: false };
+    state.progress.done = { hear: false, picture: false, arrange: false, flash: false, feed: false, trace: false, hunt: false };
   }
 
   function renderProgress() {
@@ -362,6 +445,7 @@
     if (ui.lessonName) ui.lessonName.textContent = current.name;
     if (ui.lessonObjective) ui.lessonObjective.textContent = current.objective;
     if (ui.lessonIndex) ui.lessonIndex.textContent = "Lesson " + (state.progress.lessonIndex + 1) + " of " + LESSONS.length;
+    if (ui.prevLessonTopBtn) ui.prevLessonTopBtn.disabled = state.progress.lessonIndex === 0;
   }
 
   function renderLetterDetail(letter) {
@@ -374,7 +458,7 @@
   }
 
   function renderLetterGrid() {
-    const letters = lessonLetters();
+    const letters = visibleLessonLetters();
     if (!letters.some(function (l) { return l.devanagari === state.selectedLetter.devanagari; })) {
       state.selectedLetter = letters[0];
     }
@@ -388,8 +472,8 @@
       button.addEventListener("click", function () {
         renderLetterDetail(letter);
         renderLetterGrid();
+        setMascotState("pointing");
         speakSelectedLetter();
-        setMascotState("thinking");
         setMascotSpeech("Great choice. Listen to the pronunciation.");
       });
       ui.letterGrid.appendChild(button);
@@ -537,30 +621,54 @@
   }
 
   function setupFeedMithu() {
-    const letters = lessonLetters();
-    const target = letters[state.feedIndex % letters.length];
-    ui.feedPrompt.textContent = "Feed Mithu fruit for letter: " + target.devanagari;
+    const target = FRUITS[state.feedIndex % FRUITS.length];
+    ui.feedPrompt.textContent = "Select the Sanskrit fruit: " + target.dev + " (" + target.meaning + ")";
     ui.feedChoices.innerHTML = "";
     ui.feedStatus.textContent = state.progress.done.feed ? "Completed for this lesson." : "";
     ui.nextFeed.disabled = state.progress.done.feed;
-    letters.slice(0, 4).sort(function () { return Math.random() - 0.5; }).forEach(function (l) {
+    FRUITS.slice().sort(function () { return Math.random() - 0.5; }).forEach(function (l) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice-btn";
-      button.textContent = "🍎 " + l.devanagari;
+      button.textContent = l.emoji + " " + l.dev;
       if (state.progress.done.feed) {
         button.disabled = true;
-        if (l.devanagari === target.devanagari) button.classList.add("correct");
+        if (l.dev === target.dev) button.classList.add("correct");
       }
       button.addEventListener("click", function () {
         if (state.progress.done.feed) return;
-        if (l.devanagari === target.devanagari) {
+        if (l.dev === target.dev) {
           button.classList.add("correct");
+          setMascotState("eating");
+          setMascotSpeech("Yum! " + l.dev + " is correct.");
+          const fruitFly = document.createElement("span");
+          fruitFly.textContent = l.emoji;
+          fruitFly.style.position = "fixed";
+          const from = button.getBoundingClientRect();
+          const to = ui.lessonMascot.getBoundingClientRect();
+          fruitFly.style.left = from.left + 14 + "px";
+          fruitFly.style.top = from.top + 8 + "px";
+          fruitFly.style.fontSize = "1.8rem";
+          fruitFly.style.zIndex = "60";
+          document.body.appendChild(fruitFly);
+          animate(
+            fruitFly,
+            {
+              transform: [
+                "translate(0px,0px) scale(1)",
+                "translate(" + (to.left - from.left + 38) + "px," + (to.top - from.top + 24) + "px) scale(0.55)"
+              ],
+              opacity: [1, 0.15]
+            },
+            { duration: 0.8, easing: "ease-out" }
+          );
+          setTimeout(function () { fruitFly.remove(); }, 900);
+          speakText(l.transliteration, l.dev, ui.feedStatus);
           handleCorrect("feed", 2, ui.feedStatus, "Mithu loved it! +2 stars", button);
           ui.nextFeed.disabled = true;
         } else {
           button.classList.add("wrong");
-          handleWrong(ui.feedStatus, "Not this fruit.", button, "Look for the exact letter in the prompt.");
+          handleWrong(ui.feedStatus, "Not this fruit.", button, "Match the Sanskrit fruit word carefully.");
         }
       });
       ui.feedChoices.appendChild(button);
@@ -578,6 +686,76 @@
     const cells = [];
     for (let i = 0; i < 9; i += 1) {
       cells.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+
+    function setupTraceActivity() {
+      if (!ui.traceCanvas) return;
+      const ctx = ui.traceCanvas.getContext("2d");
+      const target = lessonLetters()[state.huntIndex % lessonLetters().length];
+      ui.traceTargetLetter.textContent = target.devanagari;
+      ui.tracePrompt.textContent = "Trace this letter: " + target.devanagari + " (" + target.transliteration + ")";
+      ui.traceStatus.textContent = state.progress.done.trace ? "Completed for this lesson." : "";
+      ui.checkTraceBtn.disabled = state.progress.done.trace;
+      ui.clearTraceBtn.disabled = state.progress.done.trace;
+      state.traceStrokeCount = 0;
+      ctx.clearRect(0, 0, ui.traceCanvas.width, ui.traceCanvas.height);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "#5b5fd6";
+
+      function posFromEvent(event) {
+        const rect = ui.traceCanvas.getBoundingClientRect();
+        const point = event.touches ? event.touches[0] : event;
+        return {
+          x: (point.clientX - rect.left) * (ui.traceCanvas.width / rect.width),
+          y: (point.clientY - rect.top) * (ui.traceCanvas.height / rect.height)
+        };
+      }
+
+      function startDraw(event) {
+        if (state.progress.done.trace) return;
+        state.traceDrawing = true;
+        const p = posFromEvent(event);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        event.preventDefault();
+      }
+
+      function moveDraw(event) {
+        if (!state.traceDrawing || state.progress.done.trace) return;
+        const p = posFromEvent(event);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        state.traceStrokeCount += 1;
+        event.preventDefault();
+      }
+
+      function endDraw() {
+        state.traceDrawing = false;
+      }
+
+      ui.traceCanvas.onpointerdown = startDraw;
+      ui.traceCanvas.onpointermove = moveDraw;
+      ui.traceCanvas.onpointerup = endDraw;
+      ui.traceCanvas.onpointerleave = endDraw;
+      ui.traceCanvas.ontouchstart = startDraw;
+      ui.traceCanvas.ontouchmove = moveDraw;
+      ui.traceCanvas.ontouchend = endDraw;
+    }
+
+    function checkTraceActivity() {
+      if (state.progress.done.trace) return;
+      if (state.traceStrokeCount > 38) {
+        handleCorrect("trace", 2, ui.traceStatus, "Beautiful tracing! +2 stars", ui.traceCanvas);
+        setMascotState("celebrating");
+        setMascotSpeech("Great tracing. You wrote it beautifully.");
+        ui.checkTraceBtn.disabled = true;
+        ui.clearTraceBtn.disabled = true;
+      } else {
+        setMascotState("encouraging");
+        ui.traceStatus.textContent = "Trace a little more clearly and try again.";
+      }
     }
     cells[2] = target.devanagari;
     cells[7] = target.devanagari;
@@ -652,8 +830,18 @@
     state.progress.lessonIndex += 1;
     resetActivityFlags();
     saveProgress();
-    setMascotState("greeting");
+    setMascotState("flying");
     setMascotSpeech("New lesson unlocked! Let's continue.");
+    rebuildLesson();
+  }
+
+  function goPreviousLesson() {
+    if (state.progress.lessonIndex <= 0) return;
+    state.progress.lessonIndex -= 1;
+    resetActivityFlags();
+    saveProgress();
+    setMascotState("flying");
+    setMascotSpeech("Going back to previous lesson.");
     rebuildLesson();
   }
 
@@ -671,6 +859,7 @@
     setupArrangeWord();
     setupFlashcard();
     setupFeedMithu();
+    setupTraceActivity();
     setupHiddenHunt();
     renderProgress();
   }
@@ -702,14 +891,16 @@
 
   function setupScrollSpeechHints() {
     const sections = [
-      { selector: ".forest-layout", message: "Pick any letter tile. It will speak when you tap." },
-      { selector: "section.panel:nth-of-type(3)", message: "Track stars and finish all six activities to unlock next lesson." },
-      { selector: "section.panel:nth-of-type(4)", message: "Listen carefully and pick the matching letter." },
-      { selector: "section.panel:nth-of-type(5)", message: "Match Sanskrit words with picture clues." },
-      { selector: "section.panel:nth-of-type(6)", message: "Build the Sanskrit word by ordering tiles." },
-      { selector: "section.panel:nth-of-type(7)", message: "Flip the flashcard and choose the right meaning." },
-      { selector: "section.panel:nth-of-type(8)", message: "Feed Mithu the correct fruit letter." },
-      { selector: "section.panel:nth-of-type(9)", message: "Find hidden target letters to complete the hunt." }
+      { selector: "#forestScene", message: "Welcome to the magical tree. Letters glow and guide your sound journey." },
+      { selector: ".forest-layout", message: "Tap any letter tile. It speaks immediately." },
+      { selector: "#lessonProgressPanel", message: "Track stars and finish all seven activities to unlock next lesson." },
+      { selector: "#activityHearPanel", message: "Listen carefully and pick the matching letter." },
+      { selector: "#activityPicturePanel", message: "Match Sanskrit words with picture clues." },
+      { selector: "#activityArrangePanel", message: "Build the Sanskrit word by ordering tiles." },
+      { selector: "#activityFlashPanel", message: "Flip the flashcard and choose the right meaning." },
+      { selector: "#activityFeedPanel", message: "Feed Mithu the correct Sanskrit fruit." },
+      { selector: "#activityTracePanel", message: "Trace the letter slowly with your finger or mouse." },
+      { selector: "#activityHuntPanel", message: "Find hidden target letters to complete the treasure hunt." }
     ];
 
     let lastMessage = "";
@@ -753,6 +944,7 @@
     setupArrangeWord();
     setupFlashcard();
     setupFeedMithu();
+    setupTraceActivity();
     setupHiddenHunt();
     setupMascotFollowOnScroll();
     setupScrollSpeechHints();
@@ -760,6 +952,20 @@
     setMascotSpeech("Namaste! I am Mitthu. Let's learn one lesson at a time.");
 
     ui.testSoundBtn.addEventListener("click", runAudioTest);
+    if (ui.replayLetterBtn) ui.replayLetterBtn.addEventListener("click", speakSelectedLetter);
+    if (ui.slowLetterBtn) ui.slowLetterBtn.addEventListener("click", speakSelectedLetterSlow);
+    if (ui.prevLessonTopBtn) ui.prevLessonTopBtn.addEventListener("click", goPreviousLesson);
+    if (ui.continueAdventureTopBtn) ui.continueAdventureTopBtn.addEventListener("click", goNextAdventure);
+    if (ui.letterCategoryTabs) {
+      ui.letterCategoryTabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          ui.letterCategoryTabs.forEach(function (x) { x.classList.remove("active"); });
+          tab.classList.add("active");
+          state.letterCategory = tab.getAttribute("data-category") || "all";
+          renderLetterGrid();
+        });
+      });
+    }
     ui.playHearPrompt.addEventListener("click", function () {
       playPromptLetter(state.currentHearPrompt.letter);
     });
@@ -822,6 +1028,16 @@
       setMascotState("thinking");
       setMascotSpeech("Find hidden letters carefully.");
     });
+    if (ui.clearTraceBtn) {
+      ui.clearTraceBtn.addEventListener("click", function () {
+        setupTraceActivity();
+        setMascotState("encouraging");
+        setMascotSpeech("Trace once more. Slow and smooth.");
+      });
+    }
+    if (ui.checkTraceBtn) {
+      ui.checkTraceBtn.addEventListener("click", checkTraceActivity);
+    }
     if (ui.nextAdventureBtn) ui.nextAdventureBtn.addEventListener("click", goNextAdventure);
     if (ui.completionNextBtn) ui.completionNextBtn.addEventListener("click", goNextAdventure);
     if (ui.nextLessonBtn) ui.nextLessonBtn.addEventListener("click", unlockNextLesson);

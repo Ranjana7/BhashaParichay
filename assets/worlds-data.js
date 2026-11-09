@@ -262,5 +262,49 @@ window.SANSKRIT_WORLDS = {
         build: { meaning: "Who smiles?", tiles: ["कः", "हसति?"], answer: "कः हसति?" }
       }
     ]
+  },
+  culture: {
+    key: "culture",
+    title: "Sanskrit and Culture",
+    subtitle: "Greetings, values, and child-friendly heritage ideas",
+    reviewRequired: true,
+    lessons: [
+      {
+        title: "Namaste and Greetings",
+        objective: "Use simple Sanskrit greetings respectfully.",
+        focus: [
+          { dev: "नमस्ते", translit: "namaste", meaning: "hello / respectful greeting" },
+          { dev: "सुप्रभातम्", translit: "suprabhatam", meaning: "good morning" },
+          { dev: "धन्यवादः", translit: "dhanyavadah", meaning: "thank you" }
+        ],
+        match: { prompt: "Pick Sanskrit for thank you.", options: ["नमस्ते", "धन्यवादः", "सुप्रभातम्"], answer: "धन्यवादः" },
+        listen: { dev: "नमस्ते", options: ["नमस्ते", "धन्यवादः", "शुभरात्रिः"], answer: "नमस्ते" },
+        build: { meaning: "good morning", tiles: ["सु", "प्रभातम्"], answer: "सुप्रभातम्" }
+      },
+      {
+        title: "Simple Shloka Lines",
+        objective: "Listen to short cultural lines with care.",
+        focus: [
+          { dev: "लोकाः समस्ताः सुखिनो भवन्तु।", translit: "lokah samastah sukhino bhavantu", meaning: "May all beings be happy." },
+          { dev: "वसुधैव कुटुम्बकम्।", translit: "vasudhaiva kutumbakam", meaning: "The world is one family." },
+          { dev: "सत्यं वद।", translit: "satyam vada", meaning: "Speak the truth." }
+        ],
+        match: { prompt: "Pick line meaning 'world is one family'.", options: ["सत्यं वद।", "वसुधैव कुटुम्बकम्।", "लोकाः समस्ताः सुखिनो भवन्तु।"], answer: "वसुधैव कुटुम्बकम्।" },
+        listen: { dev: "सत्यं वद।", options: ["सत्यं वद।", "नमस्ते", "सुप्रभातम्"], answer: "सत्यं वद।" },
+        build: { meaning: "Speak the truth", tiles: ["सत्यं", "वद।"], answer: "सत्यं वद।" }
+      },
+      {
+        title: "Culture Review",
+        objective: "Review greetings and values with short checks.",
+        focus: [
+          { dev: "शुभरात्रिः", translit: "shubharatrih", meaning: "good night" },
+          { dev: "कृपया", translit: "kripaya", meaning: "please" },
+          { dev: "क्षम्यताम्", translit: "kshamyatam", meaning: "please forgive / excuse me" }
+        ],
+        match: { prompt: "Pick Sanskrit for please.", options: ["कृपया", "क्षम्यताम्", "शुभरात्रिः"], answer: "कृपया" },
+        listen: { dev: "शुभरात्रिः", options: ["शुभरात्रिः", "नमस्ते", "सत्यं वद।"], answer: "शुभरात्रिः" },
+        build: { meaning: "good night", tiles: ["शुभ", "रात्रिः"], answer: "शुभरात्रिः" }
+      }
+    ]
   }
 };

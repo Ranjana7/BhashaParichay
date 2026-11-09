@@ -21,7 +21,9 @@
     worldLessonName: document.getElementById("worldLessonName"),
     worldLessonIndex: document.getElementById("worldLessonIndex"),
     worldLessonObjective: document.getElementById("worldLessonObjective"),
+    worldPrevLessonBtn: document.getElementById("worldPrevLessonBtn"),
     worldNextLessonBtn: document.getElementById("worldNextLessonBtn"),
+    worldContinueBtn: document.getElementById("worldContinueBtn"),
     worldLessonPath: document.getElementById("worldLessonPath"),
     worldStars: document.getElementById("worldStars"),
     worldDone: document.getElementById("worldDone"),
@@ -103,6 +105,15 @@
       animate([eyeL, eyeR], { transform: ["scaleY(1)", "scaleY(0.2)", "scaleY(1)"] }, { duration: 4.2, repeat: Infinity, easing: "ease-in-out" });
     } else if (kind === "thinking") {
       animate(body, { transform: ["rotate(0deg)", "rotate(-4deg)", "rotate(0deg)"] }, { duration: 0.8, easing: "ease-in-out" });
+    } else if (kind === "flying") {
+      animate(ui.lessonMascot, { transform: ["translateX(0px) translateY(0px)", "translateX(12px) translateY(-6px)", "translateX(0px) translateY(0px)"] }, { duration: 0.8, easing: "ease-in-out" });
+      animate([wingL, wingR], { transform: ["rotate(0deg)", "rotate(30deg)", "rotate(0deg)"] }, { duration: 0.35, repeat: 2, easing: "ease-in-out" });
+    } else if (kind === "listening") {
+      animate(body, { transform: ["rotate(0deg)", "rotate(2deg)", "rotate(0deg)"] }, { duration: 0.8, easing: "ease-in-out" });
+    } else if (kind === "encouraging") {
+      animate(body, { transform: ["translateY(0px)", "translateY(-4px)", "translateY(0px)"] }, { duration: 0.6, easing: "ease-in-out" });
+    } else if (kind === "eating") {
+      animate(body, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)", "translateY(-2px)", "translateY(0px)"] }, { duration: 0.8, easing: "ease-in-out" });
     } else if (kind === "correct") {
       animate(body, { transform: ["translateY(0px)", "translateY(-10px)", "translateY(0px)"] }, { duration: 0.5, easing: "ease-out" });
       animate([wingL, wingR], { transform: ["rotate(0deg)", "rotate(28deg)", "rotate(0deg)"] }, { duration: 0.45, easing: "ease-out" });
@@ -146,6 +157,7 @@
     ui.worldLessonName.textContent = lesson.title;
     ui.worldLessonIndex.textContent = "Lesson " + (state.progress.lessonIndex + 1) + " / " + world.lessons.length;
     ui.worldLessonObjective.textContent = lesson.objective;
+    if (ui.worldPrevLessonBtn) ui.worldPrevLessonBtn.disabled = state.progress.lessonIndex === 0;
     ui.worldStars.textContent = String(state.progress.stars);
     ui.worldDone.textContent = String(doneCount());
     ui.worldProgressFill.style.width = Math.round((doneCount() / TOTAL) * 100) + "%";
@@ -424,6 +436,8 @@
   function wire() {
     ui.playListenBtn.addEventListener("click", function () {
       const lesson = currentLesson();
+      setMascot("listening");
+      setSpeech("Listen carefully and choose.");
       window.spSpeak(lesson.listen.dev, "hi-IN", ui.listenStatus, lesson.listen.dev);
     });
     ui.checkBuildBtn.addEventListener("click", checkBuildAnswer);
@@ -442,6 +456,22 @@
         setSpeech("New lesson unlocked!");
       }
     });
+    if (ui.worldPrevLessonBtn) {
+      ui.worldPrevLessonBtn.addEventListener("click", function () {
+        if (state.progress.lessonIndex <= 0) return;
+        state.progress.lessonIndex -= 1;
+        state.progress.done = { match: false, listen: false, build: false };
+        saveProgress();
+        renderAll();
+        setMascot("flying");
+        setSpeech("Going to previous lesson.");
+      });
+    }
+    if (ui.worldContinueBtn) {
+      ui.worldContinueBtn.addEventListener("click", function () {
+        window.location.href = "index.html#worlds";
+      });
+    }
   }
 
   renderAll();

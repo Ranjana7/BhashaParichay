@@ -8,7 +8,7 @@
 
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
-  const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories"];
+  const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
   const worldLinks = {
     alphabet: "alphabet-forest.html",
     words: "learning-world.html?world=words",
@@ -16,7 +16,8 @@
     numbers: "learning-world.html?world=numbers",
     colours: "learning-world.html?world=colours",
     sentences: "learning-world.html?world=sentences",
-    stories: "learning-world.html?world=stories"
+    stories: "learning-world.html?world=stories",
+    culture: "learning-world.html?world=culture"
   };
 
   const ui = {
@@ -83,7 +84,7 @@
       const raw = localStorage.getItem(LESSON_KEY);
       if (!raw) return false;
       const done = JSON.parse(raw).done || {};
-      return Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.hunt);
+      return Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.trace && done.hunt);
     } catch (error) {
       return false;
     }

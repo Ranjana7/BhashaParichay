@@ -13,6 +13,7 @@
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
       <a href="index.html">Home</a>
+      <a href="index.html#worlds">Worlds</a>
       <a href="alphabet-forest.html" aria-current="page">Alphabet Forest</a>
       <a href="about.html">About</a>
     </nav>
@@ -20,13 +21,17 @@
   </header>
 
   <main id="main-content" class="page-wrap">
-    <section class="panel">
+    <section class="panel" id="lessonProgressPanel">
       <h1>Alphabet Forest</h1>
       <p>Choose letters, listen, play games, and earn stars.</p>
       <div class="lesson-strip">
         <p><strong id="lessonName">Sprout Lesson</strong> · <span id="lessonIndex">Lesson 1 of 6</span></p>
         <p id="lessonObjective">Learn first 5 vowels</p>
-        <button id="nextLessonTopBtn" class="button secondary" type="button" disabled>Next Lesson (complete all activities)</button>
+        <div class="hero-actions">
+          <button id="prevLessonTopBtn" class="button ghost" type="button">Previous Lesson</button>
+          <button id="nextLessonTopBtn" class="button secondary" type="button" disabled>Next Lesson (complete all activities)</button>
+          <button id="continueAdventureTopBtn" class="button primary" type="button">Continue Adventure</button>
+        </div>
       </div>
       <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
         <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
@@ -56,27 +61,54 @@
       <p id="audioDebug" class="footer-note"></p>
     </section>
 
+    <section class="panel forest-scene" id="forestScene">
+      <h2>Magical Letter Tree</h2>
+      <p>Tap glowing leaves to hear Sanskrit sounds. Mithu will guide your listening journey.</p>
+      <div class="forest-illustration" aria-hidden="true">
+        <span class="tree tree-one"></span>
+        <span class="tree tree-two"></span>
+        <span class="butterfly b-one">🦋</span>
+        <span class="butterfly b-two">🦋</span>
+        <span class="flower f-one"></span>
+        <span class="flower f-two"></span>
+        <span class="glow-letter g-one">अ</span>
+        <span class="glow-letter g-two">क</span>
+        <span class="glow-letter g-three">म</span>
+      </div>
+    </section>
+
     <section class="forest-layout">
       <aside class="panel">
         <h2>Letter Garden</h2>
+        <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
+          <button class="button ghost category-tab active" data-category="all" type="button">All</button>
+          <button class="button ghost category-tab" data-category="vowels" type="button">Vowels</button>
+          <button class="button ghost category-tab" data-category="consonants" type="button">Consonants</button>
+          <button class="button ghost category-tab" data-category="signs" type="button">Signs</button>
+          <button class="button ghost category-tab" data-category="combinations" type="button">Combinations</button>
+        </div>
         <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
       </aside>
 
-      <section class="panel">
+      <section class="panel" id="activityHearPanel">
         <h2>Letter Details</h2>
         <div class="letter-detail">
           <p id="selectedDev" class="big-dev">अ</p>
           <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
           <p><strong>Example:</strong> <span id="selectedExample">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <div class="hero-actions">
+            <button id="replayLetterBtn" class="button secondary" type="button">🔊 Replay</button>
+            <button id="slowLetterBtn" class="button ghost" type="button">🐢 Slow</button>
+          </div>
           <p id="audioFallback" class="fallback" aria-live="polite"></p>
         </div>
       </section>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityPicturePanel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/6</div>
+        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/7</div>
         <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
       </div>
       <div class="progress-meter" aria-hidden="true">
@@ -99,7 +131,7 @@
       <button id="completionNextBtn" class="button primary" type="button">Go to Next Adventure</button>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityArrangePanel">
       <h2>Activity 1: Hear and Pick</h2>
       <div class="activity">
         <p>Listen to the sound and pick the matching Devanagari letter.</p>
@@ -110,7 +142,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityFlashPanel">
       <h2>Activity 2: Picture Match</h2>
       <div class="activity">
         <p id="picturePrompt">Match prompt</p>
@@ -120,7 +152,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityFeedPanel">
       <h2>Activity 3: Arrange the Word</h2>
       <div class="activity">
         <p id="arrangePrompt">Arrange prompt</p>
@@ -135,7 +167,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityTracePanel">
       <h2>Activity 4: Flashcard Flip</h2>
       <div class="activity">
         <p>Flip the flashcard, then choose the correct English meaning.</p>
@@ -147,10 +179,10 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityHuntPanel">
       <h2>Activity 5: Feed Mithu</h2>
       <div class="activity">
-        <p id="feedPrompt">Feed prompt</p>
+        <p id="feedPrompt">Choose the correct Sanskrit fruit for Mithu.</p>
         <div id="feedChoices" class="choices"></div>
         <p id="feedStatus" class="status" aria-live="polite"></p>
         <button id="nextFeed" class="button ghost" type="button">Next fruit round</button>
@@ -158,7 +190,25 @@
     </section>
 
     <section class="panel">
-      <h2>Activity 6: Hidden Letter Hunt</h2>
+      <h2>Activity 6: Letter Tracing</h2>
+      <div class="activity">
+        <p id="tracePrompt">Trace the displayed letter with your finger or mouse.</p>
+        <div class="trace-wrap">
+          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter tracing board"></canvas>
+          <div class="trace-target">
+            <span id="traceTargetLetter">अ</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
+          <button id="checkTraceBtn" class="button secondary" type="button">Check tracing</button>
+        </div>
+        <p id="traceStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 7: Letter Treasure Hunt</h2>
       <div class="activity">
         <p id="huntPrompt">Hunt prompt</p>
         <div id="huntGrid" class="tiles"></div>
