@@ -724,11 +724,44 @@ th {
 
 .lesson-mascot-floating {
   position: fixed;
-  top: 84px;
+  top: 92px;
   right: max(10px, calc((100vw - min(1100px, 94vw)) / 2 + 8px));
   width: min(240px, 34vw);
   z-index: 26;
   box-shadow: 0 12px 28px rgba(33, 79, 152, 0.24);
+  transition: top 0.35s ease, transform 0.2s ease;
+}
+
+.lesson-mascot-mobile {
+  position: sticky;
+  top: 72px;
+  width: min(170px, 48vw);
+  margin-left: auto;
+  z-index: 9;
+}
+
+.tap-audio {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: rgba(90, 85, 225, 0.55);
+}
+
+.example-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.example-art {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255, 206, 93, 0.22);
+  font-size: 1.2rem;
 }
 
 .mithu-svg {
@@ -1162,8 +1195,8 @@ th {
   }
 
   .lesson-mascot-floating {
-    position: static;
-    width: auto;
+    width: min(170px, 48vw);
+    top: 72px;
     box-shadow: none;
   }
 }

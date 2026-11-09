@@ -93,9 +93,9 @@
       <section class="panel" id="activityHearPanel">
         <h2>Letter Details</h2>
         <div class="letter-detail">
-          <p id="selectedDev" class="big-dev">अ</p>
+          <p id="selectedDev" class="big-dev tap-audio" title="Tap to hear pronunciation">अ</p>
           <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
-          <p><strong>Example:</strong> <span id="selectedExample">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <p class="example-line"><span id="selectedExampleArt" class="example-art" aria-hidden="true">🔥</span><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
           <div class="hero-actions">
             <button id="replayLetterBtn" class="button secondary" type="button">🔊 Replay</button>
             <button id="slowLetterBtn" class="button ghost" type="button">🐢 Slow</button>
@@ -105,7 +105,7 @@
       </section>
     </section>
 
-    <section class="panel" id="activityPicturePanel">
+    <section class="panel" id="lessonStatsPanel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
         <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/7</div>
@@ -131,7 +131,7 @@
       <button id="completionNextBtn" class="button primary" type="button">Go to Next Adventure</button>
     </section>
 
-    <section class="panel" id="activityArrangePanel">
+    <section class="panel" id="activityHearGamePanel">
       <h2>Activity 1: Hear and Pick</h2>
       <div class="activity">
         <p>Listen to the sound and pick the matching Devanagari letter.</p>
@@ -142,7 +142,7 @@
       </div>
     </section>
 
-    <section class="panel" id="activityFlashPanel">
+    <section class="panel" id="activityPictureGamePanel">
       <h2>Activity 2: Picture Match</h2>
       <div class="activity">
         <p id="picturePrompt">Match prompt</p>
@@ -152,7 +152,7 @@
       </div>
     </section>
 
-    <section class="panel" id="activityFeedPanel">
+    <section class="panel" id="activityArrangeGamePanel">
       <h2>Activity 3: Arrange the Word</h2>
       <div class="activity">
         <p id="arrangePrompt">Arrange prompt</p>
@@ -167,7 +167,7 @@
       </div>
     </section>
 
-    <section class="panel" id="activityTracePanel">
+    <section class="panel" id="activityFlashGamePanel">
       <h2>Activity 4: Flashcard Flip</h2>
       <div class="activity">
         <p>Flip the flashcard, then choose the correct English meaning.</p>
@@ -179,7 +179,7 @@
       </div>
     </section>
 
-    <section class="panel" id="activityHuntPanel">
+    <section class="panel" id="activityFeedGamePanel">
       <h2>Activity 5: Feed Mithu</h2>
       <div class="activity">
         <p id="feedPrompt">Choose the correct Sanskrit fruit for Mithu.</p>
@@ -189,7 +189,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityTraceGamePanel">
       <h2>Activity 6: Letter Tracing</h2>
       <div class="activity">
         <p id="tracePrompt">Trace the displayed letter with your finger or mouse.</p>
@@ -207,7 +207,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="activityHuntGamePanel">
       <h2>Activity 7: Letter Treasure Hunt</h2>
       <div class="activity">
         <p id="huntPrompt">Hunt prompt</p>

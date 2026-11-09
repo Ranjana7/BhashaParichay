@@ -1,6 +1,6 @@
 window.ALPHABET_LESSON = {
   disclaimer:
-    "Pronunciation uses bundled Sanskrit voice samples for key checks and device voice fallback for the full letter set.",
+    "Pronunciation currently uses device voice fallback while local reviewed Sanskrit recordings are being prepared.",
   reviewStatus:
     "Needs Sanskrit speaker validation before production release for verified pronunciation and pedagogy quality.",
   letters: [
