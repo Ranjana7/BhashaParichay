@@ -1,0 +1,24 @@
+{
+  "status": "draft",
+  "notes": "These files are local offline assets for classroom preview. Pronunciation is not yet verified by a fluent Sanskrit speaker.",
+  "generation": {
+    "runtime": "offline/local",
+    "paid_service": false,
+    "api_keys_required": false
+  },
+  "sources": [
+    {
+      "name": "Local tts-availability-tests folder",
+      "location": "C:/Users/ranjasharma/Downloads/Stories for Kids/tts-availability-tests",
+      "license": "User-provided local test assets",
+      "reviewRequired": true
+    }
+  ],
+  "fallback": "Browser speech synthesis (device dependent)",
+  "reviewChecklist": [
+    "Verify Sanskrit phoneme correctness",
+    "Verify long/short vowel contrast",
+    "Verify consonant cluster pronunciation",
+    "Replace uncertain samples with human-reviewed recordings"
+  ]
+}

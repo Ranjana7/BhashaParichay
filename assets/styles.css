@@ -268,6 +268,14 @@ p {
   padding: 10px 12px;
 }
 
+.lesson-strip {
+  margin: 10px 0 14px;
+  border: 2px solid #d5e3ff;
+  background: linear-gradient(180deg, #f3f8ff, #ffffff);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
 .forest-layout {
   display: grid;
   grid-template-columns: minmax(270px, 350px) 1fr;
@@ -840,10 +848,60 @@ p {
   animation: confettiFall 1.4s ease-in forwards;
 }
 
+.learning-path {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.path-node {
+  border: 2px solid #cfe0ff;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f4f8ff, #ffffff);
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+}
+
+.path-node.locked {
+  opacity: 0.56;
+  filter: grayscale(0.2);
+}
+
+.path-node.unlocked {
+  border-color: #7da4ff;
+}
+
+.path-node.completed {
+  border-color: #6acd8f;
+  background: linear-gradient(180deg, #eafff1, #ffffff);
+}
+
+.path-title {
+  font-weight: 800;
+}
+
+.path-state {
+  font-size: 0.86rem;
+  color: #44518f;
+}
+
+.path-node.unlock-pulse {
+  animation: unlockPulse 0.9s ease-out 1;
+}
+
 @keyframes cloudDrift {
   0% { transform: translateX(0); }
   50% { transform: translateX(12px); }
   100% { transform: translateX(0); }
+}
+
+@keyframes unlockPulse {
+  0% { box-shadow: 0 0 0 0 rgba(113, 147, 255, 0.5); }
+  100% { box-shadow: 0 0 0 18px rgba(113, 147, 255, 0); }
 }
 
 @keyframes flutter {
@@ -924,6 +982,10 @@ p {
 
   .world-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .learning-path {
+    grid-template-columns: 1fr;
   }
 
   .forest-layout {

@@ -23,6 +23,10 @@
     <section class="panel">
       <h1>Alphabet Forest</h1>
       <p>Choose letters, listen, play games, and earn stars.</p>
+      <div class="lesson-strip">
+        <p><strong id="lessonName">Sprout Lesson</strong> · <span id="lessonIndex">Lesson 1 of 6</span></p>
+        <p id="lessonObjective">Learn first 5 vowels</p>
+      </div>
       <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
         <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
           <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
@@ -72,7 +76,7 @@
     <section class="panel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/4</div>
+        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/6</div>
         <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
       </div>
       <div class="progress-meter" aria-hidden="true">
@@ -82,6 +86,7 @@
       <div id="doneBanner" class="done-banner" aria-live="polite">
         Wonderful! You completed Alphabet Forest! ⭐
         <span id="earnedStars"></span>
+        <button id="nextLessonBtn" class="button secondary" type="button">Unlock Next Lesson</button>
         <button id="nextAdventureBtn" class="button primary" type="button">Next Adventure</button>
       </div>
     </section>
@@ -139,6 +144,26 @@
         <div id="flashChoices" class="choices"></div>
         <p id="flashStatus" class="status" aria-live="polite"></p>
         <button id="nextFlashcard" class="button ghost" type="button">Next flashcard</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 5: Feed Mithu</h2>
+      <div class="activity">
+        <p id="feedPrompt">Feed prompt</p>
+        <div id="feedChoices" class="choices"></div>
+        <p id="feedStatus" class="status" aria-live="polite"></p>
+        <button id="nextFeed" class="button ghost" type="button">Next fruit round</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 6: Hidden Letter Hunt</h2>
+      <div class="activity">
+        <p id="huntPrompt">Hunt prompt</p>
+        <div id="huntGrid" class="tiles"></div>
+        <p id="huntStatus" class="status" aria-live="polite"></p>
+        <button id="nextHunt" class="button ghost" type="button">Next hunt</button>
       </div>
     </section>
 

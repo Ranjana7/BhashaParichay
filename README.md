@@ -5,11 +5,18 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
 ## What is included
 
 - Home page (`index.html`)
-- Alphabet Forest playable lesson (`alphabet-forest.html`)
+- Alphabet Forest playable lesson (`alphabet-forest.html`) with progressive lesson steps
 - About page (`about.html`)
 - Local progress saving with `localStorage` (device/browser only)
 - No account, no analytics, no ads, no trackers
 - Mute toggle and reduced-motion support
+- Six working activities in Alphabet Forest:
+  - Hear and Pick
+  - Picture Match
+  - Arrange the Word
+  - Flashcard Flip
+  - Feed Mithu
+  - Hidden Letter Hunt
 
 ## Run locally
 
@@ -47,18 +54,20 @@ git push -u origin main
 
 ## Content quality notes
 
-- Pronunciation currently uses browser speech synthesis when available.
-- Audio is computer-generated and not human-verified.
+- Pronunciation first attempts local files from `assets/audio/pronunciation/`.
+- If a local clip is missing, browser speech synthesis is used as fallback.
+- Audio is computer-generated or test-recorded and not human-verified yet.
 - Lesson mappings and pronunciation should be reviewed by a Sanskrit educator before wide release.
 
 ## Assets and licenses
 
 - Code/CSS/illustrations in this repository: Original work for this project.
-- Fonts/images/audio: No paid or third-party bundled assets required.
+- Fonts/images/audio: No paid runtime services are required.
 - Browser Speech Synthesis API: built-in browser feature (no subscription).
 - Animation libraries stored locally in `assets/vendor/`:
   - Motion (`motion.min.js`)
   - canvas-confetti (`canvas-confetti.min.js`)
   - lottie-web (`lottie.min.js`)
 - Lottie JSON animation assets stored locally in `assets/lottie/`.
+- Pronunciation asset manifest: `assets/audio/pronunciation/manifest.json`.
 - Reference pronunciation clips in `assets/audio/reference/` were copied from the local `Stories for Kids/tts-availability-tests` folder.
