@@ -1,0 +1,117 @@
+kind,devanagari,audio_file,file_exists_nonzero,bytes,browser_fallback_now,source,notes
+letter,अं,assets/audio/pronunciation/am.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,अः,assets/audio/pronunciation/ah.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,अ,assets/audio/pronunciation/a.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,आ,assets/audio/pronunciation/aa.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,इ,assets/audio/pronunciation/i.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ई,assets/audio/pronunciation/ii.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,उ,assets/audio/pronunciation/u.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ऊ,assets/audio/pronunciation/uu.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ऋ,assets/audio/pronunciation/ri.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ॠ,assets/audio/pronunciation/rii.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_ambiguous_symbol_needs_review
+letter,ऌ,assets/audio/pronunciation/li.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_ambiguous_symbol_needs_review
+letter,ए,assets/audio/pronunciation/e.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ऐ,assets/audio/pronunciation/ai.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,ओ,assets/audio/pronunciation/o.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,औ,assets/audio/pronunciation/au.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
+letter,क,assets/audio/pronunciation/ka.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ख,assets/audio/pronunciation/kha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ग,assets/audio/pronunciation/ga.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,घ,assets/audio/pronunciation/gha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ङ,assets/audio/pronunciation/nga.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_no_example_needs_review
+letter,च,assets/audio/pronunciation/ca.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,छ,assets/audio/pronunciation/cha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ज,assets/audio/pronunciation/ja.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,झ,assets/audio/pronunciation/jha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ञ,assets/audio/pronunciation/nya.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_no_example_needs_review
+letter,ट,assets/audio/pronunciation/tta.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ठ,assets/audio/pronunciation/ttha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ड,assets/audio/pronunciation/dda.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ढ,assets/audio/pronunciation/ddha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,ण,assets/audio/pronunciation/nna.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
+letter,त,assets/audio/pronunciation/ta.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,थ,assets/audio/pronunciation/tha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,द,assets/audio/pronunciation/da.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,ध,assets/audio/pronunciation/dha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,न,assets/audio/pronunciation/na.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,प,assets/audio/pronunciation/pa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,फ,assets/audio/pronunciation/pha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,ब,assets/audio/pronunciation/ba.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,भ,assets/audio/pronunciation/bha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,म,assets/audio/pronunciation/ma.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,य,assets/audio/pronunciation/ya.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,र,assets/audio/pronunciation/ra.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,ल,assets/audio/pronunciation/la.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,व,assets/audio/pronunciation/va.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,श,assets/audio/pronunciation/sha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,ष,assets/audio/pronunciation/ssa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,स,assets/audio/pronunciation/sa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+letter,ह,assets/audio/pronunciation/ha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
+word,अंसः,assets/audio/pronunciation/am.mp3,no,0,no (fallback removed; local clip only),example for अं,ocr_extracted_needs_review
+word,अग्निः,assets/audio/pronunciation/agnih.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,अजः,assets/audio/pronunciation/a.mp3,no,0,no (fallback removed; local clip only),example for अ,ocr_extracted_needs_review
+word,आकाशः,assets/audio/pronunciation/aakaashah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,आपः,assets/audio/pronunciation/aa.mp3,no,0,no (fallback removed; local clip only),example for आ,ocr_extracted_needs_review
+word,आम्रम्,assets/audio/pronunciation/aamram.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
+word,इनः,assets/audio/pronunciation/i.mp3,no,0,no (fallback removed; local clip only),example for इ,ocr_extracted_needs_review
+word,ईशः,assets/audio/pronunciation/ii.mp3,no,0,no (fallback removed; local clip only),example for ई,ocr_extracted_needs_review
+word,उरः,assets/audio/pronunciation/u.mp3,no,0,no (fallback removed; local clip only),example for उ,ocr_extracted_needs_review
+word,ऊरुः,assets/audio/pronunciation/uu.mp3,no,0,no (fallback removed; local clip only),example for ऊ,ocr_extracted_needs_review
+word,ऋषिः,assets/audio/pronunciation/ri.mp3,no,0,no (fallback removed; local clip only),example for ऋ,ocr_extracted_needs_review
+word,ॠकारः,assets/audio/pronunciation/rii.mp3,no,0,no (fallback removed; local clip only),example for ॠ,ocr_ambiguous_symbol_needs_review
+word,ऌकारः,assets/audio/pronunciation/li.mp3,no,0,no (fallback removed; local clip only),example for ऌ,ocr_ambiguous_symbol_needs_review
+word,एकः,assets/audio/pronunciation/ekah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,एषः,assets/audio/pronunciation/e.mp3,no,0,no (fallback removed; local clip only),example for ए,ocr_extracted_needs_review
+word,ऐक्यम्,assets/audio/pronunciation/ai.mp3,no,0,no (fallback removed; local clip only),example for ऐ,ocr_extracted_needs_review
+word,ओजः,assets/audio/pronunciation/o.mp3,no,0,no (fallback removed; local clip only),example for ओ,ocr_extracted_needs_review
+word,और्वः,assets/audio/pronunciation/au.mp3,no,0,no (fallback removed; local clip only),example for औ,ocr_extracted_needs_review
+word,कटः,assets/audio/pronunciation/tta.mp3,no,0,no (fallback removed; local clip only),example for ट,ocr_extracted_needs_review
+word,कणः,assets/audio/pronunciation/nna.mp3,no,0,no (fallback removed; local clip only),example for ण,ocr_extracted_needs_review
+word,कथा,assets/audio/pronunciation/tha.mp3,no,0,no (fallback removed; local clip only),example for थ,ocr_extracted_needs_review
+word,कदलीफलम्,assets/audio/pronunciation/kadaliphalam.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
+word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
+word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
+word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,करः,assets/audio/pronunciation/ka.mp3,no,0,no (fallback removed; local clip only),example for क,ocr_extracted_needs_review
+word,खलः,assets/audio/pronunciation/kha.mp3,no,0,no (fallback removed; local clip only),example for ख,ocr_extracted_needs_review
+word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
+word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),example for ग,ocr_extracted_needs_review
+word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
+word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,घनः,assets/audio/pronunciation/gha.mp3,no,0,no (fallback removed; local clip only),example for घ,ocr_extracted_needs_review
+word,चन्द्रः,assets/audio/pronunciation/chandrah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,चयः,assets/audio/pronunciation/ca.mp3,no,0,no (fallback removed; local clip only),example for च,ocr_extracted_needs_review
+word,छद,assets/audio/pronunciation/cha.mp3,no,0,no (fallback removed; local clip only),example for छ,ocr_extracted_needs_review
+word,जडः,assets/audio/pronunciation/ja.mp3,no,0,no (fallback removed; local clip only),example for ज,ocr_extracted_needs_review
+word,झषः,assets/audio/pronunciation/jha.mp3,no,0,no (fallback removed; local clip only),example for झ,ocr_extracted_needs_review
+word,डमरुः,assets/audio/pronunciation/dda.mp3,no,0,no (fallback removed; local clip only),example for ड,ocr_extracted_needs_review
+word,ढकः,assets/audio/pronunciation/ddha.mp3,no,0,no (fallback removed; local clip only),example for ढ,ocr_extracted_needs_review
+word,तनु,assets/audio/pronunciation/ta.mp3,no,0,no (fallback removed; local clip only),example for त,ocr_extracted_needs_review
+word,दधि,assets/audio/pronunciation/da.mp3,no,0,no (fallback removed; local clip only),example for द,ocr_extracted_needs_review
+word,द्राक्षा,assets/audio/pronunciation/draksha.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
+word,धवः,assets/audio/pronunciation/dha.mp3,no,0,no (fallback removed; local clip only),example for ध,ocr_extracted_needs_review
+word,नदी,assets/audio/pronunciation/nadee.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
+word,नदी,assets/audio/pronunciation/nadee.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,नभः,assets/audio/pronunciation/na.mp3,no,0,no (fallback removed; local clip only),example for न,ocr_extracted_needs_review
+word,पलाशः,assets/audio/pronunciation/pa.mp3,no,0,no (fallback removed; local clip only),example for प,ocr_extracted_needs_review
+word,फलम्,assets/audio/pronunciation/pha.mp3,no,0,no (fallback removed; local clip only),example for फ,ocr_extracted_needs_review
+word,बकः,assets/audio/pronunciation/ba.mp3,no,0,no (fallback removed; local clip only),example for ब,ocr_extracted_needs_review
+word,भटः,assets/audio/pronunciation/bha.mp3,no,0,no (fallback removed; local clip only),example for भ,ocr_extracted_needs_review
+word,मठः,assets/audio/pronunciation/ttha.mp3,no,0,no (fallback removed; local clip only),example for ठ,ocr_extracted_needs_review
+word,मनः,assets/audio/pronunciation/ma.mp3,no,0,no (fallback removed; local clip only),example for म,ocr_extracted_needs_review
+word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
+word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
+word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,यमः,assets/audio/pronunciation/ya.mp3,no,0,no (fallback removed; local clip only),example for य,ocr_extracted_needs_review
+word,योगः,assets/audio/pronunciation/yogah.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
+word,योगः,assets/audio/pronunciation/yogah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,रथः,assets/audio/pronunciation/rathah.mp3,no,0,no (fallback removed; local clip only),example for र,ocr_extracted_needs_review
+word,रथः,assets/audio/pronunciation/rathah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
+word,लवः,assets/audio/pronunciation/la.mp3,no,0,no (fallback removed; local clip only),example for ल,ocr_extracted_needs_review
+word,वनम्,assets/audio/pronunciation/va.mp3,no,0,no (fallback removed; local clip only),example for व,ocr_extracted_needs_review
+word,शरः,assets/audio/pronunciation/sha.mp3,no,0,no (fallback removed; local clip only),example for श,ocr_extracted_needs_review
+word,षट्,assets/audio/pronunciation/ssa.mp3,no,0,no (fallback removed; local clip only),example for ष,ocr_extracted_needs_review
+word,सः,assets/audio/pronunciation/ah.mp3,no,0,no (fallback removed; local clip only),example for अः,ocr_extracted_needs_review
+word,सरः,assets/audio/pronunciation/sa.mp3,no,0,no (fallback removed; local clip only),example for स,ocr_extracted_needs_review
+word,सेवफलम्,assets/audio/pronunciation/sevaphalam.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
+word,हयः,assets/audio/pronunciation/ha.mp3,no,0,no (fallback removed; local clip only),example for ह,ocr_extracted_needs_review

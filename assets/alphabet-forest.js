@@ -29,8 +29,11 @@
   ];
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
-  const LOCAL_AUDIO_ENABLED = false;
+  const LOCAL_AUDIO_ENABLED = true;
+  const PRONUNCIATION_UNAVAILABLE = "Pronunciation not available yet.";
+  const MUTED_AUDIO_MESSAGE = "Sound is muted. Tap Sound: Off to unmute.";
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const audioAvailabilityCache = new Map();
   const LETTER_ART = {
     "अ": "🔥",
     "आ": "🌤️",
@@ -85,6 +88,7 @@
     nextLessonBtn: document.getElementById("nextLessonBtn"),
     nextLessonTopBtn: document.getElementById("nextLessonTopBtn"),
     continueAdventureTopBtn: document.getElementById("continueAdventureTopBtn"),
+    backToWorldsTopBtn: document.getElementById("backToWorldsTopBtn"),
     replayLetterBtn: document.getElementById("replayLetterBtn"),
     slowLetterBtn: document.getElementById("slowLetterBtn"),
     letterCategoryTabs: document.querySelectorAll(".category-tab"),
@@ -400,49 +404,90 @@
     if (window.spApplause) window.spApplause();
   }
 
-  function playLocalPronunciation(key, onFail, playbackRate) {
-    if (!LOCAL_AUDIO_ENABLED) {
-      if (onFail) onFail();
+  function resolveAudioAvailability(src, callback) {
+    if (audioAvailabilityCache.has(src)) {
+      callback(audioAvailabilityCache.get(src));
       return;
     }
-    const audio = new Audio("assets/audio/pronunciation/" + key + ".mp3");
-    audio.preload = "auto";
-    audio.volume = 1;
-    audio.playbackRate = playbackRate || 1;
+    const controller = new AbortController();
+    const timeout = setTimeout(function () {
+      controller.abort();
+    }, 1400);
+    fetch(src, { method: "GET", cache: "no-store", signal: controller.signal })
+      .then(function (response) {
+        if (!response.ok) return null;
+        return response.blob();
+      })
+      .then(function (blob) {
+        if (!blob) return false;
+        return blob.size > 0;
+      })
+      .catch(function () {
+        return false;
+      })
+      .then(function (available) {
+        clearTimeout(timeout);
+        audioAvailabilityCache.set(src, available);
+        callback(available);
+      });
+  }
+
+  function playLocalPronunciation(key, onFail, playbackRate, onSuccess) {
     let failed = false;
     function failover() {
       if (failed) return;
       failed = true;
-      if (onFail) onFail();
+      if (onFail) onFail("missing");
     }
-    audio.addEventListener("error", failover, { once: true });
-    audio.addEventListener("stalled", failover, { once: true });
-    const playAttempt = audio.play();
-    if (playAttempt && typeof playAttempt.catch === "function") {
-      playAttempt.catch(failover);
+
+    if (window.SP_STATE && window.SP_STATE.muted) {
+      if (onFail) onFail("muted");
+      return;
     }
-    setTimeout(function () {
-      if (failed) return;
-      if (audio.paused || audio.currentTime <= 0) {
+    if (!LOCAL_AUDIO_ENABLED) {
+      if (onFail) onFail("disabled");
+      return;
+    }
+    if (!key) {
+      if (onFail) onFail("missing");
+      return;
+    }
+    const src = "assets/audio/pronunciation/" + key + ".mp3";
+    resolveAudioAvailability(src, function (available) {
+      if (!available) {
         failover();
+        return;
       }
-    }, 850);
+      const audio = new Audio(src);
+      audio.preload = "auto";
+      audio.volume = 1;
+      audio.playbackRate = playbackRate || 1;
+      audio.addEventListener("error", failover, { once: true });
+      audio.addEventListener("stalled", failover, { once: true });
+      audio.addEventListener("playing", function () {
+        if (onSuccess) onSuccess();
+      }, { once: true });
+      const playAttempt = audio.play();
+      if (playAttempt && typeof playAttempt.catch === "function") {
+        playAttempt.catch(failover);
+      }
+    });
   }
 
   function speakSelectedLetter() {
     const letter = state.selectedLetter;
     ui.audioFallback.textContent = "Playing pronunciation...";
     setMascotState("listening");
-    playLocalPronunciation(letter.audioKey || letter.transliteration, function () {
-      ui.audioFallback.textContent = "Local clip unavailable. Using device voice.";
-      const ok = window.spSpeak(letter.devanagari, "hi-IN", null, letter.transliteration);
-      if (!ok) {
-        ui.audioFallback.textContent =
-          window.SP_STATE && window.SP_STATE.muted
-            ? "Sound is muted. Tap Sound: Off to unmute."
-            : "Audio unavailable. Please check browser voice settings.";
+    playLocalPronunciation(
+      letter.audioKey || letter.transliteration,
+      function (reason) {
+        ui.audioFallback.textContent = reason === "muted" ? MUTED_AUDIO_MESSAGE : PRONUNCIATION_UNAVAILABLE;
+      },
+      1,
+      function () {
+        ui.audioFallback.textContent = "";
       }
-    }, 1);
+    );
     setTimeout(function () {
       if (ui.audioFallback.textContent === "Playing pronunciation...") {
         ui.audioFallback.textContent = "";
@@ -454,18 +499,16 @@
     const letter = state.selectedLetter;
     ui.audioFallback.textContent = "Playing slow pronunciation...";
     setMascotState("listening");
-    playLocalPronunciation(letter.audioKey || letter.transliteration, function () {
-      ui.audioFallback.textContent = "Local clip unavailable. Using slow device voice.";
-      if (window.spSpeak) {
-        const ok = window.spSpeak(letter.devanagari + " ... " + letter.devanagari, "hi-IN", null, letter.transliteration);
-        if (!ok) {
-          ui.audioFallback.textContent =
-            window.SP_STATE && window.SP_STATE.muted
-              ? "Sound is muted. Tap Sound: Off to unmute."
-              : "Audio unavailable. Please check browser voice settings.";
-        }
+    playLocalPronunciation(
+      letter.audioKey || letter.transliteration,
+      function (reason) {
+        ui.audioFallback.textContent = reason === "muted" ? MUTED_AUDIO_MESSAGE : PRONUNCIATION_UNAVAILABLE;
+      },
+      0.72,
+      function () {
+        ui.audioFallback.textContent = "";
       }
-    }, 0.72);
+    );
     setTimeout(function () {
       if (ui.audioFallback.textContent === "Playing slow pronunciation...") {
         ui.audioFallback.textContent = "";
@@ -473,17 +516,17 @@
     }, 1400);
   }
 
-  function speakText(textKey, displayText, fallbackEl) {
-    playLocalPronunciation(textKey, function () {
-      if (fallbackEl) fallbackEl.textContent = "Local clip unavailable. Using device voice.";
-      const ok = window.spSpeak(displayText, "hi-IN", null, textKey);
-      if (!ok && fallbackEl) {
-        fallbackEl.textContent =
-          window.SP_STATE && window.SP_STATE.muted
-            ? "Sound is muted. Tap Sound: Off to unmute."
-            : "Audio unavailable. Please check browser voice settings.";
+  function speakText(textKey, _displayText, fallbackEl) {
+    playLocalPronunciation(
+      textKey,
+      function (reason) {
+        if (fallbackEl) fallbackEl.textContent = reason === "muted" ? MUTED_AUDIO_MESSAGE : PRONUNCIATION_UNAVAILABLE;
+      },
+      1,
+      function () {
+        if (fallbackEl) fallbackEl.textContent = "";
       }
-    });
+    );
   }
 
   function playPromptLetter(promptLetter) {
@@ -491,16 +534,16 @@
       return entry.devanagari === promptLetter;
     });
     const key = match ? match.audioKey : promptLetter;
-    playLocalPronunciation(key, function () {
-      ui.hearStatus.textContent = "Local clip unavailable. Using device voice.";
-      const ok = window.spSpeak(promptLetter, "hi-IN", null, key);
-      if (!ok) {
-        ui.hearStatus.textContent =
-          window.SP_STATE && window.SP_STATE.muted
-            ? "Sound is muted. Tap Sound: Off to unmute."
-            : "Audio unavailable. Please check browser voice settings.";
+    playLocalPronunciation(
+      key,
+      function (reason) {
+        ui.hearStatus.textContent = reason === "muted" ? MUTED_AUDIO_MESSAGE : PRONUNCIATION_UNAVAILABLE;
+      },
+      1,
+      function () {
+        ui.hearStatus.textContent = "";
       }
-    });
+    );
   }
 
   function runAudioTest() {
@@ -508,9 +551,23 @@
     demo.play().then(function () {
       ui.audioFallback.textContent = "";
     }).catch(function () {
-      window.spSpeak("नमस्ते", "hi-IN", ui.audioFallback, "namaste");
+      ui.audioFallback.textContent = PRONUNCIATION_UNAVAILABLE;
     });
     renderAudioDebug();
+  }
+
+  function audioKeyForText(text) {
+    if (!text) return null;
+    const letter = canonicalLetters.find(function (entry) {
+      return entry.devanagari === text;
+    });
+    if (letter) return letter.audioKey || letter.transliteration;
+    if (EXAMPLE_AUDIO_KEYS[text]) return EXAMPLE_AUDIO_KEYS[text];
+    const fruit = FRUITS.find(function (item) {
+      return item.dev === text;
+    });
+    if (fruit) return fruit.transliteration;
+    return null;
   }
 
   function handleCorrect(activityId, stars, statusEl, message, targetEl) {
@@ -816,6 +873,7 @@
       }
       button.addEventListener("click", function () {
         if (state.progress.done.picture) return;
+        speakText(audioKeyForText(option), option, ui.pictureStatus);
         if (option === item.answer) {
           button.classList.add("correct");
           handleCorrect("picture", 2, ui.pictureStatus, "Correct match! +2 stars", button);
@@ -894,9 +952,9 @@
   function renderFlashcard() {
     const item = lesson.activities.flashcards[state.flashIndex % lesson.activities.flashcards.length];
     if (state.flashFront) {
-      ui.flashcard.innerHTML = '<p class="flash-dev">' + item.devanagari + '</p><p>Tap "Flip Card" to reveal clue</p>';
+      ui.flashcard.innerHTML = '<p class="flash-dev tap-audio" title="Tap to hear pronunciation">' + item.devanagari + '</p><p>Tap "Flip Card" to reveal clue</p>';
     } else {
-      ui.flashcard.innerHTML = "<p><strong>" + item.devanagari + "</strong></p><p>Transliteration: " + item.transliteration + "</p>";
+      ui.flashcard.innerHTML = '<p><strong class="tap-audio" title="Tap to hear pronunciation">' + item.devanagari + "</strong></p><p>Transliteration: " + item.transliteration + "</p>";
     }
   }
 
@@ -1286,7 +1344,11 @@
   }
 
   function goNextAdventure() {
-    window.location.href = "index.html#worlds";
+    window.location.href = "my-progress.html";
+  }
+
+  function goBackToWorlds() {
+    window.location.href = "explore-worlds.html";
   }
 
   function runMascotEntrance() {
@@ -1357,12 +1419,19 @@
     if (ui.selectedExample) {
       ui.selectedExample.addEventListener("click", function () {
         const letter = state.selectedLetter;
-        const key = EXAMPLE_AUDIO_KEYS[letter.example] || letter.transliteration;
+        const key = audioKeyForText(letter.example) || letter.audioKey || letter.transliteration;
         speakText(key, letter.example, ui.audioFallback);
+      });
+    }
+    if (ui.flashcard) {
+      ui.flashcard.addEventListener("click", function () {
+        const item = lesson.activities.flashcards[state.flashIndex % lesson.activities.flashcards.length];
+        speakText(audioKeyForText(item.devanagari), item.devanagari, ui.flashStatus);
       });
     }
     if (ui.prevLessonTopBtn) ui.prevLessonTopBtn.addEventListener("click", goPreviousLesson);
     if (ui.continueAdventureTopBtn) ui.continueAdventureTopBtn.addEventListener("click", goNextAdventure);
+    if (ui.backToWorldsTopBtn) ui.backToWorldsTopBtn.addEventListener("click", goBackToWorlds);
     if (ui.letterCategoryTabs) {
       ui.letterCategoryTabs.forEach(function (tab) {
         tab.addEventListener("click", function () {

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SanskritParichay | My Progress</title>
+  <meta name="description" content="Track your SanskritParichay progress and continue learning.">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="explore-worlds.html">Explore Worlds</a>
+      <a href="my-progress.html" aria-current="page">My Progress</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel">
+      <h1>My Progress</h1>
+      <p>See what you completed, what is next, and jump back into lessons.</p>
+      <div class="hero-actions">
+        <div class="star-box">⭐ Stars: <span id="progressStars">0</span></div>
+        <div class="star-box">⚡ XP: <span id="progressXp">0</span></div>
+      </div>
+      <div class="hero-actions">
+        <button id="continueLearningBtn" class="button primary" type="button">Continue Learning</button>
+        <a class="button ghost" href="explore-worlds.html">Back to Worlds</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>World Progress</h2>
+      <div id="progressWorldList" class="learning-path"></div>
+    </section>
+  </main>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/worlds-data.js"></script>
+  <script src="assets/my-progress.js"></script>
+</body>
+</html>

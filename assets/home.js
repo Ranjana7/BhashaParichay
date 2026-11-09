@@ -3,6 +3,7 @@
   const LESSON_KEY = "sanskritParichay.alphabetForest.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const MUTE_KEY = "sanskritParichay.muted";
+  const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
   const panel = document.getElementById("previewPanel");
   if (!panel) return;
 
@@ -19,38 +20,91 @@
     stories: "learning-world.html?world=stories",
     culture: "learning-world.html?world=culture"
   };
+  const challengeSteps = [
+    {
+      id: "listen",
+      title: "Listening Challenge",
+      prompt: "Listen to the word and choose it.",
+      playText: "गजः",
+      options: ["गजः", "कमलम्", "नदी"],
+      answer: "गजः",
+      success: "Excellent listening!"
+    },
+    {
+      id: "picture",
+      title: "Picture Match",
+      prompt: "Which Sanskrit word matches 🌙 (moon)?",
+      options: ["चन्द्रः", "फलम्", "माता"],
+      answer: "चन्द्रः",
+      success: "Correct picture match!"
+    },
+    {
+      id: "vocabulary",
+      title: "Vocabulary Challenge",
+      prompt: "Pick the Sanskrit word for river.",
+      options: ["नदी", "रथः", "गृहम्"],
+      answer: "नदी",
+      success: "Great vocabulary choice!"
+    },
+    {
+      id: "build",
+      title: "Word-Building Challenge",
+      prompt: "Build the Sanskrit word for lotus.",
+      tiles: ["क", "म", "लम्"],
+      answer: "कमलम्",
+      success: "Beautifully built!"
+    },
+    {
+      id: "revision",
+      title: "Revision Question",
+      prompt: "Which means mother?",
+      options: ["माता", "योगः", "वनम्"],
+      answer: "माता",
+      success: "Revision complete!"
+    }
+  ];
 
   const ui = {
     title: document.getElementById("previewTitle"),
     text: document.getElementById("previewText"),
+    challengeMeta: document.getElementById("challengeMeta"),
+    challengeProgressFill: document.getElementById("challengeProgressFill"),
+    challengeProgressText: document.getElementById("challengeProgressText"),
     choices: document.getElementById("previewChoices"),
     status: document.getElementById("previewStatus"),
+    challengeActionBtn: document.getElementById("challengeActionBtn"),
     mascot: document.getElementById("mascot"),
     mascotSpeech: document.getElementById("mascotSpeech"),
     homeStars: document.getElementById("homeStars"),
     homeXp: document.getElementById("homeXp"),
     continueBtn: document.getElementById("continueBtn"),
-    exploreBtn: document.getElementById("exploreBtn"),
     challengeBtn: document.getElementById("challengeBtn"),
     playNowBtn: document.getElementById("playNowBtn"),
     resetBtn: document.getElementById("resetProgressBtn"),
     worldCards: document.querySelectorAll(".world-card")
   };
 
-  const challengeData = {
-    title: "Today's Challenge",
-    prompt: "Pick Sanskrit for moon.",
-    options: ["चन्द्रः", "गृहम्", "फलम्"],
-    answer: "चन्द्रः",
-    hint: "Think: Chandra means moon."
-  };
-
-  const state = load();
+  const state = loadHomeState();
+  const daily = loadDailyProgress();
   renderStats();
+  renderChallengeIdle();
   wireUi();
-  setMascotState("greeting", "Namaste! Choose a world and continue your Sanskrit adventure.");
+  setMascotState("greeting", "Namaste! Choose a world or play today's challenge.");
 
-  function load() {
+  function londonDateKey() {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
+    const get = function (type) {
+      return (parts.find(function (p) { return p.type === type; }) || {}).value || "";
+    };
+    return get("year") + "-" + get("month") + "-" + get("day");
+  }
+
+  function loadHomeState() {
     try {
       const raw = localStorage.getItem(HOME_KEY);
       if (!raw) return { xp: 0, completed: [] };
@@ -59,14 +113,41 @@
         xp: Number(data.xp || 0),
         completed: Array.isArray(data.completed) ? data.completed : []
       };
-    } catch (error) {
+    } catch (_error) {
       return { xp: 0, completed: [] };
     }
   }
 
-  function save() {
+  function saveHomeState() {
     localStorage.setItem(HOME_KEY, JSON.stringify(state));
     renderStats();
+  }
+
+  function loadDailyProgress() {
+    const today = londonDateKey();
+    try {
+      const raw = localStorage.getItem(CHALLENGE_KEY);
+      if (!raw) {
+        return { date: today, started: false, stepIndex: 0, completed: false, rewardClaimed: false };
+      }
+      const data = JSON.parse(raw);
+      if (data.date !== today) {
+        return { date: today, started: false, stepIndex: 0, completed: false, rewardClaimed: false };
+      }
+      return {
+        date: today,
+        started: Boolean(data.started),
+        stepIndex: Number(data.stepIndex || 0),
+        completed: Boolean(data.completed),
+        rewardClaimed: Boolean(data.rewardClaimed)
+      };
+    } catch (_error) {
+      return { date: today, started: false, stepIndex: 0, completed: false, rewardClaimed: false };
+    }
+  }
+
+  function saveDailyProgress() {
+    localStorage.setItem(CHALLENGE_KEY, JSON.stringify(daily));
   }
 
   function lessonStars() {
@@ -74,7 +155,7 @@
       const raw = localStorage.getItem(LESSON_KEY);
       if (!raw) return 0;
       return Number((JSON.parse(raw).stars) || 0);
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -85,7 +166,7 @@
       if (!raw) return false;
       const done = JSON.parse(raw).done || {};
       return Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.trace && done.hunt);
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -134,7 +215,8 @@
   }
 
   function launchConfettiBurst() {
-    if (!window.confetti || JSON.parse(localStorage.getItem(MUTE_KEY) || "false")) return;
+    const muted = JSON.parse(localStorage.getItem(MUTE_KEY) || "false");
+    if (!window.confetti || muted) return;
     window.confetti({
       particleCount: 70,
       spread: 65,
@@ -145,38 +227,157 @@
     });
   }
 
-  function openChallenge() {
-    ui.title.textContent = challengeData.title;
-    ui.text.textContent = challengeData.prompt;
-    ui.choices.innerHTML = "";
-    ui.status.textContent = "";
-    panel.classList.remove("correct", "wrong");
-    setMascotState("thinking", "Let's solve today's challenge.");
+  function renderChallengeProgress() {
+    const completedCount = Math.min(challengeSteps.length, daily.stepIndex);
+    const percent = Math.round((completedCount / challengeSteps.length) * 100);
+    ui.challengeProgressFill.style.width = percent + "%";
+    ui.challengeProgressText.textContent = "Progress: " + completedCount + "/" + challengeSteps.length;
+  }
 
-    challengeData.options.forEach(function (option) {
+  function renderChallengeIdle() {
+    renderChallengeProgress();
+    ui.challengeActionBtn.style.display = "none";
+    if (daily.completed) {
+      ui.title.textContent = "Today's Challenge Complete";
+      ui.text.textContent = "You completed all five activities today. Come back tomorrow for a new challenge.";
+      ui.status.textContent = daily.rewardClaimed ? "Daily reward already claimed today." : "";
+      ui.challengeMeta.textContent = "Daily progress is saved on this device.";
+      ui.choices.innerHTML = "";
+      return;
+    }
+    if (!daily.started) {
+      ui.title.textContent = "Today's Challenge";
+      ui.text.textContent = "Play five short activities: listening, picture matching, vocabulary, word building, and revision.";
+      ui.status.textContent = "";
+      ui.challengeMeta.textContent = "Daily reward can be claimed once per day on this device.";
+      ui.choices.innerHTML = "";
+      return;
+    }
+    renderChallengeStep();
+  }
+
+  function playChallengePrompt(step) {
+    if (!step.playText) return;
+    window.spSpeak(step.playText, "hi-IN", ui.status, step.playText);
+  }
+
+  function completeChallengeStep() {
+    daily.stepIndex += 1;
+    if (daily.stepIndex >= challengeSteps.length) {
+      daily.completed = true;
+      daily.stepIndex = challengeSteps.length;
+      if (!daily.rewardClaimed) {
+        state.xp += 25;
+        daily.rewardClaimed = true;
+        saveHomeState();
+      }
+      saveDailyProgress();
+      renderChallengeProgress();
+      ui.challengeActionBtn.style.display = "none";
+      ui.choices.innerHTML = "";
+      ui.title.textContent = "Challenge Complete!";
+      ui.text.textContent = "You finished all five challenge activities.";
+      ui.status.textContent = "🎉 +25 XP awarded once for today.";
+      setMascotState("dance", "Fantastic! You completed today's full challenge.");
+      launchConfettiBurst();
+      if (window.spApplause && !(window.SP_STATE && window.SP_STATE.muted)) window.spApplause();
+      return;
+    }
+    saveDailyProgress();
+    renderChallengeStep();
+  }
+
+  function renderChallengeStep() {
+    renderChallengeProgress();
+    const step = challengeSteps[daily.stepIndex];
+    if (!step) return;
+    ui.title.textContent = "Today's Challenge: " + step.title;
+    ui.text.textContent = step.prompt;
+    ui.status.textContent = "";
+    ui.choices.innerHTML = "";
+    ui.challengeActionBtn.style.display = "none";
+    ui.challengeActionBtn.textContent = "Next challenge";
+    panel.classList.remove("correct", "wrong");
+
+    if (step.id === "build") {
+      let built = "";
+      const output = document.createElement("p");
+      output.className = "footer-note";
+      output.textContent = "Built word: —";
+      const row = document.createElement("div");
+      row.className = "tiles";
+      const shuffled = step.tiles.slice().sort(function () { return Math.random() - 0.5; });
+      shuffled.forEach(function (tile) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tile-btn";
+        btn.textContent = tile;
+        btn.addEventListener("click", function () {
+          if (btn.disabled) return;
+          btn.disabled = true;
+          built += tile;
+          output.textContent = "Built word: " + built;
+        });
+        row.appendChild(btn);
+      });
+      ui.choices.appendChild(row);
+      ui.choices.appendChild(output);
+      const checkBtn = document.createElement("button");
+      checkBtn.type = "button";
+      checkBtn.className = "button secondary";
+      checkBtn.textContent = "Check word";
+      checkBtn.addEventListener("click", function () {
+        if (built === step.answer) {
+          panel.classList.add("correct");
+          ui.status.textContent = step.success;
+          setMascotState("correct", "Perfect! Let's go to the next challenge.");
+          ui.challengeActionBtn.style.display = "inline-flex";
+        } else {
+          panel.classList.add("wrong");
+          ui.status.textContent = "Not yet. Try the tile order again.";
+          setMascotState("incorrect", "Great try. Rearrange and retry.");
+        }
+      });
+      ui.choices.appendChild(checkBtn);
+      return;
+    }
+
+    if (step.playText) {
+      const playBtn = document.createElement("button");
+      playBtn.type = "button";
+      playBtn.className = "button ghost";
+      playBtn.textContent = "▶ Play sound";
+      playBtn.addEventListener("click", function () {
+        setMascotState("thinking", "Listen carefully to the pronunciation.");
+        playChallengePrompt(step);
+      });
+      ui.choices.appendChild(playBtn);
+    }
+
+    const optionWrap = document.createElement("div");
+    optionWrap.className = "choices";
+    step.options.forEach(function (option) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
       btn.textContent = option;
       btn.addEventListener("click", function () {
-        if (option === challengeData.answer) {
-          btn.classList.add("correct");
-          state.xp += 10;
-          save();
+        if (option === step.answer) {
           panel.classList.add("correct");
-          ui.status.textContent = "Correct! +10 XP";
-          setMascotState("correct", "Brilliant! You got it!");
-          launchConfettiBurst();
-          if (window.spApplause) window.spApplause();
+          ui.status.textContent = step.success;
+          setMascotState("correct", "Wonderful! Move to the next one.");
+          optionWrap.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+          ui.challengeActionBtn.style.display = "inline-flex";
         } else {
           btn.classList.add("wrong");
           panel.classList.add("wrong");
-          ui.status.textContent = "Try again. Hint: " + challengeData.hint;
-          setMascotState("incorrect", "Good try! " + challengeData.hint);
+          ui.status.textContent = "Nice try. Pick the best answer.";
+          setMascotState("incorrect", "Good effort. Try once more.");
         }
       });
-      ui.choices.appendChild(btn);
+      optionWrap.appendChild(btn);
     });
+    ui.choices.appendChild(optionWrap);
   }
 
   function navigateToWorld(world) {
@@ -189,6 +390,17 @@
     }
     localStorage.setItem(LAST_WORLD_KEY, world);
     window.location.href = worldLinks[world];
+  }
+
+  function startDailyChallenge() {
+    daily.started = true;
+    if (daily.completed) {
+      renderChallengeIdle();
+      return;
+    }
+    saveDailyProgress();
+    setMascotState("thinking", "Let's begin today's five-step challenge.");
+    renderChallengeStep();
   }
 
   function wireUi() {
@@ -205,11 +417,13 @@
       const last = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
       navigateToWorld(last);
     });
-    ui.exploreBtn.addEventListener("click", function () {
-      document.getElementById("worlds").scrollIntoView({ behavior: "smooth", block: "start" });
-      setMascotState("greeting", "Pick any unlocked world to continue.");
+    ui.challengeBtn.addEventListener("click", function () {
+      startDailyChallenge();
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    ui.challengeBtn.addEventListener("click", openChallenge);
+    ui.challengeActionBtn.addEventListener("click", function () {
+      completeChallengeStep();
+    });
     if (ui.playNowBtn) {
       ui.playNowBtn.addEventListener("click", function () {
         localStorage.setItem(LAST_WORLD_KEY, "alphabet");
@@ -221,14 +435,21 @@
         localStorage.removeItem(LESSON_KEY);
         localStorage.removeItem(LAST_WORLD_KEY);
         localStorage.removeItem(MUTE_KEY);
+        localStorage.removeItem(CHALLENGE_KEY);
         Object.keys(worldLinks).forEach(function (key) {
           localStorage.removeItem("sanskritParichay.world." + key + ".progress");
         });
         state.xp = 0;
         state.completed = [];
-        save();
+        daily.started = false;
+        daily.stepIndex = 0;
+        daily.completed = false;
+        daily.rewardClaimed = false;
+        saveHomeState();
+        saveDailyProgress();
         panel.classList.remove("correct", "wrong");
         ui.status.textContent = "Progress reset successfully.";
+        renderChallengeIdle();
         setMascotState("greeting", "All set! Let's begin again.");
       });
     }

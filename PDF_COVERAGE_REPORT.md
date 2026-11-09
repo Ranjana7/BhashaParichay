@@ -16,7 +16,7 @@
 | Displayed in Letter Garden (All tab) | 48 |
 | Displayed in Magical Letter Tree | 48 |
 | Items with local recorded audio usable now | 0 |
-| Items with working runtime audio path (speech fallback) | 48 |
+| Items with browser speech fallback | 0 (disabled by design) |
 | Items awaiting Sanskrit review | 48 |
 
 ## Inventory composition
@@ -36,6 +36,19 @@ These were not detected in this 3-page PDF OCR extraction and are intentionally 
 - `क्ष`
 - `त्र`
 - `ज्ञ`
+
+## Page-by-page concept mapping
+
+| PDF page | Concepts mapped into website |
+|---|---|
+| Page 1 | Independent vowels (`अ` to `औ`) plus signs coverage seed (`अं` is represented in inventory and lesson examples). |
+| Page 2 | Consonant groups `क-वर्ग`, `च-वर्ग`, `ट-वर्ग` and corresponding example words wired into Alphabet Forest inventory and detail panel. |
+| Page 3 | Consonant groups `त-वर्ग`, `प-वर्ग`, plus `अन्तःस्थाः` (`य र ल व`) and `ऊष्माणः` (`श ष स ह`) mapped into Letter Garden, Magical Tree, and recognition activities. |
+
+## Coverage status note
+
+- This report maps extracted page concepts to implemented website inventory and activities.
+- It does **not** claim Sanskrit linguistic sign-off; all extracted items remain review-pending.
 
 ## Notes on confidence
 

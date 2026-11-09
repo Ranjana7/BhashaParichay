@@ -13,7 +13,8 @@
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
       <a href="index.html" aria-current="page">Home</a>
-      <a href="alphabet-forest.html">Alphabet Forest</a>
+      <a href="explore-worlds.html">Explore Worlds</a>
+      <a href="my-progress.html">My Progress</a>
       <a href="about.html">About</a>
     </nav>
     <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
@@ -59,7 +60,7 @@
           <div class="hero-actions">
             <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Play!</a>
             <button class="button ghost big-action" id="continueBtn" type="button">Continue Adventure</button>
-            <button class="button secondary big-action" id="exploreBtn" type="button">Explore Learning Worlds</button>
+            <a class="button secondary big-action" id="exploreBtn" href="explore-worlds.html">Explore Learning Worlds</a>
             <button class="button challenge big-action" id="challengeBtn" type="button">Today's Challenge</button>
           </div>
 
@@ -76,6 +77,9 @@
     <section id="worlds" class="panel">
       <h2>Choose a Learning World</h2>
       <p>Follow a full learning journey world by world.</p>
+      <div class="hero-actions">
+        <a class="button ghost" href="explore-worlds.html">Open Explore Worlds</a>
+      </div>
       <div class="world-grid">
         <button class="world-card world-alphabet" data-world="alphabet" type="button">
           <span class="world-icon forest"></span>
@@ -120,11 +124,19 @@
       </div>
     </section>
 
-    <section id="previewPanel" class="panel preview-panel">
+    <section id="previewPanel" class="panel preview-panel" aria-live="polite">
       <h2 id="previewTitle">Today's Challenge</h2>
-      <p id="previewText">Tap “Today's Challenge” to play a daily quick question.</p>
+      <p id="previewText">Tap “Today's Challenge” to play your five-step daily quest.</p>
+      <p id="challengeMeta" class="footer-note">Daily reward can be claimed once per day on this device.</p>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="challengeProgressFill" class="progress-fill"></div>
+      </div>
+      <p id="challengeProgressText" class="footer-note">Progress: 0/5</p>
       <div id="previewChoices" class="choices"></div>
       <p id="previewStatus" class="status"></p>
+      <div class="hero-actions">
+        <button id="challengeActionBtn" class="button ghost" type="button" style="display:none;">Next challenge</button>
+      </div>
     </section>
   </main>
 

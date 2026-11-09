@@ -1,6 +1,6 @@
 window.ALPHABET_LESSON = {
   disclaimer:
-    "Pronunciation currently uses device voice fallback while local reviewed Sanskrit recordings are being prepared.",
+    "Pronunciation uses local clip playback. If a reviewed clip is missing, the page shows “Pronunciation not available yet.”",
   reviewStatus:
     "Needs Sanskrit speaker validation before production release for verified pronunciation and pedagogy quality.",
   letters: [

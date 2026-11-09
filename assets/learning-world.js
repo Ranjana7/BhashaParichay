@@ -4,7 +4,7 @@
   const worlds = window.SANSKRIT_WORLDS || {};
   const world = worlds[worldKey];
   if (!world) {
-    window.location.href = "index.html#worlds";
+    window.location.href = "explore-worlds.html";
     return;
   }
 
@@ -24,6 +24,7 @@
     worldPrevLessonBtn: document.getElementById("worldPrevLessonBtn"),
     worldNextLessonBtn: document.getElementById("worldNextLessonBtn"),
     worldContinueBtn: document.getElementById("worldContinueBtn"),
+    worldBackBtn: document.getElementById("worldBackBtn"),
     worldLessonPath: document.getElementById("worldLessonPath"),
     worldStars: document.getElementById("worldStars"),
     worldDone: document.getElementById("worldDone"),
@@ -469,7 +470,12 @@
     }
     if (ui.worldContinueBtn) {
       ui.worldContinueBtn.addEventListener("click", function () {
-        window.location.href = "index.html#worlds";
+        window.location.href = "my-progress.html";
+      });
+    }
+    if (ui.worldBackBtn) {
+      ui.worldBackBtn.addEventListener("click", function () {
+        window.location.href = "explore-worlds.html";
       });
     }
   }
