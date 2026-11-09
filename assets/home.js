@@ -1,6 +1,8 @@
 (function initHomeAdventure() {
   const HOME_KEY = "sanskritParichay.home.progress";
+  const LESSON_KEY = "sanskritParichay.alphabetForest.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
+  const MUTE_KEY = "sanskritParichay.muted";
   const panel = document.getElementById("previewPanel");
   const title = document.getElementById("previewTitle");
   const text = document.getElementById("previewText");
@@ -13,6 +15,8 @@
   const continueBtn = document.getElementById("continueBtn");
   const exploreBtn = document.getElementById("exploreBtn");
   const challengeBtn = document.getElementById("challengeBtn");
+  const playNowBtn = document.getElementById("playNowBtn");
+  const resetBtn = document.getElementById("resetProgressBtn");
   const worldCards = document.querySelectorAll(".world-card");
 
   if (!panel) return;
@@ -67,15 +71,25 @@
   function load() {
     try {
       const raw = localStorage.getItem(HOME_KEY);
-      if (!raw) return { stars: 0, xp: 0, completed: [] };
+      if (!raw) return { xp: 0, completed: [] };
       const data = JSON.parse(raw);
       return {
-        stars: Number(data.stars || 0),
         xp: Number(data.xp || 0),
         completed: Array.isArray(data.completed) ? data.completed : []
       };
     } catch (error) {
-      return { stars: 0, xp: 0, completed: [] };
+      return { xp: 0, completed: [] };
+    }
+  }
+
+  function readLessonStars() {
+    try {
+      const raw = localStorage.getItem(LESSON_KEY);
+      if (!raw) return 0;
+      const data = JSON.parse(raw);
+      return Number(data.stars || 0);
+    } catch (error) {
+      return 0;
     }
   }
 
@@ -85,7 +99,7 @@
   }
 
   function renderStats() {
-    starsEl.textContent = String(state.stars);
+    starsEl.textContent = String(readLessonStars());
     xpEl.textContent = String(state.xp);
   }
 
@@ -114,7 +128,6 @@
   }
 
   function reward(worldName, statusEl) {
-    state.stars += 1;
     state.xp += 10;
     if (!state.completed.includes(worldName)) {
       state.completed.push(worldName);
@@ -203,6 +216,25 @@
     openPreview("challenge");
     setMascot("state-wave", "Today's Challenge is ready! Give it your best.");
   });
+  if (playNowBtn) {
+    playNowBtn.addEventListener("click", function onPlayClick() {
+      localStorage.setItem(LAST_WORLD_KEY, "alphabet");
+    });
+  }
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function onReset() {
+      localStorage.removeItem(HOME_KEY);
+      localStorage.removeItem(LESSON_KEY);
+      localStorage.removeItem(LAST_WORLD_KEY);
+      localStorage.removeItem(MUTE_KEY);
+      state.xp = 0;
+      state.completed = [];
+      renderStats();
+      setMascot("state-wave", "All set! Progress reset to zero. Let's start fresh.");
+      status.textContent = "Progress reset successfully.";
+      panel.classList.remove("correct", "wrong");
+    });
+  }
 
   renderStats();
 })();

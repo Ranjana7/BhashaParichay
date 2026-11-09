@@ -32,6 +32,12 @@
     if (!voices || voices.length === 0) return null;
 
     const normalized = (preferredLang || "").toLowerCase();
+    const preferredNameMatch = voices.find(function (v) {
+      const name = (v.name || "").toLowerCase();
+      return name.includes("swara") || name.includes("hindi") || name.includes("devanagari");
+    });
+    if (preferredNameMatch) return preferredNameMatch;
+
     const candidates = voices.filter(function (v) {
       return v.lang && v.lang.toLowerCase().startsWith(normalized);
     });
@@ -165,10 +171,12 @@
   }
 
   window.spGetAudioDebug = function spGetAudioDebug() {
+    const best = getBestVoice("sa-IN");
     return {
       muted: window.SP_STATE.muted,
       speechSupported: hasSpeechSupport(),
-      voiceCount: getVoiceCount()
+      voiceCount: getVoiceCount(),
+      bestVoice: best ? ((best.name || "voice") + " (" + (best.lang || "unknown") + ")") : "none"
     };
   };
 

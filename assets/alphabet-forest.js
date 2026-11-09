@@ -112,7 +112,6 @@
       const raw = localStorage.getItem(HOME_KEY);
       const home = raw ? JSON.parse(raw) : { stars: 0, xp: 0, completed: [] };
       home.xp = Number(home.xp || 0) + xp;
-      home.stars = Number(home.stars || 0) + 1;
       localStorage.setItem(HOME_KEY, JSON.stringify(home));
     } catch (error) {
       console.warn("Unable to update home XP.", error);
@@ -442,6 +441,8 @@
       (details.speechSupported ? "yes" : "no") +
       ", voices detected = " +
       details.voiceCount +
+      ", preferred voice = " +
+      details.bestVoice +
       ", muted = " +
       (details.muted ? "yes" : "no") +
       ".";

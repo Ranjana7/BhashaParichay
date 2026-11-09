@@ -37,6 +37,8 @@
       <div class="hero-layout">
         <div id="mascot" class="parrot-mascot state-wave" aria-live="polite">
           <div class="parrot-body">
+            <span class="parrot-tail"></span>
+            <span class="parrot-crest"></span>
             <span class="parrot-wing wing-left"></span>
             <span class="parrot-wing wing-right"></span>
             <span class="parrot-eye eye-left"></span>
@@ -61,6 +63,7 @@
           <div class="hero-actions">
             <div class="star-box">⭐ Stars: <span id="homeStars">0</span></div>
             <div class="star-box">⚡ XP: <span id="homeXp">0</span></div>
+            <button class="button ghost" id="resetProgressBtn" type="button">Reset Progress</button>
           </div>
         </div>
       </div>
@@ -76,7 +79,7 @@
 
     <section id="worlds" class="panel">
       <h2>Choose a Learning World</h2>
-      <p>Every world card is interactive. Start with Alphabet Forest or try a quick preview challenge.</p>
+      <p>Start with Alphabet Forest or try a quick preview challenge.</p>
       <div class="world-grid">
         <button class="world-card world-alphabet" data-world="alphabet" type="button">
           <span class="world-icon">🌲</span>
