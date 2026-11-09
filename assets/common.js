@@ -79,10 +79,9 @@
     if (fallbackEl) fallbackEl.textContent = "";
     window.speechSynthesis.getVoices();
     const bestVoice = getBestVoice(lang || "sa-IN");
-    const shouldUseTransliteration = !bestVoice || !isIndicVoice(bestVoice);
-    const speechText = shouldUseTransliteration ? (transliteration || text) : text;
+    const speechText = text;
     const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.lang = shouldUseTransliteration ? "en-US" : ((bestVoice && bestVoice.lang) || lang || "en-US");
+    utterance.lang = (bestVoice && bestVoice.lang) || "hi-IN";
     utterance.rate = 0.75;
     utterance.pitch = 1;
     if (bestVoice) utterance.voice = bestVoice;
@@ -100,7 +99,7 @@
     window.speechSynthesis.speak(utterance);
     setTimeout(function checkSpeechStarted() {
       if (!started && fallbackEl) {
-        fallbackEl.textContent = "No speech voice started. Check device volume and try Chrome/Edge.";
+        fallbackEl.textContent = "No speech voice started. Please use Test Sound after page load or check browser voice settings.";
       }
     }, 1200);
     return true;
