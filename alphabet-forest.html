@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SanskritParichay | Alphabet Forest</title>
+  <meta name="description" content="Play Alphabet Forest and learn Sanskrit letters through games.">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="alphabet-forest.html" aria-current="page">Alphabet Forest</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel">
+      <h1>Alphabet Forest</h1>
+      <p>Choose letters, listen, play 3 activities, and earn stars.</p>
+      <p class="privacy-note">
+        Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
+      </p>
+      <p id="audioDisclaimer" class="footer-note"></p>
+    </section>
+
+    <section class="forest-layout">
+      <aside class="panel">
+        <h2>Letter Garden</h2>
+        <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
+      </aside>
+
+      <section class="panel">
+        <h2>Letter Details</h2>
+        <div class="letter-detail">
+          <p id="selectedDev" class="big-dev">अ</p>
+          <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
+          <p><strong>Example:</strong> <span id="selectedExample">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <button id="speakLetterBtn" class="button secondary" type="button">🔊 Hear letter</button>
+          <p id="audioFallback" class="fallback" aria-live="polite"></p>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="hero-actions">
+        <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
+        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/3</div>
+      </div>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      <p id="progressText" class="footer-note">Keep going! Finish all activities to complete Alphabet Forest.</p>
+      <div id="doneBanner" class="done-banner" aria-live="polite">Wonderful! You completed Alphabet Forest! ⭐</div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 1: Hear and Pick</h2>
+      <div class="activity">
+        <p>Listen to the sound and pick the matching Devanagari letter.</p>
+        <button id="playHearPrompt" class="button secondary" type="button">▶ Play sound</button>
+        <div id="hearChoices" class="choices" style="margin-top:10px;"></div>
+        <p id="hearStatus" class="status" aria-live="polite"></p>
+        <button id="nextHear" class="button ghost" type="button">Next question</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 2: Picture Match</h2>
+      <div class="activity">
+        <p id="picturePrompt">Match prompt</p>
+        <div id="pictureChoices" class="choices"></div>
+        <p id="pictureStatus" class="status" aria-live="polite"></p>
+        <button id="nextPicture" class="button ghost" type="button">Next match</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 3: Arrange the Word</h2>
+      <div class="activity">
+        <p id="arrangePrompt">Arrange prompt</p>
+        <div id="arrangeTiles" class="tiles"></div>
+        <p><strong>Your answer:</strong> <span id="arrangeAnswer"></span></p>
+        <div class="hero-actions">
+          <button id="checkArrange" class="button secondary" type="button">Check</button>
+          <button id="resetArrange" class="button ghost" type="button">Retry</button>
+          <button id="nextArrange" class="button ghost" type="button">Next word</button>
+        </div>
+        <p id="arrangeStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Review Notes</h2>
+      <ul id="reviewList" class="review-list"></ul>
+    </section>
+  </main>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/lesson-data.js"></script>
+  <script src="assets/alphabet-forest.js"></script>
+</body>
+</html>
