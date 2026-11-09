@@ -277,6 +277,15 @@ p {
   padding: 8px 12px;
 }
 
+.lesson-strip .button {
+  margin-top: 8px;
+}
+
+.lesson-strip .button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .forest-layout {
   display: grid;
   grid-template-columns: minmax(270px, 350px) 1fr;

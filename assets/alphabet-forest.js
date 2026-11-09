@@ -33,6 +33,7 @@
     lessonObjective: document.getElementById("lessonObjective"),
     lessonIndex: document.getElementById("lessonIndex"),
     nextLessonBtn: document.getElementById("nextLessonBtn"),
+    nextLessonTopBtn: document.getElementById("nextLessonTopBtn"),
     letterGrid: document.getElementById("letterGrid"),
     selectedDev: document.getElementById("selectedDev"),
     selectedTran: document.getElementById("selectedTran"),
@@ -305,6 +306,12 @@
       ui.progressText.textContent = isLastLesson
         ? "Legendary! You completed all Alphabet Forest activities."
         : "Great! Lesson complete. Unlock the next lesson.";
+      if (ui.nextLessonTopBtn) {
+        ui.nextLessonTopBtn.disabled = isLastLesson;
+        ui.nextLessonTopBtn.textContent = isLastLesson
+          ? "All Alphabet Forest lessons completed"
+          : "Next Lesson Ready";
+      }
       if (ui.nextLessonBtn) {
         ui.nextLessonBtn.style.display = isLastLesson ? "none" : "inline-block";
       }
@@ -314,6 +321,10 @@
       ui.doneBanner.classList.remove("show");
       ui.completionScreen.classList.remove("show");
       state.lessonCelebrated = false;
+      if (ui.nextLessonTopBtn) {
+        ui.nextLessonTopBtn.disabled = true;
+        ui.nextLessonTopBtn.textContent = "Next Lesson (complete all activities)";
+      }
       if (ui.nextLessonBtn) ui.nextLessonBtn.style.display = "none";
     }
   }
@@ -381,16 +392,23 @@
     const prompt = buildHearPrompt();
     state.currentHearPrompt = prompt;
     ui.hearChoices.innerHTML = "";
-    ui.hearStatus.textContent = "";
+    ui.hearStatus.textContent = state.progress.done.hear ? "Completed for this lesson." : "";
+    ui.nextHear.disabled = state.progress.done.hear;
     prompt.options.forEach(function (option) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice-btn";
       button.textContent = option;
+      if (state.progress.done.hear) {
+        button.disabled = true;
+        if (option === prompt.letter) button.classList.add("correct");
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.hear) return;
         if (option === prompt.letter) {
           button.classList.add("correct");
           handleCorrect("hear", 2, ui.hearStatus, "Great listening! +2 stars", button);
+          ui.nextHear.disabled = true;
         } else {
           button.classList.add("wrong");
           handleWrong(ui.hearStatus, "Nice try.", button, "Listen once more and look for the first sound.");
@@ -404,16 +422,23 @@
     const item = lesson.activities.pictureMatch[state.pictureIndex % lesson.activities.pictureMatch.length];
     ui.picturePrompt.textContent = "Match: " + item.emoji + " " + item.meaning;
     ui.pictureChoices.innerHTML = "";
-    ui.pictureStatus.textContent = "";
+    ui.pictureStatus.textContent = state.progress.done.picture ? "Completed for this lesson." : "";
+    ui.nextPicture.disabled = state.progress.done.picture;
     item.options.forEach(function (option) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice-btn";
       button.textContent = option;
+      if (state.progress.done.picture) {
+        button.disabled = true;
+        if (option === item.answer) button.classList.add("correct");
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.picture) return;
         if (option === item.answer) {
           button.classList.add("correct");
           handleCorrect("picture", 2, ui.pictureStatus, "Correct match! +2 stars", button);
+          ui.nextPicture.disabled = true;
         } else {
           button.classList.add("wrong");
           handleWrong(ui.pictureStatus, "Not yet.", button, "Try the word that best matches the picture.");
@@ -427,15 +452,22 @@
     const item = lesson.activities.arrangeWord[state.arrangeIndex % lesson.activities.arrangeWord.length];
     ui.arrangePrompt.textContent = "Build the Sanskrit word for: " + item.meaning;
     ui.arrangeTiles.innerHTML = "";
-    ui.arrangeStatus.textContent = "";
+    ui.arrangeStatus.textContent = state.progress.done.arrange ? "Completed for this lesson." : "";
     state.arrangeSelected = [];
     ui.arrangeAnswer.textContent = "";
+    ui.checkArrange.disabled = state.progress.done.arrange;
+    ui.resetArrange.disabled = state.progress.done.arrange;
+    ui.nextArrange.disabled = state.progress.done.arrange;
     item.tiles.forEach(function (tile) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "tile-btn";
       button.textContent = tile;
+      if (state.progress.done.arrange) {
+        button.disabled = true;
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.arrange) return;
         if (button.disabled) return;
         button.disabled = true;
         state.arrangeSelected.push(tile);
@@ -448,18 +480,27 @@
   function setupFlashcard() {
     const item = lesson.activities.flashcards[state.flashIndex % lesson.activities.flashcards.length];
     state.flashFront = true;
-    ui.flashStatus.textContent = "";
+    ui.flashStatus.textContent = state.progress.done.flash ? "Completed for this lesson." : "";
     ui.flashChoices.innerHTML = "";
+    ui.flipFlashcard.disabled = state.progress.done.flash;
+    ui.nextFlashcard.disabled = state.progress.done.flash;
     renderFlashcard();
     item.options.forEach(function (option) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice-btn";
       button.textContent = option;
+      if (state.progress.done.flash) {
+        button.disabled = true;
+        if (option === item.meaning) button.classList.add("correct");
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.flash) return;
         if (option === item.meaning) {
           button.classList.add("correct");
           handleCorrect("flash", 2, ui.flashStatus, "Flashcard win! +2 stars", button);
+          ui.flipFlashcard.disabled = true;
+          ui.nextFlashcard.disabled = true;
         } else {
           button.classList.add("wrong");
           handleWrong(ui.flashStatus, "Oops.", button, "Flip card and match transliteration clue.");
@@ -483,16 +524,23 @@
     const target = letters[state.feedIndex % letters.length];
     ui.feedPrompt.textContent = "Feed Mithu fruit for letter: " + target.devanagari;
     ui.feedChoices.innerHTML = "";
-    ui.feedStatus.textContent = "";
+    ui.feedStatus.textContent = state.progress.done.feed ? "Completed for this lesson." : "";
+    ui.nextFeed.disabled = state.progress.done.feed;
     letters.slice(0, 4).sort(function () { return Math.random() - 0.5; }).forEach(function (l) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice-btn";
       button.textContent = "🍎 " + l.devanagari;
+      if (state.progress.done.feed) {
+        button.disabled = true;
+        if (l.devanagari === target.devanagari) button.classList.add("correct");
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.feed) return;
         if (l.devanagari === target.devanagari) {
           button.classList.add("correct");
           handleCorrect("feed", 2, ui.feedStatus, "Mithu loved it! +2 stars", button);
+          ui.nextFeed.disabled = true;
         } else {
           button.classList.add("wrong");
           handleWrong(ui.feedStatus, "Not this fruit.", button, "Look for the exact letter in the prompt.");
@@ -507,7 +555,8 @@
     const target = letters[state.huntIndex % letters.length];
     ui.huntPrompt.textContent = "Find all hidden " + target.devanagari + " letters.";
     ui.huntGrid.innerHTML = "";
-    ui.huntStatus.textContent = "";
+    ui.huntStatus.textContent = state.progress.done.hunt ? "Completed for this lesson." : "";
+    ui.nextHunt.disabled = state.progress.done.hunt;
     const pool = letters.map(function (l) { return l.devanagari; });
     const cells = [];
     for (let i = 0; i < 9; i += 1) {
@@ -521,7 +570,12 @@
       button.type = "button";
       button.className = "tile-btn";
       button.textContent = char;
+      if (state.progress.done.hunt) {
+        button.disabled = true;
+        if (char === target.devanagari) button.classList.add("correct");
+      }
       button.addEventListener("click", function () {
+        if (state.progress.done.hunt) return;
         if (button.disabled) return;
         button.disabled = true;
         if (char === target.devanagari) {
@@ -529,6 +583,7 @@
           found += 1;
           if (found >= 2) {
             handleCorrect("hunt", 2, ui.huntStatus, "You found both hidden letters! +2 stars", ui.huntGrid);
+            ui.nextHunt.disabled = true;
           }
         } else {
           button.classList.add("wrong");
@@ -621,17 +676,20 @@
 
     function updateMode() {
       const panelBottom = hostPanel.getBoundingClientRect().bottom;
-      const shouldFloat = window.scrollY > 220 && panelBottom > 240;
+      const shouldFloat = panelBottom > 240;
       if (shouldFloat) {
         if (!ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
           ui.lessonMascot.classList.add("lesson-mascot-floating");
           placeholder.classList.add("active");
         }
         syncPlaceholderHeight();
+        const sway = Math.sin(window.scrollY / 110) * 6;
+        ui.lessonMascot.style.transform = "translateY(" + sway.toFixed(1) + "px)";
       } else {
         ui.lessonMascot.classList.remove("lesson-mascot-floating");
         placeholder.classList.remove("active");
         placeholder.style.height = "0px";
+        ui.lessonMascot.style.transform = "";
       }
     }
 
@@ -734,6 +792,7 @@
     if (ui.nextAdventureBtn) ui.nextAdventureBtn.addEventListener("click", goNextAdventure);
     if (ui.completionNextBtn) ui.completionNextBtn.addEventListener("click", goNextAdventure);
     if (ui.nextLessonBtn) ui.nextLessonBtn.addEventListener("click", unlockNextLesson);
+    if (ui.nextLessonTopBtn) ui.nextLessonTopBtn.addEventListener("click", unlockNextLesson);
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden) renderAudioDebug();
     });
