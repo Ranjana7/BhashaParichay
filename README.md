@@ -6,6 +6,7 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
 
 - Home page (`index.html`)
 - Alphabet Forest playable lesson (`alphabet-forest.html`) with progressive lesson steps
+- Multi-world lesson engine (`learning-world.html` + `assets/learning-world.js`)
 - About page (`about.html`)
 - Local progress saving with `localStorage` (device/browser only)
 - No account, no analytics, no ads, no trackers
@@ -17,6 +18,13 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
   - Flashcard Flip
   - Feed Mithu
   - Hidden Letter Hunt
+- Additional full worlds with lesson progression:
+  - Word Wonderland
+  - Animal Jungle
+  - Number Galaxy
+  - Colour Kingdom
+  - Sentence Castle
+  - Story Island
 
 ## Run locally
 
@@ -58,6 +66,7 @@ git push -u origin main
 - If a local clip is missing, browser speech synthesis is used as fallback.
 - Audio is computer-generated or test-recorded and not human-verified yet.
 - Lesson mappings and pronunciation should be reviewed by a Sanskrit educator before wide release.
+- Curriculum progression is informed by the user's authorized Sanskrit From Home course structure, while all game content here is original.
 
 ## Assets and licenses
 

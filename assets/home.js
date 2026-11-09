@@ -9,6 +9,15 @@
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories"];
+  const worldLinks = {
+    alphabet: "alphabet-forest.html",
+    words: "learning-world.html?world=words",
+    animals: "learning-world.html?world=animals",
+    numbers: "learning-world.html?world=numbers",
+    colours: "learning-world.html?world=colours",
+    sentences: "learning-world.html?world=sentences",
+    stories: "learning-world.html?world=stories"
+  };
 
   const ui = {
     title: document.getElementById("previewTitle"),
@@ -24,25 +33,21 @@
     challengeBtn: document.getElementById("challengeBtn"),
     playNowBtn: document.getElementById("playNowBtn"),
     resetBtn: document.getElementById("resetProgressBtn"),
-    worldCards: document.querySelectorAll(".world-card"),
-    pathNodes: document.querySelectorAll(".path-node")
+    worldCards: document.querySelectorAll(".world-card")
   };
 
-  const worldData = {
-    animals: { title: "Animal Jungle Preview", prompt: "Which Sanskrit word means elephant?", options: ["गजः", "नदी", "माता"], answer: "गजः", hint: "Elephant starts with ग (ga)." },
-    words: { title: "Word Wonderland Preview", prompt: "Which word means lotus?", options: ["कमलम्", "रथः", "अग्निः"], answer: "कमलम्", hint: "Kamal is lotus." },
-    numbers: { title: "Number Galaxy Preview", prompt: "Pick Sanskrit for one:", options: ["एकः", "द्वौ", "त्रयः"], answer: "एकः", hint: "Think 'eka' for one." },
-    colours: { title: "Colour Kingdom Preview", prompt: "Pick Sanskrit for blue:", options: ["नीलः", "पीतः", "रक्तः"], answer: "नीलः", hint: "Neel = blue." },
-    sentences: { title: "Sentence Castle Preview", prompt: "Choose the Sanskrit greeting:", options: ["नमस्ते", "गजः", "आकाशः"], answer: "नमस्ते", hint: "It starts with नम..." },
-    stories: { title: "Story Island Preview", prompt: "Pick a gentle story starter:", options: ["एकदा वनमध्ये...", "गजः जलम् पिबति।", "नदी नीलाऽस्ति।"], answer: "एकदा वनमध्ये...", hint: "Many stories begin with 'Once upon a time'." },
-    challenge: { title: "Today's Challenge", prompt: "What is Sanskrit for moon?", options: ["चन्द्रः", "कमलम्", "योगः"], answer: "चन्द्रः", hint: "Chandra means moon." }
+  const challengeData = {
+    title: "Today's Challenge",
+    prompt: "Pick Sanskrit for moon.",
+    options: ["चन्द्रः", "गृहम्", "फलम्"],
+    answer: "चन्द्रः",
+    hint: "Think: Chandra means moon."
   };
 
   const state = load();
   renderStats();
-  renderPath();
   wireUi();
-  setMascotState("greeting", "Namaste! I am Mitthu. Pick a world and I will guide you.");
+  setMascotState("greeting", "Namaste! Choose a world and continue your Sanskrit adventure.");
 
   function load() {
     try {
@@ -61,7 +66,6 @@
   function save() {
     localStorage.setItem(HOME_KEY, JSON.stringify(state));
     renderStats();
-    renderPath();
   }
 
   function lessonStars() {
@@ -94,34 +98,9 @@
     return state.completed.includes(prev);
   }
 
-  function isWorldCompleted(world) {
-    if (world === "alphabet") return alphabetCompleted();
-    return state.completed.includes(world);
-  }
-
   function renderStats() {
     ui.homeStars.textContent = String(lessonStars());
     ui.homeXp.textContent = String(state.xp);
-  }
-
-  function renderPath() {
-    ui.pathNodes.forEach(function (node) {
-      const world = node.getAttribute("data-world");
-      const stateEl = node.querySelector(".path-state");
-      const unlocked = isWorldUnlocked(world);
-      const completed = isWorldCompleted(world);
-      node.classList.remove("locked", "unlocked", "completed");
-      if (!unlocked) {
-        node.classList.add("locked");
-        stateEl.textContent = "Locked";
-      } else if (completed) {
-        node.classList.add("completed");
-        stateEl.textContent = "Completed";
-      } else {
-        node.classList.add("unlocked");
-        stateEl.textContent = "Unlocked";
-      }
-    });
   }
 
   function setMascotState(kind, speech) {
@@ -165,94 +144,34 @@
     });
   }
 
-  function animateStarsToXp() {
-    const target = ui.homeXp;
-    const targetBox = target.getBoundingClientRect();
-    const startX = window.innerWidth * 0.55;
-    const startY = window.innerHeight * 0.64;
-    for (let i = 0; i < 6; i += 1) {
-      const star = document.createElement("span");
-      star.textContent = "⭐";
-      star.style.position = "fixed";
-      star.style.left = startX + i * 8 + "px";
-      star.style.top = startY + i * 4 + "px";
-      star.style.zIndex = "50";
-      star.style.pointerEvents = "none";
-      document.body.appendChild(star);
-      animate(
-        star,
-        {
-          transform: [
-            "translate(0px,0px) scale(1)",
-            "translate(" + (targetBox.left - startX) + "px," + (targetBox.top - startY) + "px) scale(0.4)"
-          ],
-          opacity: [1, 0.15]
-        },
-        { duration: 0.7 + i * 0.05, easing: "ease-out" }
-      );
-      setTimeout(function () {
-        star.remove();
-      }, 900 + i * 60);
-    }
-  }
-
-  function openPreview(world) {
-    if (!isWorldUnlocked(world)) {
-      ui.status.textContent = "Complete the previous world to unlock this path.";
-      setMascotState("incorrect", "Let's finish the previous world first.");
-      return;
-    }
-
-    const data = worldData[world];
-    if (!data) return;
-    ui.title.textContent = data.title;
-    ui.text.textContent = data.prompt;
+  function openChallenge() {
+    ui.title.textContent = challengeData.title;
+    ui.text.textContent = challengeData.prompt;
     ui.choices.innerHTML = "";
     ui.status.textContent = "";
     panel.classList.remove("correct", "wrong");
-    localStorage.setItem(LAST_WORLD_KEY, world);
-    setMascotState("thinking", "Let's solve this together.");
+    setMascotState("thinking", "Let's solve today's challenge.");
 
-    data.options.forEach(function (option) {
+    challengeData.options.forEach(function (option) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
       btn.textContent = option;
       btn.addEventListener("click", function () {
-        if (option === data.answer) {
+        if (option === challengeData.answer) {
           btn.classList.add("correct");
           state.xp += 10;
-          if (!state.completed.includes(world)) {
-            state.completed.push(world);
-            state.xp += 15;
-            const idx = pathOrder.indexOf(world);
-            const next = pathOrder[idx + 1];
-            if (next) {
-              const nextNode = document.querySelector('.path-node[data-world="' + next + '"]');
-              if (nextNode && !nextNode.classList.contains("completed")) {
-                nextNode.classList.add("unlock-pulse");
-                setTimeout(function () {
-                  nextNode.classList.remove("unlock-pulse");
-                }, 1000);
-              }
-            }
-          }
           save();
           panel.classList.add("correct");
           ui.status.textContent = "Correct! +10 XP";
           setMascotState("correct", "Brilliant! You got it!");
           launchConfettiBurst();
-          animateStarsToXp();
           if (window.spApplause) window.spApplause();
-          if (state.xp >= 60) {
-            setMascotState("dance", "Amazing! Mithu dance time!");
-          }
         } else {
           btn.classList.add("wrong");
           panel.classList.add("wrong");
-          ui.status.textContent = "Try again. Hint: " + data.hint;
-          setMascotState("incorrect", "Good try! " + data.hint);
-          animate(btn, { transform: ["translateX(0px)", "translateX(-5px)", "translateX(5px)", "translateX(0px)"] }, { duration: 0.4, easing: "ease-in-out" });
+          ui.status.textContent = "Try again. Hint: " + challengeData.hint;
+          setMascotState("incorrect", "Good try! " + challengeData.hint);
         }
       });
       ui.choices.appendChild(btn);
@@ -260,26 +179,27 @@
   }
 
   function navigateToWorld(world) {
-    if (world === "alphabet") {
-      localStorage.setItem(LAST_WORLD_KEY, "alphabet");
-      window.location.href = "alphabet-forest.html";
+    if (!isWorldUnlocked(world)) {
+      ui.status.textContent = "Complete the previous world first to unlock this one.";
+      panel.classList.add("wrong");
+      setMascotState("incorrect", "Let's complete the previous world first.");
+      document.getElementById("previewPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    document.getElementById("previewPanel").scrollIntoView({ behavior: "smooth", block: "start" });
-    openPreview(world);
+    localStorage.setItem(LAST_WORLD_KEY, world);
+    window.location.href = worldLinks[world];
   }
 
   function wireUi() {
     ui.worldCards.forEach(function (card) {
+      const world = card.getAttribute("data-world");
+      const unlocked = isWorldUnlocked(world);
+      if (!unlocked) card.classList.add("locked");
       card.addEventListener("click", function () {
-        navigateToWorld(card.getAttribute("data-world"));
+        navigateToWorld(world);
       });
     });
-    ui.pathNodes.forEach(function (node) {
-      node.addEventListener("click", function () {
-        navigateToWorld(node.getAttribute("data-world"));
-      });
-    });
+
     ui.continueBtn.addEventListener("click", function () {
       const last = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
       navigateToWorld(last);
@@ -288,9 +208,7 @@
       document.getElementById("worlds").scrollIntoView({ behavior: "smooth", block: "start" });
       setMascotState("greeting", "Pick any unlocked world to continue.");
     });
-    ui.challengeBtn.addEventListener("click", function () {
-      openPreview("challenge");
-    });
+    ui.challengeBtn.addEventListener("click", openChallenge);
     if (ui.playNowBtn) {
       ui.playNowBtn.addEventListener("click", function () {
         localStorage.setItem(LAST_WORLD_KEY, "alphabet");
@@ -302,6 +220,9 @@
         localStorage.removeItem(LESSON_KEY);
         localStorage.removeItem(LAST_WORLD_KEY);
         localStorage.removeItem(MUTE_KEY);
+        Object.keys(worldLinks).forEach(function (key) {
+          localStorage.removeItem("sanskritParichay.world." + key + ".progress");
+        });
         state.xp = 0;
         state.completed = [];
         save();
