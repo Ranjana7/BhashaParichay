@@ -603,6 +603,46 @@
     renderProgress();
   }
 
+  function setupMascotFollowOnScroll() {
+    if (!ui.lessonMascot) return;
+    if (window.matchMedia("(max-width: 860px)").matches) return;
+
+    const hostPanel = ui.lessonMascot.closest(".panel");
+    if (!hostPanel) return;
+    const placeholder = document.createElement("div");
+    placeholder.className = "lesson-mascot-placeholder";
+    ui.lessonMascot.insertAdjacentElement("afterend", placeholder);
+
+    function syncPlaceholderHeight() {
+      if (ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
+        placeholder.style.height = ui.lessonMascot.offsetHeight + 10 + "px";
+      }
+    }
+
+    function updateMode() {
+      const panelBottom = hostPanel.getBoundingClientRect().bottom;
+      const shouldFloat = window.scrollY > 220 && panelBottom > 240;
+      if (shouldFloat) {
+        if (!ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
+          ui.lessonMascot.classList.add("lesson-mascot-floating");
+          placeholder.classList.add("active");
+        }
+        syncPlaceholderHeight();
+      } else {
+        ui.lessonMascot.classList.remove("lesson-mascot-floating");
+        placeholder.classList.remove("active");
+        placeholder.style.height = "0px";
+      }
+    }
+
+    window.addEventListener("scroll", updateMode, { passive: true });
+    window.addEventListener("resize", function () {
+      syncPlaceholderHeight();
+      updateMode();
+    });
+    updateMode();
+  }
+
   function goNextAdventure() {
     window.location.href = "index.html#worlds";
   }
@@ -623,6 +663,7 @@
     setupFlashcard();
     setupFeedMithu();
     setupHiddenHunt();
+    setupMascotFollowOnScroll();
     setMascotState("idle");
     setMascotSpeech("Namaste! I am Mitthu. Let's learn one lesson at a time.");
 
