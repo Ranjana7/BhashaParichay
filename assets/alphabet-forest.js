@@ -39,7 +39,6 @@
     selectedTran: document.getElementById("selectedTran"),
     selectedExample: document.getElementById("selectedExample"),
     selectedMeaning: document.getElementById("selectedMeaning"),
-    speakLetterBtn: document.getElementById("speakLetterBtn"),
     audioFallback: document.getElementById("audioFallback"),
     starCount: document.getElementById("starCount"),
     doneCount: document.getElementById("doneCount"),
@@ -372,8 +371,9 @@
       button.addEventListener("click", function () {
         renderLetterDetail(letter);
         renderLetterGrid();
+        speakSelectedLetter();
         setMascotState("thinking");
-        setMascotSpeech("Great choice. Tap hear letter for pronunciation.");
+        setMascotSpeech("Great choice. Listen to the pronunciation.");
       });
       ui.letterGrid.appendChild(button);
     });
@@ -725,7 +725,6 @@
     setMascotState("idle");
     setMascotSpeech("Namaste! I am Mitthu. Let's learn one lesson at a time.");
 
-    ui.speakLetterBtn.addEventListener("click", speakSelectedLetter);
     ui.testSoundBtn.addEventListener("click", runAudioTest);
     ui.playHearPrompt.addEventListener("click", function () {
       playPromptLetter(state.currentHearPrompt.letter);
