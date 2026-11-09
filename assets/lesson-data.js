@@ -1,8 +1,8 @@
 window.ALPHABET_LESSON = {
   disclaimer:
-    "Pronunciation audio in this version is computer-generated and not yet verified by a human Sanskrit speaker.",
+    "Pronunciation uses bundled Sanskrit voice samples for key checks and device voice fallback for the full letter set.",
   reviewStatus:
-    "Needs Sanskrit speaker review before publication for exact pronunciation quality and age-level pedagogy checks.",
+    "Needs Sanskrit speaker validation before production release for verified pronunciation and pedagogy quality.",
   letters: [
     { devanagari: "अ", transliteration: "a", example: "अग्निः", meaning: "fire" },
     { devanagari: "आ", transliteration: "aa", example: "आकाशः", meaning: "sky" },

@@ -24,14 +24,21 @@
       <h1>Alphabet Forest</h1>
       <p>Choose letters, listen, play games, and earn stars.</p>
       <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
-        <div class="parrot-body">
-          <span class="parrot-wing wing-left"></span>
-          <span class="parrot-wing wing-right"></span>
-          <span class="parrot-eye eye-left"></span>
-          <span class="parrot-eye eye-right"></span>
-          <span class="parrot-beak"></span>
-          <span class="parrot-feet"></span>
-        </div>
+        <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+          <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+          <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+          <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+          <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+        </svg>
         <p id="lessonMascotSpeech" class="mascot-speech">Namaste! I am Mitthu. I will celebrate every correct answer with you.</p>
       </div>
       <p class="privacy-note">
@@ -77,6 +84,14 @@
         <span id="earnedStars"></span>
         <button id="nextAdventureBtn" class="button primary" type="button">Next Adventure</button>
       </div>
+    </section>
+
+    <section id="completionScreen" class="panel completion-screen" aria-live="polite">
+      <h2>Adventure Complete!</h2>
+      <p>You finished Alphabet Forest with joyful learning.</p>
+      <p><strong>Stars earned:</strong> <span id="completionStars">0</span></p>
+      <div id="completionLottie" class="completion-lottie"></div>
+      <button id="completionNextBtn" class="button primary" type="button">Go to Next Adventure</button>
     </section>
 
     <section class="panel">
@@ -136,6 +151,9 @@
   <div id="applauseBurst" class="applause-burst" aria-hidden="true"></div>
   <div id="lessonConfetti" class="confetti-zone" aria-hidden="true"></div>
 
+  <script src="assets/vendor/motion.min.js"></script>
+  <script src="assets/vendor/lottie.min.js"></script>
+  <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/lesson-data.js"></script>
   <script src="assets/alphabet-forest.js"></script>

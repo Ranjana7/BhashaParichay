@@ -56,4 +56,9 @@ git push -u origin main
 - Code/CSS/illustrations in this repository: Original work for this project.
 - Fonts/images/audio: No paid or third-party bundled assets required.
 - Browser Speech Synthesis API: built-in browser feature (no subscription).
-
+- Animation libraries stored locally in `assets/vendor/`:
+  - Motion (`motion.min.js`)
+  - canvas-confetti (`canvas-confetti.min.js`)
+  - lottie-web (`lottie.min.js`)
+- Lottie JSON animation assets stored locally in `assets/lottie/`.
+- Reference pronunciation clips in `assets/audio/reference/` were copied from the local `Stories for Kids/tts-availability-tests` folder.

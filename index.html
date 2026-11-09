@@ -25,25 +25,30 @@
         <span class="cloud cloud-a"></span>
         <span class="cloud cloud-b"></span>
         <span class="rainbow"></span>
-        <span class="butterfly b-one">🦋</span>
-        <span class="butterfly b-two">🦋</span>
-        <span class="butterfly b-three">🦋</span>
-        <span class="spark s1">अ</span>
-        <span class="spark s2">आ</span>
-        <span class="spark s3">क</span>
-        <span class="spark s4">म</span>
+        <div id="lottieButterflyOne" class="lottie-butterfly b-one"></div>
+        <div id="lottieButterflyTwo" class="lottie-butterfly b-two"></div>
+        <div id="lottieButterflyThree" class="lottie-butterfly b-three"></div>
+        <div id="lottieSparkleOne" class="lottie-spark s1"></div>
+        <div id="lottieSparkleTwo" class="lottie-spark s2"></div>
       </div>
 
       <div class="hero-layout">
         <div id="mascot" class="parrot-mascot state-wave" aria-live="polite">
-          <div class="parrot-body">
-            <span class="parrot-wing wing-left"></span>
-            <span class="parrot-wing wing-right"></span>
-            <span class="parrot-eye eye-left"></span>
-            <span class="parrot-eye eye-right"></span>
-            <span class="parrot-beak"></span>
-            <span class="parrot-feet"></span>
-          </div>
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+          </svg>
           <p id="mascotSpeech" class="mascot-speech">Namaste! I am Mitthu the Parrot. Let's begin your first Sanskrit adventure!</p>
         </div>
 
@@ -67,11 +72,11 @@
       </div>
 
       <div class="island-strip" aria-hidden="true">
-        <span class="island-tree">🌳</span>
-        <span class="island-flower">🌸</span>
-        <span class="island-animal">🦚</span>
-        <span class="island-flower">🌼</span>
-        <span class="island-tree">🌴</span>
+        <span class="island-tree"></span>
+        <span class="island-flower"></span>
+        <span class="island-animal"></span>
+        <span class="island-flower"></span>
+        <span class="island-tree"></span>
       </div>
     </section>
 
@@ -80,37 +85,37 @@
       <p>Start with Alphabet Forest or try a quick preview challenge.</p>
       <div class="world-grid">
         <button class="world-card world-alphabet" data-world="alphabet" type="button">
-          <span class="world-icon">🌲</span>
+          <span class="world-icon forest"></span>
           <span class="world-title">Alphabet Forest</span>
           <span class="world-text">Playable full lesson</span>
         </button>
         <button class="world-card world-jungle" data-world="animals" type="button">
-          <span class="world-icon">🦁</span>
+          <span class="world-icon jungle"></span>
           <span class="world-title">Animal Jungle</span>
           <span class="world-text">Preview challenge</span>
         </button>
         <button class="world-card world-galaxy" data-world="numbers" type="button">
-          <span class="world-icon">🚀</span>
+          <span class="world-icon galaxy"></span>
           <span class="world-title">Number Galaxy</span>
           <span class="world-text">Preview challenge</span>
         </button>
         <button class="world-card world-colour" data-world="colours" type="button">
-          <span class="world-icon">🌈</span>
+          <span class="world-icon colour"></span>
           <span class="world-title">Colour Kingdom</span>
           <span class="world-text">Preview challenge</span>
         </button>
         <button class="world-card world-word" data-world="words" type="button">
-          <span class="world-icon">📚</span>
+          <span class="world-icon word"></span>
           <span class="world-title">Word Wonderland</span>
           <span class="world-text">Preview challenge</span>
         </button>
         <button class="world-card world-sentence" data-world="sentences" type="button">
-          <span class="world-icon">🏰</span>
+          <span class="world-icon sentence"></span>
           <span class="world-title">Sentence Castle</span>
           <span class="world-text">Preview challenge</span>
         </button>
         <button class="world-card world-story" data-world="stories" type="button">
-          <span class="world-icon">🏝️</span>
+          <span class="world-icon story"></span>
           <span class="world-title">Story Island</span>
           <span class="world-text">Preview challenge</span>
         </button>
@@ -125,6 +130,10 @@
     </section>
   </main>
 
+  <div id="homeCelebrationLottie" class="home-celebration-lottie" aria-hidden="true"></div>
+  <script src="assets/vendor/motion.min.js"></script>
+  <script src="assets/vendor/lottie.min.js"></script>
+  <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/home.js"></script>
 </body>
