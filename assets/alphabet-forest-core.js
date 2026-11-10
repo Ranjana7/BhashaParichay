@@ -61,6 +61,7 @@
     return {
       currentIndex: 0,
       completedItems: [],
+      rewardedItems: [],
       answers: {},
       attempts: {},
       order: Array.from({ length: letterCount }, function mapValue(_, index) { return index; }),
@@ -88,6 +89,7 @@
     const safe = {
       currentIndex: clampIndex(activityState.currentIndex, letterCount - 1),
       completedItems: uniqueIndexList(activityState.completedItems, letterCount - 1),
+      rewardedItems: uniqueIndexList(activityState.rewardedItems || activityState.completedItems, letterCount - 1),
       answers: activityState.answers && typeof activityState.answers === "object" ? activityState.answers : {},
       attempts: activityState.attempts && typeof activityState.attempts === "object" ? activityState.attempts : {},
       order: Array.isArray(activityState.order) && activityState.order.length === letterCount
@@ -168,7 +170,11 @@
     if (!activity.completedItems.includes(index)) {
       activity.completedItems.push(index);
       activity.completedItems.sort(function sortAsc(a, b) { return a - b; });
-      state.xp += rewardPoints;
+    }
+    if (!activity.rewardedItems.includes(index)) {
+      activity.rewardedItems.push(index);
+      activity.rewardedItems.sort(function sortAsc(a, b) { return a - b; });
+      state.xp += Math.max(0, Number.isFinite(rewardPoints) ? rewardPoints : 0);
     }
     return true;
   }
@@ -196,7 +202,9 @@
     const current = state.activities[activityId];
     if (!current || !current.isComplete) return false;
     const letterCount = current.order.length;
+    const rewardedItems = Array.isArray(current.rewardedItems) ? current.rewardedItems.slice() : [];
     state.activities[activityId] = createActivityState(letterCount);
+    state.activities[activityId].rewardedItems = rewardedItems;
     state.worldCompleted = false;
     return true;
   }
