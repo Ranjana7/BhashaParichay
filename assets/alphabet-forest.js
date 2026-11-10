@@ -6,6 +6,8 @@
   const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const TREE_PROGRESS_KEY = "sanskritParichay.alphabetForest.tree.progress";
+  const GARDEN_LEARNED_KEY = "sanskritParichay.alphabetForest.garden.learned";
+  const MUTE_KEY = "sanskritParichay.muted";
   const TOTAL_ACTIVITIES = 7;
   const LESSONS = [
     { id: 0, name: "Sprout Lesson", objective: "Learn first 5 vowels", selector: { type: "vowel-range", start: 0, count: 5 } },
@@ -111,7 +113,13 @@
     selectedExample: document.getElementById("selectedExample"),
     selectedExampleArt: document.getElementById("selectedExampleArt"),
     selectedMeaning: document.getElementById("selectedMeaning"),
+    selectedPosition: document.getElementById("selectedPosition"),
+    selectedLearned: document.getElementById("selectedLearned"),
     audioFallback: document.getElementById("audioFallback"),
+    prevLetterBtn: document.getElementById("prevLetterBtn"),
+    nextLetterBtn: document.getElementById("nextLetterBtn"),
+    panelMuteBtn: document.getElementById("panelMuteBtn"),
+    muteToggle: document.getElementById("muteToggle"),
     starCount: document.getElementById("starCount"),
     doneCount: document.getElementById("doneCount"),
     streakCount: document.getElementById("streakCount"),
@@ -172,7 +180,7 @@
     huntIndex: 0,
     traceStrokeCount: 0,
     traceDrawing: false,
-    letterCategory: "all",
+    letterCategory: "vowels",
     arrangeSelected: [],
     flashFront: true,
     lessonCelebrated: false,
@@ -182,7 +190,8 @@
     treeCompletionAwarded: false,
     treeLetterPositions: new Map(),
     treeMithuHome: null,
-    treeMithuPos: null
+    treeMithuPos: null,
+    learnedLetters: new Set()
   };
 
   let completionAnim = null;
@@ -276,11 +285,64 @@
   }
 
   function visibleGardenLetters() {
-    const letters = canonicalLetters.slice();
-    if (state.letterCategory === "all") return letters;
-    return letters.filter(function (l) {
-      return letterCategory(l) === state.letterCategory;
+    if (state.letterCategory === "practice") {
+      const lessonSet = new Set(lessonLetters().map(function (item) { return item.id; }));
+      return canonicalLetters.filter(function (l) {
+        return lessonSet.has(l.id);
+      });
+    }
+    return canonicalLetters.filter(function (l) {
+      const category = letterCategory(l);
+      if (state.letterCategory === "vowels") return category === "vowels" || category === "signs";
+      if (state.letterCategory === "consonants") return category === "consonants";
+      return false;
     });
+  }
+
+  function loadLearnedLetters() {
+    try {
+      const raw = localStorage.getItem(GARDEN_LEARNED_KEY);
+      if (!raw) return new Set();
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed.ids)) return new Set();
+      return new Set(parsed.ids.filter(function (id) { return inventoryById.has(id); }));
+    } catch (_error) {
+      return new Set();
+    }
+  }
+
+  function saveLearnedLetters() {
+    localStorage.setItem(
+      GARDEN_LEARNED_KEY,
+      JSON.stringify({ ids: Array.from(state.learnedLetters) })
+    );
+  }
+
+  function markLetterLearned(letter) {
+    if (!letter || !letter.id) return;
+    if (state.learnedLetters.has(letter.id)) return;
+    state.learnedLetters.add(letter.id);
+    saveLearnedLetters();
+  }
+
+  function visibleLetterIndex(letter) {
+    const letters = visibleGardenLetters();
+    const index = letters.findIndex(function (item) {
+      return item.id === (letter && letter.id);
+    });
+    return { letters: letters, index: index };
+  }
+
+  function moveSelectedLetter(offset) {
+    const context = visibleLetterIndex(state.selectedLetter);
+    if (!context.letters.length) return;
+    const current = context.index >= 0 ? context.index : 0;
+    const targetIndex = (current + offset + context.letters.length) % context.letters.length;
+    renderLetterDetail(context.letters[targetIndex]);
+    renderLetterGrid();
+    setMascotState("pointing");
+    setMascotSpeech("Great choice. Listen to the pronunciation.");
+    speakSelectedLetter();
   }
 
   function cloneSafeStart() {
@@ -613,6 +675,25 @@
     renderAudioDebug();
   }
 
+  function renderMuteButtons() {
+    const muted = Boolean(window.SP_STATE && window.SP_STATE.muted);
+    if (ui.panelMuteBtn) {
+      ui.panelMuteBtn.textContent = muted ? "🔊 Unmute" : "🔇 Mute";
+      ui.panelMuteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+    }
+    if (ui.muteToggle) {
+      ui.muteToggle.textContent = muted ? "🔇 Sound: Off" : "🔊 Sound: On";
+      ui.muteToggle.setAttribute("aria-pressed", muted ? "true" : "false");
+    }
+  }
+
+  function toggleMuteFromPanel() {
+    if (!window.SP_STATE) window.SP_STATE = { muted: false };
+    window.SP_STATE.muted = !window.SP_STATE.muted;
+    localStorage.setItem(MUTE_KEY, String(window.SP_STATE.muted));
+    renderMuteButtons();
+  }
+
   function audioKeyForText(text) {
     if (!text) return null;
     const letter = canonicalLetters.find(function (entry) {
@@ -726,6 +807,7 @@
   function renderLetterDetail(letter) {
     if (!letter) return;
     state.selectedLetter = letter;
+    markLetterLearned(letter);
     ui.selectedDev.textContent = letter.devanagari;
     ui.selectedTran.textContent = letter.transliteration;
     ui.selectedExample.textContent = letter.example || letter.devanagari;
@@ -733,6 +815,19 @@
     if (ui.selectedExampleArt) ui.selectedExampleArt.textContent = LETTER_ART[letter.devanagari] || "🌼";
     ui.selectedDev.setAttribute("data-sanskrit", letter.devanagari);
     ui.selectedExample.setAttribute("data-sanskrit", letter.example || letter.devanagari);
+    const context = visibleLetterIndex(letter);
+    if (ui.selectedPosition) {
+      const pos = context.index >= 0 ? context.index + 1 : 1;
+      const total = context.letters.length || 1;
+      ui.selectedPosition.textContent = "Letter " + pos + " of " + total;
+    }
+    if (ui.selectedLearned) {
+      const learned = state.learnedLetters.has(letter.id);
+      ui.selectedLearned.textContent = learned ? "⭐ Learned" : "☆ Not learned yet";
+      ui.selectedLearned.classList.toggle("learned", learned);
+    }
+    if (ui.prevLetterBtn) ui.prevLetterBtn.disabled = !context.letters.length;
+    if (ui.nextLetterBtn) ui.nextLetterBtn.disabled = !context.letters.length;
     ui.audioFallback.textContent = "";
   }
 
@@ -743,49 +838,35 @@
     }
     ui.letterGrid.innerHTML = "";
     if (ui.gardenCoverage) {
-      ui.gardenCoverage.textContent = "Showing " + letters.length + " of " + canonicalLetters.length + " PDF inventory items";
+      const label =
+        state.letterCategory === "practice"
+          ? "Practice letters from current lesson"
+          : "Showing " + letters.length + " of " + canonicalLetters.length + " PDF letters";
+      ui.gardenCoverage.textContent = label;
     }
-
-    const grouped = {};
     letters.forEach(function (letter) {
-      const key = letter.category === "consonant" ? letter.subgroup : (letter.varga === "vowel-signs" ? "vowel-signs" : "vowels");
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(letter);
-    });
-
-    GROUP_ORDER.forEach(function (groupKey) {
-      if (!grouped[groupKey] || grouped[groupKey].length === 0) return;
-      const section = document.createElement("section");
-      section.className = "letter-group";
-      const heading = document.createElement("h3");
-      heading.className = "letter-group-title";
-      heading.textContent = GROUP_LABELS[groupKey] || groupKey;
-      section.appendChild(heading);
-      const groupGrid = document.createElement("div");
-      groupGrid.className = "letter-group-grid";
-      grouped[groupKey].forEach(function (letter) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "letter-btn";
-        button.setAttribute("data-letter-id", letter.id);
-        button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
-        if (letter.devanagari === state.selectedLetter.devanagari) button.classList.add("active");
-        button.innerHTML =
-          '<span class="flower-core" aria-hidden="true"></span>' +
-          '<span class="dev">' + letter.devanagari + "</span>" +
-          '<span class="tran">' + letter.transliteration + "</span>";
-        button.addEventListener("click", function () {
-          animate(button, { transform: ["scale(1)", "scale(1.08)", "scale(1)"] }, { duration: 0.32, easing: "ease-out" });
-          renderLetterDetail(letter);
-          renderLetterGrid();
-          setMascotState("pointing");
-          speakSelectedLetter();
-          setMascotSpeech("Great choice. Listen to the pronunciation.");
-        });
-        groupGrid.appendChild(button);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "letter-btn";
+      button.setAttribute("data-letter-id", letter.id);
+      button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
+      if (letter.devanagari === state.selectedLetter.devanagari) button.classList.add("active");
+      if (state.learnedLetters.has(letter.id)) button.classList.add("learned");
+      button.innerHTML =
+        '<span class="tile-star" aria-hidden="true">' + (state.learnedLetters.has(letter.id) ? "⭐" : "☆") + "</span>" +
+        '<span class="dev">' + letter.devanagari + "</span>" +
+        '<span class="tran">' + letter.transliteration + "</span>";
+      button.addEventListener("click", function () {
+        if (!prefersReducedMotion) {
+          animate(button, { transform: ["scale(1)", "scale(1.06)", "scale(1)"] }, { duration: 0.24, easing: "ease-out" });
+        }
+        renderLetterDetail(letter);
+        renderLetterGrid();
+        setMascotState("pointing");
+        speakSelectedLetter();
+        setMascotSpeech("Great choice. Listen to the pronunciation.");
       });
-      section.appendChild(groupGrid);
-      ui.letterGrid.appendChild(section);
+      ui.letterGrid.appendChild(button);
     });
     if (!state.selectedLetter && letters.length) {
       state.selectedLetter = letters[0];
@@ -1459,8 +1540,14 @@
     if (gardenButtons.length !== expectedGarden) {
       issues.push("Garden rendered count " + gardenButtons.length + " does not match expected " + expectedGarden + ".");
     }
-    if (state.letterCategory === "all" && gardenButtons.length !== canonicalLetters.length) {
-      issues.push("Garden all-items view does not match canonical inventory total.");
+    if (state.letterCategory === "vowels") {
+      const expectedVowelView = canonicalLetters.filter(function (item) {
+        const c = letterCategory(item);
+        return c === "vowels" || c === "signs";
+      }).length;
+      if (gardenButtons.length !== expectedVowelView) {
+        issues.push("Garden vowel view does not match expected vowel/sign total.");
+      }
     }
     gardenButtons.forEach(function (btn) {
       const id = btn.getAttribute("data-letter-id");
@@ -1641,6 +1728,7 @@
   function init() {
     localStorage.setItem(LAST_WORLD_KEY, "alphabet");
     ui.audioDisclaimer.textContent = lesson.disclaimer;
+    state.learnedLetters = loadLearnedLetters();
     const treeProgress = loadTreeProgress();
     state.treeDiscovered = new Set(
       treeProgress.discoveredIds.filter(function (id) {
@@ -1653,6 +1741,7 @@
     renderLetterGrid();
     renderMagicalTree();
     renderProgress();
+    renderMuteButtons();
     renderAudioDebug();
     refreshAudioDebugLater();
     renderReviewList();
@@ -1671,6 +1760,14 @@
     ui.testSoundBtn.addEventListener("click", runAudioTest);
     if (ui.replayLetterBtn) ui.replayLetterBtn.addEventListener("click", speakSelectedLetter);
     if (ui.slowLetterBtn) ui.slowLetterBtn.addEventListener("click", speakSelectedLetterSlow);
+    if (ui.prevLetterBtn) ui.prevLetterBtn.addEventListener("click", function () { moveSelectedLetter(-1); });
+    if (ui.nextLetterBtn) ui.nextLetterBtn.addEventListener("click", function () { moveSelectedLetter(1); });
+    if (ui.panelMuteBtn) ui.panelMuteBtn.addEventListener("click", toggleMuteFromPanel);
+    if (ui.muteToggle) {
+      ui.muteToggle.addEventListener("click", function () {
+        setTimeout(renderMuteButtons, 0);
+      });
+    }
     if (ui.selectedDev) {
       ui.selectedDev.addEventListener("click", function () {
         speakSelectedLetter();
@@ -1795,7 +1892,10 @@
     if (ui.nextLessonBtn) ui.nextLessonBtn.addEventListener("click", unlockNextLesson);
     if (ui.nextLessonTopBtn) ui.nextLessonTopBtn.addEventListener("click", unlockNextLesson);
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) renderAudioDebug();
+      if (!document.hidden) {
+        renderMuteButtons();
+        renderAudioDebug();
+      }
     });
   }
 

@@ -150,24 +150,30 @@
       <aside class="panel">
         <h2>Letter Garden</h2>
         <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
-          <button class="button ghost category-tab active" data-category="all" type="button">All</button>
-          <button class="button ghost category-tab" data-category="vowels" type="button">Vowels</button>
-          <button class="button ghost category-tab" data-category="consonants" type="button">Consonants</button>
-          <button class="button ghost category-tab" data-category="signs" type="button">Signs</button>
+          <button class="button ghost category-tab active" data-category="vowels" type="button">Vowels (स्वर)</button>
+          <button class="button ghost category-tab" data-category="consonants" type="button">Consonants (व्यञ्जन)</button>
+          <button class="button ghost category-tab" data-category="practice" type="button">Practice</button>
         </div>
-        <p id="gardenCoverage" class="footer-note">Showing 0 of 0 PDF inventory items</p>
+        <p id="gardenCoverage" class="footer-note">Showing 0 of 0 PDF letters</p>
         <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
       </aside>
 
       <section class="panel" id="activityHearPanel">
-        <h2>Letter Details</h2>
+        <h2>Shared Learning Panel</h2>
         <div class="letter-detail">
           <p id="selectedDev" class="big-dev tap-audio" title="Tap to hear pronunciation">अ</p>
+          <p class="selected-meta">
+            <span id="selectedPosition">Letter 1 of 1</span>
+            <span id="selectedLearned" class="learned-badge">☆ Not learned yet</span>
+          </p>
           <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
           <p class="example-line"><span id="selectedExampleArt" class="example-art" aria-hidden="true">🔥</span><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
           <div class="hero-actions">
+            <button id="prevLetterBtn" class="button ghost" type="button">◀ Previous</button>
+            <button id="nextLetterBtn" class="button ghost" type="button">Next ▶</button>
             <button id="replayLetterBtn" class="button secondary" type="button">🔊 Replay</button>
             <button id="slowLetterBtn" class="button ghost" type="button">🐢 Slow</button>
+            <button id="panelMuteBtn" class="button ghost" type="button">🔇 Mute</button>
           </div>
           <p id="audioFallback" class="fallback" aria-live="polite"></p>
         </div>

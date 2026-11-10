@@ -1,117 +1,117 @@
-kind,devanagari,audio_file,file_exists_nonzero,bytes,browser_fallback_now,source,notes
-letter,अं,assets/audio/pronunciation/am.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,अः,assets/audio/pronunciation/ah.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,अ,assets/audio/pronunciation/a.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,आ,assets/audio/pronunciation/aa.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,इ,assets/audio/pronunciation/i.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ई,assets/audio/pronunciation/ii.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,उ,assets/audio/pronunciation/u.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ऊ,assets/audio/pronunciation/uu.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ऋ,assets/audio/pronunciation/ri.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ॠ,assets/audio/pronunciation/rii.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_ambiguous_symbol_needs_review
-letter,ऌ,assets/audio/pronunciation/li.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_ambiguous_symbol_needs_review
-letter,ए,assets/audio/pronunciation/e.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ऐ,assets/audio/pronunciation/ai.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,ओ,assets/audio/pronunciation/o.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,औ,assets/audio/pronunciation/au.mp3,no,0,no (fallback removed; local clip only),PDF p1,ocr_extracted_needs_review
-letter,क,assets/audio/pronunciation/ka.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ख,assets/audio/pronunciation/kha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ग,assets/audio/pronunciation/ga.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,घ,assets/audio/pronunciation/gha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ङ,assets/audio/pronunciation/nga.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_no_example_needs_review
-letter,च,assets/audio/pronunciation/ca.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,छ,assets/audio/pronunciation/cha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ज,assets/audio/pronunciation/ja.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,झ,assets/audio/pronunciation/jha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ञ,assets/audio/pronunciation/nya.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_no_example_needs_review
-letter,ट,assets/audio/pronunciation/tta.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ठ,assets/audio/pronunciation/ttha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ड,assets/audio/pronunciation/dda.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ढ,assets/audio/pronunciation/ddha.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,ण,assets/audio/pronunciation/nna.mp3,no,0,no (fallback removed; local clip only),PDF p2,ocr_extracted_needs_review
-letter,त,assets/audio/pronunciation/ta.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,थ,assets/audio/pronunciation/tha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,द,assets/audio/pronunciation/da.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,ध,assets/audio/pronunciation/dha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,न,assets/audio/pronunciation/na.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,प,assets/audio/pronunciation/pa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,फ,assets/audio/pronunciation/pha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,ब,assets/audio/pronunciation/ba.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,भ,assets/audio/pronunciation/bha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,म,assets/audio/pronunciation/ma.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,य,assets/audio/pronunciation/ya.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,र,assets/audio/pronunciation/ra.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,ल,assets/audio/pronunciation/la.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,व,assets/audio/pronunciation/va.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,श,assets/audio/pronunciation/sha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,ष,assets/audio/pronunciation/ssa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,स,assets/audio/pronunciation/sa.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-letter,ह,assets/audio/pronunciation/ha.mp3,no,0,no (fallback removed; local clip only),PDF p3,ocr_extracted_needs_review
-word,अंसः,assets/audio/pronunciation/am.mp3,no,0,no (fallback removed; local clip only),example for अं,ocr_extracted_needs_review
-word,अग्निः,assets/audio/pronunciation/agnih.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,अजः,assets/audio/pronunciation/a.mp3,no,0,no (fallback removed; local clip only),example for अ,ocr_extracted_needs_review
-word,आकाशः,assets/audio/pronunciation/aakaashah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,आपः,assets/audio/pronunciation/aa.mp3,no,0,no (fallback removed; local clip only),example for आ,ocr_extracted_needs_review
-word,आम्रम्,assets/audio/pronunciation/aamram.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
-word,इनः,assets/audio/pronunciation/i.mp3,no,0,no (fallback removed; local clip only),example for इ,ocr_extracted_needs_review
-word,ईशः,assets/audio/pronunciation/ii.mp3,no,0,no (fallback removed; local clip only),example for ई,ocr_extracted_needs_review
-word,उरः,assets/audio/pronunciation/u.mp3,no,0,no (fallback removed; local clip only),example for उ,ocr_extracted_needs_review
-word,ऊरुः,assets/audio/pronunciation/uu.mp3,no,0,no (fallback removed; local clip only),example for ऊ,ocr_extracted_needs_review
-word,ऋषिः,assets/audio/pronunciation/ri.mp3,no,0,no (fallback removed; local clip only),example for ऋ,ocr_extracted_needs_review
-word,ॠकारः,assets/audio/pronunciation/rii.mp3,no,0,no (fallback removed; local clip only),example for ॠ,ocr_ambiguous_symbol_needs_review
-word,ऌकारः,assets/audio/pronunciation/li.mp3,no,0,no (fallback removed; local clip only),example for ऌ,ocr_ambiguous_symbol_needs_review
-word,एकः,assets/audio/pronunciation/ekah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,एषः,assets/audio/pronunciation/e.mp3,no,0,no (fallback removed; local clip only),example for ए,ocr_extracted_needs_review
-word,ऐक्यम्,assets/audio/pronunciation/ai.mp3,no,0,no (fallback removed; local clip only),example for ऐ,ocr_extracted_needs_review
-word,ओजः,assets/audio/pronunciation/o.mp3,no,0,no (fallback removed; local clip only),example for ओ,ocr_extracted_needs_review
-word,और्वः,assets/audio/pronunciation/au.mp3,no,0,no (fallback removed; local clip only),example for औ,ocr_extracted_needs_review
-word,कटः,assets/audio/pronunciation/tta.mp3,no,0,no (fallback removed; local clip only),example for ट,ocr_extracted_needs_review
-word,कणः,assets/audio/pronunciation/nna.mp3,no,0,no (fallback removed; local clip only),example for ण,ocr_extracted_needs_review
-word,कथा,assets/audio/pronunciation/tha.mp3,no,0,no (fallback removed; local clip only),example for थ,ocr_extracted_needs_review
-word,कदलीफलम्,assets/audio/pronunciation/kadaliphalam.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
-word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
-word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
-word,कमलम्,assets/audio/pronunciation/kamalam.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,करः,assets/audio/pronunciation/ka.mp3,no,0,no (fallback removed; local clip only),example for क,ocr_extracted_needs_review
-word,खलः,assets/audio/pronunciation/kha.mp3,no,0,no (fallback removed; local clip only),example for ख,ocr_extracted_needs_review
-word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
-word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),example for ग,ocr_extracted_needs_review
-word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
-word,गजः,assets/audio/pronunciation/gajah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,घनः,assets/audio/pronunciation/gha.mp3,no,0,no (fallback removed; local clip only),example for घ,ocr_extracted_needs_review
-word,चन्द्रः,assets/audio/pronunciation/chandrah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,चयः,assets/audio/pronunciation/ca.mp3,no,0,no (fallback removed; local clip only),example for च,ocr_extracted_needs_review
-word,छद,assets/audio/pronunciation/cha.mp3,no,0,no (fallback removed; local clip only),example for छ,ocr_extracted_needs_review
-word,जडः,assets/audio/pronunciation/ja.mp3,no,0,no (fallback removed; local clip only),example for ज,ocr_extracted_needs_review
-word,झषः,assets/audio/pronunciation/jha.mp3,no,0,no (fallback removed; local clip only),example for झ,ocr_extracted_needs_review
-word,डमरुः,assets/audio/pronunciation/dda.mp3,no,0,no (fallback removed; local clip only),example for ड,ocr_extracted_needs_review
-word,ढकः,assets/audio/pronunciation/ddha.mp3,no,0,no (fallback removed; local clip only),example for ढ,ocr_extracted_needs_review
-word,तनु,assets/audio/pronunciation/ta.mp3,no,0,no (fallback removed; local clip only),example for त,ocr_extracted_needs_review
-word,दधि,assets/audio/pronunciation/da.mp3,no,0,no (fallback removed; local clip only),example for द,ocr_extracted_needs_review
-word,द्राक्षा,assets/audio/pronunciation/draksha.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
-word,धवः,assets/audio/pronunciation/dha.mp3,no,0,no (fallback removed; local clip only),example for ध,ocr_extracted_needs_review
-word,नदी,assets/audio/pronunciation/nadee.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
-word,नदी,assets/audio/pronunciation/nadee.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,नभः,assets/audio/pronunciation/na.mp3,no,0,no (fallback removed; local clip only),example for न,ocr_extracted_needs_review
-word,पलाशः,assets/audio/pronunciation/pa.mp3,no,0,no (fallback removed; local clip only),example for प,ocr_extracted_needs_review
-word,फलम्,assets/audio/pronunciation/pha.mp3,no,0,no (fallback removed; local clip only),example for फ,ocr_extracted_needs_review
-word,बकः,assets/audio/pronunciation/ba.mp3,no,0,no (fallback removed; local clip only),example for ब,ocr_extracted_needs_review
-word,भटः,assets/audio/pronunciation/bha.mp3,no,0,no (fallback removed; local clip only),example for भ,ocr_extracted_needs_review
-word,मठः,assets/audio/pronunciation/ttha.mp3,no,0,no (fallback removed; local clip only),example for ठ,ocr_extracted_needs_review
-word,मनः,assets/audio/pronunciation/ma.mp3,no,0,no (fallback removed; local clip only),example for म,ocr_extracted_needs_review
-word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
-word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Flashcard prompt,taught word on flashcard
-word,माता,assets/audio/pronunciation/maataa.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,यमः,assets/audio/pronunciation/ya.mp3,no,0,no (fallback removed; local clip only),example for य,ocr_extracted_needs_review
-word,योगः,assets/audio/pronunciation/yogah.mp3,no,0,no (fallback removed; local clip only),Arrange Word target,taught word in activity target
-word,योगः,assets/audio/pronunciation/yogah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,रथः,assets/audio/pronunciation/rathah.mp3,no,0,no (fallback removed; local clip only),example for र,ocr_extracted_needs_review
-word,रथः,assets/audio/pronunciation/rathah.mp3,no,0,no (fallback removed; local clip only),Picture Match options,taught word in activity choices
-word,लवः,assets/audio/pronunciation/la.mp3,no,0,no (fallback removed; local clip only),example for ल,ocr_extracted_needs_review
-word,वनम्,assets/audio/pronunciation/va.mp3,no,0,no (fallback removed; local clip only),example for व,ocr_extracted_needs_review
-word,शरः,assets/audio/pronunciation/sha.mp3,no,0,no (fallback removed; local clip only),example for श,ocr_extracted_needs_review
-word,षट्,assets/audio/pronunciation/ssa.mp3,no,0,no (fallback removed; local clip only),example for ष,ocr_extracted_needs_review
-word,सः,assets/audio/pronunciation/ah.mp3,no,0,no (fallback removed; local clip only),example for अः,ocr_extracted_needs_review
-word,सरः,assets/audio/pronunciation/sa.mp3,no,0,no (fallback removed; local clip only),example for स,ocr_extracted_needs_review
-word,सेवफलम्,assets/audio/pronunciation/sevaphalam.mp3,no,0,no (fallback removed; local clip only),Feed Mithu activity,fruit pronunciation trigger present
-word,हयः,assets/audio/pronunciation/ha.mp3,no,0,no (fallback removed; local clip only),example for ह,ocr_extracted_needs_review
+"devanagari_text","transliteration","current_audio_file","audio_source","verification_status","missing_or_incorrect_pronunciation","file_exists_nonzero","bytes"
+"अं","am","assets/audio/pronunciation/am.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42604"
+"अः","ah","assets/audio/pronunciation/ah.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44794"
+"अ","a","assets/audio/pronunciation/a.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","39588"
+"आ","aa","assets/audio/pronunciation/aa.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","48952"
+"इ","i","assets/audio/pronunciation/i.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","59610"
+"ई","ii","assets/audio/pronunciation/ii.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","58030"
+"उ","u","assets/audio/pronunciation/u.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46348"
+"ऊ","uu","assets/audio/pronunciation/uu.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46522"
+"ऋ","ri","assets/audio/pronunciation/ri.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","42790"
+"ॠ","rii","assets/audio/pronunciation/rii.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","54642"
+"ऌ","li","assets/audio/pronunciation/li.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45800"
+"ए","e","assets/audio/pronunciation/e.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46818"
+"ऐ","ai","assets/audio/pronunciation/ai.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39574"
+"ओ","o","assets/audio/pronunciation/o.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","43660"
+"औ","au","assets/audio/pronunciation/au.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42830"
+"क","ka","assets/audio/pronunciation/ka.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","42094"
+"ख","kha","assets/audio/pronunciation/kha.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","55270"
+"ग","ga","assets/audio/pronunciation/ga.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","50166"
+"घ","gha","assets/audio/pronunciation/gha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47022"
+"ङ","nga","assets/audio/pronunciation/nga.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","51314"
+"च","ca","assets/audio/pronunciation/ca.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41624"
+"छ","cha","assets/audio/pronunciation/cha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44172"
+"ज","ja","assets/audio/pronunciation/ja.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","48716"
+"झ","jha","assets/audio/pronunciation/jha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47812"
+"ञ","nya","assets/audio/pronunciation/nya.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45718"
+"ट","tta","assets/audio/pronunciation/tta.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","41124"
+"ठ","ttha","assets/audio/pronunciation/ttha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46262"
+"ड","dda","assets/audio/pronunciation/dda.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44172"
+"ढ","ddha","assets/audio/pronunciation/ddha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","48698"
+"ण","nna","assets/audio/pronunciation/nna.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47820"
+"त","ta","assets/audio/pronunciation/ta.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","45700"
+"थ","tha","assets/audio/pronunciation/tha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41198"
+"द","da","assets/audio/pronunciation/da.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46264"
+"ध","dha","assets/audio/pronunciation/dha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42440"
+"न","na","assets/audio/pronunciation/na.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","54070"
+"प","pa","assets/audio/pronunciation/pa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39906"
+"फ","pha","assets/audio/pronunciation/pha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","81810"
+"ब","ba","assets/audio/pronunciation/ba.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","40782"
+"भ","bha","assets/audio/pronunciation/bha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39650"
+"म","ma","assets/audio/pronunciation/ma.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","107876"
+"य","ya","assets/audio/pronunciation/ya.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46120"
+"र","ra","assets/audio/pronunciation/ra.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","65610"
+"ल","la","assets/audio/pronunciation/la.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41768"
+"व","va","assets/audio/pronunciation/va.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","64540"
+"श","sha","assets/audio/pronunciation/sha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44948"
+"ष","ssa","assets/audio/pronunciation/ssa.wav","local_repo_asset_source_not_speaker_verified","sample_prepared_pending_user_review","accuracy_not_verified_by_sanskrit_speaker","yes","42074"
+"स","sa","assets/audio/pronunciation/sa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45568"
+"ह","ha","assets/audio/pronunciation/ha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45508"
+"अंसः","am","assets/audio/pronunciation/am.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42604"
+"अग्निः","agnih","assets/audio/pronunciation/agnih.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"अजः","a","assets/audio/pronunciation/a.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39588"
+"आकाशः","aakaashah","assets/audio/pronunciation/aakaashah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"आपः","aa","assets/audio/pronunciation/aa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","48952"
+"आम्रम्","aamram","assets/audio/pronunciation/aamram.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","missing_audio_file","no","0"
+"इनः","i","assets/audio/pronunciation/i.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","59610"
+"ईशः","ii","assets/audio/pronunciation/ii.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","58030"
+"उरः","u","assets/audio/pronunciation/u.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46348"
+"ऊरुः","uu","assets/audio/pronunciation/uu.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46522"
+"ऋषिः","ri","assets/audio/pronunciation/ri.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42790"
+"ॠकारः","rii","assets/audio/pronunciation/rii.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","54642"
+"ऌकारः","li","assets/audio/pronunciation/li.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45800"
+"एकः","ekah","assets/audio/pronunciation/ekah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"एषः","e","assets/audio/pronunciation/e.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46818"
+"ऐक्यम्","ai","assets/audio/pronunciation/ai.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39574"
+"ओजः","o","assets/audio/pronunciation/o.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","43660"
+"और्वः","au","assets/audio/pronunciation/au.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42830"
+"कटः","tta","assets/audio/pronunciation/tta.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41124"
+"कणः","nna","assets/audio/pronunciation/nna.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47820"
+"कथा","tha","assets/audio/pronunciation/tha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41198"
+"कदलीफलम्","kadaliphalam","assets/audio/pronunciation/kadaliphalam.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","missing_audio_file","no","0"
+"कमलम्","kamalam","assets/audio/pronunciation/kamalam.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"कमलम्","kamalam","assets/audio/pronunciation/kamalam.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"कमलम्","kamalam","assets/audio/pronunciation/kamalam.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"करः","ka","assets/audio/pronunciation/ka.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42094"
+"खलः","kha","assets/audio/pronunciation/kha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","55270"
+"गजः","gajah","assets/audio/pronunciation/gajah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"गजः","gajah","assets/audio/pronunciation/gajah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"गजः","gajah","assets/audio/pronunciation/gajah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"गजः","gajah","assets/audio/pronunciation/gajah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"घनः","gha","assets/audio/pronunciation/gha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47022"
+"चन्द्रः","chandrah","assets/audio/pronunciation/chandrah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"चयः","ca","assets/audio/pronunciation/ca.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41624"
+"छद","cha","assets/audio/pronunciation/cha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44172"
+"जडः","ja","assets/audio/pronunciation/ja.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","48716"
+"झषः","jha","assets/audio/pronunciation/jha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","47812"
+"डमरुः","dda","assets/audio/pronunciation/dda.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44172"
+"ढकः","ddha","assets/audio/pronunciation/ddha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","48698"
+"तनु","ta","assets/audio/pronunciation/ta.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45700"
+"दधि","da","assets/audio/pronunciation/da.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46264"
+"द्राक्षा","draksha","assets/audio/pronunciation/draksha.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","missing_audio_file","no","0"
+"धवः","dha","assets/audio/pronunciation/dha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42440"
+"नदी","nadee","assets/audio/pronunciation/nadee.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"नदी","nadee","assets/audio/pronunciation/nadee.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"नभः","na","assets/audio/pronunciation/na.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","54070"
+"पलाशः","pa","assets/audio/pronunciation/pa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39906"
+"फलम्","pha","assets/audio/pronunciation/pha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","81810"
+"बकः","ba","assets/audio/pronunciation/ba.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","40782"
+"भटः","bha","assets/audio/pronunciation/bha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","39650"
+"मठः","ttha","assets/audio/pronunciation/ttha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46262"
+"मनः","ma","assets/audio/pronunciation/ma.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","107876"
+"माता","maataa","assets/audio/pronunciation/maataa.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"माता","maataa","assets/audio/pronunciation/maataa.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"माता","maataa","assets/audio/pronunciation/maataa.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"यमः","ya","assets/audio/pronunciation/ya.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","46120"
+"योगः","yogah","assets/audio/pronunciation/yogah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"योगः","yogah","assets/audio/pronunciation/yogah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"रथः","rathah","assets/audio/pronunciation/rathah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"रथः","rathah","assets/audio/pronunciation/rathah.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","audio_too_small_or_placeholder","no","0"
+"लवः","la","assets/audio/pronunciation/la.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","41768"
+"वनम्","va","assets/audio/pronunciation/va.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","64540"
+"शरः","sha","assets/audio/pronunciation/sha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44948"
+"षट्","ssa","assets/audio/pronunciation/ssa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","42074"
+"सः","ah","assets/audio/pronunciation/ah.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","44794"
+"सरः","sa","assets/audio/pronunciation/sa.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45568"
+"सेवफलम्","sevaphalam","assets/audio/pronunciation/sevaphalam.mp3","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","missing_audio_file","no","0"
+"हयः","ha","assets/audio/pronunciation/ha.wav","local_repo_asset_source_not_speaker_verified","unverified_pending_sanskrit_speaker_review","accuracy_not_verified_by_sanskrit_speaker","yes","45508"

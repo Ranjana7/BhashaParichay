@@ -13,9 +13,9 @@
 |---|---:|
 | PDF pages processed | 3 |
 | Unique inventory items extracted | 48 |
-| Displayed in Letter Garden (All tab) | 48 |
+| Displayed in Letter Garden (Vowels + Consonants tabs) | 48 |
 | Displayed in Magical Letter Tree | 48 |
-| Items with local recorded audio usable now | 0 |
+| Items with local recorded audio files present now | 116 (letters + words in manifest) |
 | Items with browser speech fallback | 0 (disabled by design) |
 | Items awaiting Sanskrit review | 48 |
 
@@ -53,5 +53,6 @@ These were not detected in this 3-page PDF OCR extraction and are intentionally 
 ## Notes on confidence
 
 - OCR captured all core rows and varga headings, but some glyphs (notably `ॠ` and `ऌ`) are marked **OCR-ambiguous** in the canonical dataset.
-- Pronunciation is currently routed through browser/device speech fallback until reviewed local recordings are available.
+- Pronunciation is routed to local `assets/audio/pronunciation/` files only; browser speech fallback is disabled by design.
 - No item is marked linguistically verified yet; all remain `ocr_extracted_needs_review` (or equivalent review-required status).
+- First review sample set for `अ, आ, इ, ई, ऋ, क, ख, ट, त, ष` is prepared in `assets/audio/pronunciation/review-samples/first-pass-letters-20261110/` and is pending user + Sanskrit-speaker review.
