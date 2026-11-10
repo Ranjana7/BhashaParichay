@@ -51,13 +51,16 @@ test("jump links target all activity sections", () => {
 });
 
 test("all activity controls are present in DOM", () => {
-  ACTIVITY_IDS.forEach((id) => {
+  ACTIVITY_IDS.filter((id) => id !== "letter-garden").forEach((id) => {
     assert.ok(html.includes(`id="controls-${id}"`), `missing controls container for ${id}`);
   });
 });
 
-test("global panel is summary-only and no 3-of-6 wording", () => {
+test("global panel is consolidated summary-only and no 3-of-6 wording", () => {
   assert.ok(html.includes("0 of 9 activities complete"));
+  assert.ok(html.includes('id="globalProgressPercent"'));
+  assert.ok(html.includes('id="globalStars"'));
+  assert.equal(html.includes('id="lessonStatsPanel"'), false);
   assert.equal(html.includes("Activity 3 of 6"), false);
 });
 
@@ -73,6 +76,58 @@ test("full-page celebration canvas exists", () => {
   assert.ok(css.includes("position: fixed"));
   assert.ok(css.includes("inset: 0"));
   assert.ok(css.includes("pointer-events: none"));
+});
+
+test("letter garden uses Devanagari tab labels and subgroup categories", () => {
+  assert.ok(html.includes(">स्वर<"));
+  assert.ok(html.includes(">व्यञ्जन<"));
+  assert.ok(html.includes(">अभ्यास<"));
+  assert.equal(html.includes(">All<"), false);
+  assert.ok(js.includes("क-वर्ग"));
+  assert.ok(js.includes("च-वर्ग"));
+  assert.ok(js.includes("ट-वर्ग"));
+  assert.ok(js.includes("त-वर्ग"));
+  assert.ok(js.includes("प-वर्ग"));
+  assert.ok(js.includes("अन्तःस्थ"));
+  assert.ok(js.includes("ऊष्म"));
+});
+
+test("shared panel has single control area without duplicate nested activity controls", () => {
+  assert.equal(html.includes('id="controls-letter-garden"'), false);
+  assert.ok(html.includes('id="prevLetterBtn"'));
+  assert.ok(html.includes('id="nextLetterBtn"'));
+  assert.ok(html.includes('id="replayLetterBtn"'));
+});
+
+test("magical tree play again resets from first group in code path", () => {
+  assert.ok(js.includes('treeState.currentIndex = 0;'));
+  assert.ok(js.includes("treeState.completedItems = [];"));
+  assert.ok(js.includes('forestState.activities["magical-tree"].isComplete'));
+});
+
+test("picture match uses local image choices with structured question pool", () => {
+  assert.ok(js.includes("const pictureQuestions"));
+  assert.ok(js.includes("picture-illustration"));
+  assert.ok(js.includes("Select the correct picture for:"));
+});
+
+test("flashcard flip is tap-to-flip and does not use separate flip button", () => {
+  assert.equal(html.includes('id="flipFlashcard"'), false);
+  assert.ok(html.includes('id="flashcard" class="flashcard" role="button"'));
+  assert.ok(js.includes('ui.flashcard.addEventListener("click"'));
+});
+
+test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
+  const feedBlock = js.match(/const feedMithuQuestions = \[(.*?)\];/s);
+  assert.ok(feedBlock, "missing feedMithuQuestions definition");
+  const count = (feedBlock[1].match(/sanskrit:/g) || []).length;
+  assert.ok(count >= 15 && count <= 20, `expected 15-20 fruit questions, got ${count}`);
+  assert.ok(js.includes("animateFruitToMithu"));
+});
+
+test("letter tracing guide is glyph-based, not random seed dots", () => {
+  assert.ok(js.includes("fillText(letter.symbol"));
+  assert.equal(js.includes("charCodeAt(0)"), false);
 });
 
 test("default forest state has independent activity buckets", () => {
