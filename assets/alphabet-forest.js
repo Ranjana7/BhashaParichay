@@ -30,6 +30,7 @@
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const LOCAL_AUDIO_ENABLED = true;
+  const MIN_PRONUNCIATION_BYTES = 6000;
   const PRONUNCIATION_UNAVAILABLE = "Pronunciation not available yet.";
   const MUTED_AUDIO_MESSAGE = "Sound is muted. Tap Sound: Off to unmute.";
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -420,7 +421,7 @@
       })
       .then(function (blob) {
         if (!blob) return false;
-        return blob.size > 0;
+        return blob.size >= MIN_PRONUNCIATION_BYTES;
       })
       .catch(function () {
         return false;
