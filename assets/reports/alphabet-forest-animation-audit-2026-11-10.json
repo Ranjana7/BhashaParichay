@@ -10,15 +10,15 @@
     "motion": {
       "used": true,
       "locations": [
-        "assets/alphabet-forest.js: animate(...) for mascot section-follow movement",
+        "assets/alphabet-forest.js: mascot section-follow placement transition",
         "assets/alphabet-forest.js: animate(...) for fruit-to-Mithu movement"
       ]
     },
     "lottie": {
       "used": true,
       "locations": [
-        "assets/alphabet-forest.js: initLottieAnimations() with tree sparkle/celebration and Mithu reaction players",
-        "assets/alphabet-forest.js: playLottie(...) on listening/celebration triggers"
+        "assets/alphabet-forest.js: initLottieAnimations() for tree sparkle and tree celebration layers",
+        "assets/alphabet-forest.js: playLottie(...) on magical-tree discovery and group completion"
       ],
       "assets": [
         "assets/lottie/sparkle.json",
@@ -39,6 +39,22 @@
     "Mithu blink/breathing/wing and beak state animations",
     "Flashcard flip style transitions"
   ],
+  "integrationChecks": {
+    "alphabetForest": {
+      "loadedFromHtml": true,
+      "runtimeErrorsDuringAudit": 0
+    },
+    "homePage": {
+      "motionUsed": true,
+      "lottieUsed": true,
+      "confettiUsed": true
+    },
+    "learningWorldPage": {
+      "motionUsed": true,
+      "lottieUsed": true,
+      "confettiUsed": true
+    }
+  },
   "frameBasedCharacterAnimation": {
     "implementedAs": "SVG part-state animation (not sprite-sheet frame export)",
     "placeholderStatus": "No external frame-by-frame Mithu sprite sheet yet; existing movement uses articulated SVG states."

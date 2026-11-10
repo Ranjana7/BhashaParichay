@@ -14,8 +14,9 @@
   },
   "devanagariRendering": {
     "fontStack": "Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif",
-    "testedLettersForTracingGeometry": ["अ", "आ", "क", "म", "ट", "ष"],
-    "knownIncompleteTracingLetters": []
+    "writingPracticeMode": "self-assessment (no fake handwriting validation claims)",
+    "testedLettersForCanvasDisplay": ["अ", "आ", "क", "म", "ट", "ष"],
+    "knownIncompleteLetters": []
   },
   "activityVocabularyMapping": {
     "letterGarden": "letter symbol + transliteration + example + meaning from inventory, illustration from vocabulary map when available",
@@ -30,5 +31,11 @@
       "Fruit vocabulary spellings/transliterations used in Feed Mithu",
       "Any word-level pronunciation acceptance beyond clip playback integrity"
     ]
+  },
+  "pronunciationStatus": {
+    "enabledInApp": false,
+    "reason": "Existing clip set is not approved for Sanskrit teaching quality.",
+    "fallbackToBrowserSpeech": false,
+    "userFacingMessage": "Pronunciation unavailable until verified Sanskrit audio is approved."
   }
 }
