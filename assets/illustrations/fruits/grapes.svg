@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#f9f3ff"/>
+  <g fill="#7d55d8">
+    <circle cx="96" cy="74" r="14"/><circle cx="116" cy="72" r="14"/><circle cx="136" cy="78" r="14"/>
+    <circle cx="102" cy="94" r="14"/><circle cx="122" cy="94" r="14"/><circle cx="142" cy="98" r="14"/>
+  </g>
+  <path d="M110 52 C112 44,120 39,128 38" stroke="#4d8d3f" stroke-width="5" fill="none"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#493080">Grapes</text>
+</svg>

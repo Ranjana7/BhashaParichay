@@ -28,6 +28,12 @@
   background: #f4f7ff;
 }
 
+.selected-picture {
+  margin-top: 8px;
+  max-width: 220px;
+  height: 120px;
+}
+
 .picture-label {
   font-size: 0.86rem;
   color: #2f3a6d;
@@ -667,6 +673,11 @@ p {
   border: 2px solid #6f86ff;
 }
 
+#consonantSubgroupTabs .button.active {
+  background: linear-gradient(120deg, var(--primary), var(--primary-2));
+  color: #fff;
+}
+
 .forest-layout {
   display: grid;
   grid-template-columns: minmax(250px, 320px) 1fr;
@@ -717,7 +728,9 @@ p {
   position: fixed;
   z-index: 10000;
   pointer-events: none;
-  font-size: 1.4rem;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
   transform: translate(-50%, -50%);
 }
 
@@ -950,18 +963,58 @@ body.audio-disabled .audio-control {
   margin: 10px 0;
   border: 2px dashed #b8c7ff;
   border-radius: 16px;
-  min-height: 120px;
+  min-height: 170px;
   padding: 12px;
   display: grid;
   place-items: center;
   text-align: center;
   background: linear-gradient(180deg, #fdf9ff, #eef4ff);
+  cursor: pointer;
+  perspective: 900px;
+}
+
+.flashcard.flip {
+  border-style: solid;
+}
+
+.flashcard .flash-face {
+  width: 100%;
+  max-width: 280px;
+}
+
+.flashcard .flash-back .picture-illustration {
+  margin: 6px auto 0;
+  max-width: 180px;
+}
+
+.flashcard.flip.is-flipped .flash-front {
+  animation: flashFlipOut 0.35s ease forwards;
+}
+
+.flashcard.flip.is-flipped .flash-back {
+  animation: flashFlipIn 0.35s ease forwards;
+}
+
+.flashcard .flash-tran {
+  margin: 6px 0 0;
+  font-weight: 700;
+  color: #4a567f;
 }
 
 .flash-dev {
   font-size: 2.3rem;
   margin: 0;
   font-weight: 800;
+}
+
+@keyframes flashFlipIn {
+  from { transform: rotateY(90deg); opacity: 0; }
+  to { transform: rotateY(0deg); opacity: 1; }
+}
+
+@keyframes flashFlipOut {
+  from { transform: rotateY(0deg); opacity: 1; }
+  to { transform: rotateY(-90deg); opacity: 0; }
 }
 
 .star-box {

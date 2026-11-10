@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#f3fff4"/>
+  <path d="M64 108 A46 46 0 0 1 156 108 Z" fill="#f74f69"/>
+  <path d="M64 108 A46 46 0 0 0 156 108" stroke="#45a859" stroke-width="10" fill="none"/>
+  <circle cx="92" cy="94" r="3" fill="#202020"/><circle cx="110" cy="90" r="3" fill="#202020"/><circle cx="128" cy="96" r="3" fill="#202020"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#2f6b3b">Watermelon</text>
+</svg>

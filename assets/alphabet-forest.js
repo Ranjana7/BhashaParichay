@@ -23,6 +23,23 @@
   ];
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
+  const LETTER_ACTIVITY_IDS = new Set([
+    "magical-tree",
+    "letter-garden",
+    "hear-and-pick",
+    "arrange-word",
+    "hidden-letter-hunt",
+    "letter-tracing"
+  ]);
+  const LETTER_GARDEN_SUBGROUPS = [
+    { id: "ka-varga", label: "क-वर्ग" },
+    { id: "ca-varga", label: "च-वर्ग" },
+    { id: "tta-varga", label: "ट-वर्ग" },
+    { id: "ta-varga", label: "त-वर्ग" },
+    { id: "pa-varga", label: "प-वर्ग" },
+    { id: "antastha", label: "अन्तःस्थ" },
+    { id: "ushmana", label: "ऊष्म" }
+  ];
 
   const letters = window.SP_PDF_LETTER_INVENTORY.items
     .slice(0, LETTER_COUNT)
@@ -42,6 +59,45 @@
     })
     .filter(function hasSymbol(letter) { return Boolean(letter.symbol); });
 
+  const pictureQuestions = letters
+    .filter(function (letter) {
+      const vocab = VOCAB.words[letter.exampleText];
+      return Boolean(vocab && vocab.image);
+    })
+    .slice(0, 18)
+    .map(function (letter) {
+      const vocab = VOCAB.words[letter.exampleText];
+      return {
+        id: letter.id,
+        sanskrit: letter.exampleText,
+        transliteration: vocab.transliteration || letter.transliteration,
+        meaning: vocab.meaning || letter.meaning,
+        image: vocab.image,
+        alt: vocab.alt || (vocab.meaning || letter.meaning)
+      };
+    });
+
+  const flashcardQuestions = pictureQuestions.slice(0, 18);
+
+  const feedMithuQuestions = [
+    { sanskrit: "आम्रम्", transliteration: "aamram", meaning: "mango", image: "assets/illustrations/fruits/mango.svg", alt: "Mango fruit illustration" },
+    { sanskrit: "कदलीफलम्", transliteration: "kadalee-phalam", meaning: "banana", image: "assets/illustrations/fruits/banana.svg", alt: "Banana fruit illustration" },
+    { sanskrit: "सेवफलम्", transliteration: "sevaphalam", meaning: "apple", image: "assets/illustrations/fruits/apple.svg", alt: "Apple fruit illustration" },
+    { sanskrit: "द्राक्षा", transliteration: "draakshaa", meaning: "grapes", image: "assets/illustrations/fruits/grapes.svg", alt: "Grapes illustration" },
+    { sanskrit: "नारङ्गफलम्", transliteration: "naaranga-phalam", meaning: "orange", image: "assets/illustrations/fruits/orange.svg", alt: "Orange fruit illustration" },
+    { sanskrit: "दाडिमम्", transliteration: "daadimam", meaning: "pomegranate", image: "assets/illustrations/fruits/pomegranate.svg", alt: "Pomegranate fruit illustration" },
+    { sanskrit: "अननसम्", transliteration: "ananasam", meaning: "pineapple", image: "assets/illustrations/fruits/pineapple.svg", alt: "Pineapple fruit illustration" },
+    { sanskrit: "नारिकेलम्", transliteration: "naarikelam", meaning: "coconut", image: "assets/illustrations/fruits/coconut.svg", alt: "Coconut fruit illustration" },
+    { sanskrit: "कलिङ्गम्", transliteration: "kalingam", meaning: "watermelon", image: "assets/illustrations/fruits/watermelon.svg", alt: "Watermelon illustration" },
+    { sanskrit: "खर्जूरम्", transliteration: "kharjooram", meaning: "date fruit", image: "assets/illustrations/fruits/date.svg", alt: "Date fruit illustration" },
+    { sanskrit: "जाम्बूफलम्", transliteration: "jaamboo-phalam", meaning: "guava", image: "assets/illustrations/fruits/guava.svg", alt: "Guava fruit illustration" },
+    { sanskrit: "कपित्थम्", transliteration: "kapittham", meaning: "wood apple", image: "assets/illustrations/fruits/wood-apple.svg", alt: "Wood apple illustration" },
+    { sanskrit: "पपीतकम्", transliteration: "papeetakam", meaning: "papaya", image: "assets/illustrations/fruits/papaya.svg", alt: "Papaya fruit illustration" },
+    { sanskrit: "नाशपाती", transliteration: "naashapaatee", meaning: "pear", image: "assets/illustrations/fruits/pear.svg", alt: "Pear fruit illustration" },
+    { sanskrit: "आडुफलम्", transliteration: "aadu-phalam", meaning: "peach", image: "assets/illustrations/fruits/peach.svg", alt: "Peach fruit illustration" },
+    { sanskrit: "आलूबुखारफलम्", transliteration: "aalubukhaara-phalam", meaning: "plum", image: "assets/illustrations/fruits/plum.svg", alt: "Plum fruit illustration" }
+  ];
+
   const ui = {
     jumpNav: document.getElementById("activityJumpNav"),
     muteToggle: document.getElementById("muteToggle"),
@@ -52,10 +108,8 @@
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
     globalSummary: document.getElementById("globalProgressSummary"),
     globalFill: document.getElementById("globalProgressFill"),
-    doneCount: document.getElementById("doneCount"),
-    starCount: document.getElementById("starCount"),
-    streakCount: document.getElementById("streakCount"),
-    progressText: document.getElementById("progressText"),
+    globalPercent: document.getElementById("globalProgressPercent"),
+    globalStars: document.getElementById("globalStars"),
     treeLetters: document.getElementById("magicalTreeLetters"),
     treeStatus: document.getElementById("treeStatus"),
     treeCounter: document.getElementById("treeCounter"),
@@ -76,7 +130,7 @@
     selectedTran: document.getElementById("selectedTran"),
     selectedExample: document.getElementById("selectedExample"),
     selectedMeaning: document.getElementById("selectedMeaning"),
-    selectedExampleArt: document.getElementById("selectedExampleArt"),
+    selectedExampleImage: document.getElementById("selectedExampleImage"),
     selectedPosition: document.getElementById("selectedPosition"),
     selectedLearned: document.getElementById("selectedLearned"),
     replayLetterBtn: document.getElementById("replayLetterBtn"),
@@ -100,7 +154,6 @@
     flashcard: document.getElementById("flashcard"),
     flashChoices: document.getElementById("flashChoices"),
     flashStatus: document.getElementById("flashStatus"),
-    flipFlashcard: document.getElementById("flipFlashcard"),
     feedPrompt: document.getElementById("feedPrompt"),
     feedChoices: document.getElementById("feedChoices"),
     feedStatus: document.getElementById("feedStatus"),
@@ -114,7 +167,6 @@
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
     completionCanvas: document.getElementById("celebration-canvas"),
-    doneBanner: document.getElementById("doneBanner"),
     completionScreen: document.getElementById("completionScreen"),
     completionStars: document.getElementById("completionStars")
   };
@@ -131,7 +183,9 @@
     tracing: {
       drawing: false,
       points: [],
-      guidePoints: []
+      guidePoints: [],
+      guideCheckpoints: [],
+      hasGuide: false
     },
     byActivity: {}
   };
@@ -143,6 +197,7 @@
       flipped: false
     };
   });
+  normalizeActivityOrders();
 
   initMuteState();
   initAudioControls();
@@ -156,6 +211,33 @@
   initConfetti();
   initActivityControls();
   renderAll();
+
+  function getActivityItemCount(activityId) {
+    if (activityId === "picture-match") return pictureQuestions.length;
+    if (activityId === "flashcard-flip") return flashcardQuestions.length;
+    if (activityId === "feed-mithu") return feedMithuQuestions.length;
+    return letters.length;
+  }
+
+  function normalizeActivityOrders() {
+    ACTIVITY_IDS.forEach(function (activityId) {
+      const state = forestState.activities[activityId];
+      if (!state) return;
+      const itemCount = getActivityItemCount(activityId);
+      if (!Array.isArray(state.order) || state.order.length !== itemCount) {
+        state.order = Array.from({ length: itemCount }, function (_, index) { return index; });
+      }
+      state.currentIndex = Math.max(0, Math.min(state.currentIndex || 0, itemCount - 1));
+      state.completedItems = (Array.isArray(state.completedItems) ? state.completedItems : [])
+        .filter(function (value, index, arr) {
+          return Number.isFinite(value) && value >= 0 && value < itemCount && arr.indexOf(value) === index;
+        })
+        .sort(function (a, b) { return a - b; });
+      state.isComplete = Boolean(state.isComplete) && state.completedItems.length >= itemCount;
+      if (!state.answers || typeof state.answers !== "object") state.answers = {};
+      if (!state.attempts || typeof state.attempts !== "object") state.attempts = {};
+    });
+  }
 
   function initMuteState() {
     const fromStorage = localStorage.getItem("sanskritParichay.muted");
@@ -339,7 +421,7 @@
         const currentGroup = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
         if (currentGroup <= 0) return;
         activity.currentIndex = (currentGroup - 1) * TREE_GROUP_SIZE;
-        setActivityStatus("magical-tree", "Moved to previous group.");
+        setActivityStatus("magical-tree", "");
         saveAndRender();
       });
     }
@@ -350,7 +432,7 @@
         const nextStart = (currentGroup + 1) * TREE_GROUP_SIZE;
         if (nextStart >= letters.length) return;
         activity.currentIndex = nextStart;
-        setActivityStatus("magical-tree", "Moved to next group.");
+        setActivityStatus("magical-tree", "");
         saveAndRender();
       });
     }
@@ -359,8 +441,15 @@
         if (!forestState.activities["magical-tree"].isComplete) return;
         const ok = window.confirm("Play Magical Tree again from the first group?");
         if (!ok) return;
-        CORE.resetActivity(forestState, "magical-tree");
-        setActivityStatus("magical-tree", "Magical Tree restarted.");
+        const treeState = forestState.activities["magical-tree"];
+        treeState.currentIndex = 0;
+        treeState.completedItems = [];
+        treeState.answers = {};
+        treeState.attempts = {};
+        treeState.isComplete = false;
+        const bloomContainer = document.getElementById("treeProgressBlooms");
+        if (bloomContainer) bloomContainer.innerHTML = "";
+        setActivityStatus("magical-tree", "");
         saveAndRender();
       });
     }
@@ -378,7 +467,7 @@
         const category = tab.getAttribute("data-category") || "vowels";
         const state = forestState.activities["letter-garden"];
         state.answers.category = category;
-        if (category !== "consonants") state.answers.subgroup = "all";
+        if (category !== "consonants") state.answers.subgroup = "ka-varga";
         saveAndRender();
       });
     });
@@ -406,10 +495,16 @@
   }
 
   function initFlashControls() {
-    if (!ui.flipFlashcard) return;
-    ui.flipFlashcard.addEventListener("click", function () {
+    if (!ui.flashcard) return;
+    function toggleFlip() {
       runtime.byActivity["flashcard-flip"].flipped = !runtime.byActivity["flashcard-flip"].flipped;
       renderFlashcardFlip();
+    }
+    ui.flashcard.addEventListener("click", toggleFlip);
+    ui.flashcard.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      toggleFlip();
     });
   }
 
@@ -463,8 +558,12 @@
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
         const activityId = "letter-tracing";
+        if (!runtime.tracing.hasGuide) {
+          if (ui.traceStatus) ui.traceStatus.textContent = "This letter's tracing guide is not available yet.";
+          return;
+        }
         const coverage = tracingCoverageScore();
-        if (coverage >= 0.75 && runtime.tracing.points.length >= 35) {
+        if (coverage >= 0.68 && runtime.tracing.points.length >= 45) {
           markCurrentComplete(activityId, "Great tracing!");
           if (ui.traceStatus) ui.traceStatus.textContent = "Great tracing!";
           setMascotState("celebrating");
@@ -491,10 +590,23 @@
     const ctx = ui.traceCanvas.getContext("2d");
     if (!ctx) return;
     const letter = getCurrentLetter("letter-tracing");
-    runtime.tracing.guidePoints = buildGuidePoints(letter);
+    runtime.tracing.guidePoints = buildGuidePoints(letter, ctx);
+    runtime.tracing.hasGuide = runtime.tracing.guidePoints.length > 0;
+    runtime.tracing.guideCheckpoints = runtime.tracing.guidePoints.filter(function (_point, index) {
+      return index % 12 === 0;
+    });
+    if (!runtime.tracing.guideCheckpoints.length && runtime.tracing.guidePoints.length) {
+      runtime.tracing.guideCheckpoints = [runtime.tracing.guidePoints[0]];
+    }
+    if (!runtime.tracing.hasGuide) {
+      if (ui.traceStatus) ui.traceStatus.textContent = "Guide path unavailable for this letter.";
+      return;
+    }
+    const start = runtime.tracing.guidePoints[0];
+    const next = runtime.tracing.guidePoints[Math.min(6, runtime.tracing.guidePoints.length - 1)];
     ctx.save();
     ctx.strokeStyle = "#c7d4ff";
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 6;
     ctx.setLineDash([8, 8]);
     ctx.beginPath();
     runtime.tracing.guidePoints.forEach(function (point, index) {
@@ -502,30 +614,64 @@
       else ctx.lineTo(point.x, point.y);
     });
     ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#4d7dff";
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#4d7dff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(next.x, next.y);
+    ctx.stroke();
     ctx.restore();
   }
 
-  function buildGuidePoints(letter) {
-    const seed = (letter && letter.symbol ? letter.symbol.charCodeAt(0) : 0) % 4;
-    if (seed === 0) return [{ x: 80, y: 40 }, { x: 200, y: 40 }, { x: 120, y: 120 }, { x: 180, y: 180 }];
-    if (seed === 1) return [{ x: 90, y: 34 }, { x: 90, y: 180 }, { x: 170, y: 180 }, { x: 170, y: 100 }];
-    if (seed === 2) return [{ x: 70, y: 50 }, { x: 190, y: 50 }, { x: 190, y: 110 }, { x: 70, y: 110 }, { x: 70, y: 170 }];
-    return [{ x: 100, y: 30 }, { x: 140, y: 90 }, { x: 100, y: 150 }, { x: 170, y: 150 }];
+  function buildGuidePoints(letter, traceContext) {
+    if (!letter || !letter.symbol || !traceContext || !ui.traceCanvas) return [];
+    const width = ui.traceCanvas.width;
+    const height = ui.traceCanvas.height;
+    const offscreen = document.createElement("canvas");
+    offscreen.width = width;
+    offscreen.height = height;
+    const guideCtx = offscreen.getContext("2d");
+    if (!guideCtx) return [];
+    guideCtx.clearRect(0, 0, width, height);
+    const fontSize = Math.floor(height * 0.62);
+    guideCtx.font = "700 " + fontSize + "px Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif";
+    guideCtx.textAlign = "center";
+    guideCtx.textBaseline = "middle";
+    guideCtx.fillStyle = "#111";
+    guideCtx.fillText(letter.symbol, width / 2, height / 2 + 8);
+    const imageData = guideCtx.getImageData(0, 0, width, height).data;
+    const points = [];
+    for (let y = 0; y < height; y += 4) {
+      for (let x = 0; x < width; x += 4) {
+        const alpha = imageData[(y * width + x) * 4 + 3];
+        if (alpha > 10) points.push({ x: x, y: y });
+      }
+    }
+    points.sort(function (a, b) {
+      if (a.y === b.y) return a.x - b.x;
+      return a.y - b.y;
+    });
+    return points;
   }
 
   function tracingCoverageScore() {
-    if (!runtime.tracing.guidePoints.length || !runtime.tracing.points.length) return 0;
-    const radius = 24;
+    if (!runtime.tracing.hasGuide || !runtime.tracing.guideCheckpoints.length || !runtime.tracing.points.length) return 0;
+    const radius = 16;
     let hitCount = 0;
-    runtime.tracing.guidePoints.forEach(function (guidePoint) {
+    runtime.tracing.guideCheckpoints.forEach(function (guidePoint) {
       const hit = runtime.tracing.points.some(function (drawnPoint) {
         const dx = drawnPoint.x - guidePoint.x;
         const dy = drawnPoint.y - guidePoint.y;
-        return Math.sqrt(dx * dx + dy * dy) <= radius;
+        return (dx * dx + dy * dy) <= radius * radius;
       });
       if (hit) hitCount += 1;
     });
-    return hitCount / runtime.tracing.guidePoints.length;
+    return hitCount / runtime.tracing.guideCheckpoints.length;
   }
 
   function initConfetti() {
@@ -587,8 +733,18 @@
   function getCurrentLetter(activityId) {
     const activity = forestState.activities[activityId];
     if (!activity) return letters[0];
-    const idx = activity.order[activity.currentIndex];
+    const idx = activity.order[Math.max(0, Math.min(activity.currentIndex, activity.order.length - 1))];
     return letters[idx];
+  }
+
+  function getCurrentQuestion(activityId) {
+    const activity = forestState.activities[activityId];
+    if (!activity) return null;
+    const idx = activity.order[Math.max(0, Math.min(activity.currentIndex, activity.order.length - 1))];
+    if (activityId === "picture-match") return pictureQuestions[idx] || null;
+    if (activityId === "flashcard-flip") return flashcardQuestions[idx] || null;
+    if (activityId === "feed-mithu") return feedMithuQuestions[idx] || null;
+    return null;
   }
 
   function isCurrentResolved(activityId) {
@@ -597,8 +753,13 @@
   }
 
   function markCurrentComplete(activityId, message) {
-    CORE.markCurrentItemCompleted(forestState, activityId, 1);
+    const rewardPoints = forestState.completionRewarded[activityId] ? 0 : 1;
+    CORE.markCurrentItemCompleted(forestState, activityId, rewardPoints);
     setActivityStatus(activityId, message);
+    const activity = forestState.activities[activityId];
+    if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
+      CORE.finalizeActivity(forestState, activityId);
+    }
     if (ACTIVITY_META[activityId].type !== "tree") setMascotState("celebrating");
     saveAndRender();
   }
@@ -609,17 +770,18 @@
     if (action === "previous") {
       CORE.goPrevious(forestState, activityId);
       if (activityId === "letter-tracing") clearTraceBoard();
-      setActivityStatus(activityId, "Moved to previous item.");
+      setActivityStatus(activityId, "");
       saveAndRender();
       return;
     }
     if (action === "next") {
-      if (!isCurrentResolved(activityId) || activity.currentIndex >= letters.length - 1) return;
+      const itemCount = getActivityItemCount(activityId);
+      if (!isCurrentResolved(activityId) || activity.currentIndex >= itemCount - 1) return;
       CORE.goNext(forestState, activityId);
       runtime.byActivity[activityId].tempAnswer = "";
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") clearTraceBoard();
-      setActivityStatus(activityId, "Moved to next item.");
+      setActivityStatus(activityId, "");
       saveAndRender();
       return;
     }
@@ -628,13 +790,13 @@
       runtime.byActivity[activityId].tempAnswer = "";
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") clearTraceBoard();
-      setActivityStatus(activityId, "Retry current item.");
+      setActivityStatus(activityId, "");
       saveAndRender();
       return;
     }
     if (action === "finish") {
       if (!CORE.finalizeActivity(forestState, activityId)) {
-        setActivityStatus(activityId, "Complete all 48 items first.");
+        setActivityStatus(activityId, "Complete all questions first.");
         saveAndRender();
         return;
       }
@@ -656,7 +818,7 @@
       const ok = window.confirm("Restart this completed activity from item 1?");
       if (!ok) return;
       CORE.resetActivity(forestState, activityId);
-      setActivityStatus(activityId, "Activity restarted.");
+      setActivityStatus(activityId, "");
       saveAndRender();
     }
   }
@@ -685,10 +847,8 @@
     const global = CORE.computeGlobalProgress(forestState);
     if (ui.globalSummary) ui.globalSummary.textContent = global.completedActivityCount + " of " + global.totalActivities + " activities complete";
     if (ui.globalFill) ui.globalFill.style.width = global.globalPercent.toFixed(1) + "%";
-    if (ui.doneCount) ui.doneCount.textContent = String(global.completedActivityCount);
-    if (ui.starCount) ui.starCount.textContent = String(forestState.xp);
-    if (ui.streakCount) ui.streakCount.textContent = String(global.completedActivityCount);
-    if (ui.progressText) ui.progressText.textContent = Math.round(global.globalPercent) + "% overall completion.";
+    if (ui.globalPercent) ui.globalPercent.textContent = Math.round(global.globalPercent) + "%";
+    if (ui.globalStars) ui.globalStars.textContent = String(forestState.xp);
   }
 
   function renderMagicalTree() {
@@ -705,8 +865,8 @@
     });
 
     if (ui.treeInstruction) ui.treeInstruction.textContent = "Tap a glowing letter to discover its sound!";
-    if (ui.treeCounter) ui.treeCounter.textContent = "Group " + (groupIndex + 1) + " of " + (maxGroup + 1) + " · " + activity.completedItems.length + " of 48 letters discovered";
-    if (ui.treeStatus) ui.treeStatus.textContent = runtime.byActivity[activityId].status || "Discover each glowing letter in this group.";
+    if (ui.treeCounter) ui.treeCounter.textContent = "Group " + (groupIndex + 1) + "/" + (maxGroup + 1) + " · " + activity.completedItems.length + "/48";
+    if (ui.treeStatus) ui.treeStatus.textContent = runtime.byActivity[activityId].status || "";
     if (ui.prevTreeGroupBtn) ui.prevTreeGroupBtn.disabled = groupIndex === 0;
     if (ui.nextTreeGroupBtn) ui.nextTreeGroupBtn.disabled = !groupComplete || groupIndex >= maxGroup;
 
@@ -732,7 +892,8 @@
         setMascotState("pointing");
         playLetterAudio(letter, 1, ui.treeStatus);
         if (!activity.completedItems.includes(letterIndex)) {
-          CORE.markCurrentItemCompleted(forestState, activityId, 1);
+          const rewardPoints = forestState.completionRewarded[activityId] ? 0 : 1;
+          CORE.markCurrentItemCompleted(forestState, activityId, rewardPoints);
           growTreeBloom();
           setActivityStatus(activityId, "Letter discovered!");
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
@@ -744,7 +905,7 @@
             if (groupIndex < maxGroup) {
               setTimeout(function () {
                 activity.currentIndex = (groupIndex + 1) * TREE_GROUP_SIZE;
-                setActivityStatus(activityId, "Group complete. Moving to next group.");
+                setActivityStatus(activityId, "");
                 saveAndRender();
               }, 500);
               return;
@@ -788,7 +949,10 @@
     const activity = forestState.activities[activityId];
     const selectedLetter = getCurrentLetter(activityId);
     const selectedCategory = activity.answers.category || "vowels";
-    const selectedSubgroup = activity.answers.subgroup || "all";
+    const selectedSubgroup = (!activity.answers.subgroup || activity.answers.subgroup === "all") ? "ka-varga" : activity.answers.subgroup;
+    if (selectedCategory === "consonants" && activity.answers.subgroup !== selectedSubgroup) {
+      activity.answers.subgroup = selectedSubgroup;
+    }
     ui.letterCategoryTabs.forEach(function (tab) {
       const active = tab.getAttribute("data-category") === selectedCategory;
       tab.classList.toggle("active", active);
@@ -801,7 +965,6 @@
       if (selectedCategory === "vowels") return letter.category !== "consonant";
       if (selectedCategory === "consonants") {
         if (letter.category !== "consonant") return false;
-        if (selectedSubgroup === "all") return true;
         return (letter.subgroup || "other") === selectedSubgroup;
       }
       return true;
@@ -829,9 +992,9 @@
           setMascotState("pointing");
           playLetterAudio(letter, 1, ui.audioFallback);
           if (!activity.completedItems.includes(letterIndex)) {
-            markCurrentComplete(activityId, "Letter practised.");
+            markCurrentComplete(activityId, "");
           } else {
-            setActivityStatus(activityId, "Letter reviewed.");
+            setActivityStatus(activityId, "");
             saveAndRender();
           }
         });
@@ -849,7 +1012,11 @@
       ui.selectedLearned.textContent = learned ? "⭐ Learned" : "☆ Not learned yet";
       ui.selectedLearned.classList.toggle("learned", learned);
     }
-    if (ui.selectedExampleArt) ui.selectedExampleArt.textContent = "🪷";
+    const selectedVocab = getVocabulary(selectedLetter.exampleText, selectedLetter.meaning);
+    if (ui.selectedExampleImage) {
+      ui.selectedExampleImage.src = selectedVocab.image;
+      ui.selectedExampleImage.alt = selectedVocab.alt || selectedVocab.meaning || selectedLetter.meaning;
+    }
     if (ui.gardenCoverage) ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised.";
   }
 
@@ -860,24 +1027,14 @@
       return;
     }
     const state = forestState.activities["letter-garden"];
-    const subgroups = Array.from(new Set(letters
-      .filter(function (letter) { return letter.category === "consonant"; })
-      .map(function (letter) { return letter.subgroup || "other"; })));
     ui.subgroupTabs.innerHTML = "";
-    const allBtn = document.createElement("button");
-    allBtn.type = "button";
-    allBtn.className = "button ghost";
-    allBtn.textContent = "All";
-    allBtn.classList.toggle("active", activeSubgroup === "all");
-    allBtn.addEventListener("click", function () { state.answers.subgroup = "all"; saveAndRender(); });
-    ui.subgroupTabs.appendChild(allBtn);
-    subgroups.forEach(function (subgroup) {
+    LETTER_GARDEN_SUBGROUPS.forEach(function (subgroup) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "button ghost";
-      btn.textContent = subgroup;
-      btn.classList.toggle("active", activeSubgroup === subgroup);
-      btn.addEventListener("click", function () { state.answers.subgroup = subgroup; saveAndRender(); });
+      btn.textContent = subgroup.label;
+      btn.classList.toggle("active", activeSubgroup === subgroup.id);
+      btn.addEventListener("click", function () { state.answers.subgroup = subgroup.id; saveAndRender(); });
       ui.subgroupTabs.appendChild(btn);
     });
   }
@@ -935,22 +1092,34 @@
 
   function renderPictureMatch() {
     const activityId = "picture-match";
-    const letter = getCurrentLetter(activityId);
-    if (!letter || !ui.pictureChoices || !ui.picturePrompt || !ui.pictureStatus) return;
-    ui.picturePrompt.textContent = "Select the correct picture for: " + letter.exampleText + " (" + letter.meaning + ")";
+    const item = getCurrentQuestion(activityId);
+    if (!item || !ui.pictureChoices || !ui.picturePrompt || !ui.pictureStatus) return;
+    ui.picturePrompt.textContent = "Select the correct picture for: " + item.sanskrit + " (" + item.meaning + ")";
     ui.pictureStatus.textContent = "Choose the matching illustration.";
     ui.pictureChoices.innerHTML = "";
-    const options = buildOptions(forestState.activities[activityId].currentIndex, 4);
+    const current = forestState.activities[activityId];
+    const targetIndex = current.order[current.currentIndex];
+    const optionIndices = [targetIndex];
+    for (let index = 0; index < pictureQuestions.length && optionIndices.length < 4; index += 1) {
+      if (index === targetIndex) continue;
+      optionIndices.push(index);
+    }
+    for (let i = optionIndices.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = optionIndices[i];
+      optionIndices[i] = optionIndices[j];
+      optionIndices[j] = tmp;
+    }
+    const options = optionIndices.map(function (idx) { return pictureQuestions[idx]; });
     options.forEach(function (option) {
-      const vocab = getVocabulary(option.exampleText, option.meaning);
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn picture-choice";
       btn.innerHTML =
-        '<img class="picture-illustration" src="' + vocab.image + '" alt="' + vocab.alt + '">' +
-        '<span class="picture-label">' + option.exampleText + " · " + option.meaning + "</span>";
+        '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
+        '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
-        if (option.id === letter.id) {
+        if (option.id === item.id) {
           btn.classList.add("correct");
           markCurrentComplete(activityId, "Correct picture!");
           setMascotState("celebrating");
@@ -990,50 +1159,58 @@
 
   function renderFlashcardFlip() {
     const activityId = "flashcard-flip";
-    const letter = getCurrentLetter(activityId);
-    if (!letter || !ui.flashcard || !ui.flashChoices || !ui.flashStatus) return;
+    const item = getCurrentQuestion(activityId);
+    if (!item || !ui.flashcard || !ui.flashChoices || !ui.flashStatus) return;
     const localState = runtime.byActivity[activityId];
+    const cardClass = localState.flipped ? "flashcard flip is-flipped" : "flashcard flip";
+    ui.flashcard.className = cardClass;
     ui.flashcard.innerHTML = localState.flipped
-      ? '<p><strong>' + letter.exampleText + "</strong><br>(" + letter.meaning + ")</p>"
-      : '<p class="flash-dev">' + letter.symbol + "</p>";
-    ui.flashStatus.textContent = localState.flipped ? "Pick the correct meaning." : "Flip the card.";
+      ? '<div class="flash-face flash-back"><p><strong>' + item.meaning + "</strong></p><img class=\"picture-illustration\" src=\"" + item.image + "\" alt=\"" + item.alt + "\"><p class=\"flash-tran\">" + item.transliteration + "</p></div>"
+      : '<div class="flash-face flash-front"><p class="flash-dev">' + item.sanskrit + "</p><p class=\"flash-tran\">" + item.transliteration + "</p></div>";
+    ui.flashStatus.textContent = localState.flipped ? "Now mark this card as learned." : "Flip the card to reveal the meaning.";
     ui.flashChoices.innerHTML = "";
     if (!localState.flipped) return;
-    const options = buildOptions(forestState.activities[activityId].currentIndex, 4).map(function (item) { return item.meaning; });
-    options.forEach(function (meaning) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "choice-btn";
-      btn.textContent = meaning;
-      btn.addEventListener("click", function () {
-        if (meaning === letter.meaning) {
-          btn.classList.add("correct");
-          markCurrentComplete(activityId, "Correct meaning!");
-        } else {
-          btn.classList.add("wrong");
-          incrementAttempt(activityId);
-          ui.flashStatus.textContent = "Try again.";
-        }
-      });
-      ui.flashChoices.appendChild(btn);
+    const learnedBtn = document.createElement("button");
+    learnedBtn.type = "button";
+    learnedBtn.className = "button secondary";
+    learnedBtn.textContent = "I learned this card";
+    learnedBtn.disabled = isCurrentResolved(activityId);
+    learnedBtn.addEventListener("click", function () {
+      markCurrentComplete(activityId, "Card learned!");
     });
+    ui.flashChoices.appendChild(learnedBtn);
   }
 
   function renderFeedMithu() {
     const activityId = "feed-mithu";
-    const letter = getCurrentLetter(activityId);
-    if (!letter || !ui.feedPrompt || !ui.feedChoices || !ui.feedStatus || !ui.lessonMascot) return;
-    ui.feedPrompt.textContent = "Feed Mithu: pick the correct word for " + letter.symbol;
+    const item = getCurrentQuestion(activityId);
+    if (!item || !ui.feedPrompt || !ui.feedChoices || !ui.feedStatus || !ui.lessonMascot) return;
+    ui.feedPrompt.textContent = "Feed Mithu: choose " + item.sanskrit + " (" + item.meaning + ")";
     ui.feedStatus.textContent = "Choose one.";
     ui.feedChoices.innerHTML = "";
-    const options = buildOptions(forestState.activities[activityId].currentIndex, 4);
+    const current = forestState.activities[activityId];
+    const targetIndex = current.order[current.currentIndex];
+    const optionIndices = [targetIndex];
+    for (let index = 0; index < feedMithuQuestions.length && optionIndices.length < 4; index += 1) {
+      if (index === targetIndex) continue;
+      optionIndices.push(index);
+    }
+    for (let i = optionIndices.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = optionIndices[i];
+      optionIndices[i] = optionIndices[j];
+      optionIndices[j] = tmp;
+    }
+    const options = optionIndices.map(function (idx) { return feedMithuQuestions[idx]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "choice-btn";
-      btn.textContent = option.exampleText;
+      btn.className = "choice-btn picture-choice";
+      btn.innerHTML =
+        '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
+        '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
-        if (option.id === letter.id) {
+        if (option.sanskrit === item.sanskrit) {
           animateFruitToMithu(btn);
           btn.classList.add("correct");
           markCurrentComplete(activityId, "Mithu enjoyed the fruit!");
@@ -1052,9 +1229,11 @@
     if (REDUCED_MOTION || !ui.lessonMascot) return;
     const source = sourceButton.getBoundingClientRect();
     const target = ui.lessonMascot.getBoundingClientRect();
-    const fruit = document.createElement("span");
+    const sourceImage = sourceButton.querySelector("img");
+    const fruit = document.createElement("img");
     fruit.className = "flying-fruit";
-    fruit.textContent = "🍎";
+    fruit.src = sourceImage ? sourceImage.src : "assets/illustrations/fruits/apple.svg";
+    fruit.alt = "";
     fruit.style.left = source.left + source.width / 2 + "px";
     fruit.style.top = source.top + source.height / 2 + "px";
     document.body.appendChild(fruit);
@@ -1112,15 +1291,16 @@
       const status = mount.querySelector("#status-" + activity.id);
       const complete = mount.querySelector("#complete-" + activity.id);
       const resolved = isCurrentResolved(activity.id);
-      const atLast = state.currentIndex >= letters.length - 1;
-      const canFinish = atLast && resolved && state.completedItems.length >= letters.length && !state.isComplete;
+      const itemCount = getActivityItemCount(activity.id);
+      const atLast = state.currentIndex >= itemCount - 1;
+      const canFinish = atLast && resolved && state.completedItems.length >= itemCount && !state.isComplete;
       if (progress) {
         if (activity.id === "magical-tree") {
-          progress.textContent = "Magical Tree: " + state.completedItems.length + " of 48 letters discovered.";
+          progress.textContent = state.completedItems.length + "/48";
         } else if (activity.id === "letter-garden") {
-          progress.textContent = "Letter Garden: " + state.completedItems.length + " of 48 letters practised.";
+          progress.textContent = state.completedItems.length + "/48";
         } else {
-          progress.textContent = "Progress: " + (state.currentIndex + 1) + " of 48";
+          progress.textContent = (state.currentIndex + 1) + "/" + itemCount;
         }
       }
       if (status) status.textContent = runtime.byActivity[activity.id].status || "";
@@ -1148,7 +1328,6 @@
   function updateWorldCompletionPanels() {
     const global = CORE.computeGlobalProgress(forestState);
     const allDone = global.completedActivityCount === global.totalActivities;
-    if (ui.doneBanner) ui.doneBanner.classList.toggle("show", allDone);
     if (ui.completionScreen) ui.completionScreen.classList.toggle("show", allDone);
     if (ui.completionStars) ui.completionStars.textContent = String(forestState.xp);
   }

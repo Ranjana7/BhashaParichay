@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#fff9ef"/>
+  <ellipse cx="112" cy="88" rx="44" ry="34" fill="#ffb735"/>
+  <ellipse cx="140" cy="70" rx="14" ry="8" fill="#5ca94a"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#8a4d00">Mango</text>
+</svg>

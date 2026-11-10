@@ -69,6 +69,7 @@
     <section class="panel" id="activityNavigator">
       <h2>Alphabet Forest Progress</h2>
       <p id="globalProgressSummary" class="footer-note">0 of 9 activities complete</p>
+      <p class="footer-note"><strong id="globalProgressPercent">0%</strong> complete · ⭐ <strong id="globalStars">0</strong> stars</p>
       <div class="progress-meter" aria-hidden="true">
         <div id="globalProgressFill" class="progress-fill"></div>
       </div>
@@ -170,9 +171,9 @@
       <aside class="panel">
         <h2>Letter Garden</h2>
         <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
-          <button class="button ghost category-tab active" data-category="vowels" type="button">Vowels (स्वर)</button>
-          <button class="button ghost category-tab" data-category="consonants" type="button">Consonants (व्यञ्जन)</button>
-          <button class="button ghost category-tab" data-category="practice" type="button">Practice</button>
+          <button class="button ghost category-tab active" data-category="vowels" type="button">स्वर</button>
+          <button class="button ghost category-tab" data-category="consonants" type="button">व्यञ्जन</button>
+          <button class="button ghost category-tab" data-category="practice" type="button">अभ्यास</button>
         </div>
         <div class="hero-actions" id="consonantSubgroupTabs" aria-label="Consonant groups"></div>
         <p id="gardenCoverage" class="footer-note">Browse and revise letters in the grid.</p>
@@ -188,7 +189,8 @@
             <span id="selectedLearned" class="learned-badge">☆ Not learned yet</span>
           </p>
           <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
-          <p class="example-line"><span id="selectedExampleArt" class="example-art" aria-hidden="true">🔥</span><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <p class="example-line"><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <img id="selectedExampleImage" class="picture-illustration selected-picture" src="assets/illustrations/vocab/fire.svg" alt="Camp fire illustration">
           <div class="hero-actions">
             <button id="prevLetterBtn" class="button ghost" type="button">◀ Previous</button>
             <button id="nextLetterBtn" class="button ghost" type="button">Next ▶</button>
@@ -197,23 +199,8 @@
             <button id="panelMuteBtn" class="button ghost audio-control" type="button">🔇 Mute</button>
           </div>
           <p id="audioFallback" class="fallback" aria-live="polite"></p>
-          <div id="controls-letter-garden"></div>
         </div>
       </section>
-    </section>
-
-    <section class="panel" id="lessonStatsPanel">
-      <div class="hero-actions">
-        <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
-      </div>
-      <p id="progressText" class="footer-note">Keep going! Finish all activities to complete Alphabet Forest.</p>
-      <div id="doneBanner" class="done-banner" aria-live="polite">
-        Wonderful! You completed Alphabet Forest! ⭐
-        <span id="earnedStars"></span>
-        <button id="nextLessonBtn" class="button secondary" type="button">Unlock Next Lesson</button>
-        <button id="nextAdventureBtn" class="button primary" type="button">Next Adventure</button>
-      </div>
     </section>
 
     <section id="completionScreen" class="panel completion-screen" aria-live="polite">
@@ -263,10 +250,9 @@
     <section class="panel" id="activityFlashGamePanel" data-activity-id="flashcard-flip">
       <h2>Activity 4: Flashcard Flip</h2>
       <div class="activity">
-        <p>Flip the flashcard, then choose the correct English meaning.</p>
-        <button id="flipFlashcard" class="button secondary" type="button">Flip Card</button>
-        <div id="flashcard" class="flashcard" aria-live="polite"></div>
-        <div id="flashChoices" class="choices"></div>
+        <p>Tap or press Enter on the flashcard to flip it and reveal the meaning.</p>
+        <div id="flashcard" class="flashcard" role="button" tabindex="0" aria-live="polite" aria-label="Flashcard. Tap to flip."></div>
+        <div id="flashChoices" class="hero-actions"></div>
         <p id="flashStatus" class="status" aria-live="polite"></p>
         <div id="controls-flashcard-flip"></div>
       </div>

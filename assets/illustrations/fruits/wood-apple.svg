@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#fff8ef"/>
+  <circle cx="110" cy="88" r="36" fill="#b88a4a"/>
+  <circle cx="110" cy="88" r="20" fill="#e7c57d"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#6f4d21">Wood Apple</text>
+</svg>
