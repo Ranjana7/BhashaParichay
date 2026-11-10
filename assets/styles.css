@@ -318,6 +318,31 @@ p {
   border: 2px solid #dbe6ff;
 }
 
+.category-banner {
+  border-width: 2px;
+  padding: 12px 16px;
+}
+
+.category-banner h2 {
+  margin: 2px 0 6px;
+}
+
+.category-banner p {
+  margin: 0;
+  font-weight: 600;
+  color: #30416b;
+}
+
+.learn-banner {
+  background: linear-gradient(120deg, #eef8ff, #f4fff8);
+  border-color: #bfe2ff;
+}
+
+.practice-banner {
+  background: linear-gradient(120deg, #fff5ec, #fff9ef);
+  border-color: #ffd9b5;
+}
+
 .privacy-note {
   font-size: 0.95rem;
   background: #edf8ff;
@@ -1087,7 +1112,7 @@ body.audio-disabled .audio-control {
 
 .progress-meter {
   width: 100%;
-  height: 16px;
+  height: 10px;
   border-radius: 999px;
   background: #ecedfa;
   overflow: hidden;
@@ -1098,6 +1123,21 @@ body.audio-disabled .audio-control {
   width: 0%;
   background: linear-gradient(120deg, #37c96f, #95de4f);
   transition: width 0.35s ease;
+}
+
+.progress-compact {
+  display: grid;
+  gap: 6px;
+}
+
+.progress-compact p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.next-world-status {
+  font-weight: 800;
+  color: #8a5a00;
 }
 
 .review-list li {
@@ -1157,6 +1197,40 @@ th {
   height: 200px;
   margin: 6px auto 8px;
 }
+
+.magic-door {
+  margin: 8px auto 0;
+  width: 130px;
+  position: relative;
+}
+
+.door-frame {
+  width: 78px;
+  height: 102px;
+  margin: 0 auto;
+  border-radius: 42px 42px 12px 12px;
+  background: linear-gradient(180deg, #8152ff, #5a30cc);
+  padding: 8px;
+  box-shadow: 0 8px 20px rgba(79, 43, 172, 0.28);
+}
+
+.door-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 34px 34px 8px 8px;
+  background: radial-gradient(circle at 50% 20%, #d9f4ff, #7ec2ff 62%, #5f94f5);
+}
+
+.door-spark {
+  position: absolute;
+  font-size: 1.05rem;
+  color: #6d59ff;
+  text-shadow: 0 0 8px rgba(99, 83, 255, 0.35);
+}
+
+.door-spark.s1 { left: 6px; top: 8px; animation: sparkle 3.2s ease-in-out infinite; }
+.door-spark.s2 { right: 8px; top: 18px; animation: sparkle 3.2s ease-in-out infinite -0.8s; }
+.door-spark.s3 { right: 20px; top: 82px; animation: sparkle 3.2s ease-in-out infinite -1.4s; }
 
 .footer-note {
   color: #354178;

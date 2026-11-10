@@ -21,6 +21,11 @@
     { id: "letter-tracing", title: "Write It Yourself!", sectionId: "activityTraceGamePanel", controlsId: "controls-letter-tracing", type: "tracing" },
     { id: "hidden-letter-hunt", title: "Hidden Letter Hunt", sectionId: "activityHuntGamePanel", controlsId: "controls-hidden-letter-hunt", type: "quiz" }
   ];
+  const LEARNING_ACTIVITY_IDS = ["magical-tree", "letter-garden"];
+  const PRACTICE_ACTIVITY_IDS = ACTIVITIES
+    .map(function (activity) { return activity.id; })
+    .filter(function (activityId) { return !LEARNING_ACTIVITY_IDS.includes(activityId); });
+  const NEXT_WORLD_UNLOCK_KEY = "next-world-unlock-v1";
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
   const ACTIVITY_SPEECH = {
@@ -120,8 +125,12 @@
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
     globalSummary: document.getElementById("globalProgressSummary"),
-    globalFill: document.getElementById("globalProgressFill"),
-    globalPercent: document.getElementById("globalProgressPercent"),
+    learningProgressText: document.getElementById("learningProgressText"),
+    practiceProgressText: document.getElementById("practiceProgressText"),
+    learningProgressFill: document.getElementById("learningProgressFill"),
+    practiceProgressFill: document.getElementById("practiceProgressFill"),
+    nextWorldStatus: document.getElementById("nextWorldStatus"),
+    unlockHintText: document.getElementById("unlockHintText"),
     globalStars: document.getElementById("globalStars"),
     treeLetters: document.getElementById("magicalTreeLetters"),
     treeSparkleLottie: document.getElementById("treeSparkleLottie"),
@@ -186,7 +195,10 @@
     huntStatus: document.getElementById("huntStatus"),
     completionCanvas: document.getElementById("celebration-canvas"),
     completionScreen: document.getElementById("completionScreen"),
-    completionStars: document.getElementById("completionStars")
+    completionStars: document.getElementById("completionStars"),
+    completionTitle: document.getElementById("completionTitle"),
+    completionMessage: document.getElementById("completionMessage"),
+    completionNextBtn: document.getElementById("completionNextBtn")
   };
 
   const stateApi = CORE.createStateApi(window.localStorage, letters.length);
@@ -235,6 +247,7 @@
   initConfetti();
   initLottieAnimations();
   initActivityControls();
+  initCompletionActions();
   renderAll();
 
   function getActivityItemCount(activityId) {
@@ -854,6 +867,13 @@
     });
   }
 
+  function initCompletionActions() {
+    if (!ui.completionNextBtn) return;
+    ui.completionNextBtn.addEventListener("click", function () {
+      window.location.href = "explore-worlds.html";
+    });
+  }
+
   function setActivityStatus(activityId, text) {
     runtime.byActivity[activityId].status = text;
   }
@@ -1027,6 +1047,21 @@
     renderAll();
   }
 
+  function computeJourneyProgress() {
+    const learningCompletedCount = LEARNING_ACTIVITY_IDS.reduce(function (count, activityId) {
+      return count + (forestState.activities[activityId] && forestState.activities[activityId].isComplete ? 1 : 0);
+    }, 0);
+    const practiceCompletedCount = PRACTICE_ACTIVITY_IDS.reduce(function (count, activityId) {
+      return count + (forestState.activities[activityId] && forestState.activities[activityId].isComplete ? 1 : 0);
+    }, 0);
+    return {
+      learningCompletedCount: learningCompletedCount,
+      learningTotal: LEARNING_ACTIVITY_IDS.length,
+      practiceCompletedCount: practiceCompletedCount,
+      practiceTotal: PRACTICE_ACTIVITY_IDS.length
+    };
+  }
+
   function renderAll() {
     renderGlobalProgress();
     renderMagicalTree();
@@ -1043,10 +1078,19 @@
   }
 
   function renderGlobalProgress() {
-    const global = CORE.computeGlobalProgress(forestState);
-    if (ui.globalSummary) ui.globalSummary.textContent = global.completedActivityCount + " of " + global.totalActivities + " activities complete";
-    if (ui.globalFill) ui.globalFill.style.width = global.globalPercent.toFixed(1) + "%";
-    if (ui.globalPercent) ui.globalPercent.textContent = Math.round(global.globalPercent) + "%";
+    const journey = computeJourneyProgress();
+    const unlocked = Boolean(forestState.completionRewarded && forestState.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
+    if (ui.globalSummary) ui.globalSummary.textContent = "Follow the journey and unlock your next adventure.";
+    if (ui.learningProgressText) ui.learningProgressText.textContent = journey.learningCompletedCount + " of " + journey.learningTotal + " completed";
+    if (ui.practiceProgressText) ui.practiceProgressText.textContent = journey.practiceCompletedCount + " of " + journey.practiceTotal + " completed";
+    if (ui.learningProgressFill) ui.learningProgressFill.style.width = ((journey.learningCompletedCount / journey.learningTotal) * 100).toFixed(1) + "%";
+    if (ui.practiceProgressFill) ui.practiceProgressFill.style.width = ((journey.practiceCompletedCount / journey.practiceTotal) * 100).toFixed(1) + "%";
+    if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
+    if (ui.unlockHintText) {
+      ui.unlockHintText.textContent = unlocked
+        ? "Your next adventure is ready!"
+        : "Finish Magical Tree, Letter Garden, and any two practice games to unlock your next adventure!";
+    }
     if (ui.globalStars) ui.globalStars.textContent = String(forestState.xp);
   }
 
@@ -1575,9 +1619,33 @@
   }
 
   function updateWorldCompletionPanels() {
-    const global = CORE.computeGlobalProgress(forestState);
-    const allDone = global.completedActivityCount === global.totalActivities;
-    if (ui.completionScreen) ui.completionScreen.classList.toggle("show", allDone);
+    const journey = computeJourneyProgress();
+    const canUnlock = journey.learningCompletedCount === 2 && journey.practiceCompletedCount >= 2;
+    const alreadyUnlocked = Boolean(forestState.completionRewarded && forestState.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
+    if (canUnlock && !alreadyUnlocked) {
+      forestState.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
+      forestState.worldCompleted = true;
+      stateApi.saveState(forestState);
+      setMascotStateForDuration("dancing", 1250);
+      setMascotSpeech("Fantastic! You finished this adventure!");
+      fireConfetti(true);
+      fireSectionConfetti("completionScreen", true);
+      playLottie("treeCelebrate");
+    }
+    const unlocked = alreadyUnlocked || canUnlock;
+    if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
+    if (ui.unlockHintText) {
+      ui.unlockHintText.textContent = unlocked
+        ? "Your next adventure is ready!"
+        : "Finish Magical Tree, Letter Garden, and any two practice games to unlock your next adventure!";
+    }
+    if (ui.completionScreen) ui.completionScreen.classList.toggle("show", unlocked);
+    if (ui.completionTitle) ui.completionTitle.textContent = unlocked ? "Next World Unlocked!" : "Keep Going!";
+    if (ui.completionMessage) {
+      ui.completionMessage.textContent = unlocked
+        ? "Your next adventure is ready!"
+        : "Complete the learning goals to unlock your next adventure.";
+    }
     if (ui.completionStars) ui.completionStars.textContent = String(forestState.xp);
   }
 })();

@@ -6,7 +6,7 @@
   <title>SanskritParichay | Alphabet Forest</title>
   <meta name="description" content="Play Alphabet Forest and learn Sanskrit letters through games.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="assets/styles.css?v=20261110p7">
+  <link rel="stylesheet" href="assets/styles.css?v=20261110p8">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -67,11 +67,21 @@
 
     <section class="panel" id="activityNavigator">
       <h2>Alphabet Forest Progress</h2>
-      <p id="globalProgressSummary" class="footer-note">0 of 9 activities complete</p>
-      <p class="footer-note"><strong id="globalProgressPercent">0%</strong> complete · ⭐ <strong id="globalStars">0</strong> stars</p>
-      <div class="progress-meter" aria-hidden="true">
-        <div id="globalProgressFill" class="progress-fill"></div>
+      <p id="globalProgressSummary" class="footer-note">Follow the journey and unlock your next adventure.</p>
+      <div class="progress-compact">
+        <p><strong>LEARNING:</strong> <span id="learningProgressText">0 of 2 completed</span></p>
+        <div class="progress-meter" aria-hidden="true"><div id="learningProgressFill" class="progress-fill"></div></div>
+        <p><strong>PRACTICE:</strong> <span id="practiceProgressText">0 of 7 completed</span></p>
+        <div class="progress-meter" aria-hidden="true"><div id="practiceProgressFill" class="progress-fill"></div></div>
+        <p><strong>STARS:</strong> ⭐ <strong id="globalStars">0</strong></p>
+        <p><strong>NEXT WORLD:</strong> <span id="nextWorldStatus" class="next-world-status">Locked</span></p>
       </div>
+      <p id="unlockHintText" class="footer-note">Finish Magical Tree, Letter Garden, and any two practice games to unlock your next adventure!</p>
+    </section>
+
+    <section class="panel category-banner learn-banner">
+      <h2>Learn Sanskrit Letters</h2>
+      <p>Complete Magical Tree and Letter Garden to master all 48 letters.</p>
     </section>
 
     <section class="panel forest-scene" id="forestScene" data-activity-id="magical-tree">
@@ -201,11 +211,24 @@
     </section>
 
     <section id="completionScreen" class="panel completion-screen" aria-live="polite">
-      <h2>Adventure Complete!</h2>
-      <p>You finished Alphabet Forest with joyful learning.</p>
+      <h2 id="completionTitle">Next World Unlocked!</h2>
+      <p id="completionMessage">Your next adventure is ready!</p>
       <p><strong>Stars earned:</strong> <span id="completionStars">0</span></p>
+      <div class="magic-door" aria-hidden="true">
+        <span class="door-spark s1">✦</span>
+        <span class="door-spark s2">✧</span>
+        <span class="door-spark s3">✦</span>
+        <div class="door-frame">
+          <div class="door-inner"></div>
+        </div>
+      </div>
       <div id="completionLottie" class="completion-lottie"></div>
-      <button id="completionNextBtn" class="button primary" type="button">Go to Next Adventure</button>
+      <button id="completionNextBtn" class="button primary" type="button">Continue to Next World</button>
+    </section>
+
+    <section class="panel category-banner practice-banner" id="practiceCategoryStart">
+      <h2>Play &amp; Practise</h2>
+      <p>Pick any practice game in any order. Keep playing even after unlock!</p>
     </section>
 
     <section class="panel" id="activityHearGamePanel" data-activity-id="hear-and-pick">
@@ -312,8 +335,8 @@
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
-  <script src="assets/vocabulary-map.js?v=20261110p7"></script>
-  <script src="assets/alphabet-forest-core.js?v=20261110p7"></script>
-  <script src="assets/alphabet-forest.js?v=20261110p7"></script>
+  <script src="assets/vocabulary-map.js?v=20261110p8"></script>
+  <script src="assets/alphabet-forest-core.js?v=20261110p8"></script>
+  <script src="assets/alphabet-forest.js?v=20261110p8"></script>
 </body>
 </html>

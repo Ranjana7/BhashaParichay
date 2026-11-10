@@ -57,12 +57,20 @@ test("all activity controls are present in DOM", () => {
   });
 });
 
-test("global panel is consolidated summary-only and no 3-of-6 wording", () => {
-  assert.ok(html.includes("0 of 9 activities complete"));
-  assert.ok(html.includes('id="globalProgressPercent"'));
+test("global panel uses learning/practice/stars/unlock summary", () => {
+  assert.ok(html.includes('id="learningProgressText"'));
+  assert.ok(html.includes('id="practiceProgressText"'));
+  assert.ok(html.includes('id="nextWorldStatus"'));
   assert.ok(html.includes('id="globalStars"'));
+  assert.ok(html.includes("Finish Magical Tree, Letter Garden, and any two practice games"));
+  assert.equal(html.includes("0 of 9 activities complete"), false);
   assert.equal(html.includes('id="lessonStatsPanel"'), false);
   assert.equal(html.includes("Activity 3 of 6"), false);
+});
+
+test("page includes two learning category sections", () => {
+  assert.ok(html.includes(">Learn Sanskrit Letters<"));
+  assert.ok(html.includes(">Play &amp; Practise<"));
 });
 
 test("audio is paused without browser speech fallback", () => {
@@ -165,6 +173,12 @@ test("auto progression uses cancellable timers and manual controls", () => {
   assert.ok(js.includes("scheduleAutoAdvance("));
   assert.ok(js.includes("cancelAutoAdvance("));
   assert.ok(js.includes("data-action=\"continue\""));
+});
+
+test("next world unlock condition requires 2 learning and 2 practice completions", () => {
+  assert.ok(js.includes("const LEARNING_ACTIVITY_IDS = [\"magical-tree\", \"letter-garden\"]"));
+  assert.ok(js.includes("const NEXT_WORLD_UNLOCK_KEY = \"next-world-unlock-v1\""));
+  assert.ok(js.includes("journey.learningCompletedCount === 2 && journey.practiceCompletedCount >= 2"));
 });
 
 test("default forest state has independent activity buckets", () => {
