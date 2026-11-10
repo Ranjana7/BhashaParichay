@@ -42,7 +42,6 @@
           <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
           <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
         </svg>
-        <div id="mithuReactionLottie" class="mithu-reaction-lottie" aria-hidden="true"></div>
         <p id="lessonMascotSpeech" class="mascot-speech">Namaste! I am Mitthu. I will celebrate every correct answer with you.</p>
       </div>
       <p class="privacy-note">
@@ -63,7 +62,7 @@
       <a class="button ghost jump-link" href="#activityArrangeGamePanel">Arrange the Word</a>
       <a class="button ghost jump-link" href="#activityFlashGamePanel">Flashcard Flip</a>
       <a class="button ghost jump-link" href="#activityFeedGamePanel">Feed Mithu</a>
-      <a class="button ghost jump-link" href="#activityTraceGamePanel">Letter Tracing</a>
+      <a class="button ghost jump-link" href="#activityTraceGamePanel">Write It Yourself</a>
       <a class="button ghost jump-link" href="#activityHuntGamePanel">Hidden Letter Hunt</a>
     </nav>
 
@@ -270,18 +269,29 @@
     </section>
 
     <section class="panel" id="activityTraceGamePanel" data-activity-id="letter-tracing">
-      <h2>Activity 6: Letter Tracing</h2>
+      <h2>Activity 6: Write It Yourself!</h2>
       <div class="activity">
-        <p id="tracePrompt">Trace the displayed Devanagari letter shape with your finger or mouse.</p>
+        <p id="tracePrompt">Look at the target letter, write it on the blank canvas, then check and compare.</p>
         <div class="trace-wrap">
-          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter tracing board"></canvas>
+          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
           <div class="trace-target">
             <span id="traceTargetLetter">अ</span>
           </div>
         </div>
+        <div id="writingComparePanel" class="writing-compare" hidden>
+          <div class="writing-sample">
+            <p class="footer-note"><strong>Your writing</strong></p>
+            <img id="writingSampleImage" alt="Your writing sample">
+          </div>
+          <div class="writing-sample">
+            <p class="footer-note"><strong>Correct letter</strong></p>
+            <p id="writingTargetLarge" class="writing-target-large">अ</p>
+          </div>
+        </div>
         <div class="hero-actions">
-          <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
-          <button id="checkTraceBtn" class="button secondary" type="button">Check tracing</button>
+          <button id="clearTraceBtn" class="button ghost" type="button">Try Again</button>
+          <button id="checkTraceBtn" class="button secondary" type="button">Check My Writing</button>
+          <button id="confirmWritingBtn" class="button primary" type="button" hidden>Looks Good, Continue</button>
         </div>
         <p id="traceStatus" class="status" aria-live="polite"></p>
         <div id="controls-letter-tracing"></div>

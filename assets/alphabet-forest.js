@@ -18,12 +18,22 @@
     { id: "arrange-word", title: "Arrange the Word", sectionId: "activityArrangeGamePanel", controlsId: "controls-arrange-word", type: "quiz" },
     { id: "flashcard-flip", title: "Flashcard Flip", sectionId: "activityFlashGamePanel", controlsId: "controls-flashcard-flip", type: "quiz" },
     { id: "feed-mithu", title: "Feed Mithu", sectionId: "activityFeedGamePanel", controlsId: "controls-feed-mithu", type: "quiz" },
-    { id: "letter-tracing", title: "Letter Tracing", sectionId: "activityTraceGamePanel", controlsId: "controls-letter-tracing", type: "tracing" },
+    { id: "letter-tracing", title: "Write It Yourself!", sectionId: "activityTraceGamePanel", controlsId: "controls-letter-tracing", type: "tracing" },
     { id: "hidden-letter-hunt", title: "Hidden Letter Hunt", sectionId: "activityHuntGamePanel", controlsId: "controls-hidden-letter-hunt", type: "quiz" }
   ];
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
-  const TRACE_REVIEW_LETTERS = ["अ", "आ", "क", "म", "ट", "ष"];
+  const ACTIVITY_SPEECH = {
+    "magical-tree": "Let's discover magical Sanskrit letters!",
+    "letter-garden": "Choose a letter and explore!",
+    "hear-and-pick": "Listen carefully and choose the letter!",
+    "picture-match": "Can you find the matching picture?",
+    "arrange-word": "Build the Sanskrit word in order!",
+    "flashcard-flip": "Think of the meaning before flipping!",
+    "feed-mithu": "Choose the right fruit for me!",
+    "letter-tracing": "Let's practise writing Sanskrit!",
+    "hidden-letter-hunt": "Can you spot the hidden letter?"
+  };
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -110,7 +120,6 @@
     audioDebug: document.getElementById("audioDebug"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
-    mithuReactionLottie: document.getElementById("mithuReactionLottie"),
     globalSummary: document.getElementById("globalProgressSummary"),
     globalFill: document.getElementById("globalProgressFill"),
     globalPercent: document.getElementById("globalProgressPercent"),
@@ -170,6 +179,10 @@
     traceStatus: document.getElementById("traceStatus"),
     clearTraceBtn: document.getElementById("clearTraceBtn"),
     checkTraceBtn: document.getElementById("checkTraceBtn"),
+    confirmWritingBtn: document.getElementById("confirmWritingBtn"),
+    writingComparePanel: document.getElementById("writingComparePanel"),
+    writingSampleImage: document.getElementById("writingSampleImage"),
+    writingTargetLarge: document.getElementById("writingTargetLarge"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
@@ -188,13 +201,17 @@
     confetti: null,
     lottie: {},
     mascotActiveSection: null,
+    mascotPinnedActivity: null,
+    mascotPinnedUntil: 0,
+    mascotStateTimeout: null,
+    autoAdvance: {},
+    treeGroupAdvanceTimer: null,
     tracing: {
       drawing: false,
       points: [],
-      glyphMask: null,
-      checkpoints: [],
-      hasGuide: false,
-      auditIncompleteSymbols: []
+      reviewed: false,
+      sampleImage: "",
+      lastLetterIndex: -1
     },
     byActivity: {}
   };
@@ -220,7 +237,6 @@
   initConfetti();
   initLottieAnimations();
   initActivityControls();
-  runTracingGuideAudit();
   renderAll();
 
   function getActivityItemCount(activityId) {
@@ -329,9 +345,9 @@
     audio.playbackRate = playbackRate || 1;
     runtime.currentAudio = audio;
     setMascotState("listening");
-    playLottie("mithuReaction");
     audio.addEventListener("ended", function () {
       setMascotState("idle");
+      updateMascotSpeechForActivity(runtime.mascotActiveSection);
     }, { once: true });
     audio.addEventListener("error", function () {
       if (feedbackEl) feedbackEl.textContent = "Could not play pronunciation clip.";
@@ -352,6 +368,15 @@
         if (!target) return;
         event.preventDefault();
         target.scrollIntoView({ behavior: "smooth", block: "start" });
+        const activity = ACTIVITIES.find(function (entry) { return entry.sectionId === target.id; });
+        if (activity) {
+          runtime.mascotPinnedActivity = activity.id;
+          runtime.mascotPinnedUntil = Date.now() + 1400;
+          runtime.mascotActiveSection = activity.id;
+          moveMascotNearSection(target);
+          updateMascotSpeechForActivity(activity.id);
+          setMascotStateForDuration("flying", 320);
+        }
       });
     });
     if (typeof IntersectionObserver !== "function") return;
@@ -378,49 +403,71 @@
     ui.lessonMascot.classList.add("state-" + stateName);
   }
 
+  function setMascotStateForDuration(stateName, durationMs) {
+    setMascotState(stateName);
+    if (runtime.mascotStateTimeout) window.clearTimeout(runtime.mascotStateTimeout);
+    runtime.mascotStateTimeout = window.setTimeout(function () {
+      setMascotState("idle");
+      updateMascotSpeechForActivity(runtime.mascotActiveSection);
+      runtime.mascotStateTimeout = null;
+    }, durationMs);
+  }
+
   function setMascotSpeech(text) {
     if (ui.lessonMascotSpeech) ui.lessonMascotSpeech.textContent = text;
   }
 
+  function updateMascotSpeechForActivity(activityId) {
+    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Let's keep learning Sanskrit together!");
+  }
+
   function initMascotCompanion() {
     if (!ui.lessonMascot) return;
-    setMascotState("welcome");
-    setMascotSpeech("Namaste! I am Mithu. Let's discover Sanskrit together.");
+    setMascotState("idle");
+    updateMascotSpeechForActivity("magical-tree");
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
+    function applyActiveSection(section) {
+      const activity = ACTIVITIES.find(function (item) { return item.sectionId === section.id; });
+      if (!activity || runtime.mascotActiveSection === activity.id) return;
+      if (runtime.mascotPinnedActivity && Date.now() < runtime.mascotPinnedUntil && activity.id !== runtime.mascotPinnedActivity) return;
+      runtime.mascotActiveSection = activity.id;
+      if (runtime.mascotPinnedActivity === activity.id && Date.now() >= runtime.mascotPinnedUntil) {
+        runtime.mascotPinnedActivity = null;
+      }
+      moveMascotNearSection(section);
+      updateMascotSpeechForActivity(activity.id);
+      setMascotStateForDuration("flying", 380);
+    }
     function updateActiveSection() {
+      if (runtime.mascotPinnedActivity && Date.now() >= runtime.mascotPinnedUntil) {
+        runtime.mascotPinnedActivity = null;
+      }
       let best = null;
       let bestScore = -Infinity;
+      const anchorY = window.innerHeight * 0.32;
       sections.forEach(function (section) {
         const rect = section.getBoundingClientRect();
-        const sectionMid = rect.top + rect.height * 0.5;
-        const viewportMid = window.innerHeight * 0.45;
-        const score = -Math.abs(sectionMid - viewportMid);
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+        let score;
+        if (rect.top <= anchorY && rect.bottom >= anchorY) {
+          score = 10000 - Math.abs(anchorY - rect.top);
+        } else {
+          const sectionMid = rect.top + rect.height * 0.5;
+          score = -Math.abs(sectionMid - anchorY);
+        }
         if (score > bestScore) {
           bestScore = score;
           best = section;
         }
       });
       if (!best) return;
-      const activity = ACTIVITIES.find(function (item) { return item.sectionId === best.id; });
-      if (!activity || runtime.mascotActiveSection === activity.id) return;
-      runtime.mascotActiveSection = activity.id;
-      moveMascotNearSection(best);
-      setMascotState("flying");
-      setTimeout(function () { setMascotState("idle"); }, 420);
+      applyActiveSection(best);
     }
     if (typeof IntersectionObserver === "function") {
-      const observer = new IntersectionObserver(function (entries) {
-        const active = entries.filter(function (entry) { return entry.isIntersecting; })
-          .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
-        if (!active) return;
-        const activity = ACTIVITIES.find(function (item) { return item.sectionId === active.target.id; });
-        if (!activity || runtime.mascotActiveSection === activity.id) return;
-        runtime.mascotActiveSection = activity.id;
-        moveMascotNearSection(active.target);
-        setMascotState("flying");
-        setTimeout(function () { setMascotState("idle"); }, 420);
-      }, { threshold: [0.22, 0.45, 0.7] });
+      const observer = new IntersectionObserver(function () {
+        updateActiveSection();
+      }, { threshold: [0.25, 0.55], rootMargin: "-10% 0px -25% 0px" });
       sections.forEach(function (section) { observer.observe(section); });
     }
     window.addEventListener("scroll", function () {
@@ -445,23 +492,22 @@
     const mobile = window.matchMedia("(max-width: 860px)").matches;
     ui.lessonMascot.classList.toggle("lesson-mascot-mobile", mobile);
     if (mobile) {
-      ui.lessonMascot.style.top = "86px";
+      ui.lessonMascot.style.top = "82px";
       ui.lessonMascot.style.right = "8px";
       return;
     }
     const rect = section.getBoundingClientRect();
-    const targetTop = Math.max(92, Math.min(window.innerHeight - 260, rect.top + rect.height * 0.18));
-    if (REDUCED_MOTION) {
-      ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
-      return;
-    }
-    animate(ui.lessonMascot, { top: [ui.lessonMascot.style.top || "120px", targetTop.toFixed(0) + "px"] }, { duration: 0.48, easing: "ease-out" });
+    const targetTop = Math.max(88, Math.min(window.innerHeight - 250, rect.top + rect.height * 0.2));
     ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
   }
 
   function initTreeControls() {
     if (ui.prevTreeGroupBtn) {
       ui.prevTreeGroupBtn.addEventListener("click", function () {
+        if (runtime.treeGroupAdvanceTimer) {
+          window.clearTimeout(runtime.treeGroupAdvanceTimer);
+          runtime.treeGroupAdvanceTimer = null;
+        }
         const activity = forestState.activities["magical-tree"];
         const currentGroup = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
         if (currentGroup <= 0) return;
@@ -472,6 +518,10 @@
     }
     if (ui.nextTreeGroupBtn) {
       ui.nextTreeGroupBtn.addEventListener("click", function () {
+        if (runtime.treeGroupAdvanceTimer) {
+          window.clearTimeout(runtime.treeGroupAdvanceTimer);
+          runtime.treeGroupAdvanceTimer = null;
+        }
         const activity = forestState.activities["magical-tree"];
         const currentGroup = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
         const nextStart = (currentGroup + 1) * TREE_GROUP_SIZE;
@@ -483,6 +533,10 @@
     }
     if (ui.playTreeAgainBtn) {
       ui.playTreeAgainBtn.addEventListener("click", function () {
+        if (runtime.treeGroupAdvanceTimer) {
+          window.clearTimeout(runtime.treeGroupAdvanceTimer);
+          runtime.treeGroupAdvanceTimer = null;
+        }
         if (!forestState.activities["magical-tree"].isComplete) return;
         const ok = window.confirm("Play Magical Tree again from the first group?");
         if (!ok) return;
@@ -533,6 +587,7 @@
           incrementAttempt(activityId);
           if (ui.arrangeStatus) ui.arrangeStatus.textContent = "Try again.";
           setMascotState("thinking");
+          setMascotSpeech("Good try! Let's try again!");
         }
       });
     }
@@ -599,25 +654,35 @@
     ui.traceCanvas.addEventListener("touchmove", moveDraw, { passive: false });
     ui.traceCanvas.addEventListener("touchend", endDraw);
 
-    if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () { clearTraceBoard(); });
+    if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
+      clearTraceBoard();
+      hideWritingComparison();
+      if (ui.traceStatus) ui.traceStatus.textContent = "Try writing the letter again.";
+    });
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
         const activityId = "letter-tracing";
-        const currentLetter = getCurrentLetter(activityId);
-        if (!runtime.tracing.hasGuide || runtime.tracing.auditIncompleteSymbols.includes(currentLetter.symbol)) {
-          if (ui.traceStatus) ui.traceStatus.textContent = "This letter's tracing guide is not available yet.";
+        if (runtime.tracing.points.length < 3) {
+          if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then check your writing.";
           return;
         }
-        const coverage = tracingCoverageScore();
-        if (coverage >= 0.62 && runtime.tracing.points.length >= 60) {
-          markCurrentComplete(activityId, "Great tracing!");
-          if (ui.traceStatus) ui.traceStatus.textContent = "Great tracing!";
-          setMascotState("celebrating");
-        } else {
-          incrementAttempt(activityId);
-          if (ui.traceStatus) ui.traceStatus.textContent = "Follow the dotted guide path and try again.";
-          setMascotState("encouraging");
+        runtime.tracing.sampleImage = ui.traceCanvas.toDataURL("image/png");
+        runtime.tracing.reviewed = true;
+        showWritingComparison(getCurrentLetter(activityId));
+        setMascotState("thinking");
+        setMascotSpeech("Compare your writing and choose what to do next.");
+        if (ui.traceStatus) ui.traceStatus.textContent = "Self-check: compare your writing with the correct letter.";
+      });
+    }
+    if (ui.confirmWritingBtn) {
+      ui.confirmWritingBtn.addEventListener("click", function () {
+        const activityId = "letter-tracing";
+        if (!runtime.tracing.reviewed) {
+          if (ui.traceStatus) ui.traceStatus.textContent = "Please check your writing first.";
+          return;
         }
+        hideWritingComparison();
+        markCurrentComplete(activityId, "Writing practised!");
       });
     }
   }
@@ -628,134 +693,21 @@
     if (!ctx) return;
     ctx.clearRect(0, 0, ui.traceCanvas.width, ui.traceCanvas.height);
     runtime.tracing.points = [];
-    drawTraceGuide();
+    runtime.tracing.sampleImage = "";
+    runtime.tracing.reviewed = false;
   }
 
-  function drawTraceGuide() {
-    if (!ui.traceCanvas) return;
-    const ctx = ui.traceCanvas.getContext("2d");
-    if (!ctx) return;
-    const letter = getCurrentLetter("letter-tracing");
-    const glyphGuide = buildGlyphGuide(letter && letter.symbol ? letter.symbol : "");
-    runtime.tracing.glyphMask = glyphGuide.mask;
-    runtime.tracing.checkpoints = glyphGuide.checkpoints;
-    runtime.tracing.hasGuide = Boolean(glyphGuide.mask && glyphGuide.mask.length);
-    if (!runtime.tracing.hasGuide) {
-      if (ui.traceStatus) ui.traceStatus.textContent = "Guide path unavailable for this letter.";
-      return;
-    }
-    const width = ui.traceCanvas.width;
-    const height = ui.traceCanvas.height;
-    ctx.save();
-    ctx.clearRect(0, 0, width, height);
-    const fontSize = Math.floor(height * 0.62);
-    ctx.font = "700 " + fontSize + "px Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(84, 102, 196, 0.16)";
-    ctx.fillText(letter.symbol, width / 2, height / 2 + 8);
-    ctx.strokeStyle = "rgba(120, 140, 216, 0.72)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([7, 6]);
-    ctx.strokeText(letter.symbol, width / 2, height / 2 + 8);
-    ctx.setLineDash([]);
-    ctx.fillStyle = "#4d7dff";
-    runtime.tracing.checkpoints.forEach(function (point) {
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 2.8, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    if (runtime.tracing.checkpoints.length) {
-      const start = runtime.tracing.checkpoints[0];
-      ctx.fillStyle = "#284fc8";
-      ctx.beginPath();
-      ctx.arc(start.x, start.y, 6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.strokeStyle = "#4b63cf";
-    ctx.lineWidth = 8;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    if (!runtime.tracing.points.length) {
-      ctx.restore();
-      return;
-    }
-    ctx.beginPath();
-    runtime.tracing.points.forEach(function (point, index) {
-      if (index === 0) ctx.moveTo(point.x, point.y);
-      else ctx.lineTo(point.x, point.y);
-    });
-    ctx.stroke();
-    ctx.restore();
+  function showWritingComparison(letter) {
+    if (!ui.writingComparePanel || !ui.writingSampleImage || !ui.writingTargetLarge || !ui.confirmWritingBtn) return;
+    ui.writingComparePanel.hidden = false;
+    ui.confirmWritingBtn.hidden = false;
+    ui.writingSampleImage.src = runtime.tracing.sampleImage;
+    ui.writingTargetLarge.textContent = letter && letter.symbol ? letter.symbol : "अ";
   }
 
-  function buildGlyphGuide(symbol) {
-    if (!symbol || !ui.traceCanvas) return { mask: null, checkpoints: [] };
-    const width = ui.traceCanvas.width;
-    const height = ui.traceCanvas.height;
-    const offscreen = document.createElement("canvas");
-    offscreen.width = width;
-    offscreen.height = height;
-    const guideCtx = offscreen.getContext("2d");
-    if (!guideCtx) return { mask: null, checkpoints: [] };
-    guideCtx.clearRect(0, 0, width, height);
-    const fontSize = Math.floor(height * 0.62);
-    guideCtx.font = "700 " + fontSize + "px Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif";
-    guideCtx.textAlign = "center";
-    guideCtx.textBaseline = "middle";
-    guideCtx.fillStyle = "#111";
-    guideCtx.fillText(symbol, width / 2, height / 2 + 8);
-    const imageData = guideCtx.getImageData(0, 0, width, height).data;
-    const mask = new Uint8Array(width * height);
-    const points = [];
-    for (let y = 0; y < height; y += 4) {
-      for (let x = 0; x < width; x += 4) {
-        const alpha = imageData[(y * width + x) * 4 + 3];
-        if (alpha > 12) {
-          mask[y * width + x] = 1;
-          points.push({ x: x, y: y });
-        }
-      }
-    }
-    if (points.length < 10) return { mask: null, checkpoints: [] };
-    const checkpoints = [];
-    const sampleCount = Math.min(24, points.length);
-    for (let index = 0; index < sampleCount; index += 1) {
-      const pointIndex = Math.floor((index / Math.max(1, sampleCount - 1)) * (points.length - 1));
-      checkpoints.push(points[pointIndex]);
-    }
-    return { mask: mask, checkpoints: checkpoints };
-  }
-
-  function tracingCoverageScore() {
-    if (!runtime.tracing.hasGuide || !runtime.tracing.checkpoints.length || !runtime.tracing.points.length || !ui.traceCanvas) return 0;
-    const width = ui.traceCanvas.width;
-    const radius = 16;
-    let inMaskCount = 0;
-    runtime.tracing.points.forEach(function (point) {
-      const x = Math.max(0, Math.min(width - 1, Math.round(point.x)));
-      const y = Math.max(0, Math.min(ui.traceCanvas.height - 1, Math.round(point.y)));
-      if (runtime.tracing.glyphMask[y * width + x]) inMaskCount += 1;
-    });
-    const insideRatio = inMaskCount / runtime.tracing.points.length;
-    let hitCount = 0;
-    runtime.tracing.checkpoints.forEach(function (guidePoint) {
-      const hit = runtime.tracing.points.some(function (drawnPoint) {
-        const dx = drawnPoint.x - guidePoint.x;
-        const dy = drawnPoint.y - guidePoint.y;
-        return (dx * dx + dy * dy) <= radius * radius;
-      });
-      if (hit) hitCount += 1;
-    });
-    const checkpointRatio = hitCount / runtime.tracing.checkpoints.length;
-    return (insideRatio * 0.45) + (checkpointRatio * 0.55);
-  }
-
-  function runTracingGuideAudit() {
-    runtime.tracing.auditIncompleteSymbols = TRACE_REVIEW_LETTERS.filter(function (symbol) {
-      const guide = buildGlyphGuide(symbol);
-      return !(guide.mask && guide.checkpoints.length >= 8);
-    });
+  function hideWritingComparison() {
+    if (ui.writingComparePanel) ui.writingComparePanel.hidden = true;
+    if (ui.confirmWritingBtn) ui.confirmWritingBtn.hidden = true;
   }
 
   function initConfetti() {
@@ -777,7 +729,6 @@
     };
     runtime.lottie.treeSparkle = build(ui.treeSparkleLottie, "assets/lottie/sparkle.json", false);
     runtime.lottie.treeCelebrate = build(ui.treeCelebrationLottie, "assets/lottie/celebration.json", false);
-    runtime.lottie.mithuReaction = build(ui.mithuReactionLottie, "assets/lottie/sparkle.json", false);
   }
 
   function playLottie(name) {
@@ -816,6 +767,7 @@
         '<button class="button ghost" type="button" data-action="retry">Retry</button>' +
         '<button class="button secondary" type="button" data-action="next">Next</button>' +
         '<button class="button secondary" type="button" data-action="finish" hidden>Finish Activity</button>' +
+        '<button class="button primary" type="button" data-action="continue" hidden>Continue to Next Activity</button>' +
         '<button class="button ghost" type="button" data-action="restart">Restart Activity</button>' +
         "</div>" +
         '<p class="status" id="status-' + activity.id + '" aria-live="polite"></p>' +
@@ -824,12 +776,41 @@
       mount.querySelector('[data-action="retry"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "retry"); });
       mount.querySelector('[data-action="next"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "next"); });
       mount.querySelector('[data-action="finish"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "finish"); });
+      mount.querySelector('[data-action="continue"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "continue"); });
       mount.querySelector('[data-action="restart"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "restart"); });
     });
   }
 
   function setActivityStatus(activityId, text) {
     runtime.byActivity[activityId].status = text;
+  }
+
+  function cancelAutoAdvance(activityId) {
+    const timerId = runtime.autoAdvance[activityId];
+    if (!timerId) return;
+    window.clearTimeout(timerId);
+    delete runtime.autoAdvance[activityId];
+  }
+
+  function scheduleAutoAdvance(activityId, sourceIndex, delayMs) {
+    const activity = forestState.activities[activityId];
+    if (!activity || activity.isComplete || ACTIVITY_META[activityId].type === "tree") return;
+    const itemCount = getActivityItemCount(activityId);
+    if (sourceIndex >= itemCount - 1) return;
+    cancelAutoAdvance(activityId);
+    runtime.autoAdvance[activityId] = window.setTimeout(function () {
+      delete runtime.autoAdvance[activityId];
+      const current = forestState.activities[activityId];
+      if (!current || current.isComplete) return;
+      if (current.currentIndex !== sourceIndex) return;
+      if (!current.completedItems.includes(sourceIndex)) return;
+      CORE.goNext(forestState, activityId);
+      runtime.byActivity[activityId].tempAnswer = "";
+      runtime.byActivity[activityId].flipped = false;
+      if (activityId === "letter-tracing") clearTraceBoard();
+      setActivityStatus(activityId, "");
+      saveAndRender();
+    }, delayMs || 900);
   }
 
   function incrementAttempt(activityId) {
@@ -861,16 +842,25 @@
   }
 
   function markCurrentComplete(activityId, message) {
-    const rewardPoints = forestState.completionRewarded[activityId] ? 0 : 1;
-    CORE.markCurrentItemCompleted(forestState, activityId, rewardPoints);
-    setActivityStatus(activityId, message);
     const activity = forestState.activities[activityId];
+    if (!activity) return;
+    cancelAutoAdvance(activityId);
+    const sourceIndex = activity.currentIndex;
+    CORE.markCurrentItemCompleted(forestState, activityId, 1);
+    setActivityStatus(activityId, message);
     if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
       CORE.finalizeActivity(forestState, activityId);
     }
     if (ACTIVITY_META[activityId].type !== "tree") {
-      setMascotState("celebrating");
-      playLottie("mithuReaction");
+      if (activity.isComplete) {
+        setMascotSpeech("Fantastic! You finished this adventure!");
+        setMascotStateForDuration("dancing", 950);
+        fireConfetti(false);
+      } else {
+        setMascotSpeech("Wonderful! Let's keep going!");
+        setMascotStateForDuration("celebrating", 650);
+        scheduleAutoAdvance(activityId, sourceIndex, 900);
+      }
     }
     saveAndRender();
   }
@@ -878,9 +868,11 @@
   function dispatchActivityAction(activityId, action) {
     const activity = forestState.activities[activityId];
     if (!activity) return;
+    cancelAutoAdvance(activityId);
     if (action === "previous") {
       CORE.goPrevious(forestState, activityId);
       if (activityId === "letter-tracing") clearTraceBoard();
+      if (activityId === "letter-tracing") hideWritingComparison();
       setActivityStatus(activityId, "");
       saveAndRender();
       return;
@@ -891,7 +883,10 @@
       CORE.goNext(forestState, activityId);
       runtime.byActivity[activityId].tempAnswer = "";
       runtime.byActivity[activityId].flipped = false;
-      if (activityId === "letter-tracing") clearTraceBoard();
+      if (activityId === "letter-tracing") {
+        clearTraceBoard();
+        hideWritingComparison();
+      }
       setActivityStatus(activityId, "");
       saveAndRender();
       return;
@@ -900,7 +895,10 @@
       CORE.retryCurrent(forestState, activityId);
       runtime.byActivity[activityId].tempAnswer = "";
       runtime.byActivity[activityId].flipped = false;
-      if (activityId === "letter-tracing") clearTraceBoard();
+      if (activityId === "letter-tracing") {
+        clearTraceBoard();
+        hideWritingComparison();
+      }
       setActivityStatus(activityId, "");
       saveAndRender();
       return;
@@ -913,7 +911,8 @@
       }
       setActivityStatus(activityId, "Activity completed!");
       fireConfetti(false);
-      setMascotState("dancing");
+      setMascotStateForDuration("dancing", 900);
+      setMascotSpeech("Fantastic! You finished this adventure!");
       const global = CORE.computeGlobalProgress(forestState);
       if (global.completedActivityCount === global.totalActivities) {
         fireConfetti(true);
@@ -929,8 +928,21 @@
       const ok = window.confirm("Restart this completed activity from item 1?");
       if (!ok) return;
       CORE.resetActivity(forestState, activityId);
+      if (activityId === "letter-tracing") {
+        clearTraceBoard();
+        hideWritingComparison();
+      }
       setActivityStatus(activityId, "");
       saveAndRender();
+      return;
+    }
+    if (action === "continue") {
+      const nextActivity = ACTIVITIES.find(function (entry) {
+        return forestState.activities[entry.id] && !forestState.activities[entry.id].isComplete && entry.id !== activityId;
+      });
+      const targetId = nextActivity ? nextActivity.sectionId : "completionScreen";
+      const target = document.getElementById(targetId);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
@@ -1003,8 +1015,7 @@
         setMascotState("pointing");
         playLetterAudio(letter, 1, ui.treeStatus);
         if (!activity.completedItems.includes(letterIndex)) {
-          const rewardPoints = forestState.completionRewarded[activityId] ? 0 : 1;
-          CORE.markCurrentItemCompleted(forestState, activityId, rewardPoints);
+          CORE.markCurrentItemCompleted(forestState, activityId, 1);
           growTreeBloom();
           playLottie("treeSparkle");
           setActivityStatus(activityId, "Letter discovered!");
@@ -1016,7 +1027,8 @@
             fireConfetti(false);
             playLottie("treeCelebrate");
             if (groupIndex < maxGroup) {
-              setTimeout(function () {
+              runtime.treeGroupAdvanceTimer = window.setTimeout(function () {
+                runtime.treeGroupAdvanceTimer = null;
                 activity.currentIndex = (groupIndex + 1) * TREE_GROUP_SIZE;
                 setActivityStatus(activityId, "");
                 saveAndRender();
@@ -1102,6 +1114,7 @@
           '<span class="tile-star" aria-hidden="true">' + (activity.completedItems.includes(letterIndex) ? "⭐" : "☆") + "</span>" +
           '<span class="dev">' + letter.symbol + '</span><span class="tran">' + letter.transliteration + "</span>";
         btn.addEventListener("click", function () {
+          cancelAutoAdvance(activityId);
           activity.currentIndex = letterIndex;
           setMascotState("pointing");
           playLetterAudio(letter, 1, ui.audioFallback);
@@ -1183,6 +1196,7 @@
       btn.className = "choice-btn";
       btn.textContent = option.symbol;
       btn.addEventListener("click", function () {
+        cancelAutoAdvance(activityId);
         if (option.id === letter.id) {
           btn.classList.add("correct");
           markCurrentComplete(activityId, "Correct!");
@@ -1191,6 +1205,7 @@
           incrementAttempt(activityId);
           ui.hearStatus.textContent = "Try again.";
           setMascotState("encouraging");
+          setMascotSpeech("Good try! Let's try again!");
         }
       });
       ui.hearChoices.appendChild(btn);
@@ -1233,6 +1248,7 @@
         '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
         '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
+        cancelAutoAdvance(activityId);
         if (option.id === item.id) {
           btn.classList.add("correct");
           markCurrentComplete(activityId, "Correct picture!");
@@ -1242,6 +1258,7 @@
           incrementAttempt(activityId);
           ui.pictureStatus.textContent = "Not yet. Try again.";
           setMascotState("thinking");
+          setMascotSpeech("Good try! Let's try again!");
         }
       });
       ui.pictureChoices.appendChild(btn);
@@ -1324,6 +1341,7 @@
         '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
         '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
+        cancelAutoAdvance(activityId);
         if (option.sanskrit === item.sanskrit) {
           animateFruitToMithu(btn);
           btn.classList.add("correct");
@@ -1333,6 +1351,8 @@
           btn.classList.add("wrong");
           incrementAttempt(activityId);
           ui.feedStatus.textContent = "Try a different fruit.";
+          setMascotState("encouraging");
+          setMascotSpeech("Good try! Let's try again!");
         }
       });
       ui.feedChoices.appendChild(btn);
@@ -1363,18 +1383,21 @@
     const activityId = "letter-tracing";
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.tracePrompt || !ui.traceTargetLetter || !ui.traceStatus) return;
-    const needsReview = runtime.tracing.auditIncompleteSymbols.includes(letter.symbol);
-    ui.tracePrompt.textContent = needsReview
-      ? "Guided tracing for " + letter.symbol + " is under review."
-      : "Trace letter " + letter.symbol + " by following the faint letter shape.";
+    const activity = forestState.activities[activityId];
+    ui.tracePrompt.textContent = "Look at " + letter.symbol + ", write it freely, then self-check your writing.";
     ui.traceTargetLetter.textContent = letter.symbol;
-    if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = needsReview;
-    if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = needsReview
-        ? "Tracing guide unavailable for this letter right now."
-        : "Trace the letter shape, then tap Check tracing.";
+    if (ui.writingTargetLarge) ui.writingTargetLarge.textContent = letter.symbol;
+    if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = false;
+    if (runtime.tracing.lastLetterIndex !== activity.currentIndex) {
+      runtime.tracing.lastLetterIndex = activity.currentIndex;
+      clearTraceBoard();
+      hideWritingComparison();
     }
-    clearTraceBoard();
+    if (!isCurrentResolved(activityId)) {
+      ui.traceStatus.textContent = "Write the letter, tap Check My Writing, then choose Looks Good when ready.";
+    } else if (!runtime.byActivity[activityId].status) {
+      ui.traceStatus.textContent = "Great practice. Move to the next letter when you're ready.";
+    }
   }
 
   function renderHiddenLetterHunt() {
@@ -1391,6 +1414,7 @@
       btn.className = "tile-btn";
       btn.textContent = option.symbol;
       btn.addEventListener("click", function () {
+        cancelAutoAdvance(activityId);
         if (option.id === letter.id) {
           btn.classList.add("correct");
           markCurrentComplete(activityId, "Found it!");
@@ -1398,6 +1422,8 @@
           btn.classList.add("wrong");
           incrementAttempt(activityId);
           ui.huntStatus.textContent = "Keep searching.";
+          setMascotState("encouraging");
+          setMascotSpeech("Good try! Let's try again!");
         }
       });
       ui.huntGrid.appendChild(btn);
@@ -1415,7 +1441,6 @@
       const resolved = isCurrentResolved(activity.id);
       const itemCount = getActivityItemCount(activity.id);
       const atLast = state.currentIndex >= itemCount - 1;
-      const canFinish = atLast && resolved && state.completedItems.length >= itemCount && !state.isComplete;
       if (progress) {
         if (activity.id === "magical-tree") {
           progress.textContent = state.completedItems.length + "/48";
@@ -1432,16 +1457,21 @@
       const retry = mount.querySelector('[data-action="retry"]');
       const next = mount.querySelector('[data-action="next"]');
       const finish = mount.querySelector('[data-action="finish"]');
+      const continueBtn = mount.querySelector('[data-action="continue"]');
       const restart = mount.querySelector('[data-action="restart"]');
       if (previous) previous.disabled = state.currentIndex === 0;
       if (retry) retry.disabled = false;
       if (next) {
-        next.hidden = canFinish;
+        next.hidden = false;
         next.disabled = atLast || !resolved;
       }
       if (finish) {
-        finish.hidden = !canFinish;
-        finish.disabled = !canFinish;
+        finish.hidden = true;
+        finish.disabled = true;
+      }
+      if (continueBtn) {
+        continueBtn.hidden = !state.isComplete;
+        continueBtn.disabled = !state.isComplete;
       }
       if (restart) restart.disabled = !state.isComplete;
     });

@@ -645,7 +645,7 @@ p {
   display: grid;
   grid-template-columns: 1fr 120px;
   gap: 12px;
-  align-items: center;
+  align-items: start;
 }
 
 #traceCanvas {
@@ -655,6 +655,7 @@ p {
   border-radius: 14px;
   background: #ffffff;
   touch-action: none;
+  min-height: 220px;
 }
 
 .trace-target {
@@ -670,6 +671,37 @@ p {
   font-size: 3rem;
   font-weight: 800;
   color: #4a33c6;
+}
+
+.writing-compare {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.writing-sample {
+  border: 1px solid #dbe6ff;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f8fbff;
+}
+
+#writingSampleImage {
+  width: 100%;
+  min-height: 120px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid #dbe6ff;
+  background: #fff;
+}
+
+.writing-target-large {
+  margin: 0;
+  text-align: center;
+  font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
+  font-size: 4rem;
+  color: #3d2ab0;
 }
 
 .category-tab.active {
@@ -739,25 +771,22 @@ p {
 
 .lesson-mascot {
   position: fixed;
-  right: 14px;
+  right: max(10px, calc((100vw - min(1100px, 94vw)) / 2 + 8px));
   top: 120px;
-  z-index: 18;
-  width: 210px;
+  z-index: 20;
+  width: min(208px, 28vw);
+  transition: top 0.35s ease-out;
+}
+
+.lesson-mascot.parrot-mascot {
+  position: fixed;
 }
 
 .lesson-mascot-mobile {
   position: fixed;
-  width: 116px;
+  width: 104px;
   right: 8px;
-  top: 88px;
-}
-
-.mithu-reaction-lottie {
-  position: absolute;
-  inset: 22% 18% auto 18%;
-  width: 64%;
-  height: 54%;
-  pointer-events: none;
+  top: 82px;
 }
 
 .mithu-eye-left,
@@ -1925,9 +1954,9 @@ th {
 
   .lesson-mascot {
     position: fixed;
-    width: 116px;
+    width: 104px;
     right: 8px;
-    top: 86px;
+    top: 82px;
   }
 
   .magical-tree-stage {
