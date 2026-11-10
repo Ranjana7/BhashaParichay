@@ -31,6 +31,7 @@
   const animate = motion.animate || function () {};
   const LOCAL_AUDIO_ENABLED = true;
   const MIN_PRONUNCIATION_BYTES = 6000;
+  const AUDIO_ASSET_VERSION = "20261110c";
   const PRONUNCIATION_UNAVAILABLE = "Pronunciation not available yet.";
   const MUTED_AUDIO_MESSAGE = "Sound is muted. Tap Sound: Off to unmute.";
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -442,9 +443,10 @@
         return;
       }
       const src = candidates[index];
-      resolveAudioAvailability(src, function (available) {
+      const url = src + "?v=" + AUDIO_ASSET_VERSION;
+      resolveAudioAvailability(url, function (available) {
         if (available) {
-          callback(src);
+          callback(url);
           return;
         }
         tryIndex(index + 1);
