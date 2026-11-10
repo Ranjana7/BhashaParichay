@@ -48,6 +48,7 @@ test("jump links target all activity sections", () => {
   sectionAnchors.forEach((anchor) => {
     assert.ok(html.includes(`href="${anchor}"`));
   });
+  assert.ok(html.includes(">Write It Yourself<"));
 });
 
 test("all activity controls are present in DOM", () => {
@@ -130,17 +131,28 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
   assert.ok(js.includes("animateFruitToMithu"));
 });
 
-test("letter tracing guide is glyph-based, not random seed dots", () => {
-  assert.ok(js.includes("buildGlyphGuide("));
-  assert.ok(js.includes("fillText(symbol"));
-  assert.equal(js.includes("buildGuidePoints("), false);
-  assert.equal(js.includes("charCodeAt(0)"), false);
+test("write-it-yourself uses self-assessment and no fake handwriting validation", () => {
+  assert.ok(html.includes('id="writingComparePanel"'));
+  assert.ok(html.includes("Check My Writing"));
+  assert.ok(html.includes("Looks Good, Continue"));
+  assert.ok(js.includes("showWritingComparison("));
+  assert.ok(js.includes("Self-check: compare your writing"));
+  assert.equal(js.includes("tracingCoverageScore("), false);
+  assert.equal(js.includes("buildGlyphGuide("), false);
 });
 
-test("mithu companion includes lottie reactions and persistent container", () => {
-  assert.ok(html.includes('id="mithuReactionLottie"'));
-  assert.ok(js.includes("window.lottie.loadAnimation"));
-  assert.ok(js.includes("playLottie(\"mithuReaction\")"));
+test("mithu companion uses activity-based speech and has no unrelated reaction icon", () => {
+  assert.equal(html.includes('id="mithuReactionLottie"'), false);
+  assert.ok(js.includes("const ACTIVITY_SPEECH ="));
+  assert.ok(js.includes("updateMascotSpeechForActivity("));
+  assert.ok(js.includes("IntersectionObserver"));
+  assert.ok(js.includes("moveMascotNearSection("));
+});
+
+test("auto progression uses cancellable timers and manual controls", () => {
+  assert.ok(js.includes("scheduleAutoAdvance("));
+  assert.ok(js.includes("cancelAutoAdvance("));
+  assert.ok(js.includes("data-action=\"continue\""));
 });
 
 test("default forest state has independent activity buckets", () => {
@@ -195,6 +207,20 @@ test("restart only works after completion", () => {
   assert.equal(core.resetActivity(state, "arrange-word"), true);
   assert.equal(state.activities["arrange-word"].currentIndex, 0);
   assert.equal(state.activities["arrange-word"].completedItems.length, 0);
+});
+
+test("restart keeps historical rewards and prevents duplicate star awarding", () => {
+  const state = core.createDefaultForestState(48);
+  const activity = state.activities["arrange-word"];
+  activity.currentIndex = 0;
+  core.markCurrentItemCompleted(state, "arrange-word", 1);
+  assert.equal(state.xp, 1);
+  activity.isComplete = true;
+  activity.completedItems = Array.from({ length: 48 }, (_, index) => index);
+  assert.equal(core.resetActivity(state, "arrange-word"), true);
+  state.activities["arrange-word"].currentIndex = 0;
+  core.markCurrentItemCompleted(state, "arrange-word", 1);
+  assert.equal(state.xp, 1);
 });
 
 test("legacy progression state migrates safely", () => {
