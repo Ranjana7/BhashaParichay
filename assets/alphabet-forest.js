@@ -31,7 +31,7 @@
   const animate = motion.animate || function () {};
   const LOCAL_AUDIO_ENABLED = true;
   const MIN_PRONUNCIATION_BYTES = 6000;
-  const AUDIO_ASSET_VERSION = "20261110d";
+  const AUDIO_ASSET_VERSION = "20261110e";
   const PRONUNCIATION_UNAVAILABLE = "Pronunciation not available yet.";
   const MUTED_AUDIO_MESSAGE = "Sound is muted. Tap Sound: Off to unmute.";
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
