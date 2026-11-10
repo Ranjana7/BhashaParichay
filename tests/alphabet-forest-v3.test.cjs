@@ -92,6 +92,11 @@ test("letter garden uses Devanagari tab labels and subgroup categories", () => {
   assert.ok(js.includes("ऊष्म"));
 });
 
+test("educational images are not cropped by default", () => {
+  assert.ok(css.includes("object-fit: contain"));
+  assert.ok(css.includes(".picture-illustration"));
+});
+
 test("shared panel has single control area without duplicate nested activity controls", () => {
   assert.equal(html.includes('id="controls-letter-garden"'), false);
   assert.ok(html.includes('id="prevLetterBtn"'));
@@ -126,8 +131,16 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
 });
 
 test("letter tracing guide is glyph-based, not random seed dots", () => {
-  assert.ok(js.includes("fillText(letter.symbol"));
+  assert.ok(js.includes("buildGlyphGuide("));
+  assert.ok(js.includes("fillText(symbol"));
+  assert.equal(js.includes("buildGuidePoints("), false);
   assert.equal(js.includes("charCodeAt(0)"), false);
+});
+
+test("mithu companion includes lottie reactions and persistent container", () => {
+  assert.ok(html.includes('id="mithuReactionLottie"'));
+  assert.ok(js.includes("window.lottie.loadAnimation"));
+  assert.ok(js.includes("playLottie(\"mithuReaction\")"));
 });
 
 test("default forest state has independent activity buckets", () => {
