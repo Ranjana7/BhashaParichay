@@ -23,6 +23,7 @@
   ];
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
+  const TRACE_REVIEW_LETTERS = ["अ", "आ", "क", "म", "ट", "ष"];
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -109,11 +110,14 @@
     audioDebug: document.getElementById("audioDebug"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
+    mithuReactionLottie: document.getElementById("mithuReactionLottie"),
     globalSummary: document.getElementById("globalProgressSummary"),
     globalFill: document.getElementById("globalProgressFill"),
     globalPercent: document.getElementById("globalProgressPercent"),
     globalStars: document.getElementById("globalStars"),
     treeLetters: document.getElementById("magicalTreeLetters"),
+    treeSparkleLottie: document.getElementById("treeSparkleLottie"),
+    treeCelebrationLottie: document.getElementById("treeCelebrationLottie"),
     treeStatus: document.getElementById("treeStatus"),
     treeCounter: document.getElementById("treeCounter"),
     treeInstruction: document.getElementById("treeInstruction"),
@@ -182,13 +186,15 @@
     muted: false,
     currentAudio: null,
     confetti: null,
+    lottie: {},
     mascotActiveSection: null,
     tracing: {
       drawing: false,
       points: [],
-      guidePoints: [],
-      guideCheckpoints: [],
-      hasGuide: false
+      glyphMask: null,
+      checkpoints: [],
+      hasGuide: false,
+      auditIncompleteSymbols: []
     },
     byActivity: {}
   };
@@ -212,7 +218,9 @@
   initFlashControls();
   initTracingCanvas();
   initConfetti();
+  initLottieAnimations();
   initActivityControls();
+  runTracingGuideAudit();
   renderAll();
 
   function getActivityItemCount(activityId) {
@@ -321,6 +329,7 @@
     audio.playbackRate = playbackRate || 1;
     runtime.currentAudio = audio;
     setMascotState("listening");
+    playLottie("mithuReaction");
     audio.addEventListener("ended", function () {
       setMascotState("idle");
     }, { once: true });
@@ -378,25 +387,49 @@
     setMascotState("welcome");
     setMascotSpeech("Namaste! I am Mithu. Let's discover Sanskrit together.");
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
-    if (typeof IntersectionObserver !== "function") return;
-    const observer = new IntersectionObserver(function (entries) {
-      const active = entries.filter(function (entry) { return entry.isIntersecting; })
-        .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
-      if (!active) return;
-      const activity = ACTIVITIES.find(function (item) { return item.sectionId === active.target.id; });
+    function updateActiveSection() {
+      let best = null;
+      let bestScore = -Infinity;
+      sections.forEach(function (section) {
+        const rect = section.getBoundingClientRect();
+        const sectionMid = rect.top + rect.height * 0.5;
+        const viewportMid = window.innerHeight * 0.45;
+        const score = -Math.abs(sectionMid - viewportMid);
+        if (score > bestScore) {
+          bestScore = score;
+          best = section;
+        }
+      });
+      if (!best) return;
+      const activity = ACTIVITIES.find(function (item) { return item.sectionId === best.id; });
       if (!activity || runtime.mascotActiveSection === activity.id) return;
       runtime.mascotActiveSection = activity.id;
-      moveMascotNearSection(active.target);
+      moveMascotNearSection(best);
       setMascotState("flying");
       setTimeout(function () { setMascotState("idle"); }, 420);
-    }, { threshold: [0.22, 0.45, 0.7] });
-    sections.forEach(function (section) { observer.observe(section); });
+    }
+    if (typeof IntersectionObserver === "function") {
+      const observer = new IntersectionObserver(function (entries) {
+        const active = entries.filter(function (entry) { return entry.isIntersecting; })
+          .sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
+        if (!active) return;
+        const activity = ACTIVITIES.find(function (item) { return item.sectionId === active.target.id; });
+        if (!activity || runtime.mascotActiveSection === activity.id) return;
+        runtime.mascotActiveSection = activity.id;
+        moveMascotNearSection(active.target);
+        setMascotState("flying");
+        setTimeout(function () { setMascotState("idle"); }, 420);
+      }, { threshold: [0.22, 0.45, 0.7] });
+      sections.forEach(function (section) { observer.observe(section); });
+    }
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
     window.addEventListener("resize", function () {
       if (!runtime.mascotActiveSection) return;
       const sectionId = ACTIVITY_META[runtime.mascotActiveSection].sectionId;
       const section = document.getElementById(sectionId);
       if (section) moveMascotNearSection(section);
     });
+    updateActiveSection();
   }
 
   function moveMascotNearSection(section) {
@@ -404,11 +437,12 @@
     const mobile = window.matchMedia("(max-width: 860px)").matches;
     ui.lessonMascot.classList.toggle("lesson-mascot-mobile", mobile);
     if (mobile) {
-      ui.lessonMascot.style.top = "";
+      ui.lessonMascot.style.top = "86px";
+      ui.lessonMascot.style.right = "8px";
       return;
     }
     const rect = section.getBoundingClientRect();
-    const targetTop = Math.max(96, Math.min(window.innerHeight - 260, rect.top + rect.height * 0.2));
+    const targetTop = Math.max(92, Math.min(window.innerHeight - 260, rect.top + rect.height * 0.18));
     if (REDUCED_MOTION) {
       ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
       return;
@@ -561,12 +595,13 @@
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
         const activityId = "letter-tracing";
-        if (!runtime.tracing.hasGuide) {
+        const currentLetter = getCurrentLetter(activityId);
+        if (!runtime.tracing.hasGuide || runtime.tracing.auditIncompleteSymbols.includes(currentLetter.symbol)) {
           if (ui.traceStatus) ui.traceStatus.textContent = "This letter's tracing guide is not available yet.";
           return;
         }
         const coverage = tracingCoverageScore();
-        if (coverage >= 0.68 && runtime.tracing.points.length >= 45) {
+        if (coverage >= 0.62 && runtime.tracing.points.length >= 60) {
           markCurrentComplete(activityId, "Great tracing!");
           if (ui.traceStatus) ui.traceStatus.textContent = "Great tracing!";
           setMascotState("celebrating");
@@ -593,80 +628,110 @@
     const ctx = ui.traceCanvas.getContext("2d");
     if (!ctx) return;
     const letter = getCurrentLetter("letter-tracing");
-    runtime.tracing.guidePoints = buildGuidePoints(letter, ctx);
-    runtime.tracing.hasGuide = runtime.tracing.guidePoints.length > 0;
-    runtime.tracing.guideCheckpoints = runtime.tracing.guidePoints.filter(function (_point, index) {
-      return index % 12 === 0;
-    });
-    if (!runtime.tracing.guideCheckpoints.length && runtime.tracing.guidePoints.length) {
-      runtime.tracing.guideCheckpoints = [runtime.tracing.guidePoints[0]];
-    }
+    const glyphGuide = buildGlyphGuide(letter && letter.symbol ? letter.symbol : "");
+    runtime.tracing.glyphMask = glyphGuide.mask;
+    runtime.tracing.checkpoints = glyphGuide.checkpoints;
+    runtime.tracing.hasGuide = Boolean(glyphGuide.mask && glyphGuide.mask.length);
     if (!runtime.tracing.hasGuide) {
       if (ui.traceStatus) ui.traceStatus.textContent = "Guide path unavailable for this letter.";
       return;
     }
-    const start = runtime.tracing.guidePoints[0];
-    const next = runtime.tracing.guidePoints[Math.min(6, runtime.tracing.guidePoints.length - 1)];
+    const width = ui.traceCanvas.width;
+    const height = ui.traceCanvas.height;
     ctx.save();
-    ctx.strokeStyle = "#c7d4ff";
-    ctx.lineWidth = 6;
-    ctx.setLineDash([8, 8]);
+    ctx.clearRect(0, 0, width, height);
+    const fontSize = Math.floor(height * 0.62);
+    ctx.font = "700 " + fontSize + "px Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(84, 102, 196, 0.16)";
+    ctx.fillText(letter.symbol, width / 2, height / 2 + 8);
+    ctx.strokeStyle = "rgba(120, 140, 216, 0.72)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([7, 6]);
+    ctx.strokeText(letter.symbol, width / 2, height / 2 + 8);
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#4d7dff";
+    runtime.tracing.checkpoints.forEach(function (point) {
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    if (runtime.tracing.checkpoints.length) {
+      const start = runtime.tracing.checkpoints[0];
+      ctx.fillStyle = "#284fc8";
+      ctx.beginPath();
+      ctx.arc(start.x, start.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "#4b63cf";
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    if (!runtime.tracing.points.length) {
+      ctx.restore();
+      return;
+    }
     ctx.beginPath();
-    runtime.tracing.guidePoints.forEach(function (point, index) {
+    runtime.tracing.points.forEach(function (point, index) {
       if (index === 0) ctx.moveTo(point.x, point.y);
       else ctx.lineTo(point.x, point.y);
     });
     ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = "#4d7dff";
-    ctx.beginPath();
-    ctx.arc(start.x, start.y, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#4d7dff";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(next.x, next.y);
-    ctx.stroke();
     ctx.restore();
   }
 
-  function buildGuidePoints(letter, traceContext) {
-    if (!letter || !letter.symbol || !traceContext || !ui.traceCanvas) return [];
+  function buildGlyphGuide(symbol) {
+    if (!symbol || !ui.traceCanvas) return { mask: null, checkpoints: [] };
     const width = ui.traceCanvas.width;
     const height = ui.traceCanvas.height;
     const offscreen = document.createElement("canvas");
     offscreen.width = width;
     offscreen.height = height;
     const guideCtx = offscreen.getContext("2d");
-    if (!guideCtx) return [];
+    if (!guideCtx) return { mask: null, checkpoints: [] };
     guideCtx.clearRect(0, 0, width, height);
     const fontSize = Math.floor(height * 0.62);
     guideCtx.font = "700 " + fontSize + "px Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif";
     guideCtx.textAlign = "center";
     guideCtx.textBaseline = "middle";
     guideCtx.fillStyle = "#111";
-    guideCtx.fillText(letter.symbol, width / 2, height / 2 + 8);
+    guideCtx.fillText(symbol, width / 2, height / 2 + 8);
     const imageData = guideCtx.getImageData(0, 0, width, height).data;
+    const mask = new Uint8Array(width * height);
     const points = [];
     for (let y = 0; y < height; y += 4) {
       for (let x = 0; x < width; x += 4) {
         const alpha = imageData[(y * width + x) * 4 + 3];
-        if (alpha > 10) points.push({ x: x, y: y });
+        if (alpha > 12) {
+          mask[y * width + x] = 1;
+          points.push({ x: x, y: y });
+        }
       }
     }
-    points.sort(function (a, b) {
-      if (a.y === b.y) return a.x - b.x;
-      return a.y - b.y;
-    });
-    return points;
+    if (points.length < 10) return { mask: null, checkpoints: [] };
+    const checkpoints = [];
+    const sampleCount = Math.min(24, points.length);
+    for (let index = 0; index < sampleCount; index += 1) {
+      const pointIndex = Math.floor((index / Math.max(1, sampleCount - 1)) * (points.length - 1));
+      checkpoints.push(points[pointIndex]);
+    }
+    return { mask: mask, checkpoints: checkpoints };
   }
 
   function tracingCoverageScore() {
-    if (!runtime.tracing.hasGuide || !runtime.tracing.guideCheckpoints.length || !runtime.tracing.points.length) return 0;
+    if (!runtime.tracing.hasGuide || !runtime.tracing.checkpoints.length || !runtime.tracing.points.length || !ui.traceCanvas) return 0;
+    const width = ui.traceCanvas.width;
     const radius = 16;
+    let inMaskCount = 0;
+    runtime.tracing.points.forEach(function (point) {
+      const x = Math.max(0, Math.min(width - 1, Math.round(point.x)));
+      const y = Math.max(0, Math.min(ui.traceCanvas.height - 1, Math.round(point.y)));
+      if (runtime.tracing.glyphMask[y * width + x]) inMaskCount += 1;
+    });
+    const insideRatio = inMaskCount / runtime.tracing.points.length;
     let hitCount = 0;
-    runtime.tracing.guideCheckpoints.forEach(function (guidePoint) {
+    runtime.tracing.checkpoints.forEach(function (guidePoint) {
       const hit = runtime.tracing.points.some(function (drawnPoint) {
         const dx = drawnPoint.x - guidePoint.x;
         const dy = drawnPoint.y - guidePoint.y;
@@ -674,12 +739,44 @@
       });
       if (hit) hitCount += 1;
     });
-    return hitCount / runtime.tracing.guideCheckpoints.length;
+    const checkpointRatio = hitCount / runtime.tracing.checkpoints.length;
+    return (insideRatio * 0.45) + (checkpointRatio * 0.55);
+  }
+
+  function runTracingGuideAudit() {
+    runtime.tracing.auditIncompleteSymbols = TRACE_REVIEW_LETTERS.filter(function (symbol) {
+      const guide = buildGlyphGuide(symbol);
+      return !(guide.mask && guide.checkpoints.length >= 8);
+    });
   }
 
   function initConfetti() {
     if (!ui.completionCanvas || typeof window.confetti !== "function") return;
     runtime.confetti = window.confetti.create(ui.completionCanvas, { resize: true, useWorker: true });
+  }
+
+  function initLottieAnimations() {
+    if (!window.lottie || typeof window.lottie.loadAnimation !== "function") return;
+    const build = function (container, path, loop) {
+      if (!container) return null;
+      return window.lottie.loadAnimation({
+        container: container,
+        renderer: "svg",
+        loop: Boolean(loop),
+        autoplay: false,
+        path: path
+      });
+    };
+    runtime.lottie.treeSparkle = build(ui.treeSparkleLottie, "assets/lottie/sparkle.json", false);
+    runtime.lottie.treeCelebrate = build(ui.treeCelebrationLottie, "assets/lottie/celebration.json", false);
+    runtime.lottie.mithuReaction = build(ui.mithuReactionLottie, "assets/lottie/sparkle.json", false);
+  }
+
+  function playLottie(name) {
+    const player = runtime.lottie[name];
+    if (!player || REDUCED_MOTION) return;
+    player.stop();
+    player.play();
   }
 
   function fireConfetti(big) {
@@ -763,7 +860,10 @@
     if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
       CORE.finalizeActivity(forestState, activityId);
     }
-    if (ACTIVITY_META[activityId].type !== "tree") setMascotState("celebrating");
+    if (ACTIVITY_META[activityId].type !== "tree") {
+      setMascotState("celebrating");
+      playLottie("mithuReaction");
+    }
     saveAndRender();
   }
 
@@ -898,6 +998,7 @@
           const rewardPoints = forestState.completionRewarded[activityId] ? 0 : 1;
           CORE.markCurrentItemCompleted(forestState, activityId, rewardPoints);
           growTreeBloom();
+          playLottie("treeSparkle");
           setActivityStatus(activityId, "Letter discovered!");
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
             return activity.completedItems.includes(groupStart + innerOffset);
@@ -905,6 +1006,7 @@
           if (nowComplete) {
             setMascotState("celebrating");
             fireConfetti(false);
+            playLottie("treeCelebrate");
             if (groupIndex < maxGroup) {
               setTimeout(function () {
                 activity.currentIndex = (groupIndex + 1) * TREE_GROUP_SIZE;
@@ -917,6 +1019,7 @@
               CORE.finalizeActivity(forestState, activityId);
               setMascotState("dancing");
               fireConfetti(true);
+              playLottie("treeCelebrate");
               setActivityStatus(activityId, "Magical Tree complete!");
             }
           }
@@ -1252,9 +1355,17 @@
     const activityId = "letter-tracing";
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.tracePrompt || !ui.traceTargetLetter || !ui.traceStatus) return;
-    ui.tracePrompt.textContent = "Trace letter " + letter.symbol + " using the dotted path.";
+    const needsReview = runtime.tracing.auditIncompleteSymbols.includes(letter.symbol);
+    ui.tracePrompt.textContent = needsReview
+      ? "Guided tracing for " + letter.symbol + " is under review."
+      : "Trace letter " + letter.symbol + " by following the faint letter shape.";
     ui.traceTargetLetter.textContent = letter.symbol;
-    if (!isCurrentResolved(activityId)) ui.traceStatus.textContent = "Trace the letter, then tap Check tracing.";
+    if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = needsReview;
+    if (!isCurrentResolved(activityId)) {
+      ui.traceStatus.textContent = needsReview
+        ? "Tracing guide unavailable for this letter right now."
+        : "Trace the letter shape, then tap Check tracing.";
+    }
     clearTraceBoard();
   }
 
