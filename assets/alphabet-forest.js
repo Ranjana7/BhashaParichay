@@ -117,7 +117,6 @@
     muteToggle: document.getElementById("muteToggle"),
     testSoundBtn: document.getElementById("testSoundBtn"),
     audioDisclaimer: document.getElementById("audioDisclaimer"),
-    audioDebug: document.getElementById("audioDebug"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
     globalSummary: document.getElementById("globalProgressSummary"),
@@ -146,7 +145,6 @@
     selectedTran: document.getElementById("selectedTran"),
     selectedExample: document.getElementById("selectedExample"),
     selectedMeaning: document.getElementById("selectedMeaning"),
-    selectedExampleImage: document.getElementById("selectedExampleImage"),
     selectedPosition: document.getElementById("selectedPosition"),
     selectedLearned: document.getElementById("selectedLearned"),
     replayLetterBtn: document.getElementById("replayLetterBtn"),
@@ -159,6 +157,7 @@
     hearStatus: document.getElementById("hearStatus"),
     playHearPrompt: document.getElementById("playHearPrompt"),
     picturePrompt: document.getElementById("picturePrompt"),
+    pictureLottie: document.getElementById("pictureMatchLottie"),
     pictureChoices: document.getElementById("pictureChoices"),
     pictureStatus: document.getElementById("pictureStatus"),
     arrangePrompt: document.getElementById("arrangePrompt"),
@@ -173,7 +172,6 @@
     feedPrompt: document.getElementById("feedPrompt"),
     feedChoices: document.getElementById("feedChoices"),
     feedStatus: document.getElementById("feedStatus"),
-    tracePrompt: document.getElementById("tracePrompt"),
     traceCanvas: document.getElementById("traceCanvas"),
     traceTargetLetter: document.getElementById("traceTargetLetter"),
     traceStatus: document.getElementById("traceStatus"),
@@ -181,8 +179,7 @@
     checkTraceBtn: document.getElementById("checkTraceBtn"),
     writingTryAgainBtn: document.getElementById("writingTryAgainBtn"),
     confirmWritingBtn: document.getElementById("confirmWritingBtn"),
-    writingComparePanel: document.getElementById("writingComparePanel"),
-    writingSampleImage: document.getElementById("writingSampleImage"),
+    writingSelfCheck: document.getElementById("writingSelfCheck"),
     writingTargetLarge: document.getElementById("writingTargetLarge"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
@@ -199,6 +196,7 @@
   const runtime = {
     muted: false,
     currentAudio: null,
+    sfxContext: null,
     confetti: null,
     lottie: {},
     mascotActiveSection: null,
@@ -211,7 +209,6 @@
       drawing: false,
       points: [],
       reviewed: false,
-      sampleImage: "",
       lastLetterIndex: -1
     },
     byActivity: {}
@@ -296,11 +293,6 @@
       ui.audioDisclaimer.textContent = AUDIO_ENABLED
         ? "Tap Sanskrit letters or words to hear reviewed local pronunciation clips."
         : "Pronunciation is unavailable until verified Sanskrit audio is approved.";
-    }
-    if (ui.audioDebug) {
-      ui.audioDebug.textContent = AUDIO_ENABLED
-        ? "Audio source: verified local pronunciation clips only."
-        : "Audio source paused: inaccurate clips removed; no browser speech fallback.";
     }
     if (ui.muteToggle) ui.muteToggle.addEventListener("click", function () { setMuted(!runtime.muted); });
     if (ui.panelMuteBtn) ui.panelMuteBtn.addEventListener("click", function () { setMuted(!runtime.muted); });
@@ -663,31 +655,29 @@
 
     if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
       clearTraceBoard();
-      hideWritingComparison();
-      if (ui.traceStatus) ui.traceStatus.textContent = "Canvas cleared. Try writing the letter again.";
+      hideWritingSelfCheck();
+      if (ui.traceStatus) ui.traceStatus.textContent = "Canvas cleared. Write the letter again.";
     });
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
-        const activityId = "letter-tracing";
         if (runtime.tracing.points.length < 3) {
-          if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then check your writing.";
+          if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then tap Check.";
           return;
         }
-        runtime.tracing.sampleImage = ui.traceCanvas.toDataURL("image/png");
         runtime.tracing.reviewed = true;
-        showWritingComparison(getCurrentLetter(activityId));
+        showWritingSelfCheck(getCurrentLetter("letter-tracing"));
         setMascotState("thinking");
-        setMascotSpeech("Compare your writing and choose what to do next.");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Self-check: compare your writing with the correct letter.";
+        setMascotSpeech("Check your writing with the letter.");
+        if (ui.traceStatus) ui.traceStatus.textContent = "Self-check: does your writing match the target letter?";
       });
     }
     if (ui.writingTryAgainBtn) {
       ui.writingTryAgainBtn.addEventListener("click", function () {
         clearTraceBoard();
-        hideWritingComparison();
+        hideWritingSelfCheck();
         setMascotState("encouraging");
         setMascotSpeech("Good try! Let's try again!");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Try again and compare your writing once more.";
+        if (ui.traceStatus) ui.traceStatus.textContent = "Good try. Write again and tap Check.";
       });
     }
     if (ui.confirmWritingBtn) {
@@ -700,9 +690,10 @@
         }
         const sourceIndex = activity ? activity.currentIndex : 0;
         const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
-        hideWritingComparison();
+        hideWritingSelfCheck();
+        playSuccessSound("applause");
+        fireSectionConfetti("activityTraceGamePanel", true);
         markCurrentComplete(activityId, "Writing practised!");
-        fireConfetti(false);
         if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
       });
     }
@@ -714,19 +705,42 @@
     if (!ctx) return;
     ctx.clearRect(0, 0, ui.traceCanvas.width, ui.traceCanvas.height);
     runtime.tracing.points = [];
-    runtime.tracing.sampleImage = "";
     runtime.tracing.reviewed = false;
   }
 
-  function showWritingComparison(letter) {
-    if (!ui.writingComparePanel || !ui.writingSampleImage || !ui.writingTargetLarge) return;
-    ui.writingComparePanel.hidden = false;
-    ui.writingSampleImage.src = runtime.tracing.sampleImage;
+  function showWritingSelfCheck(letter) {
+    if (!ui.writingSelfCheck || !ui.writingTargetLarge) return;
+    ui.writingSelfCheck.hidden = false;
     ui.writingTargetLarge.textContent = letter && letter.symbol ? letter.symbol : "अ";
   }
 
-  function hideWritingComparison() {
-    if (ui.writingComparePanel) ui.writingComparePanel.hidden = true;
+  function hideWritingSelfCheck() {
+    if (ui.writingSelfCheck) ui.writingSelfCheck.hidden = true;
+  }
+
+  function playSuccessSound(kind) {
+    if (runtime.muted) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!runtime.sfxContext) runtime.sfxContext = new AudioCtx();
+    const ctx = runtime.sfxContext;
+    if (ctx.state === "suspended") ctx.resume();
+    const now = ctx.currentTime;
+    const notes = kind === "applause"
+      ? [523.25, 659.25, 783.99, 1046.5]
+      : [523.25, 659.25, 783.99];
+    notes.forEach(function (frequency, idx) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + idx * 0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.19);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.2);
+    });
   }
 
   function initConfetti() {
@@ -748,6 +762,10 @@
     };
     runtime.lottie.treeSparkle = build(ui.treeSparkleLottie, "assets/lottie/sparkle.json", false);
     runtime.lottie.treeCelebrate = build(ui.treeCelebrationLottie, "assets/lottie/celebration.json", false);
+    runtime.lottie.pictureGuide = build(ui.pictureLottie, "assets/lottie/butterfly.json", true);
+    if (runtime.lottie.pictureGuide && !REDUCED_MOTION) {
+      runtime.lottie.pictureGuide.play();
+    }
   }
 
   function playLottie(name) {
@@ -764,6 +782,42 @@
       spread: big ? 110 : 70,
       startVelocity: big ? 34 : 24,
       origin: { y: 0.68 }
+    });
+  }
+
+  function fireSectionConfetti(sectionId, big) {
+    if (!runtime.confetti || REDUCED_MOTION) return;
+    const section = typeof sectionId === "string" ? document.getElementById(sectionId) : sectionId;
+    if (!section) {
+      fireConfetti(big);
+      return;
+    }
+    const rect = section.getBoundingClientRect();
+    const vw = Math.max(window.innerWidth || 1, 1);
+    const vh = Math.max(window.innerHeight || 1, 1);
+    const xs = [0.15, 0.35, 0.55, 0.75, 0.9];
+    xs.forEach(function (ratio, idx) {
+      const originX = Math.min(0.96, Math.max(0.04, (rect.left + rect.width * ratio) / vw));
+      const originY = Math.min(0.94, Math.max(0.06, (rect.top + rect.height * (0.2 + (idx % 2) * 0.28)) / vh));
+      runtime.confetti({
+        particleCount: big ? 55 : 36,
+        spread: big ? 95 : 70,
+        startVelocity: big ? 34 : 26,
+        gravity: 0.8,
+        scalar: 0.95,
+        colors: ["#ff77b7", "#ffc9e7", "#ffd866", "#9fe07d", "#8ecbff"],
+        origin: { x: originX, y: originY }
+      });
+      runtime.confetti({
+        particleCount: big ? 38 : 24,
+        spread: big ? 70 : 54,
+        startVelocity: big ? 30 : 20,
+        gravity: 0.95,
+        scalar: 1.05,
+        shapes: ["circle"],
+        colors: ["#ff93c8", "#ffb1d8", "#ffd5eb"],
+        origin: { x: originX, y: originY }
+      });
     });
   }
 
@@ -894,7 +948,7 @@
     if (action === "previous") {
       CORE.goPrevious(forestState, activityId);
       if (activityId === "letter-tracing") clearTraceBoard();
-      if (activityId === "letter-tracing") hideWritingComparison();
+      if (activityId === "letter-tracing") hideWritingSelfCheck();
       setActivityStatus(activityId, "");
       saveAndRender();
       return;
@@ -907,7 +961,7 @@
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingComparison();
+        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -919,7 +973,7 @@
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingComparison();
+        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -952,7 +1006,7 @@
       CORE.resetActivity(forestState, activityId);
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingComparison();
+        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -1162,11 +1216,6 @@
       ui.selectedLearned.textContent = learned ? "⭐ Learned" : "☆ Not learned yet";
       ui.selectedLearned.classList.toggle("learned", learned);
     }
-    const selectedVocab = getVocabulary(selectedLetter.exampleText, selectedLetter.meaning);
-    if (ui.selectedExampleImage) {
-      ui.selectedExampleImage.src = selectedVocab.image;
-      ui.selectedExampleImage.alt = selectedVocab.alt || selectedVocab.meaning || selectedLetter.meaning;
-    }
     if (ui.gardenCoverage) ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised.";
     if (ui.audioFallback && !AUDIO_ENABLED) {
       ui.audioFallback.textContent = "Pronunciation unavailable until verified Sanskrit audio is approved.";
@@ -1244,12 +1293,6 @@
     }
   }
 
-  function getVocabulary(word, meaning) {
-    const mapped = VOCAB.words[word];
-    if (!mapped) return { image: VOCAB.fallback.image, alt: VOCAB.fallback.alt, meaning: meaning };
-    return mapped;
-  }
-
   function renderPictureMatch() {
     const activityId = "picture-match";
     const item = getCurrentQuestion(activityId);
@@ -1258,18 +1301,25 @@
     ui.pictureStatus.textContent = "Choose the matching illustration.";
     ui.pictureChoices.innerHTML = "";
     const current = forestState.activities[activityId];
+    const local = runtime.byActivity[activityId];
+    if (!local.optionOrderByQuestion) local.optionOrderByQuestion = {};
     const targetIndex = current.order[current.currentIndex];
-    const optionIndices = [targetIndex];
-    for (let index = 0; index < pictureQuestions.length && optionIndices.length < 4; index += 1) {
-      if (index === targetIndex) continue;
-      optionIndices.push(index);
+    const questionKey = String(current.currentIndex);
+    if (!Array.isArray(local.optionOrderByQuestion[questionKey])) {
+      const optionIndices = [targetIndex];
+      for (let index = 0; index < pictureQuestions.length && optionIndices.length < 4; index += 1) {
+        if (index === targetIndex) continue;
+        optionIndices.push(index);
+      }
+      for (let i = optionIndices.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = optionIndices[i];
+        optionIndices[i] = optionIndices[j];
+        optionIndices[j] = tmp;
+      }
+      local.optionOrderByQuestion[questionKey] = optionIndices;
     }
-    for (let i = optionIndices.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const tmp = optionIndices[i];
-      optionIndices[i] = optionIndices[j];
-      optionIndices[j] = tmp;
-    }
+    const optionIndices = local.optionOrderByQuestion[questionKey];
     const options = optionIndices.map(function (idx) { return pictureQuestions[idx]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
@@ -1280,16 +1330,33 @@
         '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
         cancelAutoAdvance(activityId);
+        if (btn.disabled) return;
         if (option.id === item.id) {
           btn.classList.add("correct");
+          ui.pictureChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.disabled = true; });
+          animate(btn, { transform: ["scale(1)", "scale(1.06)", "scale(1)"] }, { duration: 0.35, easing: "ease-out" });
+          playSuccessSound("chime");
+          fireConfetti(false);
           markCurrentComplete(activityId, "Correct picture!");
           setMascotState("celebrating");
         } else {
           btn.classList.add("wrong");
+          animate(btn, {
+            transform: [
+              "translateX(0px)",
+              "translateX(-7px)",
+              "translateX(7px)",
+              "translateX(-4px)",
+              "translateX(0px)"
+            ]
+          }, { duration: 0.32, easing: "ease-out" });
           incrementAttempt(activityId);
-          ui.pictureStatus.textContent = "Not yet. Try again.";
+          ui.pictureStatus.textContent = "Good try. Hint: match the word with the correct picture.";
           setMascotState("thinking");
           setMascotSpeech("Good try! Let's try again!");
+          window.setTimeout(function () {
+            btn.classList.remove("wrong");
+          }, 420);
         }
       });
       ui.pictureChoices.appendChild(btn);
@@ -1413,21 +1480,20 @@
   function renderLetterTracing() {
     const activityId = "letter-tracing";
     const letter = getCurrentLetter(activityId);
-    if (!letter || !ui.tracePrompt || !ui.traceTargetLetter || !ui.traceStatus) return;
+    if (!letter || !ui.traceTargetLetter || !ui.traceStatus) return;
     const activity = forestState.activities[activityId];
-    ui.tracePrompt.textContent = "Look at " + letter.symbol + ", write it freely, then self-check your writing.";
     ui.traceTargetLetter.textContent = letter.symbol;
     if (ui.writingTargetLarge) ui.writingTargetLarge.textContent = letter.symbol;
     if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = false;
     if (runtime.tracing.lastLetterIndex !== activity.currentIndex) {
       runtime.tracing.lastLetterIndex = activity.currentIndex;
       clearTraceBoard();
-      hideWritingComparison();
+      hideWritingSelfCheck();
     }
     if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = "Write the letter, tap Check My Writing, then choose Looks Good when ready.";
+      ui.traceStatus.textContent = "Write the letter, then tap Check.";
     } else if (!runtime.byActivity[activityId].status) {
-      ui.traceStatus.textContent = "Great practice. Move to the next letter when you're ready.";
+      ui.traceStatus.textContent = "Great writing! Continue when ready.";
     }
   }
 

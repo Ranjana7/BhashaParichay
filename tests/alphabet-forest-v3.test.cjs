@@ -69,6 +69,7 @@ test("audio is paused without browser speech fallback", () => {
   assert.ok(js.includes("const AUDIO_ENABLED = false;"));
   assert.equal(js.includes("speechSynthesis"), false);
   assert.ok(js.includes("Pronunciation is unavailable until verified Sanskrit audio is approved."));
+  assert.equal(html.includes('id="audioDebug"'), false);
 });
 
 test("full-page celebration canvas exists", () => {
@@ -103,6 +104,7 @@ test("shared panel has single control area without duplicate nested activity con
   assert.ok(html.includes('id="prevLetterBtn"'));
   assert.ok(html.includes('id="nextLetterBtn"'));
   assert.ok(html.includes('id="replayLetterBtn"'));
+  assert.equal(html.includes('id="selectedExampleImage"'), false);
 });
 
 test("magical tree play again resets from first group in code path", () => {
@@ -115,6 +117,9 @@ test("picture match uses local image choices with structured question pool", () 
   assert.ok(js.includes("const pictureQuestions"));
   assert.ok(js.includes("picture-illustration"));
   assert.ok(js.includes("Select the correct picture for:"));
+  assert.ok(html.includes('id="pictureMatchLottie"'));
+  assert.ok(js.includes("optionOrderByQuestion"));
+  assert.ok(js.includes("Good try. Hint: match the word with the correct picture."));
 });
 
 test("flashcard flip is tap-to-flip and does not use separate flip button", () => {
@@ -132,14 +137,20 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
 });
 
 test("write-it-yourself uses self-assessment and no fake handwriting validation", () => {
-  assert.ok(html.includes('id="writingComparePanel"'));
-  assert.ok(html.includes("Check My Writing"));
+  assert.ok(html.includes('id="writingSelfCheck"'));
+  assert.ok(html.includes(">Check<"));
+  assert.ok(html.includes(">Clear<"));
   assert.ok(html.includes("Looks Good!"));
   assert.ok(html.includes("Try Again"));
-  assert.ok(js.includes("showWritingComparison("));
-  assert.ok(js.includes("Self-check: compare your writing"));
+  assert.ok(js.includes("showWritingSelfCheck("));
+  assert.ok(js.includes("Self-check: does your writing match the target letter?"));
   assert.equal(js.includes("tracingCoverageScore("), false);
   assert.equal(js.includes("buildGlyphGuide("), false);
+});
+
+test("alphabet forest does not render end-of-page review notes", () => {
+  assert.equal(html.includes("Review Notes"), false);
+  assert.equal(html.includes('id="reviewList"'), false);
 });
 
 test("mithu companion uses activity-based speech and has no unrelated reaction icon", () => {

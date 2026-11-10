@@ -6,7 +6,7 @@
   <title>SanskritParichay | Alphabet Forest</title>
   <meta name="description" content="Play Alphabet Forest and learn Sanskrit letters through games.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="assets/styles.css?v=20261110p6">
+  <link rel="stylesheet" href="assets/styles.css?v=20261110p7">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -51,7 +51,6 @@
         <button id="testSoundBtn" class="button secondary audio-control" type="button">🔊 Test Sound</button>
       </div>
       <p id="audioDisclaimer" class="footer-note"></p>
-      <p id="audioDebug" class="footer-note"></p>
     </section>
 
     <nav class="panel activity-jump-nav" id="activityJumpNav" aria-label="Alphabet Forest activities">
@@ -189,7 +188,6 @@
           </p>
           <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
           <p class="example-line"><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
-          <img id="selectedExampleImage" class="picture-illustration selected-picture" src="assets/illustrations/vocab/fire.svg" alt="Camp fire illustration">
           <div class="hero-actions">
             <button id="prevLetterBtn" class="button ghost" type="button">◀ Previous</button>
             <button id="nextLetterBtn" class="button ghost" type="button">Next ▶</button>
@@ -225,6 +223,7 @@
       <h2>Activity 2: Picture Match</h2>
       <div class="activity">
         <p id="picturePrompt">Match prompt</p>
+        <div id="pictureMatchLottie" class="picture-match-lottie" aria-hidden="true"></div>
         <div id="pictureChoices" class="choices"></div>
         <p id="pictureStatus" class="status" aria-live="polite"></p>
         <div id="controls-picture-match"></div>
@@ -270,33 +269,25 @@
     <section class="panel" id="activityTraceGamePanel" data-activity-id="letter-tracing">
       <h2>Activity 6: Write It Yourself!</h2>
       <div class="activity">
-        <p id="tracePrompt">Look at the target letter, write it on the blank canvas, then check and compare.</p>
-        <div class="trace-wrap">
-          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
+        <div class="writing-card">
           <div class="trace-target">
             <span id="traceTargetLetter">अ</span>
           </div>
-        </div>
-        <div id="writingComparePanel" class="writing-compare" hidden>
-          <div class="writing-sample">
-            <p class="footer-note"><strong>Your writing</strong></p>
-            <img id="writingSampleImage" alt="Your writing sample">
+          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
+          <div class="hero-actions">
+            <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
+            <button id="checkTraceBtn" class="button secondary" type="button">Check</button>
           </div>
-          <div class="writing-sample">
-            <p class="footer-note"><strong>Correct letter</strong></p>
-            <p id="writingTargetLarge" class="writing-target-large">अ</p>
+          <div id="writingSelfCheck" class="writing-self-check" hidden>
             <p class="footer-note"><strong>Does your letter look like this?</strong></p>
+            <p id="writingTargetLarge" class="writing-target-large">अ</p>
             <div class="hero-actions">
               <button id="writingTryAgainBtn" class="button ghost" type="button">Try Again</button>
               <button id="confirmWritingBtn" class="button primary" type="button">Looks Good!</button>
             </div>
           </div>
+          <p id="traceStatus" class="status" aria-live="polite"></p>
         </div>
-        <div class="hero-actions">
-          <button id="clearTraceBtn" class="button ghost" type="button">Clear Canvas</button>
-          <button id="checkTraceBtn" class="button secondary" type="button">Check My Writing</button>
-        </div>
-        <p id="traceStatus" class="status" aria-live="polite"></p>
         <div id="controls-letter-tracing"></div>
       </div>
     </section>
@@ -311,10 +302,6 @@
       </div>
     </section>
 
-    <section class="panel">
-      <h2>Review Notes</h2>
-      <ul id="reviewList" class="review-list"></ul>
-    </section>
   </main>
 
   <canvas id="celebration-canvas" aria-hidden="true"></canvas>
@@ -325,8 +312,8 @@
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
-  <script src="assets/vocabulary-map.js?v=20261110p6"></script>
-  <script src="assets/alphabet-forest-core.js?v=20261110p6"></script>
-  <script src="assets/alphabet-forest.js?v=20261110p6"></script>
+  <script src="assets/vocabulary-map.js?v=20261110p7"></script>
+  <script src="assets/alphabet-forest-core.js?v=20261110p7"></script>
+  <script src="assets/alphabet-forest.js?v=20261110p7"></script>
 </body>
 </html>

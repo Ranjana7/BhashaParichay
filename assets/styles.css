@@ -30,15 +30,16 @@
   background: #f4f7ff;
 }
 
-.selected-picture {
-  margin-top: 8px;
-  max-width: 220px;
-  height: 120px;
-}
-
 .picture-label {
   font-size: 0.86rem;
   color: #2f3a6d;
+}
+
+.picture-match-lottie {
+  width: 86px;
+  height: 66px;
+  margin: 2px auto 8px;
+  pointer-events: none;
 }
 
 .lesson-mascot {
@@ -641,66 +642,55 @@ p {
   animation: blossomPulse 2.6s ease-in-out infinite;
 }
 
-.trace-wrap {
-  display: grid;
-  grid-template-columns: 1fr 120px;
-  gap: 12px;
-  align-items: start;
-}
-
-#traceCanvas {
-  width: 100%;
-  max-width: 420px;
-  border: 2px dashed #abc3ff;
+.writing-card {
+  max-width: 430px;
+  margin: 0 auto;
+  border: 1px solid #dbe6ff;
   border-radius: 14px;
-  background: #ffffff;
-  touch-action: none;
-  min-height: 220px;
+  background: #f8fbff;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
 }
 
 .trace-target {
   display: grid;
   place-items: center;
-  min-height: 120px;
+  min-height: 78px;
   border: 2px solid #d8e2ff;
   border-radius: 12px;
   background: #f7faff;
 }
 
 #traceTargetLetter {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 800;
   color: #4a33c6;
+  font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
 }
 
-.writing-compare {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.writing-sample {
-  border: 1px solid #dbe6ff;
-  border-radius: 12px;
-  padding: 10px;
-  background: #f8fbff;
-}
-
-#writingSampleImage {
+#traceCanvas {
   width: 100%;
-  min-height: 120px;
-  object-fit: contain;
-  border-radius: 10px;
-  border: 1px solid #dbe6ff;
+  max-width: 408px;
+  border: 2px dashed #abc3ff;
+  border-radius: 14px;
+  background: #ffffff;
+  touch-action: none;
+  min-height: 170px;
+}
+
+.writing-self-check {
+  border: 1px solid #d8e2ff;
+  border-radius: 12px;
   background: #fff;
+  padding: 8px 10px;
 }
 
 .writing-target-large {
   margin: 0;
   text-align: center;
   font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
-  font-size: 4rem;
+  font-size: 3.1rem;
   color: #3d2ab0;
 }
 
@@ -1982,8 +1972,12 @@ th {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .trace-wrap {
-    grid-template-columns: 1fr;
+  .writing-card {
+    max-width: 100%;
+  }
+
+  #traceCanvas {
+    min-height: 160px;
   }
 
   .feature-grid {
