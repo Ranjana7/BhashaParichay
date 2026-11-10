@@ -387,6 +387,7 @@
     setMascotState("welcome");
     setMascotSpeech("Namaste! I am Mithu. Let's discover Sanskrit together.");
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
+    let scrollTicking = false;
     function updateActiveSection() {
       let best = null;
       let bestScore = -Infinity;
@@ -422,7 +423,14 @@
       }, { threshold: [0.22, 0.45, 0.7] });
       sections.forEach(function (section) { observer.observe(section); });
     }
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("scroll", function () {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      window.requestAnimationFrame(function () {
+        updateActiveSection();
+        scrollTicking = false;
+      });
+    }, { passive: true });
     window.addEventListener("resize", function () {
       if (!runtime.mascotActiveSection) return;
       const sectionId = ACTIVITY_META[runtime.mascotActiveSection].sectionId;
