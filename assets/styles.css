@@ -24,7 +24,9 @@
   height: 112px;
   border-radius: 10px;
   border: 1px solid #dbe6ff;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  padding: 6px;
   background: #f4f7ff;
 }
 
@@ -42,6 +44,7 @@
 .lesson-mascot {
   margin: 10px 0;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  pointer-events: none;
 }
 
 .lesson-mascot .parrot-body {
@@ -743,23 +746,37 @@ p {
 }
 
 .lesson-mascot-mobile {
-  position: static;
-  width: 150px;
-  margin: 8px auto;
+  position: fixed;
+  width: 116px;
+  right: 8px;
+  top: 88px;
+}
+
+.mithu-reaction-lottie {
+  position: absolute;
+  inset: 22% 18% auto 18%;
+  width: 64%;
+  height: 54%;
+  pointer-events: none;
+}
+
+.mithu-eye-left,
+.mithu-eye-right {
+  transform-origin: center;
+  animation: mithuBlink 4.8s infinite;
 }
 
 .state-welcome .mithu-body,
 .state-idle .mithu-body {
-  animation: mithuFloat 2.6s ease-in-out infinite;
+  animation: mithuFloat 2.6s ease-in-out infinite, mithuBreath 2.6s ease-in-out infinite;
 }
 
 .state-flying .mithu-body {
   animation: mithuFly 0.7s ease-in-out 1;
 }
 
-.state-listening .mithu-head,
 .state-listening .mithu-body {
-  animation: mithuListen 0.7s ease-in-out infinite;
+  animation: mithuListen 0.72s ease-in-out infinite;
 }
 
 .state-pointing .mithu-wing-right {
@@ -783,6 +800,11 @@ p {
   animation: treeMithuCelebrate 0.9s ease-in-out 2;
 }
 
+.state-celebrating .mithu-wing-left,
+.state-celebrating .mithu-wing-right {
+  animation: mithuWingFlap 0.24s ease-in-out 5;
+}
+
 .state-dancing .mithu-body {
   animation: treeMithuDance 1s ease-in-out infinite;
 }
@@ -790,6 +812,11 @@ p {
 @keyframes mithuFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
+}
+
+@keyframes mithuBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 @keyframes mithuFly {
@@ -815,6 +842,16 @@ p {
 @keyframes mithuEncourage {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px) scale(1.02); }
+}
+
+@keyframes mithuWingFlap {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(12deg); }
+}
+
+@keyframes mithuBlink {
+  0%, 44%, 48%, 100% { transform: scaleY(1); }
+  46% { transform: scaleY(0.08); }
 }
 
 body.audio-disabled .audio-control {
@@ -1240,6 +1277,7 @@ th {
   border: 2px solid #9ddfc3;
   border-radius: 18px;
   padding: 12px;
+  position: relative;
 }
 
 .lesson-mascot-floating {
@@ -1253,11 +1291,11 @@ th {
 }
 
 .lesson-mascot-mobile {
-  position: sticky;
-  top: 72px;
-  width: min(170px, 48vw);
-  margin-left: auto;
-  z-index: 9;
+  position: fixed;
+  right: 8px;
+  top: 86px;
+  width: 116px;
+  z-index: 22;
 }
 
 .tap-audio {
@@ -1886,9 +1924,10 @@ th {
   }
 
   .lesson-mascot {
-    position: static;
-    width: 150px;
-    margin: 8px auto;
+    position: fixed;
+    width: 116px;
+    right: 8px;
+    top: 86px;
   }
 
   .magical-tree-stage {
