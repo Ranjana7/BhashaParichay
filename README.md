@@ -5,13 +5,15 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
 ## What is included
 
 - Home page (`index.html`)
-- Alphabet Forest playable lesson (`alphabet-forest.html`) with progressive lesson steps
+- Alphabet Forest playable lesson (`alphabet-forest.html`) with eight scrollable activity sections
 - Multi-world lesson engine (`learning-world.html` + `assets/learning-world.js`)
 - About page (`about.html`)
 - Local progress saving with `localStorage` (device/browser only)
 - No account, no analytics, no ads, no trackers
-- Mute toggle and reduced-motion support
-- Six working activities in Alphabet Forest:
+- Reduced-motion support
+- Eight Alphabet Forest sections:
+  - Magical Tree
+  - Letter Garden
   - Hear and Pick
   - Picture Match
   - Arrange the Word
@@ -68,9 +70,8 @@ git push -u origin main
 
 ## Content quality notes
 
-- Pronunciation first attempts local files from `assets/audio/pronunciation/`.
-- If a local clip is missing, browser speech synthesis is used as fallback.
-- Audio is computer-generated or test-recorded and not human-verified yet.
+- Alphabet Forest audio can be temporarily disabled via a page feature flag during UX stabilization.
+- Pronunciation assets are preserved in `assets/audio/pronunciation/` for later restoration.
 - Lesson mappings and pronunciation should be reviewed by a Sanskrit educator before wide release.
 - Curriculum progression is informed by the user's authorized Sanskrit From Home course structure, while all game content here is original.
 

@@ -57,13 +57,24 @@
         Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
       </p>
       <div class="hero-actions">
-        <button id="testSoundBtn" class="button secondary" type="button">🔊 Test Sound</button>
+        <button id="testSoundBtn" class="button secondary audio-control" type="button">🔊 Test Sound</button>
       </div>
       <p id="audioDisclaimer" class="footer-note"></p>
       <p id="audioDebug" class="footer-note"></p>
     </section>
 
-    <section class="panel forest-scene" id="forestScene">
+    <nav class="panel activity-jump-nav" id="activityJumpNav" aria-label="Alphabet Forest activities">
+      <a class="button ghost jump-link" href="#forestScene">Magical Tree</a>
+      <a class="button ghost jump-link" href="#letterGardenSection">Letter Garden</a>
+      <a class="button ghost jump-link" href="#activityHearGamePanel">Hear and Pick</a>
+      <a class="button ghost jump-link" href="#activityPictureGamePanel">Picture Match</a>
+      <a class="button ghost jump-link" href="#activityArrangeGamePanel">Arrange the Word</a>
+      <a class="button ghost jump-link" href="#activityFlashGamePanel">Flashcard Flip</a>
+      <a class="button ghost jump-link" href="#activityFeedGamePanel">Feed Mithu</a>
+      <a class="button ghost jump-link" href="#activityHuntGamePanel">Hidden Letter Hunt</a>
+    </nav>
+
+    <section class="panel forest-scene" id="forestScene" data-activity-id="magical-tree">
       <h2>Magical Letter Tree</h2>
       <p id="treeInstruction" class="tree-instruction">Tap a glowing letter to discover its sound!</p>
       <div id="magicalTreeStage" class="magical-tree-stage">
@@ -148,17 +159,18 @@
         <button id="nextTreeGroupBtn" class="button secondary" type="button">Next Group</button>
       </div>
       <p id="treeStatus" class="status" aria-live="polite"></p>
+      <div id="controls-magical-tree"></div>
     </section>
 
     <section class="panel" id="activityNavigator">
       <h2>Alphabet Forest Progress</h2>
-      <p id="globalProgressSummary" class="footer-note">0 of 6 activities completed</p>
+      <p id="globalProgressSummary" class="footer-note">0 of 8 activities complete</p>
       <div class="progress-meter" aria-hidden="true">
         <div id="globalProgressFill" class="progress-fill"></div>
       </div>
     </section>
 
-    <section class="forest-layout" id="letterGardenSection">
+    <section class="forest-layout" id="letterGardenSection" data-activity-id="letter-garden">
       <aside class="panel">
         <h2>Letter Garden</h2>
         <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
@@ -184,11 +196,12 @@
           <div class="hero-actions">
             <button id="prevLetterBtn" class="button ghost" type="button">◀ Previous</button>
             <button id="nextLetterBtn" class="button ghost" type="button">Next ▶</button>
-            <button id="replayLetterBtn" class="button secondary" type="button">🔊 Replay</button>
-            <button id="slowLetterBtn" class="button ghost" type="button">🐢 Slow</button>
-            <button id="panelMuteBtn" class="button ghost" type="button">🔇 Mute</button>
+            <button id="replayLetterBtn" class="button secondary audio-control" type="button">🔊 Replay</button>
+            <button id="slowLetterBtn" class="button ghost audio-control" type="button">🐢 Slow</button>
+            <button id="panelMuteBtn" class="button ghost audio-control" type="button">🔇 Mute</button>
           </div>
           <p id="audioFallback" class="fallback" aria-live="polite"></p>
+          <div id="controls-letter-garden"></div>
         </div>
       </section>
     </section>
@@ -196,7 +209,7 @@
     <section class="panel" id="lessonStatsPanel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/6</div>
+        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/8</div>
         <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
       </div>
       <div class="progress-meter" aria-hidden="true">
@@ -219,28 +232,28 @@
       <button id="completionNextBtn" class="button primary" type="button">Go to Next Adventure</button>
     </section>
 
-    <section class="panel" id="activityHearGamePanel">
+    <section class="panel" id="activityHearGamePanel" data-activity-id="hear-and-pick">
       <h2>Activity 1: Hear and Pick</h2>
       <div class="activity">
         <p>Listen to the sound and pick the matching Devanagari letter.</p>
-        <button id="playHearPrompt" class="button secondary" type="button">▶ Play sound</button>
+        <button id="playHearPrompt" class="button secondary audio-control" type="button">▶ Play sound</button>
         <div id="hearChoices" class="choices" style="margin-top:10px;"></div>
         <p id="hearStatus" class="status" aria-live="polite"></p>
-        <button id="nextHear" class="button ghost" type="button">Next question</button>
+        <div id="controls-hear-and-pick"></div>
       </div>
     </section>
 
-    <section class="panel" id="activityPictureGamePanel">
+    <section class="panel" id="activityPictureGamePanel" data-activity-id="picture-match">
       <h2>Activity 2: Picture Match</h2>
       <div class="activity">
         <p id="picturePrompt">Match prompt</p>
         <div id="pictureChoices" class="choices"></div>
         <p id="pictureStatus" class="status" aria-live="polite"></p>
-        <button id="nextPicture" class="button ghost" type="button">Next match</button>
+        <div id="controls-picture-match"></div>
       </div>
     </section>
 
-    <section class="panel" id="activityArrangeGamePanel">
+    <section class="panel" id="activityArrangeGamePanel" data-activity-id="arrange-word">
       <h2>Activity 3: Arrange the Word</h2>
       <div class="activity">
         <p id="arrangePrompt">Arrange prompt</p>
@@ -249,13 +262,13 @@
         <div class="hero-actions">
           <button id="checkArrange" class="button secondary" type="button">Check</button>
           <button id="resetArrange" class="button ghost" type="button">Retry</button>
-          <button id="nextArrange" class="button ghost" type="button">Next word</button>
         </div>
         <p id="arrangeStatus" class="status" aria-live="polite"></p>
+        <div id="controls-arrange-word"></div>
       </div>
     </section>
 
-    <section class="panel" id="activityFlashGamePanel">
+    <section class="panel" id="activityFlashGamePanel" data-activity-id="flashcard-flip">
       <h2>Activity 4: Flashcard Flip</h2>
       <div class="activity">
         <p>Flip the flashcard, then choose the correct English meaning.</p>
@@ -263,45 +276,27 @@
         <div id="flashcard" class="flashcard" aria-live="polite"></div>
         <div id="flashChoices" class="choices"></div>
         <p id="flashStatus" class="status" aria-live="polite"></p>
-        <button id="nextFlashcard" class="button ghost" type="button">Next flashcard</button>
+        <div id="controls-flashcard-flip"></div>
       </div>
     </section>
 
-    <section class="panel" id="activityFeedGamePanel">
+    <section class="panel" id="activityFeedGamePanel" data-activity-id="feed-mithu">
       <h2>Activity 5: Feed Mithu</h2>
       <div class="activity">
         <p id="feedPrompt">Choose the correct Sanskrit fruit for Mithu.</p>
         <div id="feedChoices" class="choices"></div>
         <p id="feedStatus" class="status" aria-live="polite"></p>
-        <button id="nextFeed" class="button ghost" type="button">Next fruit round</button>
+        <div id="controls-feed-mithu"></div>
       </div>
     </section>
 
-    <section class="panel" id="activityTraceGamePanel">
-      <h2>Activity 6: Letter Tracing</h2>
-      <div class="activity">
-        <p id="tracePrompt">Trace the displayed letter with your finger or mouse.</p>
-        <div class="trace-wrap">
-          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter tracing board"></canvas>
-          <div class="trace-target">
-            <span id="traceTargetLetter">अ</span>
-          </div>
-        </div>
-        <div class="hero-actions">
-          <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
-          <button id="checkTraceBtn" class="button secondary" type="button">Check tracing</button>
-        </div>
-        <p id="traceStatus" class="status" aria-live="polite"></p>
-      </div>
-    </section>
-
-    <section class="panel" id="activityHuntGamePanel">
-      <h2>Activity 7: Letter Treasure Hunt</h2>
+    <section class="panel" id="activityHuntGamePanel" data-activity-id="hidden-letter-hunt">
+      <h2>Activity 6: Hidden Letter Hunt</h2>
       <div class="activity">
         <p id="huntPrompt">Hunt prompt</p>
         <div id="huntGrid" class="tiles"></div>
         <p id="huntStatus" class="status" aria-live="polite"></p>
-        <button id="nextHunt" class="button ghost" type="button">Next hunt</button>
+        <div id="controls-hidden-letter-hunt"></div>
       </div>
     </section>
 
@@ -311,8 +306,7 @@
     </section>
   </main>
 
-  <div id="applauseBurst" class="applause-burst" aria-hidden="true"></div>
-  <div id="lessonConfetti" class="confetti-zone" aria-hidden="true"></div>
+  <canvas id="celebration-canvas" aria-hidden="true"></canvas>
 
   <script src="assets/vendor/motion.min.js"></script>
   <script src="assets/vendor/lottie.min.js"></script>
@@ -320,7 +314,7 @@
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
-  <script src="assets/progression-controller.js?v=20261110l"></script>
-  <script src="assets/alphabet-forest.js?v=20261110l"></script>
+  <script src="assets/alphabet-forest-core.js?v=20261110m"></script>
+  <script src="assets/alphabet-forest.js?v=20261110m"></script>
 </body>
 </html>
