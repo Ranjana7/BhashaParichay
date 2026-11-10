@@ -42,6 +42,14 @@ test("progress store migrates legacy alphabet progress safely", () => {
   assert.ok(storage.getItem("sanskritParichay.alphabetForest.v3"));
 });
 
+test("progress store migrates legacy letter-garden learned key", () => {
+  const { api } = loadStore({
+    "sanskritParichay.alphabetForest.garden.learned": JSON.stringify([0, 1, 1, 47, 100])
+  });
+  const forest = api.loadForestState();
+  assert.deepEqual(Array.from(forest.activities["letter-garden"].completedItems), [0, 1, 47]);
+});
+
 test("snapshot reports learning/practice counts from alphabet forest v3", () => {
   const v3 = {
     schemaVersion: 3,

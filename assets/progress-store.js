@@ -2,6 +2,8 @@
   const FOREST_V3_KEY = "sanskritParichay.alphabetForest.v3";
   const FOREST_LEGACY_KEY = "sanskritParichay.alphabetForest.progress";
   const FOREST_LEGACY_V1_KEY = "sanskritParichay.alphabetForest.progression.v1";
+  const FOREST_LEGACY_TREE_KEY = "sanskritParichay.alphabetForest.tree.progress";
+  const FOREST_LEGACY_GARDEN_KEY = "sanskritParichay.alphabetForest.garden.learned";
   const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const LETTER_COUNT = 48;
@@ -123,7 +125,17 @@
   }
 
   function migrateLegacyForestState() {
-    const legacy = readJson(FOREST_LEGACY_KEY, null) || readJson(FOREST_LEGACY_V1_KEY, null);
+    const legacyKeys = [
+      FOREST_LEGACY_KEY,
+      FOREST_LEGACY_V1_KEY,
+      FOREST_LEGACY_TREE_KEY,
+      FOREST_LEGACY_GARDEN_KEY
+    ];
+    let legacy = null;
+    for (let index = 0; index < legacyKeys.length; index += 1) {
+      legacy = readJson(legacyKeys[index], null);
+      if (legacy !== null && legacy !== undefined) break;
+    }
     if (!legacy || typeof legacy !== "object") return null;
     const migrated = createForestState();
     if (Array.isArray(legacy)) {
@@ -301,6 +313,8 @@
       FOREST_V3_KEY: FOREST_V3_KEY,
       FOREST_LEGACY_KEY: FOREST_LEGACY_KEY,
       FOREST_LEGACY_V1_KEY: FOREST_LEGACY_V1_KEY,
+      FOREST_LEGACY_TREE_KEY: FOREST_LEGACY_TREE_KEY,
+      FOREST_LEGACY_GARDEN_KEY: FOREST_LEGACY_GARDEN_KEY,
       HOME_KEY: HOME_KEY,
       LAST_WORLD_KEY: LAST_WORLD_KEY
     },

@@ -174,6 +174,10 @@
     prevLetterBtn: document.getElementById("prevLetterBtn"),
     nextLetterBtn: document.getElementById("nextLetterBtn"),
     audioFallback: document.getElementById("audioFallback"),
+    letterGardenStatus: document.getElementById("letterGardenStatus"),
+    letterGardenCompletionActions: document.getElementById("letterGardenCompletionActions"),
+    playLetterGardenAgainBtn: document.getElementById("playLetterGardenAgainBtn"),
+    continueToPracticeBtn: document.getElementById("continueToPracticeBtn"),
     hearChoices: document.getElementById("hearChoices"),
     hearStatus: document.getElementById("hearStatus"),
     playHearPrompt: document.getElementById("playHearPrompt"),
@@ -248,6 +252,8 @@
     };
   });
   normalizeActivityOrders();
+  reconcileLetterGardenProgress();
+  stateApi.saveState(forestState);
 
   initMuteState();
   initAudioControls();
@@ -285,10 +291,31 @@
           return Number.isFinite(value) && value >= 0 && value < itemCount && arr.indexOf(value) === index;
         })
         .sort(function (a, b) { return a - b; });
-      state.isComplete = Boolean(state.isComplete) && state.completedItems.length >= itemCount;
+      state.isComplete = Boolean(state.isComplete) || state.completedItems.length >= itemCount;
       if (!state.answers || typeof state.answers !== "object") state.answers = {};
       if (!state.attempts || typeof state.attempts !== "object") state.attempts = {};
     });
+  }
+
+  function reconcileLetterGardenProgress() {
+    const activity = forestState.activities["letter-garden"];
+    if (!activity) return;
+    if (!activity.answers || typeof activity.answers !== "object") activity.answers = {};
+    const idToIndex = {};
+    letters.forEach(function (letter, index) {
+      idToIndex[letter.id] = index;
+    });
+    const fromIds = Array.isArray(activity.answers.completedLetterIds)
+      ? activity.answers.completedLetterIds
+          .map(function (id) { return idToIndex[id]; })
+          .filter(function (value) { return Number.isInteger(value) && value >= 0 && value < letters.length; })
+      : [];
+    const merged = Array.from(new Set([].concat(activity.completedItems || [], fromIds)))
+      .filter(function (value) { return Number.isInteger(value) && value >= 0 && value < letters.length; })
+      .sort(function (a, b) { return a - b; });
+    activity.completedItems = merged;
+    activity.answers.completedLetterIds = merged.map(function (index) { return letters[index].id; });
+    if (merged.length >= letters.length) activity.isComplete = true;
   }
 
   function initMuteState() {
@@ -615,6 +642,12 @@
     });
     if (ui.prevLetterBtn) ui.prevLetterBtn.addEventListener("click", function () { dispatchActivityAction("letter-garden", "previous"); });
     if (ui.nextLetterBtn) ui.nextLetterBtn.addEventListener("click", function () { dispatchActivityAction("letter-garden", "next"); });
+    if (ui.playLetterGardenAgainBtn) ui.playLetterGardenAgainBtn.addEventListener("click", function () {
+      dispatchActivityAction("letter-garden", "restart");
+    });
+    if (ui.continueToPracticeBtn) ui.continueToPracticeBtn.addEventListener("click", function () {
+      dispatchActivityAction("letter-garden", "continue");
+    });
   }
 
   function initArrangeControls() {
@@ -987,13 +1020,21 @@
     const sourceIndex = activity.currentIndex;
     const wasResolved = activity.completedItems.includes(sourceIndex);
     CORE.markCurrentItemCompleted(forestState, activityId, 1);
+    if (activityId === "letter-garden") {
+      reconcileLetterGardenProgress();
+    }
     setActivityStatus(activityId, message);
     if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
       CORE.finalizeActivity(forestState, activityId);
     }
     if (ACTIVITY_META[activityId].type !== "tree") {
       if (activity.isComplete) {
-        setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"));
+        if (activityId === "letter-garden") {
+          setActivityStatus(activityId, "Wonderful! You learned all the letters!");
+          setMascotSpeech("Wonderful! You learned all the letters!");
+        } else {
+          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"));
+        }
         setMascotStateForDuration("dancing", 950);
         fireConfetti(true);
       } else {
@@ -1340,6 +1381,12 @@
       ui.selectedLearned.classList.toggle("learned", learned);
     }
     if (ui.gardenCoverage) ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised.";
+    if (ui.letterGardenStatus) {
+      ui.letterGardenStatus.textContent = runtime.byActivity[activityId].status || "";
+    }
+    if (ui.letterGardenCompletionActions) {
+      ui.letterGardenCompletionActions.hidden = !activity.isComplete;
+    }
     if (ui.audioFallback && !AUDIO_ENABLED) {
       ui.audioFallback.textContent = "Pronunciation unavailable until verified Sanskrit audio is approved.";
     }

@@ -112,6 +112,9 @@ test("shared panel has single control area without duplicate nested activity con
   assert.equal(html.includes('id="controls-letter-garden"'), false);
   assert.ok(html.includes('id="prevLetterBtn"'));
   assert.ok(html.includes('id="nextLetterBtn"'));
+  assert.ok(html.includes('id="letterGardenStatus"'));
+  assert.ok(html.includes('id="playLetterGardenAgainBtn"'));
+  assert.ok(html.includes('id="continueToPracticeBtn"'));
   assert.ok(html.includes('id="replayLetterBtn"'));
   assert.equal(html.includes('id="selectedExampleImage"'), false);
 });
@@ -188,10 +191,13 @@ test("next world unlock condition requires 2 learning and 2 practice completions
 
 test("letter garden derives selected tab and subgroup from current letter", () => {
   assert.ok(js.includes("syncLetterGardenCategoryFromCurrent("));
+  assert.ok(js.includes("reconcileLetterGardenProgress("));
+  assert.ok(js.includes("completedLetterIds"));
   assert.ok(js.includes("getLetterGardenViewForIndex("));
   assert.ok(js.includes("activity.answers.category = view.category"));
   assert.ok(js.includes("activity.answers.subgroup = view.subgroup"));
   assert.ok(js.includes("findFirstLetterIndex("));
+  assert.ok(js.includes("state.isComplete = Boolean(state.isComplete) || state.completedItems.length >= itemCount;"));
 });
 
 test("default forest state has independent activity buckets", () => {
