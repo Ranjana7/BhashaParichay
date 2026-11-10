@@ -14,6 +14,7 @@
   const TOTAL = 3;
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const ui = {
     worldTitle: document.getElementById("worldTitle"),
@@ -25,6 +26,8 @@
     worldNextLessonBtn: document.getElementById("worldNextLessonBtn"),
     worldContinueBtn: document.getElementById("worldContinueBtn"),
     worldBackBtn: document.getElementById("worldBackBtn"),
+    worldIllustration: document.getElementById("worldIllustration"),
+    worldIllustrationSparkle: document.getElementById("worldIllustrationSparkle"),
     worldLessonPath: document.getElementById("worldLessonPath"),
     worldStars: document.getElementById("worldStars"),
     worldDone: document.getElementById("worldDone"),
@@ -60,6 +63,7 @@
     progress: loadProgress(),
     buildSelected: []
   };
+  let worldSparkleAnim = null;
 
   function loadProgress() {
     try {
@@ -133,6 +137,36 @@
     if (window.spApplause) window.spApplause();
   }
 
+  function initWorldIllustration() {
+    if (!ui.worldIllustration) return;
+    if (!prefersReducedMotion) {
+      animate(
+        ui.worldIllustration.querySelectorAll(".world-clouds ellipse"),
+        { transform: ["translateX(0px)", "translateX(10px)", "translateX(0px)"] },
+        { duration: 5.8, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.12; } }
+      );
+      animate(
+        ui.worldIllustration.querySelectorAll(".world-sparkles circle"),
+        { opacity: [0.42, 1, 0.48], transform: ["scale(0.8)", "scale(1.15)", "scale(0.85)"] },
+        { duration: 2.8, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.22; } }
+      );
+    }
+    if (window.lottie && ui.worldIllustrationSparkle) {
+      worldSparkleAnim = window.lottie.loadAnimation({
+        container: ui.worldIllustrationSparkle,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "assets/lottie/sparkle.json"
+      });
+    }
+  }
+
+  function pulseWorldIllustration() {
+    if (!ui.worldIllustration || prefersReducedMotion) return;
+    animate(ui.worldIllustration, { transform: ["scale(1)", "scale(1.018)", "scale(1)"] }, { duration: 0.5, easing: "ease-in-out" });
+  }
+
   function updateHomeCompletion() {
     try {
       const raw = localStorage.getItem(HOME_KEY);
@@ -169,6 +203,7 @@
       ui.worldNextLessonBtn.disabled = false;
       ui.worldNextLessonBtn.textContent = "Unlock Next Lesson";
       ui.worldProgressText.textContent = "Great! Unlock the next lesson.";
+      pulseWorldIllustration();
     } else if (lessonDone && isLast) {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "World Completed";
@@ -179,6 +214,7 @@
       updateHomeCompletion();
       setMascot("dance");
       setSpeech("You completed " + world.title + "!");
+      pulseWorldIllustration();
     } else {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "Next Lesson (complete all activities)";
@@ -267,6 +303,7 @@
           setMascot("correct");
           setSpeech("Lovely! You matched it.");
           confetti();
+          pulseWorldIllustration();
           renderMatch();
         } else {
           btn.classList.add("wrong");
@@ -306,6 +343,7 @@
           setMascot("correct");
           setSpeech("Excellent listening.");
           confetti();
+          pulseWorldIllustration();
           renderListen();
         } else {
           btn.classList.add("wrong");
@@ -364,6 +402,7 @@
       setMascot("correct");
       setSpeech("Wonderful sentence building.");
       confetti();
+      pulseWorldIllustration();
       renderBuild();
     } else {
       ui.buildStatus.textContent = "Almost there. Retry the tile order.";
@@ -481,6 +520,7 @@
   }
 
   renderAll();
+  initWorldIllustration();
   wire();
   setMascot("idle");
   setSpeech("Namaste! Let's learn " + world.title + ".");

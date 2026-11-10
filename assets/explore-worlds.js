@@ -6,6 +6,8 @@
   if (!grid) return;
 
   const worldsData = window.SANSKRIT_WORLDS || {};
+  const motion = window.Motion || {};
+  const animate = motion.animate || function () {};
   const worldOrder = [
     { key: "alphabet", title: "Alphabet Forest", subtitle: "Letters, sounds, and foundational games", lessons: 6, iconClass: "forest", cardClass: "world-alphabet", link: "alphabet-forest.html" },
     { key: "words", title: "Word Wonderland", subtitle: "Nouns and meanings", lessons: 3, iconClass: "word", cardClass: "world-word", link: "learning-world.html?world=words" },
@@ -64,7 +66,7 @@
     const card = document.createElement("article");
     card.className = "world-card " + world.cardClass + (unlocked ? "" : " locked");
     card.innerHTML =
-      '<span class="world-icon ' + world.iconClass + '"></span>' +
+      '<span class="world-icon ' + world.iconClass + '"><i></i><i></i><i></i></span>' +
       '<span class="world-title">' + world.title + "</span>" +
       '<span class="world-text">' + world.subtitle + "</span>" +
       '<span class="world-text">Lessons: ' + progress.completed + "/" + progress.total + "</span>" +
@@ -78,6 +80,9 @@
       window.location.href = world.link;
     });
     grid.appendChild(card);
+    animate(card, { opacity: [0, 1], transform: ["translateY(18px)", "translateY(0px)"] }, { duration: 0.45, easing: "ease-out", delay: worldOrder.indexOf(world) * 0.05 });
+    const iconLeaves = card.querySelectorAll(".world-icon i");
+    animate(iconLeaves, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)"] }, { duration: 2.6, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.2; } });
   });
 
   if (status) {

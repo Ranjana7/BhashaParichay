@@ -81,7 +81,12 @@
     challengeBtn: document.getElementById("challengeBtn"),
     playNowBtn: document.getElementById("playNowBtn"),
     resetBtn: document.getElementById("resetProgressBtn"),
-    worldCards: document.querySelectorAll(".world-card")
+    worldCards: document.querySelectorAll(".world-card"),
+    lottieButterflyOne: document.getElementById("lottieButterflyOne"),
+    lottieButterflyTwo: document.getElementById("lottieButterflyTwo"),
+    lottieButterflyThree: document.getElementById("lottieButterflyThree"),
+    lottieSparkleOne: document.getElementById("lottieSparkleOne"),
+    lottieSparkleTwo: document.getElementById("lottieSparkleTwo")
   };
 
   const state = loadHomeState();
@@ -89,6 +94,7 @@
   renderStats();
   renderChallengeIdle();
   wireUi();
+  initHomeLottie();
   setMascotState("greeting", "Namaste! Choose a world or play today's challenge.");
 
   function londonDateKey() {
@@ -224,6 +230,32 @@
       ticks: 100,
       origin: { y: 0.68 },
       colors: ["#ffd166", "#7f5cff", "#2ec4b6", "#ff7eb6"]
+    });
+  }
+
+  function initHomeLottie() {
+    if (!window.lottie) return;
+    const butterflies = [ui.lottieButterflyOne, ui.lottieButterflyTwo, ui.lottieButterflyThree].filter(Boolean);
+    butterflies.forEach(function (container, index) {
+      window.lottie.loadAnimation({
+        container: container,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "assets/lottie/butterfly.json",
+        rendererSettings: { progressiveLoad: true }
+      });
+      container.style.opacity = "0.9";
+      container.style.transform = "scale(" + (0.8 + index * 0.08).toFixed(2) + ")";
+    });
+    [ui.lottieSparkleOne, ui.lottieSparkleTwo].filter(Boolean).forEach(function (container) {
+      window.lottie.loadAnimation({
+        container: container,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "assets/lottie/sparkle.json"
+      });
     });
   }
 
@@ -408,6 +440,8 @@
       const world = card.getAttribute("data-world");
       const unlocked = isWorldUnlocked(world);
       if (!unlocked) card.classList.add("locked");
+      const iconLeaves = card.querySelectorAll(".world-icon i");
+      animate(iconLeaves, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)"] }, { duration: 2.7, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.18; } });
       card.addEventListener("click", function () {
         navigateToWorld(world);
       });

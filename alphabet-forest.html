@@ -66,19 +66,83 @@
     <section class="panel forest-scene" id="forestScene">
       <h2>Magical Letter Tree</h2>
       <p>Tap glowing leaves to hear Sanskrit sounds. Mithu will guide your listening journey.</p>
-      <div class="forest-illustration" aria-hidden="true">
-        <span class="tree tree-one"></span>
-        <span class="tree tree-two"></span>
-        <span class="butterfly b-one">🦋</span>
-        <span class="butterfly b-two">🦋</span>
-        <span class="flower f-one"></span>
-        <span class="flower f-two"></span>
-        <span class="glow-letter g-one">अ</span>
-        <span class="glow-letter g-two">क</span>
-        <span class="glow-letter g-three">म</span>
+      <div id="magicalTreeStage" class="magical-tree-stage">
+        <svg class="magical-tree-art" viewBox="0 0 1200 520" role="img" aria-label="Illustrated magical Sanskrit tree">
+          <defs>
+            <linearGradient id="treeSky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#d9fff3"/>
+              <stop offset="58%" stop-color="#f4fffb"/>
+              <stop offset="100%" stop-color="#fffde9"/>
+            </linearGradient>
+            <linearGradient id="treeTrunk" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#7a4f2e"/>
+              <stop offset="100%" stop-color="#4c2f16"/>
+            </linearGradient>
+            <radialGradient id="treeGlow" cx="50%" cy="42%" r="52%">
+              <stop offset="0%" stop-color="#deffe9" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#82d8a6" stop-opacity="0.24"/>
+            </radialGradient>
+          </defs>
+          <rect class="tree-sky" x="0" y="0" width="1200" height="520" fill="url(#treeSky)"></rect>
+          <ellipse class="tree-ground" cx="600" cy="472" rx="560" ry="72"></ellipse>
+          <ellipse class="tree-canopy-glow" cx="600" cy="182" rx="330" ry="190" fill="url(#treeGlow)"></ellipse>
+          <g class="tree-canopy cluster-a">
+            <circle cx="505" cy="150" r="92"></circle>
+            <circle cx="620" cy="125" r="112"></circle>
+            <circle cx="730" cy="164" r="90"></circle>
+            <circle cx="578" cy="215" r="112"></circle>
+          </g>
+          <g class="tree-trunk-group">
+            <path class="tree-trunk" d="M535 460 C530 372, 540 284, 566 212 C577 180, 575 152, 564 120 C596 143, 618 173, 632 210 C662 282, 676 360, 666 460 Z" fill="url(#treeTrunk)"></path>
+            <path class="tree-trunk-shade" d="M595 460 C593 360, 606 265, 633 198 C646 232, 656 322, 651 460 Z"></path>
+          </g>
+          <g class="tree-branches">
+            <path class="branch b1" d="M594 232 C525 216, 480 198, 430 160"></path>
+            <path class="branch b2" d="M612 216 C685 192, 758 175, 824 128"></path>
+            <path class="branch b3" d="M598 265 C512 278, 446 310, 390 344"></path>
+            <path class="branch b4" d="M635 272 C705 300, 774 334, 844 360"></path>
+            <path class="branch b5" d="M620 246 C655 236, 692 218, 726 188"></path>
+          </g>
+          <g class="tree-flowers">
+            <circle class="flower-dot f1" cx="470" cy="208" r="10"></circle>
+            <circle class="flower-dot f2" cx="655" cy="160" r="9"></circle>
+            <circle class="flower-dot f3" cx="746" cy="230" r="10"></circle>
+            <circle class="flower-dot f4" cx="554" cy="306" r="9"></circle>
+            <circle class="flower-dot f5" cx="405" cy="278" r="10"></circle>
+            <circle class="flower-dot f6" cx="818" cy="282" r="9"></circle>
+          </g>
+          <g class="tree-perch">
+            <path d="M732 304 C772 300, 816 304, 858 320"></path>
+            <circle cx="852" cy="322" r="6"></circle>
+          </g>
+        </svg>
+        <div id="treeSparkleLottie" class="tree-lottie tree-lottie-sparkle" aria-hidden="true"></div>
+        <div id="treeCelebrationLottie" class="tree-lottie tree-lottie-celebration" aria-hidden="true"></div>
+        <div id="treeParticles" class="tree-particles" aria-hidden="true"></div>
+        <div id="treeProgressBlooms" class="tree-progress-blooms" aria-hidden="true"></div>
+        <div id="magicalTreeLetters" class="magical-tree-grid" role="group" aria-label="Magical Letter Tree"></div>
+        <div id="letterSpotlight" class="letter-spotlight" aria-live="polite">
+          <p id="spotlightLetterDev" class="spotlight-letter-dev">अ</p>
+          <p id="spotlightLetterTran" class="spotlight-letter-tran">a</p>
+          <p id="spotlightLetterExample" class="spotlight-letter-example">अग्निः · fire</p>
+        </div>
+        <div id="treeMithu" class="tree-mithu" aria-hidden="true">
+          <svg viewBox="0 0 120 120" class="tree-mithu-svg">
+            <ellipse class="mithu-shadow" cx="60" cy="102" rx="24" ry="7"></ellipse>
+            <path class="mithu-tail" d="M91 71 L112 88 L90 91 Z"></path>
+            <ellipse class="mithu-body" cx="60" cy="58" rx="30" ry="36"></ellipse>
+            <ellipse class="mithu-belly" cx="60" cy="66" rx="18" ry="22"></ellipse>
+            <path class="mithu-wing-left" d="M41 54 C23 58, 21 80, 37 86 C39 74, 44 62, 49 57 Z"></path>
+            <path class="mithu-wing-right" d="M79 54 C97 58, 99 80, 83 86 C81 74, 76 62, 71 57 Z"></path>
+            <circle class="mithu-eye-left" cx="50" cy="46" r="3.8"></circle>
+            <circle class="mithu-eye-right" cx="69" cy="46" r="3.8"></circle>
+            <path class="mithu-beak-top" d="M54 53 L66 53 L60 61 Z"></path>
+            <path class="mithu-beak-bottom" d="M55 60 L65 60 L60 67 Z"></path>
+            <path class="mithu-crest" d="M53 20 L58 11 L62 20 L66 10 L71 20"></path>
+          </svg>
+        </div>
       </div>
       <p id="treeCounter" class="footer-note" aria-live="polite">Discovered 0 of 0 PDF letters</p>
-      <div id="magicalTreeLetters" class="magical-tree-grid" role="group" aria-label="Magical Letter Tree"></div>
       <p id="treeStatus" class="status" aria-live="polite"></p>
     </section>
 
@@ -237,6 +301,6 @@
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
-  <script src="assets/alphabet-forest.js?v=20261110e"></script>
+  <script src="assets/alphabet-forest.js?v=20261110f"></script>
 </body>
 </html>

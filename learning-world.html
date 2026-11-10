@@ -34,6 +34,41 @@
           <button id="worldBackBtn" class="button ghost" type="button">Back to Worlds</button>
         </div>
       </div>
+      <div id="worldIllustration" class="world-illustration" aria-hidden="true">
+        <svg class="world-illustration-svg" viewBox="0 0 960 280">
+          <defs>
+            <linearGradient id="worldSky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#deebff"/>
+              <stop offset="100%" stop-color="#f7fbff"/>
+            </linearGradient>
+            <linearGradient id="worldHill" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#9de3b6"/>
+              <stop offset="100%" stop-color="#71c996"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="960" height="280" fill="url(#worldSky)"></rect>
+          <ellipse cx="460" cy="236" rx="440" ry="58" fill="url(#worldHill)"></ellipse>
+          <g class="world-clouds">
+            <ellipse cx="180" cy="74" rx="64" ry="24"></ellipse>
+            <ellipse cx="252" cy="78" rx="44" ry="20"></ellipse>
+            <ellipse cx="658" cy="58" rx="62" ry="22"></ellipse>
+            <ellipse cx="716" cy="64" rx="36" ry="16"></ellipse>
+          </g>
+          <g class="world-castle">
+            <rect x="406" y="118" width="160" height="94" rx="18"></rect>
+            <rect x="430" y="88" width="28" height="42" rx="8"></rect>
+            <rect x="514" y="88" width="28" height="42" rx="8"></rect>
+            <path d="M452 212 C466 188, 502 188, 520 212 Z"></path>
+          </g>
+          <g class="world-sparkles">
+            <circle cx="328" cy="146" r="6"></circle>
+            <circle cx="598" cy="128" r="5"></circle>
+            <circle cx="676" cy="170" r="4"></circle>
+            <circle cx="258" cy="174" r="5"></circle>
+          </g>
+        </svg>
+        <div id="worldIllustrationSparkle" class="world-illustration-sparkle"></div>
+      </div>
       <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
         <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
           <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
@@ -115,6 +150,7 @@
   </main>
 
   <script src="assets/vendor/motion.min.js"></script>
+  <script src="assets/vendor/lottie.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/worlds-data.js"></script>

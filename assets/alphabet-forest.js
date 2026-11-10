@@ -80,7 +80,17 @@
     testSoundBtn: document.getElementById("testSoundBtn"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
+    magicalTreeStage: document.getElementById("magicalTreeStage"),
     magicalTreeLetters: document.getElementById("magicalTreeLetters"),
+    treeParticles: document.getElementById("treeParticles"),
+    treeProgressBlooms: document.getElementById("treeProgressBlooms"),
+    treeSparkleLottie: document.getElementById("treeSparkleLottie"),
+    treeCelebrationLottie: document.getElementById("treeCelebrationLottie"),
+    letterSpotlight: document.getElementById("letterSpotlight"),
+    spotlightLetterDev: document.getElementById("spotlightLetterDev"),
+    spotlightLetterTran: document.getElementById("spotlightLetterTran"),
+    spotlightLetterExample: document.getElementById("spotlightLetterExample"),
+    treeMithu: document.getElementById("treeMithu"),
     treeCounter: document.getElementById("treeCounter"),
     treeStatus: document.getElementById("treeStatus"),
     lessonName: document.getElementById("lessonName"),
@@ -169,10 +179,15 @@
     activeMascotSection: "",
     speechLockUntil: 0,
     treeDiscovered: new Set(),
-    treeCompletionAwarded: false
+    treeCompletionAwarded: false,
+    treeLetterPositions: new Map(),
+    treeMithuHome: null,
+    treeMithuPos: null
   };
 
   let completionAnim = null;
+  let treeSparkleAnim = null;
+  let treeCelebrateAnim = null;
   const canonicalLetters = buildCanonicalInventory();
   const inventoryById = new Map(canonicalLetters.map(function (item) { return [item.id, item]; }));
   state.selectedLetter = canonicalLetters[0] || lesson.letters[0];
@@ -332,14 +347,34 @@
   }
 
   function initLottie() {
-    if (!window.lottie || !ui.completionLottie) return;
-    completionAnim = window.lottie.loadAnimation({
-      container: ui.completionLottie,
-      renderer: "svg",
-      loop: false,
-      autoplay: false,
-      path: "assets/lottie/celebration.json"
-    });
+    if (!window.lottie) return;
+    if (ui.completionLottie) {
+      completionAnim = window.lottie.loadAnimation({
+        container: ui.completionLottie,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        path: "assets/lottie/celebration.json"
+      });
+    }
+    if (ui.treeSparkleLottie) {
+      treeSparkleAnim = window.lottie.loadAnimation({
+        container: ui.treeSparkleLottie,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "assets/lottie/sparkle.json"
+      });
+    }
+    if (ui.treeCelebrationLottie) {
+      treeCelebrateAnim = window.lottie.loadAnimation({
+        container: ui.treeCelebrationLottie,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        path: "assets/lottie/celebration.json"
+      });
+    }
   }
 
   function loadProgress() {
@@ -603,10 +638,19 @@
     }
     saveProgress();
     renderProgress();
+    renderTreeProgressDecor();
     setMascotState("correct");
+    animateTreeMithuTo(
+      (state.treeMithuHome ? state.treeMithuHome.x : 300) - 24,
+      (state.treeMithuHome ? state.treeMithuHome.y : 220) - 20,
+      "celebrating"
+    );
     setMascotSpeech("Wonderful! That answer is correct.");
     celebrateSmall();
     if (statusEl) statusEl.textContent = message;
+    setTimeout(function () {
+      returnTreeMithuHome();
+    }, 900);
   }
 
   function handleWrong(statusEl, message, targetEl, hint) {
@@ -789,26 +833,186 @@
     saveTreeProgress();
     renderProgress();
     setMascotState("dancing");
+    animateTreeMithuTo((state.treeMithuHome && state.treeMithuHome.x) || 0, (state.treeMithuHome && state.treeMithuHome.y) || 0, "dancing");
     setMascotSpeech("Magical Tree complete! You discovered every PDF letter.");
     celebrateSmall();
+    if (treeCelebrateAnim && !prefersReducedMotion) {
+      if (ui.treeCelebrationLottie) ui.treeCelebrationLottie.style.opacity = "1";
+      treeCelebrateAnim.goToAndPlay(0, true);
+      setTimeout(function () {
+        if (ui.treeCelebrationLottie) ui.treeCelebrationLottie.style.opacity = "0";
+      }, 1800);
+    }
     if (ui.treeStatus) ui.treeStatus.textContent = "Tree complete! +5 stars awarded once.";
+  }
+
+  function ensureTreeParticles() {
+    if (!ui.treeParticles || ui.treeParticles.childElementCount) return;
+    for (let i = 0; i < 28; i += 1) {
+      const dot = document.createElement("span");
+      dot.className = "tree-particle";
+      dot.style.left = 12 + Math.random() * 76 + "%";
+      dot.style.top = 24 + Math.random() * 56 + "%";
+      dot.style.animationDelay = -(Math.random() * 8).toFixed(2) + "s";
+      dot.style.animationDuration = (6 + Math.random() * 5).toFixed(2) + "s";
+      ui.treeParticles.appendChild(dot);
+    }
+  }
+
+  function ensureTreeMithuHome() {
+    if (!ui.treeMithu || !ui.magicalTreeStage) return;
+    const stageRect = ui.magicalTreeStage.getBoundingClientRect();
+    if (!state.treeMithuHome) {
+      state.treeMithuHome = { x: stageRect.width * 0.75, y: stageRect.height * 0.62 };
+    }
+    if (!state.treeMithuPos) {
+      state.treeMithuPos = { x: state.treeMithuHome.x, y: state.treeMithuHome.y };
+      ui.treeMithu.style.left = state.treeMithuPos.x.toFixed(1) + "px";
+      ui.treeMithu.style.top = state.treeMithuPos.y.toFixed(1) + "px";
+    }
+  }
+
+  function animateTreeMithuTo(targetX, targetY, stateName) {
+    if (!ui.treeMithu || !ui.magicalTreeStage) return;
+    ensureTreeMithuHome();
+    const stageRect = ui.magicalTreeStage.getBoundingClientRect();
+    const clampedX = Math.max(68, Math.min(stageRect.width - 68, targetX));
+    const clampedY = Math.max(60, Math.min(stageRect.height - 62, targetY));
+    const from = state.treeMithuPos || state.treeMithuHome;
+    ui.treeMithu.classList.remove("listening", "pointing", "celebrating", "dancing");
+    if (stateName) ui.treeMithu.classList.add(stateName);
+    if (prefersReducedMotion) {
+      state.treeMithuPos = { x: clampedX, y: clampedY };
+      ui.treeMithu.style.left = clampedX.toFixed(1) + "px";
+      ui.treeMithu.style.top = clampedY.toFixed(1) + "px";
+      return;
+    }
+    animate(
+      ui.treeMithu,
+      {
+        left: [from.x.toFixed(1) + "px", clampedX.toFixed(1) + "px"],
+        top: [from.y.toFixed(1) + "px", clampedY.toFixed(1) + "px"],
+        transform: [
+          "translate(-50%, -50%) scale(0.88)",
+          "translate(-50%, -58%) scale(1.02)",
+          "translate(-50%, -50%) scale(1)"
+        ]
+      },
+      { duration: 0.85, easing: "ease-in-out" }
+    );
+    state.treeMithuPos = { x: clampedX, y: clampedY };
+  }
+
+  function returnTreeMithuHome() {
+    if (!state.treeMithuHome) return;
+    animateTreeMithuTo(state.treeMithuHome.x, state.treeMithuHome.y, "listening");
+  }
+
+  function updateSpotlight(letter, show) {
+    if (!ui.letterSpotlight) return;
+    if (!letter) {
+      ui.letterSpotlight.style.opacity = "0";
+      return;
+    }
+    if (ui.spotlightLetterDev) ui.spotlightLetterDev.textContent = letter.devanagari;
+    if (ui.spotlightLetterTran) ui.spotlightLetterTran.textContent = letter.transliteration;
+    if (ui.spotlightLetterExample) {
+      const exampleText = (letter.example || letter.devanagari) + " · " + (letter.meaning || "Needs review");
+      ui.spotlightLetterExample.textContent = exampleText;
+    }
+    if (show) {
+      ui.letterSpotlight.style.opacity = "1";
+      if (!prefersReducedMotion) {
+        animate(
+          ui.letterSpotlight,
+          { opacity: [0, 1], transform: ["scale(0.86)", "scale(1.02)", "scale(1)"] },
+          { duration: 0.5, easing: "ease-out" }
+        );
+      }
+    } else {
+      ui.letterSpotlight.style.opacity = "0";
+    }
+  }
+
+  function treeGrowthLevel() {
+    const doneTotal = Object.values(state.progress.done).filter(Boolean).length;
+    const lessonProgress = Math.min(6, state.progress.lessonIndex);
+    return Math.min(12, doneTotal + lessonProgress);
+  }
+
+  function renderTreeProgressDecor() {
+    if (!ui.treeProgressBlooms || !ui.magicalTreeStage) return;
+    const level = treeGrowthLevel();
+    ui.magicalTreeStage.style.filter = "saturate(" + (1 + level * 0.03).toFixed(2) + ") brightness(" + (1 + level * 0.01).toFixed(2) + ")";
+    ui.treeProgressBlooms.innerHTML = "";
+    const bloomCount = Math.min(12, Math.max(2, level));
+    for (let i = 0; i < bloomCount; i += 1) {
+      const bloom = document.createElement("span");
+      bloom.className = "progress-bloom";
+      bloom.style.left = (26 + ((i * 11.7) % 60)).toFixed(2) + "%";
+      bloom.style.top = (20 + ((i * 7.9) % 46)).toFixed(2) + "%";
+      if (!prefersReducedMotion) {
+        bloom.style.animationDelay = -(i * 0.14).toFixed(2) + "s";
+      } else {
+        bloom.style.transform = "scale(1)";
+      }
+      ui.treeProgressBlooms.appendChild(bloom);
+      if (!prefersReducedMotion) {
+        animate(bloom, { transform: ["scale(0)", "scale(1.22)", "scale(1)"], opacity: [0, 1, 1] }, { duration: 0.65, easing: "ease-out", delay: i * 0.05 });
+      }
+    }
+    const starCount = Math.max(1, Math.min(8, Math.floor(level / 2)));
+    for (let i = 0; i < starCount; i += 1) {
+      const star = document.createElement("span");
+      star.className = "progress-star";
+      star.textContent = "✦";
+      star.style.left = (24 + ((i * 13.4) % 66)).toFixed(2) + "%";
+      star.style.top = (14 + ((i * 9.6) % 50)).toFixed(2) + "%";
+      ui.treeProgressBlooms.appendChild(star);
+      if (!prefersReducedMotion) {
+        animate(star, { transform: ["scale(0)", "scale(1.05)", "scale(0.9)"], opacity: [0, 1, 0.86] }, { duration: 0.8, easing: "ease-out", delay: i * 0.08 });
+      } else {
+        star.style.transform = "scale(1)";
+        star.style.opacity = "0.86";
+      }
+    }
+  }
+
+  function treeLetterCoordinates(index, total) {
+    const angle = (Math.PI * 2 * index) / Math.max(1, total);
+    const ring = index % 3;
+    const radiusX = [255, 214, 174][ring];
+    const radiusY = [152, 128, 98][ring];
+    return {
+      x: 50 + (Math.cos(angle) * radiusX) / 12,
+      y: 39 + (Math.sin(angle) * radiusY) / 5.7
+    };
   }
 
   function renderMagicalTree() {
     if (!ui.magicalTreeLetters) return;
+    ensureTreeParticles();
+    ensureTreeMithuHome();
     ui.magicalTreeLetters.innerHTML = "";
+    state.treeLetterPositions.clear();
     canonicalLetters.forEach(function (letter) {
+      const i = letter.order || 0;
+      const pos = treeLetterCoordinates(i, canonicalLetters.length);
+      state.treeLetterPositions.set(letter.id, pos);
       const button = document.createElement("button");
       button.type = "button";
       button.className = "tree-letter-btn";
       button.setAttribute("data-tree-id", letter.id);
       button.setAttribute("data-sanskrit", letter.devanagari);
       button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
+      button.style.left = pos.x.toFixed(2) + "%";
+      button.style.top = pos.y.toFixed(2) + "%";
       button.innerHTML = '<span class="tree-dev">' + letter.devanagari + '</span><span class="tree-tran">' + letter.transliteration + "</span>";
       if (state.treeDiscovered.has(letter.id)) button.classList.add("discovered");
       ui.magicalTreeLetters.appendChild(button);
     });
     renderTreeCounter();
+    renderTreeProgressDecor();
   }
 
   function activateTreeLetterByButton(button) {
@@ -818,7 +1022,30 @@
       if (ui.treeStatus) ui.treeStatus.textContent = "Letter data missing for selected tree button.";
       return;
     }
-    animate(button, { transform: ["scale(1)", "scale(1.12)", "scale(1)"] }, { duration: 0.34, easing: "ease-out" });
+    const stageRect = ui.magicalTreeStage ? ui.magicalTreeStage.getBoundingClientRect() : null;
+    const buttonRect = button.getBoundingClientRect();
+    const fromLeft = button.style.left;
+    const fromTop = button.style.top;
+    button.classList.add("tree-active");
+    updateSpotlight(letter, true);
+    if (!prefersReducedMotion) {
+      animate(button, { transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.16)", "translate(-50%, -50%) scale(1.02)"] }, { duration: 0.28, easing: "ease-out" });
+    }
+    if (stageRect) {
+      const centerX = (buttonRect.left + buttonRect.width / 2 - stageRect.left) / stageRect.width * 100;
+      const centerY = (buttonRect.top + buttonRect.height / 2 - stageRect.top) / stageRect.height * 100;
+      if (!prefersReducedMotion) {
+        animate(button, {
+          left: [fromLeft, "50%"],
+          top: [fromTop, "48%"],
+          transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -54%) scale(1.24)", "translate(-50%, -50%) scale(1.1)"]
+        }, { duration: 0.7, easing: "ease-in-out" });
+      } else {
+        button.style.left = "50%";
+        button.style.top = "48%";
+      }
+      animateTreeMithuTo(stageRect.width * (centerX / 100 + 0.08), stageRect.height * (centerY / 100 - 0.16), "pointing");
+    }
     renderLetterDetail(letter);
     setMascotState("pointing");
     setMascotSpeech("Listening to " + letter.devanagari + ".", 1200);
@@ -838,6 +1065,17 @@
       }, 180);
     }
     handleTreeCompletionOnce();
+    renderTreeProgressDecor();
+    setTimeout(function () {
+      button.style.left = fromLeft;
+      button.style.top = fromTop;
+      button.classList.remove("tree-active");
+      if (!prefersReducedMotion) {
+        animate(button, { transform: ["translate(-50%, -50%) scale(1.08)", "translate(-50%, -50%) scale(1)"] }, { duration: 0.33, easing: "ease-out" });
+      }
+      updateSpotlight(letter, false);
+      returnTreeMithuHome();
+    }, prefersReducedMotion ? 250 : 1250);
   }
 
   function buildHearPrompt() {
