@@ -1,5 +1,5 @@
 (function initAlphabetForestV4() {
-  const AUDIO_ENABLED = true;
+  const AUDIO_ENABLED = false;
   const LETTER_COUNT = 48;
   const TREE_GROUP_SIZE = 5;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -24,13 +24,13 @@
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
   const ACTIVITY_SPEECH = {
-    "magical-tree": "Let's discover magical Sanskrit letters!",
+    "magical-tree": "Let's discover magical letters!",
     "letter-garden": "Choose a letter and explore!",
     "hear-and-pick": "Listen carefully and choose the letter!",
     "picture-match": "Can you find the matching picture?",
     "arrange-word": "Build the Sanskrit word in order!",
-    "flashcard-flip": "Think of the meaning before flipping!",
-    "feed-mithu": "Choose the right fruit for me!",
+    "flashcard-flip": "Can you remember what this means?",
+    "feed-mithu": "Can you find my favourite fruit?",
     "letter-tracing": "Let's practise writing Sanskrit!",
     "hidden-letter-hunt": "Can you spot the hidden letter?"
   };
@@ -179,6 +179,7 @@
     traceStatus: document.getElementById("traceStatus"),
     clearTraceBtn: document.getElementById("clearTraceBtn"),
     checkTraceBtn: document.getElementById("checkTraceBtn"),
+    writingTryAgainBtn: document.getElementById("writingTryAgainBtn"),
     confirmWritingBtn: document.getElementById("confirmWritingBtn"),
     writingComparePanel: document.getElementById("writingComparePanel"),
     writingSampleImage: document.getElementById("writingSampleImage"),
@@ -294,10 +295,12 @@
     if (ui.audioDisclaimer) {
       ui.audioDisclaimer.textContent = AUDIO_ENABLED
         ? "Tap Sanskrit letters or words to hear reviewed local pronunciation clips."
-        : "Audio is temporarily disabled on this page.";
+        : "Pronunciation is unavailable until verified Sanskrit audio is approved.";
     }
     if (ui.audioDebug) {
-      ui.audioDebug.textContent = AUDIO_ENABLED ? "Audio source: local pronunciation clips only." : "AUDIO_ENABLED = false";
+      ui.audioDebug.textContent = AUDIO_ENABLED
+        ? "Audio source: verified local pronunciation clips only."
+        : "Audio source paused: inaccurate clips removed; no browser speech fallback.";
     }
     if (ui.muteToggle) ui.muteToggle.addEventListener("click", function () { setMuted(!runtime.muted); });
     if (ui.panelMuteBtn) ui.panelMuteBtn.addEventListener("click", function () { setMuted(!runtime.muted); });
@@ -334,7 +337,11 @@
   }
 
   function playLetterAudio(letter, playbackRate, feedbackEl) {
-    if (!AUDIO_ENABLED || runtime.muted || !letter) return;
+    if (!AUDIO_ENABLED) {
+      if (feedbackEl) feedbackEl.textContent = "Pronunciation is unavailable until verified Sanskrit audio is approved.";
+      return;
+    }
+    if (runtime.muted || !letter) return;
     if (!letter.audioPath) {
       if (feedbackEl) feedbackEl.textContent = "Pronunciation clip is not available for this item yet.";
       return;
@@ -657,7 +664,7 @@
     if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
       clearTraceBoard();
       hideWritingComparison();
-      if (ui.traceStatus) ui.traceStatus.textContent = "Try writing the letter again.";
+      if (ui.traceStatus) ui.traceStatus.textContent = "Canvas cleared. Try writing the letter again.";
     });
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
@@ -674,15 +681,29 @@
         if (ui.traceStatus) ui.traceStatus.textContent = "Self-check: compare your writing with the correct letter.";
       });
     }
+    if (ui.writingTryAgainBtn) {
+      ui.writingTryAgainBtn.addEventListener("click", function () {
+        clearTraceBoard();
+        hideWritingComparison();
+        setMascotState("encouraging");
+        setMascotSpeech("Good try! Let's try again!");
+        if (ui.traceStatus) ui.traceStatus.textContent = "Try again and compare your writing once more.";
+      });
+    }
     if (ui.confirmWritingBtn) {
       ui.confirmWritingBtn.addEventListener("click", function () {
         const activityId = "letter-tracing";
+        const activity = forestState.activities[activityId];
         if (!runtime.tracing.reviewed) {
           if (ui.traceStatus) ui.traceStatus.textContent = "Please check your writing first.";
           return;
         }
+        const sourceIndex = activity ? activity.currentIndex : 0;
+        const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
         hideWritingComparison();
         markCurrentComplete(activityId, "Writing practised!");
+        fireConfetti(false);
+        if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
       });
     }
   }
@@ -698,16 +719,14 @@
   }
 
   function showWritingComparison(letter) {
-    if (!ui.writingComparePanel || !ui.writingSampleImage || !ui.writingTargetLarge || !ui.confirmWritingBtn) return;
+    if (!ui.writingComparePanel || !ui.writingSampleImage || !ui.writingTargetLarge) return;
     ui.writingComparePanel.hidden = false;
-    ui.confirmWritingBtn.hidden = false;
     ui.writingSampleImage.src = runtime.tracing.sampleImage;
     ui.writingTargetLarge.textContent = letter && letter.symbol ? letter.symbol : "अ";
   }
 
   function hideWritingComparison() {
     if (ui.writingComparePanel) ui.writingComparePanel.hidden = true;
-    if (ui.confirmWritingBtn) ui.confirmWritingBtn.hidden = true;
   }
 
   function initConfetti() {
@@ -846,6 +865,7 @@
     if (!activity) return;
     cancelAutoAdvance(activityId);
     const sourceIndex = activity.currentIndex;
+    const wasResolved = activity.completedItems.includes(sourceIndex);
     CORE.markCurrentItemCompleted(forestState, activityId, 1);
     setActivityStatus(activityId, message);
     if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
@@ -855,11 +875,13 @@
       if (activity.isComplete) {
         setMascotSpeech("Fantastic! You finished this adventure!");
         setMascotStateForDuration("dancing", 950);
-        fireConfetti(false);
+        fireConfetti(true);
       } else {
         setMascotSpeech("Wonderful! Let's keep going!");
         setMascotStateForDuration("celebrating", 650);
-        scheduleAutoAdvance(activityId, sourceIndex, 900);
+        if (!wasResolved && ACTIVITY_META[activityId].type === "quiz") {
+          scheduleAutoAdvance(activityId, sourceIndex, 900);
+        }
       }
     }
     saveAndRender();
@@ -1074,7 +1096,9 @@
     const activityId = "letter-garden";
     const activity = forestState.activities[activityId];
     const selectedLetter = getCurrentLetter(activityId);
-    const selectedCategory = activity.answers.category || "vowels";
+    const rawCategory = activity.answers.category || "vowels";
+    const selectedCategory = (rawCategory === "consonants" || rawCategory === "vowels") ? rawCategory : "vowels";
+    if (selectedCategory !== rawCategory) activity.answers.category = selectedCategory;
     const selectedSubgroup = (!activity.answers.subgroup || activity.answers.subgroup === "all") ? "ka-varga" : activity.answers.subgroup;
     if (selectedCategory === "consonants" && activity.answers.subgroup !== selectedSubgroup) {
       activity.answers.subgroup = selectedSubgroup;
@@ -1087,7 +1111,6 @@
     renderSubgroupButtons(selectedCategory, selectedSubgroup);
 
     const filtered = letters.filter(function (letter) {
-      if (selectedCategory === "practice") return true;
       if (selectedCategory === "vowels") return letter.category !== "consonant";
       if (selectedCategory === "consonants") {
         if (letter.category !== "consonant") return false;
@@ -1145,6 +1168,9 @@
       ui.selectedExampleImage.alt = selectedVocab.alt || selectedVocab.meaning || selectedLetter.meaning;
     }
     if (ui.gardenCoverage) ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised.";
+    if (ui.audioFallback && !AUDIO_ENABLED) {
+      ui.audioFallback.textContent = "Pronunciation unavailable until verified Sanskrit audio is approved.";
+    }
   }
 
   function renderSubgroupButtons(category, activeSubgroup) {
@@ -1188,7 +1214,9 @@
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.hearChoices || !ui.hearStatus) return;
     ui.hearChoices.innerHTML = "";
-    ui.hearStatus.textContent = "Tap the matching letter.";
+    ui.hearStatus.textContent = AUDIO_ENABLED
+      ? "Tap the matching letter."
+      : "Pronunciation unavailable. Tap the shown letter: " + letter.symbol;
     const options = buildOptions(forestState.activities[activityId].currentIndex, 4);
     options.forEach(function (option) {
       const btn = document.createElement("button");
@@ -1210,7 +1238,10 @@
       });
       ui.hearChoices.appendChild(btn);
     });
-    if (ui.playHearPrompt) ui.playHearPrompt.onclick = function () { playLetterAudio(letter, 1, ui.hearStatus); };
+    if (ui.playHearPrompt) {
+      ui.playHearPrompt.disabled = !AUDIO_ENABLED;
+      ui.playHearPrompt.onclick = function () { playLetterAudio(letter, 1, ui.hearStatus); };
+    }
   }
 
   function getVocabulary(word, meaning) {

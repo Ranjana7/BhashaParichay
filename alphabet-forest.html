@@ -42,7 +42,7 @@
           <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
           <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
         </svg>
-        <p id="lessonMascotSpeech" class="mascot-speech">Namaste! I am Mitthu. I will celebrate every correct answer with you.</p>
+        <p id="lessonMascotSpeech" class="mascot-speech">Namaste! I am Mithu. I will celebrate every correct answer with you.</p>
       </div>
       <p class="privacy-note">
         Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
@@ -173,7 +173,6 @@
         <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
           <button class="button ghost category-tab active" data-category="vowels" type="button">स्वर</button>
           <button class="button ghost category-tab" data-category="consonants" type="button">व्यञ्जन</button>
-          <button class="button ghost category-tab" data-category="practice" type="button">अभ्यास</button>
         </div>
         <div class="hero-actions" id="consonantSubgroupTabs" aria-label="Consonant groups"></div>
         <p id="gardenCoverage" class="footer-note">Browse and revise letters in the grid.</p>
@@ -286,12 +285,16 @@
           <div class="writing-sample">
             <p class="footer-note"><strong>Correct letter</strong></p>
             <p id="writingTargetLarge" class="writing-target-large">अ</p>
+            <p class="footer-note"><strong>Does your letter look like this?</strong></p>
+            <div class="hero-actions">
+              <button id="writingTryAgainBtn" class="button ghost" type="button">Try Again</button>
+              <button id="confirmWritingBtn" class="button primary" type="button">Looks Good!</button>
+            </div>
           </div>
         </div>
         <div class="hero-actions">
-          <button id="clearTraceBtn" class="button ghost" type="button">Try Again</button>
+          <button id="clearTraceBtn" class="button ghost" type="button">Clear Canvas</button>
           <button id="checkTraceBtn" class="button secondary" type="button">Check My Writing</button>
-          <button id="confirmWritingBtn" class="button primary" type="button" hidden>Looks Good, Continue</button>
         </div>
         <p id="traceStatus" class="status" aria-live="polite"></p>
         <div id="controls-letter-tracing"></div>
