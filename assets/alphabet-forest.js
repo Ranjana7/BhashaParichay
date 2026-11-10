@@ -203,7 +203,6 @@
     clearTraceBtn: document.getElementById("clearTraceBtn"),
     checkTraceBtn: document.getElementById("checkTraceBtn"),
     traceSelfCheck: document.getElementById("traceSelfCheck"),
-    traceSelfCheckLetter: document.getElementById("traceSelfCheckLetter"),
     traceSelfCheckQuestion: document.getElementById("traceSelfCheckQuestion"),
     traceConfirmBtn: document.getElementById("traceConfirmBtn"),
     traceRetryBtn: document.getElementById("traceRetryBtn"),
@@ -743,8 +742,8 @@
         }
         openTraceSelfCheck();
         setMascotState("pointing");
-        setMascotSpeech("Does your letter look like this?");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Compare your writing and choose an option below.";
+        setMascotSpeech("Does your writing look like this?");
+        if (ui.traceStatus) ui.traceStatus.textContent = "";
       });
     }
     if (ui.traceConfirmBtn) {
@@ -757,6 +756,7 @@
         playSuccessSound("applause");
         setMascotStateForDuration("celebrating", 1000);
         fireSectionConfetti("activityTraceGamePanel", true);
+        showTraceFlowerBurst();
         markCurrentComplete(activityId, "Shabash! Letter practised!");
         if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
       });
@@ -768,7 +768,7 @@
         clearTraceBoard();
         setMascotState("encouraging");
         setMascotSpeech("Nice try! Let's write it once more.");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Great effort! Let's try this same letter again.";
+        if (ui.traceStatus) ui.traceStatus.textContent = "Great effort! Try this same letter again.";
       });
     }
   }
@@ -795,9 +795,7 @@
   }
 
   function openTraceSelfCheck() {
-    if (!ui.traceSelfCheck || !ui.traceSelfCheckLetter) return;
-    const letter = getCurrentLetter("letter-tracing");
-    ui.traceSelfCheckLetter.textContent = letter ? letter.symbol : "अ";
+    if (!ui.traceSelfCheck) return;
     ui.traceSelfCheck.hidden = false;
   }
 
@@ -907,6 +905,22 @@
         origin: { x: originX, y: originY }
       });
     });
+  }
+
+  function showTraceFlowerBurst() {
+    const section = document.getElementById("activityTraceGamePanel");
+    if (!section || REDUCED_MOTION) return;
+    const tokens = ["✿", "❀", "✽"];
+    for (let index = 0; index < 9; index += 1) {
+      const flower = document.createElement("span");
+      flower.className = "trace-flower-burst";
+      flower.textContent = tokens[index % tokens.length];
+      flower.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
+      flower.style.top = (16 + Math.random() * 62).toFixed(1) + "%";
+      flower.style.animationDelay = (Math.random() * 0.12).toFixed(2) + "s";
+      section.appendChild(flower);
+      window.setTimeout(function () { flower.remove(); }, 1200);
+    }
   }
 
   function initActivityControls() {

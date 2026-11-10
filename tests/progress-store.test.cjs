@@ -50,6 +50,27 @@ test("progress store migrates legacy letter-garden learned key", () => {
   assert.deepEqual(Array.from(forest.activities["letter-garden"].completedItems), [0, 1, 47]);
 });
 
+test("progress store merges multiple legacy keys", () => {
+  const { api } = loadStore({
+    "sanskritParichay.alphabetForest.tree.progress": JSON.stringify({
+      state: {
+        activities: {
+          "magical-tree": {
+            currentLetterIndex: 47,
+            completedLetters: Array.from({ length: 48 }, (_, i) => i),
+            isCompleted: true
+          }
+        }
+      }
+    }),
+    "sanskritParichay.alphabetForest.garden.learned": JSON.stringify(Array.from({ length: 48 }, (_, i) => i))
+  });
+  const forest = api.loadForestState();
+  assert.equal(forest.activities["magical-tree"].isComplete, true);
+  assert.equal(forest.activities["letter-garden"].isComplete, true);
+  assert.equal(forest.activities["letter-garden"].completedItems.length, 48);
+});
+
 test("snapshot reports learning/practice counts from alphabet forest v3", () => {
   const v3 = {
     schemaVersion: 3,

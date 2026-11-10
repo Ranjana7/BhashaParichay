@@ -124,24 +124,13 @@
     return state;
   }
 
-  function migrateLegacyForestState() {
-    const legacyKeys = [
-      FOREST_LEGACY_KEY,
-      FOREST_LEGACY_V1_KEY,
-      FOREST_LEGACY_TREE_KEY,
-      FOREST_LEGACY_GARDEN_KEY
-    ];
-    let legacy = null;
-    for (let index = 0; index < legacyKeys.length; index += 1) {
-      legacy = readJson(legacyKeys[index], null);
-      if (legacy !== null && legacy !== undefined) break;
-    }
+  function migrateSingleLegacyForestState(legacy) {
     if (!legacy || typeof legacy !== "object") return null;
     const migrated = createForestState();
     if (Array.isArray(legacy)) {
       migrated.activities["letter-garden"].completedItems = normalizeIndexList(legacy, LETTER_COUNT - 1);
       migrated.activities["letter-garden"].isComplete = migrated.activities["letter-garden"].completedItems.length >= LETTER_COUNT;
-      return migrated;
+      return sanitizeForestState(migrated);
     }
     if (legacy.state && legacy.state.activities) {
       Object.keys(legacy.state.activities).forEach(function (legacyId) {
@@ -174,7 +163,60 @@
       }, 0);
       if (practiceDone >= 2) migrated.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
     }
-    return migrated;
+    return sanitizeForestState(migrated);
+  }
+
+  function mergeForestStates(baseState, incomingState) {
+    const base = sanitizeForestState(baseState);
+    const incoming = sanitizeForestState(incomingState);
+    const merged = createForestState();
+    FOREST_ACTIVITY_IDS.forEach(function (id) {
+      const mergedCompleted = normalizeIndexList(
+        (base.activities[id].completedItems || []).concat(incoming.activities[id].completedItems || []),
+        LETTER_COUNT - 1
+      );
+      const mergedRewarded = normalizeIndexList(
+        (base.activities[id].rewardedItems || []).concat(incoming.activities[id].rewardedItems || []),
+        LETTER_COUNT - 1
+      );
+      merged.activities[id].currentIndex = clampIndex(Math.max(base.activities[id].currentIndex || 0, incoming.activities[id].currentIndex || 0), LETTER_COUNT - 1);
+      merged.activities[id].completedItems = mergedCompleted;
+      merged.activities[id].rewardedItems = mergedRewarded;
+      merged.activities[id].answers = Object.assign({}, base.activities[id].answers || {}, incoming.activities[id].answers || {});
+      merged.activities[id].attempts = Object.assign({}, base.activities[id].attempts || {}, incoming.activities[id].attempts || {});
+      merged.activities[id].order = Array.isArray(base.activities[id].order) && base.activities[id].order.length === LETTER_COUNT
+        ? base.activities[id].order.slice()
+        : incoming.activities[id].order.slice();
+      merged.activities[id].isComplete = Boolean(base.activities[id].isComplete || incoming.activities[id].isComplete || mergedCompleted.length >= LETTER_COUNT);
+    });
+    merged.completionRewarded = Object.assign({}, base.completionRewarded || {}, incoming.completionRewarded || {});
+    merged.worldCompleted = Boolean(base.worldCompleted || incoming.worldCompleted);
+    merged.xp = Math.max(Number(base.xp || 0), Number(incoming.xp || 0));
+    return sanitizeForestState(merged);
+  }
+
+  function migrateLegacyForestState() {
+    const legacyKeys = [
+      FOREST_LEGACY_KEY,
+      FOREST_LEGACY_V1_KEY,
+      FOREST_LEGACY_TREE_KEY,
+      FOREST_LEGACY_GARDEN_KEY
+    ];
+    let merged = null;
+    legacyKeys.forEach(function (key) {
+      const legacy = readJson(key, null);
+      const migrated = migrateSingleLegacyForestState(legacy);
+      if (!migrated) return;
+      merged = merged ? mergeForestStates(merged, migrated) : migrated;
+    });
+    if (!merged) return null;
+    if (merged.activities["magical-tree"].isComplete && merged.activities["letter-garden"].isComplete) {
+      const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
+        return count + (merged.activities[id].isComplete ? 1 : 0);
+      }, 0);
+      if (practiceDone >= 2) merged.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
+    }
+    return sanitizeForestState(merged);
   }
 
   function loadForestState() {

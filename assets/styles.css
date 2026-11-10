@@ -683,7 +683,7 @@ p {
 }
 
 .writing-card {
-  max-width: 430px;
+  max-width: 620px;
   margin: 0 auto;
   border: 1px solid #dbe6ff;
   border-radius: 14px;
@@ -693,10 +693,17 @@ p {
   gap: 10px;
 }
 
+.trace-work-area {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
 .trace-target {
   display: grid;
   place-items: center;
-  min-height: 78px;
+  min-height: 170px;
   border: 2px solid #d8e2ff;
   border-radius: 12px;
   background: #f7faff;
@@ -711,7 +718,6 @@ p {
 
 #traceCanvas {
   width: 100%;
-  max-width: 408px;
   border: 2px dashed #abc3ff;
   border-radius: 14px;
   background: #ffffff;
@@ -719,21 +725,24 @@ p {
   min-height: 170px;
 }
 
+.trace-canvas-wrap {
+  min-width: 0;
+}
+
 .trace-self-check {
-  border: 1px solid #d8e2ff;
-  border-radius: 12px;
-  background: #fff;
-  padding: 10px 12px;
+  padding: 6px 2px 0;
   display: grid;
   gap: 8px;
 }
 
-.trace-self-check-letter {
-  margin: 0;
-  text-align: center;
-  font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", "Segoe UI", sans-serif;
-  font-size: 3.1rem;
-  color: #3d2ab0;
+.trace-flower-burst {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #ff6fba;
+  text-shadow: 0 0 6px rgba(255, 149, 205, 0.7);
+  pointer-events: none;
+  z-index: 12;
+  animation: traceFlowerBurst 1s ease-out forwards;
 }
 
 .category-tab.active {
@@ -1917,6 +1926,12 @@ th {
   100% { box-shadow: 0 0 0 18px rgba(113, 147, 255, 0); }
 }
 
+@keyframes traceFlowerBurst {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -100%) scale(1.1); }
+}
+
 @keyframes flutter {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-8px) rotate(7deg); }
@@ -2065,6 +2080,14 @@ th {
 
   .writing-card {
     max-width: 100%;
+  }
+
+  .trace-work-area {
+    grid-template-columns: 1fr;
+  }
+
+  .trace-target {
+    min-height: 102px;
   }
 
   #traceCanvas {

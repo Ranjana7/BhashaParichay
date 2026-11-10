@@ -151,7 +151,10 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
 
 test("write-it-yourself uses self-check flow without fake machine validation", () => {
   assert.ok(html.includes('id="traceSelfCheck"'));
-  assert.ok(html.includes("Does your letter look like this?"));
+  assert.ok(html.includes("Does your writing look like this?"));
+  assert.equal(html.includes('id="traceSelfCheckLetter"'), false);
+  assert.ok(html.includes('class="trace-work-area"'));
+  assert.ok(html.includes('class="trace-canvas-wrap"'));
   assert.ok(html.includes("Yes, I did it!"));
   assert.ok(html.includes("Let me try again!"));
   assert.ok(html.includes(">Check My Writing<"));
@@ -160,6 +163,7 @@ test("write-it-yourself uses self-check flow without fake machine validation", (
   assert.ok(js.includes("Let's write our letter first!"));
   assert.ok(js.includes("openTraceSelfCheck("));
   assert.ok(js.includes("closeTraceSelfCheck("));
+  assert.ok(js.includes("showTraceFlowerBurst("));
   assert.equal(js.includes("validateTraceAgainstLetter("), false);
 });
 
@@ -307,4 +311,20 @@ test("invalid saved JSON falls back to valid default state", () => {
   const state = api.loadState();
   assert.equal(state.schemaVersion, 3);
   assert.equal(Object.keys(state.activities).length, 9);
+});
+
+test("legacy keys merge tree and garden progress without data loss", () => {
+  const storage = {
+    map: new Map([
+      [core.LEGACY_KEYS[2], JSON.stringify({ state: { activities: { "magical-tree": { currentLetterIndex: 47, completedLetters: Array.from({ length: 48 }, (_, i) => i), isCompleted: true } } } })],
+      [core.LEGACY_KEYS[3], JSON.stringify(Array.from({ length: 48 }, (_, i) => i))]
+    ]),
+    getItem(key) { return this.map.has(key) ? this.map.get(key) : null; },
+    setItem(key, value) { this.map.set(key, value); }
+  };
+  const api = core.createStateApi(storage, 48);
+  const state = api.loadState();
+  assert.equal(state.activities["magical-tree"].isComplete, true);
+  assert.equal(state.activities["letter-garden"].isComplete, true);
+  assert.equal(state.activities["letter-garden"].completedItems.length, 48);
 });

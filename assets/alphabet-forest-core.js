@@ -152,6 +152,33 @@
     return validateForestState(migrated, letterCount);
   }
 
+  function mergeActivityState(baseActivity, incomingActivity, letterCount) {
+    const merged = createActivityState(letterCount);
+    const base = validateActivityState(baseActivity, letterCount);
+    const incoming = validateActivityState(incomingActivity, letterCount);
+    merged.currentIndex = clampIndex(Math.max(base.currentIndex, incoming.currentIndex), letterCount - 1);
+    merged.completedItems = uniqueIndexList(base.completedItems.concat(incoming.completedItems), letterCount - 1);
+    merged.rewardedItems = uniqueIndexList(base.rewardedItems.concat(incoming.rewardedItems), letterCount - 1);
+    merged.answers = Object.assign({}, base.answers, incoming.answers);
+    merged.attempts = Object.assign({}, base.attempts, incoming.attempts);
+    merged.order = (Array.isArray(base.order) && base.order.length === letterCount ? base.order : incoming.order).slice();
+    merged.isComplete = Boolean(base.isComplete || incoming.isComplete || merged.completedItems.length >= letterCount);
+    return merged;
+  }
+
+  function mergeForestStates(baseState, incomingState, letterCount) {
+    const merged = createDefaultForestState(letterCount);
+    const base = validateForestState(baseState, letterCount);
+    const incoming = validateForestState(incomingState, letterCount);
+    ACTIVITY_IDS.forEach(function eachActivity(activityId) {
+      merged.activities[activityId] = mergeActivityState(base.activities[activityId], incoming.activities[activityId], letterCount);
+    });
+    merged.xp = Math.max(Number(base.xp || 0), Number(incoming.xp || 0));
+    merged.completionRewarded = Object.assign({}, base.completionRewarded || {}, incoming.completionRewarded || {});
+    merged.worldCompleted = Boolean(base.worldCompleted || incoming.worldCompleted);
+    return validateForestState(merged, letterCount);
+  }
+
   function computeGlobalProgress(state) {
     const completed = ACTIVITY_IDS.filter(function eachActivity(activityId) {
       return Boolean(state.activities[activityId] && state.activities[activityId].isComplete);
@@ -244,12 +271,14 @@
     function loadState() {
       const current = parseRaw(readRaw(STORAGE_KEY));
       if (current) return migrateForestState(current, letterCount);
+      let merged = null;
       for (let index = 0; index < LEGACY_KEYS.length; index += 1) {
         const legacy = parseRaw(readRaw(LEGACY_KEYS[index]));
         if (!legacy) continue;
-        return migrateForestState(legacy, letterCount);
+        const migrated = migrateForestState(legacy, letterCount);
+        merged = merged ? mergeForestStates(merged, migrated, letterCount) : migrated;
       }
-      return createDefaultForestState(letterCount);
+      return merged || createDefaultForestState(letterCount);
     }
 
     function saveState(state) {
@@ -275,6 +304,7 @@
     createDefaultForestState: createDefaultForestState,
     validateForestState: validateForestState,
     migrateForestState: migrateForestState,
+    mergeForestStates: mergeForestStates,
     computeGlobalProgress: computeGlobalProgress,
     markCurrentItemCompleted: markCurrentItemCompleted,
     goPrevious: goPrevious,

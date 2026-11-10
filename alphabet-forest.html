@@ -298,17 +298,20 @@
       <h2>Activity 6: Write It Yourself!</h2>
       <div class="activity">
         <div class="writing-card">
-          <div class="trace-target">
-            <span id="traceTargetLetter">अ</span>
+          <div class="trace-work-area">
+            <div class="trace-target">
+              <span id="traceTargetLetter">अ</span>
+            </div>
+            <div class="trace-canvas-wrap">
+              <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
+            </div>
           </div>
-          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
           <div class="hero-actions">
             <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
             <button id="checkTraceBtn" class="button secondary" type="button">Check My Writing</button>
           </div>
           <div id="traceSelfCheck" class="trace-self-check" hidden>
-            <p id="traceSelfCheckQuestion"><strong>Does your letter look like this?</strong></p>
-            <p class="trace-self-check-letter" id="traceSelfCheckLetter">अ</p>
+            <p id="traceSelfCheckQuestion"><strong>Does your writing look like this?</strong></p>
             <div class="hero-actions">
               <button id="traceConfirmBtn" class="button primary" type="button">Yes, I did it!</button>
               <button id="traceRetryBtn" class="button ghost" type="button">Let me try again!</button>
@@ -344,7 +347,7 @@
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
   <script src="assets/vocabulary-map.js?v=20261110p10"></script>
-  <script src="assets/alphabet-forest-core.js?v=20261110p12"></script>
-  <script src="assets/alphabet-forest.js?v=20261110p12"></script>
+  <script src="assets/alphabet-forest-core.js?v=20261110p13"></script>
+  <script src="assets/alphabet-forest.js?v=20261110p13"></script>
 </body>
 </html>
