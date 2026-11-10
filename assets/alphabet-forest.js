@@ -72,10 +72,13 @@
     streakCount: document.getElementById("streakCount"),
     progressFill: document.getElementById("progressFill"),
     progressText: document.getElementById("progressText"),
-    activityHubList: document.getElementById("activityHubList"),
+    globalProgressSummary: document.getElementById("globalProgressSummary"),
+    globalProgressFill: document.getElementById("globalProgressFill"),
     treeInstruction: document.getElementById("treeInstruction"),
     treeCounter: document.getElementById("treeCounter"),
     treeStatus: document.getElementById("treeStatus"),
+    prevTreeGroupBtn: document.getElementById("prevTreeGroupBtn"),
+    nextTreeGroupBtn: document.getElementById("nextTreeGroupBtn"),
     treeMithu: document.getElementById("treeMithu"),
     magicalTreeStage: document.getElementById("magicalTreeStage"),
     magicalTreeLetters: document.getElementById("magicalTreeLetters"),
@@ -95,6 +98,7 @@
     prevLetterBtn: document.getElementById("prevLetterBtn"),
     nextLetterBtn: document.getElementById("nextLetterBtn"),
     letterCategoryTabs: Array.from(document.querySelectorAll(".category-tab")),
+    consonantSubgroupTabs: document.getElementById("consonantSubgroupTabs"),
     gardenCoverage: document.getElementById("gardenCoverage"),
     letterGrid: document.getElementById("letterGrid"),
     playHearPrompt: document.getElementById("playHearPrompt"),
@@ -142,8 +146,10 @@
     interactionCompleted: false,
     retryLockKey: null,
     activeCategory: "vowels",
+    activeConsonantSubgroup: "all",
     gameSeed: 0,
     localNav: {},
+    lastActivityId: null,
     trace: {
       ctx: null,
       drawing: false,
@@ -154,7 +160,9 @@
   hideNonSequencePanels();
   setupTraceCanvas();
   setupStaticActions();
-  renderActivityHub();
+  renderConsonantSubgroupTabs();
+  renderGlobalSummary();
+  setupMascotCompanion();
   renderCurrentActivity();
   renderAudioDebug();
 
@@ -266,9 +274,31 @@
         ui.letterCategoryTabs.forEach(function removeActive(item) { item.classList.remove("active"); });
         tab.classList.add("active");
         runtime.activeCategory = tab.getAttribute("data-category") || "vowels";
+        if (runtime.activeCategory !== "consonants") runtime.activeConsonantSubgroup = "all";
+        renderConsonantSubgroupTabs();
         if (progression.getCurrentActivityId() === "letter-garden") renderLetterGarden();
       });
     });
+
+    if (ui.prevTreeGroupBtn) {
+      ui.prevTreeGroupBtn.addEventListener("click", function onPrevGroup() {
+        if (progression.getCurrentActivityId() !== "magical-tree") return;
+        const currentIndex = progression.getCurrentLetterIndex("magical-tree");
+        const currentGroup = Math.floor(currentIndex / TREE_GROUP_SIZE);
+        if (currentGroup <= 0) return;
+        jumpToTreeGroup(currentGroup - 1);
+      });
+    }
+    if (ui.nextTreeGroupBtn) {
+      ui.nextTreeGroupBtn.addEventListener("click", function onNextGroup() {
+        if (progression.getCurrentActivityId() !== "magical-tree") return;
+        const currentIndex = progression.getCurrentLetterIndex("magical-tree");
+        const currentGroup = Math.floor(currentIndex / TREE_GROUP_SIZE);
+        const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+        if (currentGroup >= maxGroup) return;
+        jumpToTreeGroup(currentGroup + 1);
+      });
+    }
   }
 
   function setupTraceCanvas() {
@@ -345,26 +375,17 @@
     runtime.trace.strokeCount = 0;
   }
 
-  function renderActivityHub() {
-    if (!ui.activityHubList) return;
+  function renderGlobalSummary() {
     const snapshot = progression.getSnapshot();
-    ui.activityHubList.innerHTML = "";
-    ACTIVITY_SEQUENCE.forEach(function renderHubItem(activity, index) {
-      const activityState = snapshot.state.activities[activity.id];
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "button ghost activity-pill";
-      button.textContent =
-        String(index + 1) + ". " + activity.label + " (" + activityState.completedLetters.length + "/48)";
-      if (activity.id === progression.getCurrentActivityId()) button.classList.add("secondary");
-      if (activityState.completedAtLeastOnce) button.classList.add("primary");
-      button.addEventListener("click", function onOpenActivity() {
-        progression.goToActivity(activity.id);
-        runtime.retryLockKey = null;
-        renderCurrentActivity();
-      });
-      ui.activityHubList.appendChild(button);
-    });
+    const completedActivities = ACTIVITY_SEQUENCE.filter(function countCompleted(activity) {
+      return snapshot.state.activities[activity.id].completedAtLeastOnce;
+    }).length;
+    if (ui.globalProgressSummary) {
+      ui.globalProgressSummary.textContent = completedActivities + " of " + ACTIVITY_SEQUENCE.length + " activities completed";
+    }
+    if (ui.globalProgressFill) {
+      ui.globalProgressFill.style.width = ((completedActivities / ACTIVITY_SEQUENCE.length) * 100).toFixed(1) + "%";
+    }
   }
 
   function getLocalNavTarget(activityId) {
@@ -471,11 +492,76 @@
     return "consonants";
   }
 
+  function consonantSubgroupLabel(subgroup) {
+    const labels = {
+      "ka-varga": "क-वर्ग",
+      "ca-varga": "च-वर्ग",
+      "tta-varga": "ट-वर्ग",
+      "ta-varga": "त-वर्ग",
+      "pa-varga": "प-वर्ग",
+      antastha: "अन्तःस्थाः",
+      ushmana: "ऊष्माणः"
+    };
+    return labels[subgroup] || subgroup;
+  }
+
+  function renderConsonantSubgroupTabs() {
+    if (!ui.consonantSubgroupTabs) return;
+    if (runtime.activeCategory !== "consonants") {
+      ui.consonantSubgroupTabs.innerHTML = "";
+      return;
+    }
+    const subgroups = Array.from(new Set(canonicalLetters
+      .filter(function onlyConsonants(letter) { return activityCategoryForLetter(letter) === "consonants"; })
+      .map(function mapGroup(letter) { return letter.subgroup || "other"; })));
+    ui.consonantSubgroupTabs.innerHTML = "";
+
+    const allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "button ghost";
+    allBtn.textContent = "All";
+    allBtn.classList.toggle("active", runtime.activeConsonantSubgroup === "all");
+    allBtn.addEventListener("click", function () {
+      runtime.activeConsonantSubgroup = "all";
+      renderConsonantSubgroupTabs();
+      if (progression.getCurrentActivityId() === "letter-garden") renderLetterGarden();
+    });
+    ui.consonantSubgroupTabs.appendChild(allBtn);
+
+    subgroups.forEach(function eachSubgroup(subgroup) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "button ghost";
+      button.textContent = consonantSubgroupLabel(subgroup);
+      button.classList.toggle("active", runtime.activeConsonantSubgroup === subgroup);
+      button.addEventListener("click", function () {
+        runtime.activeConsonantSubgroup = subgroup;
+        renderConsonantSubgroupTabs();
+        if (progression.getCurrentActivityId() === "letter-garden") renderLetterGarden();
+      });
+      ui.consonantSubgroupTabs.appendChild(button);
+    });
+  }
+
+  function jumpToTreeGroup(groupIndex) {
+    if (typeof progression.setCurrentLetterIndex !== "function") return;
+    const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+    const safeGroup = Math.max(0, Math.min(maxGroup, groupIndex));
+    progression.setCurrentLetterIndex("magical-tree", safeGroup * TREE_GROUP_SIZE);
+    runtime.retryLockKey = null;
+    renderCurrentActivity();
+  }
+
   function renderCurrentActivity() {
     const activityId = progression.getCurrentActivityId();
     const letterIndex = progression.getCurrentLetterIndex(activityId);
     const letter = canonicalLetters[letterIndex];
     runtime.currentLetter = letter;
+    if (runtime.lastActivityId !== activityId) {
+      setMascotState("listening");
+      setMascotSpeech("Now exploring " + labelForActivity(activityId) + ".");
+      runtime.lastActivityId = activityId;
+    }
 
     Object.keys(activityPanels).forEach(function hideInactive(id) {
       const panel = activityPanels[id];
@@ -483,7 +569,7 @@
       panel.hidden = id !== activityId;
     });
 
-    renderActivityHub();
+    renderGlobalSummary();
 
     const alreadyCompleted = progression.isLetterCompleted(activityId, letterIndex);
     const retryLocked = runtime.retryLockKey === (activityId + ":" + letterIndex);
@@ -509,6 +595,15 @@
     controls.progress.textContent =
       "Activity " + (activityIndex + 1) + " of " + ACTIVITY_SEQUENCE.length +
       " · Letter " + (letterIndex + 1) + " of " + canonicalLetters.length;
+    if (activityId === "magical-tree") {
+      controls.previous.textContent = "Previous Group";
+      controls.next.textContent = "Next Group";
+      controls.reset.textContent = "Play Magical Tree Again";
+    } else {
+      controls.previous.textContent = "Previous";
+      controls.next.textContent = "Next";
+      controls.reset.textContent = "Reset Activity";
+    }
   }
 
   function renderSharedLearningPanel(letter, letterIndex, activityId) {
@@ -531,18 +626,31 @@
     const letterIndex = progression.getCurrentLetterIndex(activityId);
     const groupStart = Math.floor(letterIndex / TREE_GROUP_SIZE) * TREE_GROUP_SIZE;
     const groupLetters = canonicalLetters.slice(groupStart, groupStart + TREE_GROUP_SIZE);
+    const groupEnd = Math.min(groupStart + TREE_GROUP_SIZE - 1, canonicalLetters.length - 1);
+    const currentGroup = Math.floor(groupStart / TREE_GROUP_SIZE);
+    const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+    const groupCompleted = groupLetters.every(function isDone(letter) {
+      const idx = canonicalLetters.findIndex(function find(item) { return item.id === letter.id; });
+      return progression.isLetterCompleted(activityId, idx);
+    });
 
     ui.magicalTreeLetters.innerHTML = "";
     if (ui.treeInstruction) {
-      ui.treeInstruction.textContent = "Tap the glowing target letter: " + runtime.currentLetter.devanagari;
+      ui.treeInstruction.textContent = "Tap glowing letters to discover their sounds.";
     }
     if (ui.treeCounter) {
-      ui.treeCounter.textContent = "Keep discovering glowing letters.";
+      ui.treeCounter.textContent = "Group " + (currentGroup + 1) + " of " + (maxGroup + 1);
     }
     if (ui.treeStatus) {
-      ui.treeStatus.textContent = runtime.interactionCompleted
-        ? "Great! Press Next."
-        : "Discover the target letter to unlock Next.";
+      ui.treeStatus.textContent = groupCompleted
+        ? "Great! Group complete."
+        : "Discover all five letters in this group.";
+    }
+    if (ui.prevTreeGroupBtn) {
+      ui.prevTreeGroupBtn.disabled = currentGroup === 0;
+    }
+    if (ui.nextTreeGroupBtn) {
+      ui.nextTreeGroupBtn.disabled = currentGroup >= maxGroup;
     }
 
     groupLetters.forEach(function renderTreeButton(letter, index) {
@@ -556,21 +664,47 @@
       button.classList.toggle("discovered", progression.isLetterCompleted(activityId, canonicalLetters.indexOf(letter)));
       button.classList.toggle("tree-active", letter.id === runtime.currentLetter.id);
       button.addEventListener("click", function onTreeClick() {
+        const letterGlobalIndex = canonicalLetters.findIndex(function find(item) { return item.id === letter.id; });
+        if (typeof progression.setCurrentLetterIndex === "function") {
+          progression.setCurrentLetterIndex(activityId, letterGlobalIndex);
+          runtime.currentLetter = letter;
+        }
         updateSpotlight(letter);
         moveTreeMithuNearButton(button);
         setMascotState("pointing");
         setMascotSpeech("Listen to " + letter.devanagari + ".");
         playPronunciation(letter, 1, ui.treeStatus);
-        if (letter.id === runtime.currentLetter.id) {
+        const alreadyDone = progression.isLetterCompleted(activityId, letterGlobalIndex);
+        if (!alreadyDone) {
           growTreeBloom();
-          completeCurrentLetter("Wonderful! You discovered the target letter.");
-          if (ui.treeStatus) ui.treeStatus.textContent = "Wonderful! Next is unlocked.";
-        } else if (ui.treeStatus) {
-          ui.treeStatus.textContent = "Try the target letter: " + runtime.currentLetter.devanagari;
+          completeCurrentLetter("Wonderful! Letter discovered.");
+        }
+        const nowGroupCompleted = canonicalLetters
+          .slice(groupStart, groupEnd + 1)
+          .every(function allDone(entry, offset) {
+            return progression.isLetterCompleted(activityId, groupStart + offset);
+          });
+        if (nowGroupCompleted) {
+          setMascotState("celebrating");
+          setMascotSpeech("Beautiful! Group complete.");
+          fireConfetti(40);
+          if (currentGroup < maxGroup) {
+            setTimeout(function autoAdvanceGroup() {
+              jumpToTreeGroup(currentGroup + 1);
+              setMascotState("listening");
+              setMascotSpeech("New letters are ready.");
+            }, 700);
+          } else {
+            setNavStatus("Magical Tree complete! You can finish this activity.");
+          }
         }
       });
       ui.magicalTreeLetters.appendChild(button);
     });
+
+    if (groupCompleted && currentGroup === maxGroup && progression.getActivityProgress(activityId).completedCount === canonicalLetters.length) {
+      setNavStatus("All 48 letters discovered. Finish Activity or Play Magical Tree Again.");
+    }
   }
 
   function updateSpotlight(letter) {
@@ -621,16 +755,22 @@
       const category = activityCategoryForLetter(letter);
       if (runtime.activeCategory === "practice") return true;
       if (runtime.activeCategory === "vowels") return category === "vowels";
-      if (runtime.activeCategory === "consonants") return category === "consonants";
+      if (runtime.activeCategory === "consonants") {
+        if (category !== "consonants") return false;
+        if (runtime.activeConsonantSubgroup === "all") return true;
+        return (letter.subgroup || "other") === runtime.activeConsonantSubgroup;
+      }
       return true;
     });
 
     if (!filtered.some(function hasTarget(letter) { return letter.id === target.id; })) {
       runtime.activeCategory = activityCategoryForLetter(target);
+      runtime.activeConsonantSubgroup = "all";
       ui.letterCategoryTabs.forEach(function markTabs(tab) {
         const isActive = tab.getAttribute("data-category") === runtime.activeCategory;
         tab.classList.toggle("active", isActive);
       });
+      renderConsonantSubgroupTabs();
       filtered = canonicalLetters.filter(function includeTargetCategory(letter) {
         return activityCategoryForLetter(letter) === runtime.activeCategory;
       });
@@ -800,6 +940,12 @@
 
   function movePreviousLetter() {
     const activityId = progression.getCurrentActivityId();
+    if (activityId === "magical-tree") {
+      const current = progression.getCurrentLetterIndex(activityId);
+      const currentGroup = Math.floor(current / TREE_GROUP_SIZE);
+      if (currentGroup > 0) jumpToTreeGroup(currentGroup - 1);
+      return;
+    }
     progression.goToPreviousLetter(activityId);
     runtime.retryLockKey = null;
     renderCurrentActivity();
@@ -807,6 +953,13 @@
 
   function moveNextLetter() {
     const activityId = progression.getCurrentActivityId();
+    if (activityId === "magical-tree") {
+      const current = progression.getCurrentLetterIndex(activityId);
+      const currentGroup = Math.floor(current / TREE_GROUP_SIZE);
+      const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+      if (currentGroup < maxGroup) jumpToTreeGroup(currentGroup + 1);
+      return;
+    }
     if (!runtime.interactionCompleted) return;
     progression.goToNextLetter(activityId);
     runtime.retryLockKey = null;
@@ -823,11 +976,21 @@
     const activityCompleted = activityProgress.isCompleted;
     const isLastActivity = progression.getSnapshot().state.currentActivityIndex >= ACTIVITY_SEQUENCE.length - 1;
 
-    controls.previous.disabled = letterIndex === 0;
-    controls.next.hidden = isLastLetter;
-    controls.next.disabled = !runtime.interactionCompleted;
-    controls.finish.hidden = !isLastLetter || activityCompleted;
-    controls.finish.disabled = !runtime.interactionCompleted;
+    if (activityId === "magical-tree") {
+      const group = Math.floor(letterIndex / TREE_GROUP_SIZE);
+      const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+      controls.previous.disabled = group === 0;
+      controls.next.hidden = false;
+      controls.next.disabled = group >= maxGroup;
+      controls.finish.hidden = !activityCompleted;
+      controls.finish.disabled = false;
+    } else {
+      controls.previous.disabled = letterIndex === 0;
+      controls.next.hidden = isLastLetter;
+      controls.next.disabled = !runtime.interactionCompleted;
+      controls.finish.hidden = !isLastLetter || activityCompleted;
+      controls.finish.disabled = !runtime.interactionCompleted;
+    }
     controls.nextActivity.hidden = !(activityCompleted && !isLastActivity);
     controls.nextActivity.disabled = !activityCompleted || isLastActivity;
     controls.reset.hidden = !activityCompleted;
@@ -851,6 +1014,7 @@
     if (ui.progressText) {
       ui.progressText.textContent = completedSteps + " of " + totalSteps + " learning steps completed.";
     }
+    renderGlobalSummary();
 
     if (snapshot.state.worldCompleted) {
       showWorldCompletion();
@@ -923,6 +1087,64 @@
       animate(parts.body, { transform: ["translateY(0px)", "translateY(-8px)", "translateY(0px)"] }, { duration: 0.5, repeat: 3, easing: "ease-in-out" });
       animate([parts.wingLeft, parts.wingRight], { transform: ["rotate(0deg)", "rotate(28deg)", "rotate(0deg)"] }, { duration: 0.4, repeat: 3, easing: "ease-in-out" });
     }
+  }
+
+  function setupMascotCompanion() {
+    if (!ui.lessonMascot) return;
+    const sections = [
+      document.getElementById("forestScene"),
+      document.getElementById("letterGardenSection"),
+      document.getElementById("activityHearGamePanel"),
+      document.getElementById("activityTraceGamePanel"),
+      document.getElementById("activityPictureGamePanel"),
+      document.getElementById("activityHuntGamePanel")
+    ].filter(Boolean);
+
+    function updateLayoutMode() {
+      const isMobile = window.matchMedia("(max-width: 860px)").matches;
+      ui.lessonMascot.classList.toggle("lesson-mascot-mobile", isMobile);
+      if (isMobile) {
+        ui.lessonMascot.classList.remove("lesson-mascot-floating");
+        ui.lessonMascot.style.top = "";
+        return;
+      }
+      ui.lessonMascot.classList.add("lesson-mascot-floating");
+    }
+
+    function positionNearSection(section) {
+      if (!section || window.matchMedia("(max-width: 860px)").matches) return;
+      const rect = section.getBoundingClientRect();
+      const top = Math.max(92, Math.min(window.innerHeight - 280, rect.top + rect.height * 0.18));
+      ui.lessonMascot.style.top = top.toFixed(0) + "px";
+    }
+
+    const observer = new IntersectionObserver(function onIntersect(entries) {
+      const visible = entries
+        .filter(function onlyVisible(entry) { return entry.isIntersecting; })
+        .sort(function byRatio(a, b) { return b.intersectionRatio - a.intersectionRatio; });
+      if (!visible.length) return;
+      positionNearSection(visible[0].target);
+    }, { threshold: [0.2, 0.45, 0.7] });
+    sections.forEach(function observe(section) { observer.observe(section); });
+
+    updateLayoutMode();
+    window.addEventListener("resize", updateLayoutMode);
+
+    if (!prefersReducedMotion) {
+      animate(
+        ui.lessonMascot,
+        {
+          transform: [
+            "translateX(-260px) translateY(-24px) scale(0.92)",
+            "translateX(0px) translateY(0px) scale(1)"
+          ],
+          opacity: [0.35, 1]
+        },
+        { duration: 0.9, easing: "ease-out" }
+      );
+    }
+    setMascotState("listening");
+    setMascotSpeech("Namaste! I am Mitthu. Scroll and I will learn with you.");
   }
 
   function playPronunciation(letter, rate, feedbackEl) {

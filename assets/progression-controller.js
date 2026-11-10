@@ -186,6 +186,13 @@
       return activity.currentLetterIndex;
     }
 
+    function setCurrentLetterIndex(activityId, letterIndex) {
+      const activity = getActivityState(activityId);
+      activity.currentLetterIndex = clamp(Number(letterIndex) || 0, 0, letterCount - 1);
+      saveState();
+      return activity.currentLetterIndex;
+    }
+
     function retryCurrentLetter(activityId) {
       const activity = getActivityState(activityId);
       activity.retryToken += 1;
@@ -195,7 +202,7 @@
 
     function canFinishActivity(activityId) {
       const activity = getActivityState(activityId);
-      return activity.currentLetterIndex === letterCount - 1 && activity.completedLetters.length === letterCount;
+      return activity.completedLetters.length === letterCount;
     }
 
     function completeActivity(activityId) {
@@ -267,6 +274,7 @@
       canGoNext: canGoNext,
       goToPreviousLetter: goToPreviousLetter,
       goToNextLetter: goToNextLetter,
+      setCurrentLetterIndex: setCurrentLetterIndex,
       retryCurrentLetter: retryCurrentLetter,
       canFinishActivity: canFinishActivity,
       completeActivity: completeActivity,

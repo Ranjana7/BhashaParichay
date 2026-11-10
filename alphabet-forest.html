@@ -143,16 +143,19 @@
         </div>
       </div>
       <div class="hero-actions tree-actions">
+        <button id="prevTreeGroupBtn" class="button ghost" type="button">Previous Group</button>
         <p id="treeCounter" class="footer-note" aria-live="polite">Keep discovering glowing letters.</p>
-        <button id="nextTreeGroupBtn" class="button secondary" type="button" hidden>Next Five Letters</button>
+        <button id="nextTreeGroupBtn" class="button secondary" type="button">Next Group</button>
       </div>
       <p id="treeStatus" class="status" aria-live="polite"></p>
     </section>
 
     <section class="panel" id="activityNavigator">
-      <h2>Activities</h2>
-      <p class="footer-note">Each activity tracks its own 48-letter journey and contributes to overall progress.</p>
-      <div id="activityHubList" class="hero-actions" aria-label="Activity launcher"></div>
+      <h2>Alphabet Forest Progress</h2>
+      <p id="globalProgressSummary" class="footer-note">0 of 6 activities completed</p>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="globalProgressFill" class="progress-fill"></div>
+      </div>
     </section>
 
     <section class="forest-layout" id="letterGardenSection">
@@ -163,6 +166,7 @@
           <button class="button ghost category-tab" data-category="consonants" type="button">Consonants (व्यञ्जन)</button>
           <button class="button ghost category-tab" data-category="practice" type="button">Practice</button>
         </div>
+        <div class="hero-actions" id="consonantSubgroupTabs" aria-label="Consonant groups"></div>
         <p id="gardenCoverage" class="footer-note">Browse and revise letters in the grid.</p>
         <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
       </aside>
