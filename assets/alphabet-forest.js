@@ -1,5 +1,6 @@
 (function initAlphabetForestV4() {
   const AUDIO_ENABLED = false;
+  const WRITING_VALIDATION_AVAILABLE = false;
   const LETTER_COUNT = 48;
   const TREE_GROUP_SIZE = 5;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -186,10 +187,6 @@
     traceStatus: document.getElementById("traceStatus"),
     clearTraceBtn: document.getElementById("clearTraceBtn"),
     checkTraceBtn: document.getElementById("checkTraceBtn"),
-    writingTryAgainBtn: document.getElementById("writingTryAgainBtn"),
-    confirmWritingBtn: document.getElementById("confirmWritingBtn"),
-    writingSelfCheck: document.getElementById("writingSelfCheck"),
-    writingTargetLarge: document.getElementById("writingTargetLarge"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
@@ -577,8 +574,14 @@
       tab.addEventListener("click", function () {
         const category = tab.getAttribute("data-category") || "vowels";
         const state = forestState.activities["letter-garden"];
-        state.answers.category = category;
-        if (category !== "consonants") state.answers.subgroup = "ka-varga";
+        if (category === "vowels") {
+          state.currentIndex = findFirstLetterIndex(function (letter) { return letter.category !== "consonant"; });
+        } else {
+          const subgroup = (state.answers.subgroup && state.answers.subgroup !== "all") ? state.answers.subgroup : "ka-varga";
+          state.currentIndex = findFirstLetterIndex(function (letter) {
+            return letter.category === "consonant" && (letter.subgroup || "other") === subgroup;
+          });
+        }
         saveAndRender();
       });
     });
@@ -668,43 +671,28 @@
 
     if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
       clearTraceBoard();
-      hideWritingSelfCheck();
       if (ui.traceStatus) ui.traceStatus.textContent = "Canvas cleared. Write the letter again.";
     });
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
-        if (runtime.tracing.points.length < 3) {
+        const activityId = "letter-tracing";
+        if (runtime.tracing.points.length < 2 && !traceCanvasHasInk()) {
           if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then tap Check.";
           return;
         }
-        runtime.tracing.reviewed = true;
-        showWritingSelfCheck(getCurrentLetter("letter-tracing"));
-        setMascotState("thinking");
-        setMascotSpeech("Check your writing with the letter.");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Self-check: does your writing match the target letter?";
-      });
-    }
-    if (ui.writingTryAgainBtn) {
-      ui.writingTryAgainBtn.addEventListener("click", function () {
-        clearTraceBoard();
-        hideWritingSelfCheck();
-        setMascotState("encouraging");
-        setMascotSpeech("Good try! Let's try again!");
-        if (ui.traceStatus) ui.traceStatus.textContent = "Good try. Write again and tap Check.";
-      });
-    }
-    if (ui.confirmWritingBtn) {
-      ui.confirmWritingBtn.addEventListener("click", function () {
-        const activityId = "letter-tracing";
-        const activity = forestState.activities[activityId];
-        if (!runtime.tracing.reviewed) {
-          if (ui.traceStatus) ui.traceStatus.textContent = "Please check your writing first.";
+        if (!WRITING_VALIDATION_AVAILABLE) {
+          setMascotState("thinking");
+          setMascotSpeech("We're preparing handwriting checking.");
+          if (ui.traceStatus) {
+            ui.traceStatus.textContent = "Automatic Sanskrit handwriting validation is coming soon. Keep practising this letter.";
+          }
           return;
         }
+        const activity = forestState.activities[activityId];
         const sourceIndex = activity ? activity.currentIndex : 0;
         const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
-        hideWritingSelfCheck();
         playSuccessSound("applause");
+        setMascotStateForDuration("celebrating", 800);
         fireSectionConfetti("activityTraceGamePanel", true);
         markCurrentComplete(activityId, "Writing practised!");
         if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
@@ -721,14 +709,15 @@
     runtime.tracing.reviewed = false;
   }
 
-  function showWritingSelfCheck(letter) {
-    if (!ui.writingSelfCheck || !ui.writingTargetLarge) return;
-    ui.writingSelfCheck.hidden = false;
-    ui.writingTargetLarge.textContent = letter && letter.symbol ? letter.symbol : "अ";
-  }
-
-  function hideWritingSelfCheck() {
-    if (ui.writingSelfCheck) ui.writingSelfCheck.hidden = true;
+  function traceCanvasHasInk() {
+    if (!ui.traceCanvas) return false;
+    const ctx = ui.traceCanvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return false;
+    const data = ctx.getImageData(0, 0, ui.traceCanvas.width, ui.traceCanvas.height).data;
+    for (let index = 3; index < data.length; index += 16) {
+      if (data[index] > 8) return true;
+    }
+    return false;
   }
 
   function playSuccessSound(kind) {
@@ -968,7 +957,6 @@
     if (action === "previous") {
       CORE.goPrevious(forestState, activityId);
       if (activityId === "letter-tracing") clearTraceBoard();
-      if (activityId === "letter-tracing") hideWritingSelfCheck();
       setActivityStatus(activityId, "");
       saveAndRender();
       return;
@@ -981,7 +969,6 @@
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -993,7 +980,6 @@
       runtime.byActivity[activityId].flipped = false;
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -1024,9 +1010,9 @@
       const ok = window.confirm("Restart this completed activity from item 1?");
       if (!ok) return;
       CORE.resetActivity(forestState, activityId);
+      runtime.byActivity[activityId].optionOrderByQuestion = {};
       if (activityId === "letter-tracing") {
         clearTraceBoard();
-        hideWritingSelfCheck();
       }
       setActivityStatus(activityId, "");
       saveAndRender();
@@ -1190,10 +1176,29 @@
     setTimeout(function () { bloom.remove(); }, 1600);
   }
 
+  function findFirstLetterIndex(predicate) {
+    const found = letters.findIndex(predicate);
+    return found >= 0 ? found : 0;
+  }
+
+  function syncLetterGardenCategoryFromCurrent() {
+    const activity = forestState.activities["letter-garden"];
+    const currentLetter = getCurrentLetter("letter-garden");
+    if (!activity || !currentLetter) return;
+    if (currentLetter.category === "consonant") {
+      activity.answers.category = "consonants";
+      activity.answers.subgroup = currentLetter.subgroup || "ka-varga";
+      return;
+    }
+    activity.answers.category = "vowels";
+    activity.answers.subgroup = "ka-varga";
+  }
+
   function renderLetterGarden() {
     const activityId = "letter-garden";
     const activity = forestState.activities[activityId];
     const selectedLetter = getCurrentLetter(activityId);
+    syncLetterGardenCategoryFromCurrent();
     const rawCategory = activity.answers.category || "vowels";
     const selectedCategory = (rawCategory === "consonants" || rawCategory === "vowels") ? rawCategory : "vowels";
     if (selectedCategory !== rawCategory) activity.answers.category = selectedCategory;
@@ -1280,26 +1285,40 @@
       btn.className = "button ghost";
       btn.textContent = subgroup.label;
       btn.classList.toggle("active", activeSubgroup === subgroup.id);
-      btn.addEventListener("click", function () { state.answers.subgroup = subgroup.id; saveAndRender(); });
+      btn.addEventListener("click", function () {
+        state.currentIndex = findFirstLetterIndex(function (letter) {
+          return letter.category === "consonant" && (letter.subgroup || "other") === subgroup.id;
+        });
+        saveAndRender();
+      });
       ui.subgroupTabs.appendChild(btn);
     });
   }
 
-  function buildOptions(targetIndex, size) {
-    const options = [targetIndex];
+  function getStableOptionOrder(activityId, questionKey, builder) {
+    const local = runtime.byActivity[activityId];
+    if (!local.optionOrderByQuestion) local.optionOrderByQuestion = {};
+    if (!Array.isArray(local.optionOrderByQuestion[questionKey])) {
+      local.optionOrderByQuestion[questionKey] = builder();
+    }
+    return local.optionOrderByQuestion[questionKey];
+  }
+
+  function buildLetterOptionIndices(targetIndex, size) {
+    const optionIndices = [targetIndex];
     let offset = 1;
-    while (options.length < size) {
+    while (optionIndices.length < size) {
       const candidate = (targetIndex + offset * 7) % letters.length;
-      if (!options.includes(candidate)) options.push(candidate);
+      if (!optionIndices.includes(candidate)) optionIndices.push(candidate);
       offset += 1;
     }
-    for (let i = options.length - 1; i > 0; i -= 1) {
+    for (let i = optionIndices.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
-      const tmp = options[i];
-      options[i] = options[j];
-      options[j] = tmp;
+      const tmp = optionIndices[i];
+      optionIndices[i] = optionIndices[j];
+      optionIndices[j] = tmp;
     }
-    return options.map(function (index) { return letters[index]; });
+    return optionIndices;
   }
 
   function renderHearAndPick() {
@@ -1310,7 +1329,13 @@
     ui.hearStatus.textContent = AUDIO_ENABLED
       ? "Tap the matching letter."
       : "Pronunciation unavailable. Tap the shown letter: " + letter.symbol;
-    const options = buildOptions(forestState.activities[activityId].currentIndex, 4);
+    const activity = forestState.activities[activityId];
+    const questionKey = String(activity.currentIndex);
+    const targetIndex = activity.order[activity.currentIndex];
+    const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
+      return buildLetterOptionIndices(targetIndex, 4);
+    });
+    const options = optionIndices.map(function (index) { return letters[index]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
       btn.type = "button";
@@ -1345,11 +1370,9 @@
     ui.pictureStatus.textContent = "Choose the matching illustration.";
     ui.pictureChoices.innerHTML = "";
     const current = forestState.activities[activityId];
-    const local = runtime.byActivity[activityId];
-    if (!local.optionOrderByQuestion) local.optionOrderByQuestion = {};
     const targetIndex = current.order[current.currentIndex];
     const questionKey = String(current.currentIndex);
-    if (!Array.isArray(local.optionOrderByQuestion[questionKey])) {
+    const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
       const optionIndices = [targetIndex];
       for (let index = 0; index < pictureQuestions.length && optionIndices.length < 4; index += 1) {
         if (index === targetIndex) continue;
@@ -1361,9 +1384,8 @@
         optionIndices[i] = optionIndices[j];
         optionIndices[j] = tmp;
       }
-      local.optionOrderByQuestion[questionKey] = optionIndices;
-    }
-    const optionIndices = local.optionOrderByQuestion[questionKey];
+      return optionIndices;
+    });
     const options = optionIndices.map(function (idx) { return pictureQuestions[idx]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
@@ -1463,17 +1485,21 @@
     ui.feedChoices.innerHTML = "";
     const current = forestState.activities[activityId];
     const targetIndex = current.order[current.currentIndex];
-    const optionIndices = [targetIndex];
-    for (let index = 0; index < feedMithuQuestions.length && optionIndices.length < 4; index += 1) {
-      if (index === targetIndex) continue;
-      optionIndices.push(index);
-    }
-    for (let i = optionIndices.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const tmp = optionIndices[i];
-      optionIndices[i] = optionIndices[j];
-      optionIndices[j] = tmp;
-    }
+    const questionKey = String(current.currentIndex);
+    const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
+      const indices = [targetIndex];
+      for (let index = 0; index < feedMithuQuestions.length && indices.length < 4; index += 1) {
+        if (index === targetIndex) continue;
+        indices.push(index);
+      }
+      for (let i = indices.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = indices[i];
+        indices[i] = indices[j];
+        indices[j] = tmp;
+      }
+      return indices;
+    });
     const options = optionIndices.map(function (idx) { return feedMithuQuestions[idx]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
@@ -1527,15 +1553,15 @@
     if (!letter || !ui.traceTargetLetter || !ui.traceStatus) return;
     const activity = forestState.activities[activityId];
     ui.traceTargetLetter.textContent = letter.symbol;
-    if (ui.writingTargetLarge) ui.writingTargetLarge.textContent = letter.symbol;
     if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = false;
     if (runtime.tracing.lastLetterIndex !== activity.currentIndex) {
       runtime.tracing.lastLetterIndex = activity.currentIndex;
       clearTraceBoard();
-      hideWritingSelfCheck();
     }
     if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = "Write the letter, then tap Check.";
+      ui.traceStatus.textContent = WRITING_VALIDATION_AVAILABLE
+        ? "Write the letter, then tap Check."
+        : "Write the letter and practise. Automatic Sanskrit handwriting checking is coming soon.";
     } else if (!runtime.byActivity[activityId].status) {
       ui.traceStatus.textContent = "Great writing! Continue when ready.";
     }
@@ -1545,10 +1571,16 @@
     const activityId = "hidden-letter-hunt";
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.huntPrompt || !ui.huntGrid || !ui.huntStatus) return;
+    const activity = forestState.activities[activityId];
     ui.huntPrompt.textContent = "Find letter " + letter.symbol + " in the grid.";
     ui.huntStatus.textContent = "Tap the target.";
     ui.huntGrid.innerHTML = "";
-    const options = buildOptions(forestState.activities[activityId].currentIndex, 8);
+    const questionKey = String(activity.currentIndex);
+    const targetIndex = activity.order[activity.currentIndex];
+    const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
+      return buildLetterOptionIndices(targetIndex, 8);
+    });
+    const options = optionIndices.map(function (index) { return letters[index]; });
     options.forEach(function (option) {
       const btn = document.createElement("button");
       btn.type = "button";
