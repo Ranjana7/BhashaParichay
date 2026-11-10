@@ -681,7 +681,10 @@
           if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then tap Check.";
           return;
         }
-        if (!WRITING_VALIDATION_AVAILABLE) {
+        const activity = forestState.activities[activityId];
+        const letter = activity ? getCurrentLetter(activityId) : null;
+        const validation = validateTraceAgainstLetter(letter);
+        if (!validation.available) {
           setMascotState("thinking");
           setMascotSpeech("We're preparing handwriting checking.");
           if (ui.traceStatus) {
@@ -689,7 +692,13 @@
           }
           return;
         }
-        const activity = forestState.activities[activityId];
+        if (!validation.isCorrect) {
+          incrementAttempt(activityId);
+          setMascotState("encouraging");
+          setMascotSpeech("Almost there! Try writing it again.");
+          if (ui.traceStatus) ui.traceStatus.textContent = "Almost there! Try writing it again.";
+          return;
+        }
         const sourceIndex = activity ? activity.currentIndex : 0;
         const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
         playSuccessSound("applause");
@@ -719,6 +728,13 @@
       if (data[index] > 8) return true;
     }
     return false;
+  }
+
+  function validateTraceAgainstLetter(letter) {
+    if (!WRITING_VALIDATION_AVAILABLE || !letter) {
+      return { available: false, isCorrect: false };
+    }
+    return { available: false, isCorrect: false };
   }
 
   function playSuccessSound(kind) {
@@ -1567,7 +1583,7 @@
         ? "Write the letter, then tap Check."
         : "Write the letter and practise. Automatic Sanskrit handwriting checking is coming soon.";
     } else if (!runtime.byActivity[activityId].status) {
-      ui.traceStatus.textContent = "Great writing! Continue when ready.";
+      ui.traceStatus.textContent = "Letter saved. Continue when ready.";
     }
   }
 
