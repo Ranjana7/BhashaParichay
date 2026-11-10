@@ -128,6 +128,7 @@ test("picture match uses local image choices with structured question pool", () 
   assert.ok(html.includes('id="pictureMatchLottie"'));
   assert.ok(js.includes("optionOrderByQuestion"));
   assert.ok(js.includes("Good try. Hint: match the word with the correct picture."));
+  assert.ok(js.includes("getStableOptionOrder("));
 });
 
 test("flashcard flip is tap-to-flip and does not use separate flip button", () => {
@@ -144,14 +145,14 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
   assert.ok(js.includes("animateFruitToMithu"));
 });
 
-test("write-it-yourself uses self-assessment and no fake handwriting validation", () => {
-  assert.ok(html.includes('id="writingSelfCheck"'));
+test("write-it-yourself removes manual self-check and does not fake validation", () => {
+  assert.equal(html.includes('id="writingSelfCheck"'), false);
+  assert.equal(html.includes("Looks Good!"), false);
+  assert.equal(html.includes("Does your letter look like this?"), false);
   assert.ok(html.includes(">Check<"));
   assert.ok(html.includes(">Clear<"));
-  assert.ok(html.includes("Looks Good!"));
-  assert.ok(html.includes("Try Again"));
-  assert.ok(js.includes("showWritingSelfCheck("));
-  assert.ok(js.includes("Self-check: does your writing match the target letter?"));
+  assert.ok(js.includes("const WRITING_VALIDATION_AVAILABLE = false;"));
+  assert.ok(js.includes("Automatic Sanskrit handwriting validation is coming soon."));
   assert.equal(js.includes("tracingCoverageScore("), false);
   assert.equal(js.includes("buildGlyphGuide("), false);
 });
@@ -179,6 +180,14 @@ test("next world unlock condition requires 2 learning and 2 practice completions
   assert.ok(js.includes("const LEARNING_ACTIVITY_IDS = [\"magical-tree\", \"letter-garden\"]"));
   assert.ok(js.includes("const NEXT_WORLD_UNLOCK_KEY = \"next-world-unlock-v1\""));
   assert.ok(js.includes("journey.learningCompletedCount === 2 && journey.practiceCompletedCount >= 2"));
+});
+
+test("letter garden derives selected tab and subgroup from current letter", () => {
+  assert.ok(js.includes("syncLetterGardenCategoryFromCurrent("));
+  assert.ok(js.includes("getLetterGardenViewForIndex("));
+  assert.ok(js.includes("activity.answers.category = view.category"));
+  assert.ok(js.includes("activity.answers.subgroup = view.subgroup"));
+  assert.ok(js.includes("findFirstLetterIndex("));
 });
 
 test("default forest state has independent activity buckets", () => {
