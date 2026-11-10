@@ -65,7 +65,7 @@
 
     <section class="panel forest-scene" id="forestScene">
       <h2>Magical Letter Tree</h2>
-      <p>Tap glowing leaves to hear Sanskrit sounds. Mithu will guide your listening journey.</p>
+      <p id="treeInstruction" class="tree-instruction">Tap a glowing letter to discover its sound!</p>
       <div id="magicalTreeStage" class="magical-tree-stage">
         <svg class="magical-tree-art" viewBox="0 0 1200 520" role="img" aria-label="Illustrated magical Sanskrit tree">
           <defs>
@@ -142,7 +142,10 @@
           </svg>
         </div>
       </div>
-      <p id="treeCounter" class="footer-note" aria-live="polite">Discovered 0 of 0 PDF letters</p>
+      <div class="hero-actions tree-actions">
+        <p id="treeCounter" class="footer-note" aria-live="polite">Discovered 0 of 0 PDF letters</p>
+        <button id="nextTreeGroupBtn" class="button secondary" type="button" hidden>Next Five Letters</button>
+      </div>
       <p id="treeStatus" class="status" aria-live="polite"></p>
     </section>
 

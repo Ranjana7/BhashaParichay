@@ -8,6 +8,14 @@
   const TREE_PROGRESS_KEY = "sanskritParichay.alphabetForest.tree.progress";
   const GARDEN_LEARNED_KEY = "sanskritParichay.alphabetForest.garden.learned";
   const MUTE_KEY = "sanskritParichay.muted";
+  const TREE_GROUP_SIZE = 5;
+  const TREE_SLOT_POSITIONS = [
+    { x: 31, y: 34 },
+    { x: 43, y: 23 },
+    { x: 56, y: 29 },
+    { x: 67, y: 22 },
+    { x: 74, y: 36 }
+  ];
   const TOTAL_ACTIVITIES = 7;
   const LESSONS = [
     { id: 0, name: "Sprout Lesson", objective: "Learn first 5 vowels", selector: { type: "vowel-range", start: 0, count: 5 } },
@@ -95,6 +103,8 @@
     treeMithu: document.getElementById("treeMithu"),
     treeCounter: document.getElementById("treeCounter"),
     treeStatus: document.getElementById("treeStatus"),
+    treeInstruction: document.getElementById("treeInstruction"),
+    nextTreeGroupBtn: document.getElementById("nextTreeGroupBtn"),
     lessonName: document.getElementById("lessonName"),
     lessonObjective: document.getElementById("lessonObjective"),
     lessonIndex: document.getElementById("lessonIndex"),
@@ -188,6 +198,7 @@
     speechLockUntil: 0,
     treeDiscovered: new Set(),
     treeCompletionAwarded: false,
+    treeGroupIndex: 0,
     treeLetterPositions: new Map(),
     treeMithuHome: null,
     treeMithuPos: null,
@@ -419,24 +430,8 @@
         path: "assets/lottie/celebration.json"
       });
     }
-    if (ui.treeSparkleLottie) {
-      treeSparkleAnim = window.lottie.loadAnimation({
-        container: ui.treeSparkleLottie,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        path: "assets/lottie/sparkle.json"
-      });
-    }
-    if (ui.treeCelebrationLottie) {
-      treeCelebrateAnim = window.lottie.loadAnimation({
-        container: ui.treeCelebrationLottie,
-        renderer: "svg",
-        loop: false,
-        autoplay: false,
-        path: "assets/lottie/celebration.json"
-      });
-    }
+    treeSparkleAnim = null;
+    treeCelebrateAnim = null;
   }
 
   function loadProgress() {
@@ -719,7 +714,7 @@
     }
     saveProgress();
     renderProgress();
-    renderTreeProgressDecor();
+    renderTreeGroupProgress();
     setMascotState("correct");
     animateTreeMithuTo(
       (state.treeMithuHome ? state.treeMithuHome.x : 300) - 24,
@@ -877,14 +872,15 @@
   function loadTreeProgress() {
     try {
       const raw = localStorage.getItem(TREE_PROGRESS_KEY);
-      if (!raw) return { discoveredIds: [], completionAwarded: false };
+      if (!raw) return { discoveredIds: [], completionAwarded: false, groupIndex: 0 };
       const parsed = JSON.parse(raw);
       return {
         discoveredIds: Array.isArray(parsed.discoveredIds) ? parsed.discoveredIds : [],
-        completionAwarded: Boolean(parsed.completionAwarded)
+        completionAwarded: Boolean(parsed.completionAwarded),
+        groupIndex: Number.isFinite(parsed.groupIndex) ? Number(parsed.groupIndex) : 0
       };
     } catch (_error) {
-      return { discoveredIds: [], completionAwarded: false };
+      return { discoveredIds: [], completionAwarded: false, groupIndex: 0 };
     }
   }
 
@@ -893,15 +889,56 @@
       TREE_PROGRESS_KEY,
       JSON.stringify({
         discoveredIds: Array.from(state.treeDiscovered),
-        completionAwarded: state.treeCompletionAwarded
+        completionAwarded: state.treeCompletionAwarded,
+        groupIndex: state.treeGroupIndex
       })
     );
+  }
+
+  function treeGroupCount() {
+    return Math.ceil(canonicalLetters.length / TREE_GROUP_SIZE);
+  }
+
+  function treeLettersForGroup(groupIndex) {
+    const start = groupIndex * TREE_GROUP_SIZE;
+    return canonicalLetters.slice(start, start + TREE_GROUP_SIZE);
+  }
+
+  function findFirstIncompleteTreeGroup() {
+    const groups = treeGroupCount();
+    for (let i = 0; i < groups; i += 1) {
+      const letters = treeLettersForGroup(i);
+      if (!letters.length) continue;
+      const complete = letters.every(function (letter) {
+        return state.treeDiscovered.has(letter.id);
+      });
+      if (!complete) return i;
+    }
+    return Math.max(0, groups - 1);
+  }
+
+  function currentTreeLetters() {
+    return treeLettersForGroup(state.treeGroupIndex);
+  }
+
+  function isTreeGroupComplete(groupIndex) {
+    return treeLettersForGroup(groupIndex).every(function (letter) {
+      return state.treeDiscovered.has(letter.id);
+    });
   }
 
   function renderTreeCounter() {
     if (!ui.treeCounter) return;
     ui.treeCounter.textContent =
-      "Discovered " + state.treeDiscovered.size + " of " + canonicalLetters.length + " PDF letters";
+      "Group " +
+      (state.treeGroupIndex + 1) +
+      " of " +
+      treeGroupCount() +
+      " · Discovered " +
+      state.treeDiscovered.size +
+      " of " +
+      canonicalLetters.length +
+      " PDF letters";
   }
 
   function handleTreeCompletionOnce() {
@@ -927,16 +964,24 @@
     if (ui.treeStatus) ui.treeStatus.textContent = "Tree complete! +5 stars awarded once.";
   }
 
-  function ensureTreeParticles() {
-    if (!ui.treeParticles || ui.treeParticles.childElementCount) return;
-    for (let i = 0; i < 28; i += 1) {
-      const dot = document.createElement("span");
-      dot.className = "tree-particle";
-      dot.style.left = 12 + Math.random() * 76 + "%";
-      dot.style.top = 24 + Math.random() * 56 + "%";
-      dot.style.animationDelay = -(Math.random() * 8).toFixed(2) + "s";
-      dot.style.animationDuration = (6 + Math.random() * 5).toFixed(2) + "s";
-      ui.treeParticles.appendChild(dot);
+  function renderTreeGroupProgress() {
+    const completed = isTreeGroupComplete(state.treeGroupIndex);
+    if (ui.nextTreeGroupBtn) {
+      const isLast = state.treeGroupIndex >= treeGroupCount() - 1;
+      ui.nextTreeGroupBtn.hidden = !completed || isLast;
+      ui.nextTreeGroupBtn.disabled = !completed || isLast;
+    }
+    if (ui.treeProgressBlooms) {
+      ui.treeProgressBlooms.innerHTML = "";
+      if (!completed) return;
+      for (let i = 0; i < 6; i += 1) {
+        const bloom = document.createElement("span");
+        bloom.className = "group-bloom";
+        bloom.style.left = 30 + i * 8 + "%";
+        bloom.style.top = i % 2 === 0 ? "20%" : "25%";
+        if (!prefersReducedMotion) bloom.style.animationDelay = -(i * 0.12).toFixed(2) + "s";
+        ui.treeProgressBlooms.appendChild(bloom);
+      }
     }
   }
 
@@ -944,7 +989,7 @@
     if (!ui.treeMithu || !ui.magicalTreeStage) return;
     const stageRect = ui.magicalTreeStage.getBoundingClientRect();
     if (!state.treeMithuHome) {
-      state.treeMithuHome = { x: stageRect.width * 0.75, y: stageRect.height * 0.62 };
+      state.treeMithuHome = { x: stageRect.width * 0.78, y: stageRect.height * 0.6 };
     }
     if (!state.treeMithuPos) {
       state.treeMithuPos = { x: state.treeMithuHome.x, y: state.treeMithuHome.y };
@@ -1006,8 +1051,8 @@
       if (!prefersReducedMotion) {
         animate(
           ui.letterSpotlight,
-          { opacity: [0, 1], transform: ["scale(0.86)", "scale(1.02)", "scale(1)"] },
-          { duration: 0.5, easing: "ease-out" }
+          { opacity: [0, 1], transform: ["translateY(8px)", "translateY(0px)"] },
+          { duration: 0.24, easing: "ease-out" }
         );
       }
     } else {
@@ -1015,70 +1060,13 @@
     }
   }
 
-  function treeGrowthLevel() {
-    const doneTotal = Object.values(state.progress.done).filter(Boolean).length;
-    const lessonProgress = Math.min(6, state.progress.lessonIndex);
-    return Math.min(12, doneTotal + lessonProgress);
-  }
-
-  function renderTreeProgressDecor() {
-    if (!ui.treeProgressBlooms || !ui.magicalTreeStage) return;
-    const level = treeGrowthLevel();
-    ui.magicalTreeStage.style.filter = "saturate(" + (1 + level * 0.03).toFixed(2) + ") brightness(" + (1 + level * 0.01).toFixed(2) + ")";
-    ui.treeProgressBlooms.innerHTML = "";
-    const bloomCount = Math.min(12, Math.max(2, level));
-    for (let i = 0; i < bloomCount; i += 1) {
-      const bloom = document.createElement("span");
-      bloom.className = "progress-bloom";
-      bloom.style.left = (26 + ((i * 11.7) % 60)).toFixed(2) + "%";
-      bloom.style.top = (20 + ((i * 7.9) % 46)).toFixed(2) + "%";
-      if (!prefersReducedMotion) {
-        bloom.style.animationDelay = -(i * 0.14).toFixed(2) + "s";
-      } else {
-        bloom.style.transform = "scale(1)";
-      }
-      ui.treeProgressBlooms.appendChild(bloom);
-      if (!prefersReducedMotion) {
-        animate(bloom, { transform: ["scale(0)", "scale(1.22)", "scale(1)"], opacity: [0, 1, 1] }, { duration: 0.65, easing: "ease-out", delay: i * 0.05 });
-      }
-    }
-    const starCount = Math.max(1, Math.min(8, Math.floor(level / 2)));
-    for (let i = 0; i < starCount; i += 1) {
-      const star = document.createElement("span");
-      star.className = "progress-star";
-      star.textContent = "✦";
-      star.style.left = (24 + ((i * 13.4) % 66)).toFixed(2) + "%";
-      star.style.top = (14 + ((i * 9.6) % 50)).toFixed(2) + "%";
-      ui.treeProgressBlooms.appendChild(star);
-      if (!prefersReducedMotion) {
-        animate(star, { transform: ["scale(0)", "scale(1.05)", "scale(0.9)"], opacity: [0, 1, 0.86] }, { duration: 0.8, easing: "ease-out", delay: i * 0.08 });
-      } else {
-        star.style.transform = "scale(1)";
-        star.style.opacity = "0.86";
-      }
-    }
-  }
-
-  function treeLetterCoordinates(index, total) {
-    const angle = (Math.PI * 2 * index) / Math.max(1, total);
-    const ring = index % 3;
-    const radiusX = [255, 214, 174][ring];
-    const radiusY = [152, 128, 98][ring];
-    return {
-      x: 50 + (Math.cos(angle) * radiusX) / 12,
-      y: 39 + (Math.sin(angle) * radiusY) / 5.7
-    };
-  }
-
   function renderMagicalTree() {
     if (!ui.magicalTreeLetters) return;
-    ensureTreeParticles();
     ensureTreeMithuHome();
     ui.magicalTreeLetters.innerHTML = "";
     state.treeLetterPositions.clear();
-    canonicalLetters.forEach(function (letter) {
-      const i = letter.order || 0;
-      const pos = treeLetterCoordinates(i, canonicalLetters.length);
+    currentTreeLetters().forEach(function (letter, index) {
+      const pos = TREE_SLOT_POSITIONS[index] || TREE_SLOT_POSITIONS[TREE_SLOT_POSITIONS.length - 1];
       state.treeLetterPositions.set(letter.id, pos);
       const button = document.createElement("button");
       button.type = "button";
@@ -1088,12 +1076,12 @@
       button.setAttribute("aria-label", "Hear " + letter.devanagari + ", " + letter.transliteration);
       button.style.left = pos.x.toFixed(2) + "%";
       button.style.top = pos.y.toFixed(2) + "%";
-      button.innerHTML = '<span class="tree-dev">' + letter.devanagari + '</span><span class="tree-tran">' + letter.transliteration + "</span>";
+      button.innerHTML = '<span class="tree-dev">' + letter.devanagari + "</span>";
       if (state.treeDiscovered.has(letter.id)) button.classList.add("discovered");
       ui.magicalTreeLetters.appendChild(button);
     });
     renderTreeCounter();
-    renderTreeProgressDecor();
+    renderTreeGroupProgress();
   }
 
   function activateTreeLetterByButton(button) {
@@ -1105,38 +1093,28 @@
     }
     const stageRect = ui.magicalTreeStage ? ui.magicalTreeStage.getBoundingClientRect() : null;
     const buttonRect = button.getBoundingClientRect();
-    const fromLeft = button.style.left;
-    const fromTop = button.style.top;
     button.classList.add("tree-active");
     updateSpotlight(letter, true);
     if (!prefersReducedMotion) {
-      animate(button, { transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.16)", "translate(-50%, -50%) scale(1.02)"] }, { duration: 0.28, easing: "ease-out" });
+      animate(button, { transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.12)", "translate(-50%, -50%) scale(1)"] }, { duration: 0.2, easing: "ease-out" });
     }
     if (stageRect) {
       const centerX = (buttonRect.left + buttonRect.width / 2 - stageRect.left) / stageRect.width * 100;
       const centerY = (buttonRect.top + buttonRect.height / 2 - stageRect.top) / stageRect.height * 100;
-      if (!prefersReducedMotion) {
-        animate(button, {
-          left: [fromLeft, "50%"],
-          top: [fromTop, "48%"],
-          transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -54%) scale(1.24)", "translate(-50%, -50%) scale(1.1)"]
-        }, { duration: 0.7, easing: "ease-in-out" });
-      } else {
-        button.style.left = "50%";
-        button.style.top = "48%";
-      }
       animateTreeMithuTo(stageRect.width * (centerX / 100 + 0.08), stageRect.height * (centerY / 100 - 0.16), "pointing");
     }
     renderLetterDetail(letter);
     setMascotState("pointing");
-    setMascotSpeech("Listening to " + letter.devanagari + ".", 1200);
+    setMascotSpeech("Listening to " + letter.devanagari + ".", 800);
     speakSelectedLetter();
+    const wasGroupComplete = isTreeGroupComplete(state.treeGroupIndex);
     if (!state.treeDiscovered.has(letter.id)) {
       state.treeDiscovered.add(letter.id);
       button.classList.add("discovered");
       saveTreeProgress();
       renderTreeCounter();
     }
+    const nowGroupComplete = isTreeGroupComplete(state.treeGroupIndex);
     if (ui.treeStatus) {
       ui.treeStatus.textContent = "Selected " + letter.devanagari + " (" + letter.transliteration + ").";
       setTimeout(function () {
@@ -1145,18 +1123,28 @@
         }
       }, 180);
     }
+    if (!wasGroupComplete && nowGroupComplete) {
+      if (ui.treeStatus) ui.treeStatus.textContent = "Beautiful! You discovered all five letters in this group.";
+      setMascotState("celebrating");
+      celebrateSmall();
+      renderTreeGroupProgress();
+    }
     handleTreeCompletionOnce();
-    renderTreeProgressDecor();
     setTimeout(function () {
-      button.style.left = fromLeft;
-      button.style.top = fromTop;
       button.classList.remove("tree-active");
-      if (!prefersReducedMotion) {
-        animate(button, { transform: ["translate(-50%, -50%) scale(1.08)", "translate(-50%, -50%) scale(1)"] }, { duration: 0.33, easing: "ease-out" });
-      }
-      updateSpotlight(letter, false);
       returnTreeMithuHome();
-    }, prefersReducedMotion ? 250 : 1250);
+    }, prefersReducedMotion ? 220 : 900);
+  }
+
+  function goToNextTreeGroup() {
+    const next = state.treeGroupIndex + 1;
+    if (next >= treeGroupCount()) return;
+    state.treeGroupIndex = next;
+    saveTreeProgress();
+    renderMagicalTree();
+    updateSpotlight(null, false);
+    if (ui.treeStatus) ui.treeStatus.textContent = "New letters are ready. Tap a glowing letter to discover its sound!";
+    returnTreeMithuHome();
   }
 
   function buildHearPrompt() {
@@ -1524,8 +1512,9 @@
     });
 
     const treeButtons = ui.magicalTreeLetters ? ui.magicalTreeLetters.querySelectorAll("[data-tree-id]") : [];
-    if (treeButtons.length !== canonicalLetters.length) {
-      issues.push("Tree rendered count " + treeButtons.length + " does not match inventory " + canonicalLetters.length + ".");
+    const expectedTreeCount = currentTreeLetters().length;
+    if (treeButtons.length !== expectedTreeCount) {
+      issues.push("Tree rendered count " + treeButtons.length + " does not match expected group size " + expectedTreeCount + ".");
     }
     treeButtons.forEach(function (btn) {
       const id = btn.getAttribute("data-tree-id");
@@ -1736,10 +1725,16 @@
       })
     );
     state.treeCompletionAwarded = treeProgress.completionAwarded;
+    state.treeGroupIndex = Math.max(0, Math.min(treeGroupCount() - 1, treeProgress.groupIndex || 0));
+    if (isTreeGroupComplete(state.treeGroupIndex) && state.treeDiscovered.size < canonicalLetters.length) {
+      state.treeGroupIndex = findFirstIncompleteTreeGroup();
+    }
     initLottie();
     renderLessonHeader();
     renderLetterGrid();
     renderMagicalTree();
+    if (ui.treeStatus) ui.treeStatus.textContent = "Tap a glowing letter to discover its sound!";
+    handleTreeCompletionOnce();
     renderProgress();
     renderMuteButtons();
     renderAudioDebug();
@@ -1815,6 +1810,7 @@
         }
       });
     }
+    if (ui.nextTreeGroupBtn) ui.nextTreeGroupBtn.addEventListener("click", goToNextTreeGroup);
     ui.playHearPrompt.addEventListener("click", function () {
       playPromptLetter(state.currentHearPrompt.letter);
     });
