@@ -596,10 +596,12 @@
       "Activity " + (activityIndex + 1) + " of " + ACTIVITY_SEQUENCE.length +
       " · Letter " + (letterIndex + 1) + " of " + canonicalLetters.length;
     if (activityId === "magical-tree") {
-      controls.previous.textContent = "Previous Group";
-      controls.next.textContent = "Next Group";
+      controls.previous.hidden = true;
+      controls.next.hidden = true;
       controls.reset.textContent = "Play Magical Tree Again";
     } else {
+      controls.previous.hidden = false;
+      controls.next.hidden = false;
       controls.previous.textContent = "Previous";
       controls.next.textContent = "Next";
       controls.reset.textContent = "Reset Activity";
@@ -636,7 +638,7 @@
 
     ui.magicalTreeLetters.innerHTML = "";
     if (ui.treeInstruction) {
-      ui.treeInstruction.textContent = "Tap glowing letters to discover their sounds.";
+      ui.treeInstruction.textContent = "Tap a glowing letter to discover its sound!";
     }
     if (ui.treeCounter) {
       ui.treeCounter.textContent = "Group " + (currentGroup + 1) + " of " + (maxGroup + 1);
@@ -979,13 +981,16 @@
     if (activityId === "magical-tree") {
       const group = Math.floor(letterIndex / TREE_GROUP_SIZE);
       const maxGroup = Math.floor((canonicalLetters.length - 1) / TREE_GROUP_SIZE);
+      controls.previous.hidden = true;
+      controls.next.hidden = true;
       controls.previous.disabled = group === 0;
-      controls.next.hidden = false;
       controls.next.disabled = group >= maxGroup;
       controls.finish.hidden = !activityCompleted;
       controls.finish.disabled = false;
     } else {
+      controls.previous.hidden = false;
       controls.previous.disabled = letterIndex === 0;
+      controls.next.hidden = false;
       controls.next.hidden = isLastLetter;
       controls.next.disabled = !runtime.interactionCompleted;
       controls.finish.hidden = !isLastLetter || activityCompleted;
