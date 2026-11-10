@@ -65,10 +65,10 @@ test("global panel is consolidated summary-only and no 3-of-6 wording", () => {
   assert.equal(html.includes("Activity 3 of 6"), false);
 });
 
-test("audio uses local playback and no speechSynthesis usage", () => {
-  assert.ok(js.includes("const AUDIO_ENABLED = true;"));
+test("audio is paused without browser speech fallback", () => {
+  assert.ok(js.includes("const AUDIO_ENABLED = false;"));
   assert.equal(js.includes("speechSynthesis"), false);
-  assert.ok(js.includes("new Audio("));
+  assert.ok(js.includes("Pronunciation is unavailable until verified Sanskrit audio is approved."));
 });
 
 test("full-page celebration canvas exists", () => {
@@ -82,7 +82,7 @@ test("full-page celebration canvas exists", () => {
 test("letter garden uses Devanagari tab labels and subgroup categories", () => {
   assert.ok(html.includes(">स्वर<"));
   assert.ok(html.includes(">व्यञ्जन<"));
-  assert.ok(html.includes(">अभ्यास<"));
+  assert.equal(html.includes(">अभ्यास<"), false);
   assert.equal(html.includes(">All<"), false);
   assert.ok(js.includes("क-वर्ग"));
   assert.ok(js.includes("च-वर्ग"));
@@ -134,7 +134,8 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
 test("write-it-yourself uses self-assessment and no fake handwriting validation", () => {
   assert.ok(html.includes('id="writingComparePanel"'));
   assert.ok(html.includes("Check My Writing"));
-  assert.ok(html.includes("Looks Good, Continue"));
+  assert.ok(html.includes("Looks Good!"));
+  assert.ok(html.includes("Try Again"));
   assert.ok(js.includes("showWritingComparison("));
   assert.ok(js.includes("Self-check: compare your writing"));
   assert.equal(js.includes("tracingCoverageScore("), false);
