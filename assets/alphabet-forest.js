@@ -72,17 +72,7 @@
     streakCount: document.getElementById("streakCount"),
     progressFill: document.getElementById("progressFill"),
     progressText: document.getElementById("progressText"),
-    activityProgressLabel: document.getElementById("activityProgressLabel"),
-    letterProgressLabel: document.getElementById("letterProgressLabel"),
-    activityPills: document.getElementById("activityPills"),
-    prevNavBtn: document.getElementById("prevNavBtn"),
-    retryNavBtn: document.getElementById("retryNavBtn"),
-    nextNavBtn: document.getElementById("nextNavBtn"),
-    finishNavBtn: document.getElementById("finishNavBtn"),
-    nextActivityNavBtn: document.getElementById("nextActivityNavBtn"),
-    resetActivityNavBtn: document.getElementById("resetActivityNavBtn"),
-    backToActivitiesBtn: document.getElementById("backToActivitiesBtn"),
-    activityNavStatus: document.getElementById("activityNavStatus"),
+    activityHubList: document.getElementById("activityHubList"),
     treeInstruction: document.getElementById("treeInstruction"),
     treeCounter: document.getElementById("treeCounter"),
     treeStatus: document.getElementById("treeStatus"),
@@ -153,6 +143,7 @@
     retryLockKey: null,
     activeCategory: "vowels",
     gameSeed: 0,
+    localNav: {},
     trace: {
       ctx: null,
       drawing: false,
@@ -163,7 +154,7 @@
   hideNonSequencePanels();
   setupTraceCanvas();
   setupStaticActions();
-  renderActivityPills();
+  renderActivityHub();
   renderCurrentActivity();
   renderAudioDebug();
 
@@ -237,71 +228,6 @@
     }
     if (ui.prevLetterBtn) ui.prevLetterBtn.addEventListener("click", movePreviousLetter);
     if (ui.nextLetterBtn) ui.nextLetterBtn.addEventListener("click", moveNextLetter);
-    if (ui.prevNavBtn) ui.prevNavBtn.addEventListener("click", movePreviousLetter);
-    if (ui.nextNavBtn) ui.nextNavBtn.addEventListener("click", moveNextLetter);
-
-    if (ui.retryNavBtn) {
-      ui.retryNavBtn.addEventListener("click", function onRetry() {
-        const activityId = progression.getCurrentActivityId();
-        const letterIndex = progression.getCurrentLetterIndex(activityId);
-        progression.retryCurrentLetter(activityId);
-        runtime.retryLockKey = activityId + ":" + letterIndex;
-        runtime.interactionCompleted = false;
-        setNavStatus("Retry this letter to unlock Next.");
-        renderCurrentActivity();
-      });
-    }
-
-    if (ui.finishNavBtn) {
-      ui.finishNavBtn.addEventListener("click", function onFinishActivity() {
-        const activityId = progression.getCurrentActivityId();
-        const result = progression.completeActivity(activityId);
-        if (!result.completed) {
-          setNavStatus("Complete all 48 letters before finishing this activity.");
-          return;
-        }
-        if (window.spApplause) window.spApplause();
-        fireConfetti(90);
-        setMascotState("dancing");
-        setMascotSpeech(labelForActivity(activityId) + " complete! Great work.");
-        setNavStatus(labelForActivity(activityId) + " complete. You can move to the next activity.");
-        if (result.worldCompleted) {
-          showWorldCompletion();
-        }
-        renderCurrentActivity();
-      });
-    }
-
-    if (ui.nextActivityNavBtn) {
-      ui.nextActivityNavBtn.addEventListener("click", function onNextActivity() {
-        progression.goToNextActivity();
-        runtime.retryLockKey = null;
-        renderCurrentActivity();
-      });
-    }
-
-    if (ui.resetActivityNavBtn) {
-      ui.resetActivityNavBtn.addEventListener("click", function onResetActivity() {
-        const activityId = progression.getCurrentActivityId();
-        const confirmed = window.confirm("Reset this completed activity and restart from Letter 1?");
-        if (!confirmed) return;
-        const result = progression.resetActivity(activityId);
-        if (!result.reset) {
-          setNavStatus("Reset is available only after finishing all 48 letters in this activity.");
-          return;
-        }
-        runtime.retryLockKey = null;
-        setNavStatus("Activity reset. Start again from Letter 1.");
-        renderCurrentActivity();
-      });
-    }
-
-    if (ui.backToActivitiesBtn) {
-      ui.backToActivitiesBtn.addEventListener("click", function onBackToActivities() {
-        const panel = document.getElementById("activityNavigator");
-        if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
 
     if (ui.nextAdventureBtn) {
       ui.nextAdventureBtn.addEventListener("click", function onNextAdventure() {
@@ -324,7 +250,8 @@
     }
     if (ui.continueAdventureTopBtn) {
       ui.continueAdventureTopBtn.addEventListener("click", function onContinueAdventure() {
-        const panel = document.getElementById("activityNavigator");
+        const activityId = progression.getCurrentActivityId();
+        const panel = activityPanels[activityId];
         if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
@@ -418,21 +345,120 @@
     runtime.trace.strokeCount = 0;
   }
 
-  function renderActivityPills() {
-    if (!ui.activityPills) return;
-    ui.activityPills.innerHTML = "";
-    ACTIVITY_SEQUENCE.forEach(function renderPill(activity, index) {
+  function renderActivityHub() {
+    if (!ui.activityHubList) return;
+    const snapshot = progression.getSnapshot();
+    ui.activityHubList.innerHTML = "";
+    ACTIVITY_SEQUENCE.forEach(function renderHubItem(activity, index) {
+      const activityState = snapshot.state.activities[activity.id];
       const button = document.createElement("button");
       button.type = "button";
       button.className = "button ghost activity-pill";
-      button.textContent = String(index + 1) + ". " + activity.label;
-      button.addEventListener("click", function onClickActivity() {
+      button.textContent =
+        String(index + 1) + ". " + activity.label + " (" + activityState.completedLetters.length + "/48)";
+      if (activity.id === progression.getCurrentActivityId()) button.classList.add("secondary");
+      if (activityState.completedAtLeastOnce) button.classList.add("primary");
+      button.addEventListener("click", function onOpenActivity() {
         progression.goToActivity(activity.id);
         runtime.retryLockKey = null;
         renderCurrentActivity();
       });
-      ui.activityPills.appendChild(button);
+      ui.activityHubList.appendChild(button);
     });
+  }
+
+  function getLocalNavTarget(activityId) {
+    if (activityId === "letter-garden") return document.getElementById("activityHearPanel");
+    return activityPanels[activityId];
+  }
+
+  function createLocalNav(activityId) {
+    if (runtime.localNav[activityId]) return runtime.localNav[activityId];
+    const target = getLocalNavTarget(activityId);
+    if (!target) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "activity-local-nav";
+    wrap.setAttribute("data-activity-local-nav", activityId);
+    wrap.innerHTML =
+      '<p class="footer-note local-progress"></p>' +
+      '<div class="hero-actions">' +
+      '<button type="button" class="button ghost" data-action="previous">Previous</button>' +
+      '<button type="button" class="button ghost" data-action="retry">Retry</button>' +
+      '<button type="button" class="button secondary" data-action="next">Next</button>' +
+      '<button type="button" class="button secondary" data-action="finish" hidden>Finish Activity</button>' +
+      '<button type="button" class="button primary" data-action="next-activity" hidden>Next Activity</button>' +
+      '<button type="button" class="button ghost" data-action="reset" hidden>Reset Activity</button>' +
+      '<button type="button" class="button ghost" data-action="back">Back to Activities</button>' +
+      '</div>' +
+      '<p class="status local-status" aria-live="polite"></p>';
+
+    target.appendChild(wrap);
+
+    const controls = {
+      root: wrap,
+      progress: wrap.querySelector(".local-progress"),
+      status: wrap.querySelector(".local-status"),
+      previous: wrap.querySelector('[data-action="previous"]'),
+      retry: wrap.querySelector('[data-action="retry"]'),
+      next: wrap.querySelector('[data-action="next"]'),
+      finish: wrap.querySelector('[data-action="finish"]'),
+      nextActivity: wrap.querySelector('[data-action="next-activity"]'),
+      reset: wrap.querySelector('[data-action="reset"]'),
+      back: wrap.querySelector('[data-action="back"]')
+    };
+
+    controls.previous.addEventListener("click", movePreviousLetter);
+    controls.next.addEventListener("click", moveNextLetter);
+    controls.retry.addEventListener("click", function onRetry() {
+      const currentActivityId = progression.getCurrentActivityId();
+      const letterIndex = progression.getCurrentLetterIndex(currentActivityId);
+      progression.retryCurrentLetter(currentActivityId);
+      runtime.retryLockKey = currentActivityId + ":" + letterIndex;
+      runtime.interactionCompleted = false;
+      setNavStatus("Retry this letter to unlock Next.");
+      renderCurrentActivity();
+    });
+    controls.finish.addEventListener("click", function onFinish() {
+      const currentActivityId = progression.getCurrentActivityId();
+      const result = progression.completeActivity(currentActivityId);
+      if (!result.completed) {
+        setNavStatus("Complete all 48 letters before finishing this activity.");
+        return;
+      }
+      if (window.spApplause) window.spApplause();
+      fireConfetti(90);
+      setMascotState("dancing");
+      setMascotSpeech(labelForActivity(currentActivityId) + " complete! Great work.");
+      setNavStatus(labelForActivity(currentActivityId) + " complete. You can move to the next activity.");
+      if (result.worldCompleted) showWorldCompletion();
+      renderCurrentActivity();
+    });
+    controls.nextActivity.addEventListener("click", function onNextActivity() {
+      progression.goToNextActivity();
+      runtime.retryLockKey = null;
+      renderCurrentActivity();
+    });
+    controls.reset.addEventListener("click", function onReset() {
+      const currentActivityId = progression.getCurrentActivityId();
+      const confirmed = window.confirm("Reset this completed activity and restart from Letter 1?");
+      if (!confirmed) return;
+      const result = progression.resetActivity(currentActivityId);
+      if (!result.reset) {
+        setNavStatus("Reset is available only after finishing all 48 letters in this activity.");
+        return;
+      }
+      runtime.retryLockKey = null;
+      setNavStatus("Activity reset. Start again from Letter 1.");
+      renderCurrentActivity();
+    });
+    controls.back.addEventListener("click", function onBack() {
+      const hub = document.getElementById("activityNavigator");
+      if (hub) hub.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    runtime.localNav[activityId] = controls;
+    return controls;
   }
 
   function labelForActivity(activityId) {
@@ -457,30 +483,13 @@
       panel.hidden = id !== activityId;
     });
 
-    ACTIVITY_SEQUENCE.forEach(function updatePill(activity, index) {
-      if (!ui.activityPills || !ui.activityPills.children[index]) return;
-      const button = ui.activityPills.children[index];
-      if (activity.id === activityId) {
-        button.classList.add("secondary");
-        button.classList.remove("ghost");
-      } else {
-        button.classList.remove("secondary");
-        button.classList.add("ghost");
-      }
-    });
-
-    if (ui.activityProgressLabel) {
-      const activityIndex = ACTIVITY_SEQUENCE.findIndex(function findIndex(entry) { return entry.id === activityId; });
-      ui.activityProgressLabel.innerHTML = "<strong>Activity " + (activityIndex + 1) + " of " + ACTIVITY_SEQUENCE.length + "</strong>";
-    }
-    if (ui.letterProgressLabel) {
-      ui.letterProgressLabel.textContent = "Letter " + (letterIndex + 1) + " of " + canonicalLetters.length;
-    }
+    renderActivityHub();
 
     const alreadyCompleted = progression.isLetterCompleted(activityId, letterIndex);
     const retryLocked = runtime.retryLockKey === (activityId + ":" + letterIndex);
     runtime.interactionCompleted = alreadyCompleted && !retryLocked;
     renderSharedLearningPanel(letter, letterIndex, activityId);
+    renderLocalActivityNavigation(activityId, letterIndex);
 
     if (activityId === "magical-tree") renderMagicalTree();
     if (activityId === "letter-garden") renderLetterGarden();
@@ -491,6 +500,15 @@
 
     renderProgressSummary();
     updateNavigationButtons();
+  }
+
+  function renderLocalActivityNavigation(activityId, letterIndex) {
+    const activityIndex = ACTIVITY_SEQUENCE.findIndex(function findIndex(entry) { return entry.id === activityId; });
+    const controls = createLocalNav(activityId);
+    if (!controls) return;
+    controls.progress.textContent =
+      "Activity " + (activityIndex + 1) + " of " + ACTIVITY_SEQUENCE.length +
+      " · Letter " + (letterIndex + 1) + " of " + canonicalLetters.length;
   }
 
   function renderSharedLearningPanel(letter, letterIndex, activityId) {
@@ -797,29 +815,23 @@
 
   function updateNavigationButtons() {
     const activityId = progression.getCurrentActivityId();
+    const controls = createLocalNav(activityId);
+    if (!controls) return;
     const letterIndex = progression.getCurrentLetterIndex(activityId);
     const isLastLetter = letterIndex === canonicalLetters.length - 1;
     const activityProgress = progression.getActivityProgress(activityId);
     const activityCompleted = activityProgress.isCompleted;
     const isLastActivity = progression.getSnapshot().state.currentActivityIndex >= ACTIVITY_SEQUENCE.length - 1;
 
-    if (ui.prevNavBtn) ui.prevNavBtn.disabled = letterIndex === 0;
-    if (ui.nextNavBtn) {
-      ui.nextNavBtn.hidden = isLastLetter;
-      ui.nextNavBtn.disabled = !runtime.interactionCompleted;
-    }
-    if (ui.finishNavBtn) {
-      ui.finishNavBtn.hidden = !isLastLetter || activityCompleted;
-      ui.finishNavBtn.disabled = !runtime.interactionCompleted;
-    }
-    if (ui.nextActivityNavBtn) {
-      ui.nextActivityNavBtn.hidden = !(activityCompleted && !isLastActivity);
-      ui.nextActivityNavBtn.disabled = !activityCompleted || isLastActivity;
-    }
-    if (ui.resetActivityNavBtn) {
-      ui.resetActivityNavBtn.hidden = !activityCompleted;
-      ui.resetActivityNavBtn.disabled = !activityCompleted;
-    }
+    controls.previous.disabled = letterIndex === 0;
+    controls.next.hidden = isLastLetter;
+    controls.next.disabled = !runtime.interactionCompleted;
+    controls.finish.hidden = !isLastLetter || activityCompleted;
+    controls.finish.disabled = !runtime.interactionCompleted;
+    controls.nextActivity.hidden = !(activityCompleted && !isLastActivity);
+    controls.nextActivity.disabled = !activityCompleted || isLastActivity;
+    controls.reset.hidden = !activityCompleted;
+    controls.reset.disabled = !activityCompleted;
   }
 
   function renderProgressSummary() {
@@ -873,7 +885,9 @@
   }
 
   function setNavStatus(message) {
-    if (ui.activityNavStatus) ui.activityNavStatus.textContent = message;
+    const activityId = progression.getCurrentActivityId();
+    const controls = createLocalNav(activityId);
+    if (controls && controls.status) controls.status.textContent = message;
   }
 
   function setMascotSpeech(message) {
