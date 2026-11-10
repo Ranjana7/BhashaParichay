@@ -12,6 +12,17 @@
   const WORLD_KEY = "sanskritParichay.world." + worldKey + ".progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const TOTAL = 3;
+  const WORLD_ORDER = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const WORLD_TOTALS = {
+    alphabet: 9,
+    words: 3,
+    animals: 3,
+    numbers: 3,
+    colours: 3,
+    sentences: 3,
+    stories: 3,
+    culture: 3
+  };
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -102,6 +113,9 @@
 
   function saveProgress() {
     localStorage.setItem(WORLD_KEY, JSON.stringify(state.progress));
+    if (typeof window.spSyncProgressModel === "function") {
+      window.spSyncProgressModel(WORLD_ORDER, WORLD_TOTALS);
+    }
   }
 
   function currentLesson() {
@@ -191,6 +205,9 @@
         home.xp = Number(home.xp || 0) + 30;
       }
       localStorage.setItem(HOME_KEY, JSON.stringify(home));
+      if (typeof window.spSyncProgressModel === "function") {
+        window.spSyncProgressModel(WORLD_ORDER, WORLD_TOTALS);
+      }
     } catch (error) {
       // Keep local world progress even if home aggregate update fails.
     }

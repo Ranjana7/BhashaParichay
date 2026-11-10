@@ -198,6 +198,11 @@
     traceStatus: document.getElementById("traceStatus"),
     clearTraceBtn: document.getElementById("clearTraceBtn"),
     checkTraceBtn: document.getElementById("checkTraceBtn"),
+    traceSelfCheck: document.getElementById("traceSelfCheck"),
+    traceSelfCheckLetter: document.getElementById("traceSelfCheckLetter"),
+    traceSelfCheckQuestion: document.getElementById("traceSelfCheckQuestion"),
+    traceConfirmBtn: document.getElementById("traceConfirmBtn"),
+    traceRetryBtn: document.getElementById("traceRetryBtn"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
@@ -694,40 +699,43 @@
 
     if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
       clearTraceBoard();
-      if (ui.traceStatus) ui.traceStatus.textContent = "Canvas cleared. Write the letter again.";
+      if (ui.traceStatus) ui.traceStatus.textContent = "Great! Try writing the letter again.";
     });
     if (ui.checkTraceBtn) {
       ui.checkTraceBtn.addEventListener("click", function () {
         const activityId = "letter-tracing";
         if (runtime.tracing.points.length < 2 && !traceCanvasHasInk()) {
-          if (ui.traceStatus) ui.traceStatus.textContent = "Write the letter first, then tap Check.";
+          if (ui.traceStatus) ui.traceStatus.textContent = "Let's write our letter first!";
           return;
         }
+        openTraceSelfCheck();
+        setMascotState("pointing");
+        setMascotSpeech("Does your letter look like this?");
+        if (ui.traceStatus) ui.traceStatus.textContent = "Compare your writing and choose an option below.";
+      });
+    }
+    if (ui.traceConfirmBtn) {
+      ui.traceConfirmBtn.addEventListener("click", function () {
+        const activityId = "letter-tracing";
         const activity = forestState.activities[activityId];
-        const letter = activity ? getCurrentLetter(activityId) : null;
-        const validation = validateTraceAgainstLetter(letter);
-        if (!validation.available) {
-          setMascotState("thinking");
-          setMascotSpeech("You're doing great! Handwriting checking is coming soon.");
-          if (ui.traceStatus) {
-            ui.traceStatus.textContent = "Automatic Sanskrit handwriting validation is coming soon. Keep practising this letter.";
-          }
-          return;
-        }
-        if (!validation.isCorrect) {
-          incrementAttempt(activityId);
-          setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "trace-wrong"));
-          if (ui.traceStatus) ui.traceStatus.textContent = "Almost there! Try writing it again.";
-          return;
-        }
         const sourceIndex = activity ? activity.currentIndex : 0;
         const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
+        closeTraceSelfCheck();
         playSuccessSound("applause");
-        setMascotStateForDuration("celebrating", 800);
+        setMascotStateForDuration("celebrating", 1000);
         fireSectionConfetti("activityTraceGamePanel", true);
-        markCurrentComplete(activityId, "Writing practised!");
+        markCurrentComplete(activityId, "Shabash! Letter practised!");
         if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
+      });
+    }
+    if (ui.traceRetryBtn) {
+      ui.traceRetryBtn.addEventListener("click", function () {
+        incrementAttempt("letter-tracing");
+        closeTraceSelfCheck();
+        clearTraceBoard();
+        setMascotState("encouraging");
+        setMascotSpeech("Nice try! Let's write it once more.");
+        if (ui.traceStatus) ui.traceStatus.textContent = "Great effort! Let's try this same letter again.";
       });
     }
   }
@@ -739,6 +747,7 @@
     ctx.clearRect(0, 0, ui.traceCanvas.width, ui.traceCanvas.height);
     runtime.tracing.points = [];
     runtime.tracing.reviewed = false;
+    closeTraceSelfCheck();
   }
 
   function traceCanvasHasInk() {
@@ -752,11 +761,16 @@
     return false;
   }
 
-  function validateTraceAgainstLetter(letter) {
-    if (!WRITING_VALIDATION_AVAILABLE || !letter) {
-      return { available: false, isCorrect: false };
-    }
-    return { available: false, isCorrect: false };
+  function openTraceSelfCheck() {
+    if (!ui.traceSelfCheck || !ui.traceSelfCheckLetter) return;
+    const letter = getCurrentLetter("letter-tracing");
+    ui.traceSelfCheckLetter.textContent = letter ? letter.symbol : "अ";
+    ui.traceSelfCheck.hidden = false;
+  }
+
+  function closeTraceSelfCheck() {
+    if (!ui.traceSelfCheck) return;
+    ui.traceSelfCheck.hidden = true;
   }
 
   function playSuccessSound(kind) {
@@ -1081,6 +1095,12 @@
 
   function saveAndRender() {
     stateApi.saveState(forestState);
+    if (typeof window.spSyncProgressModel === "function") {
+      window.spSyncProgressModel(
+        ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"],
+        { alphabet: 9, words: 3, animals: 3, numbers: 3, colours: 3, sentences: 3, stories: 3, culture: 3 }
+      );
+    }
     renderAll();
   }
 
@@ -1613,11 +1633,9 @@
       clearTraceBoard();
     }
     if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = WRITING_VALIDATION_AVAILABLE
-        ? "Write the letter, then tap Check."
-        : "Write the letter and practise. Automatic Sanskrit handwriting checking is coming soon.";
+      ui.traceStatus.textContent = "Write the letter, then tap Check My Writing.";
     } else if (!runtime.byActivity[activityId].status) {
-      ui.traceStatus.textContent = "Letter saved. Continue when ready.";
+      ui.traceStatus.textContent = "Wonderful! This letter is practised. Continue when ready.";
     }
   }
 

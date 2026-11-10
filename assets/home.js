@@ -11,6 +11,16 @@
   const messages = window.SP_MESSAGES || {};
   const homeMsg = messages.home || {};
   const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const worldTotals = {
+    alphabet: 9,
+    words: 3,
+    animals: 3,
+    numbers: 3,
+    colours: 3,
+    sentences: 3,
+    stories: 3,
+    culture: 3
+  };
   const worldLinks = {
     alphabet: "alphabet-forest.html",
     words: "learning-world.html?world=words",
@@ -94,13 +104,17 @@
 
   const state = loadHomeState();
   const daily = loadDailyProgress();
+  if (typeof window.spSyncProgressModel === "function") {
+    window.spSyncProgressModel(pathOrder, worldTotals);
+  }
+  const snapshot = getProgressSnapshot();
   renderStats();
   renderChallengeIdle();
   wireUi();
   initHomeLottie();
   if (ui.homeHeroSubtitle && homeMsg.heroSubtitle) ui.homeHeroSubtitle.textContent = homeMsg.heroSubtitle;
   setMascotState("greeting", homeMsg.mascotIntro || "Namaste! Choose a world or play today's challenge.");
-  if (ui.homeReturningMessage && state.xp > 0) {
+  if (ui.homeReturningMessage && snapshot.totals && snapshot.totals.stars > 0) {
     ui.homeReturningMessage.hidden = false;
     ui.homeReturningMessage.textContent = homeMsg.returning || "Welcome back! Ready to continue your adventure?";
   }
@@ -164,11 +178,11 @@
     localStorage.setItem(CHALLENGE_KEY, JSON.stringify(daily));
   }
 
-  function lessonStars() {
-    if (typeof window.spGetAlphabetUnlockStatus === "function") {
-      return Number(window.spGetAlphabetUnlockStatus().stars || 0);
+  function getProgressSnapshot() {
+    if (typeof window.spGetProgressSnapshot === "function") {
+      return window.spGetProgressSnapshot(pathOrder, worldTotals);
     }
-    return 0;
+    return { totals: { stars: 0 } };
   }
 
   function isWorldUnlocked(world) {
@@ -179,7 +193,8 @@
   }
 
   function renderStats() {
-    ui.homeStars.textContent = String(lessonStars());
+    const latest = getProgressSnapshot();
+    ui.homeStars.textContent = String((latest.totals && latest.totals.stars) || 0);
     ui.homeXp.textContent = String(state.xp);
   }
 

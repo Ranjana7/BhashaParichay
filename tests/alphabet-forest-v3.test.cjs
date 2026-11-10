@@ -146,16 +146,18 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
   assert.ok(js.includes("animateFruitToMithu"));
 });
 
-test("write-it-yourself removes manual self-check and does not fake validation", () => {
-  assert.equal(html.includes('id="writingSelfCheck"'), false);
-  assert.equal(html.includes("Looks Good!"), false);
-  assert.equal(html.includes("Does your letter look like this?"), false);
-  assert.ok(html.includes(">Check<"));
+test("write-it-yourself uses self-check flow without fake machine validation", () => {
+  assert.ok(html.includes('id="traceSelfCheck"'));
+  assert.ok(html.includes("Does your letter look like this?"));
+  assert.ok(html.includes("Yes, I did it!"));
+  assert.ok(html.includes("Let me try again!"));
+  assert.ok(html.includes(">Check My Writing<"));
   assert.ok(html.includes(">Clear<"));
   assert.ok(js.includes("const WRITING_VALIDATION_AVAILABLE = false;"));
-  assert.ok(js.includes("Automatic Sanskrit handwriting validation is coming soon."));
-  assert.equal(js.includes("tracingCoverageScore("), false);
-  assert.equal(js.includes("buildGlyphGuide("), false);
+  assert.ok(js.includes("Let's write our letter first!"));
+  assert.ok(js.includes("openTraceSelfCheck("));
+  assert.ok(js.includes("closeTraceSelfCheck("));
+  assert.equal(js.includes("validateTraceAgainstLetter("), false);
 });
 
 test("alphabet forest does not render end-of-page review notes", () => {

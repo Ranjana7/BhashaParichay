@@ -1,5 +1,4 @@
 (function initExploreWorlds() {
-  const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const grid = document.getElementById("exploreWorldGrid");
   if (!grid) return;
@@ -8,7 +7,7 @@
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const worldOrder = [
-    { key: "alphabet", title: "Alphabet Forest", subtitle: "Letters, sounds, and foundational games", lessons: 6, iconClass: "forest", cardClass: "world-alphabet", link: "alphabet-forest.html" },
+    { key: "alphabet", title: "Alphabet Forest", subtitle: "Letters, sounds, and foundational games", lessons: 9, iconClass: "forest", cardClass: "world-alphabet", link: "alphabet-forest.html" },
     { key: "words", title: "Word Wonderland", subtitle: "Nouns and meanings", lessons: 3, iconClass: "word", cardClass: "world-word", link: "learning-world.html?world=words" },
     { key: "animals", title: "Animal Jungle", subtitle: "Animal vocabulary", lessons: 3, iconClass: "jungle", cardClass: "world-jungle", link: "learning-world.html?world=animals" },
     { key: "numbers", title: "Number Galaxy", subtitle: "Counting and number words", lessons: 3, iconClass: "galaxy", cardClass: "world-galaxy", link: "learning-world.html?world=numbers" },
@@ -19,39 +18,35 @@
   ];
 
   const status = document.getElementById("exploreStatus");
-  const home = readJson(HOME_KEY, { xp: 0, completed: [] });
-
-  function readJson(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (_error) {
-      return fallback;
-    }
+  const worldTotals = {};
+  worldOrder.forEach(function (world) { worldTotals[world.key] = world.lessons; });
+  const orderKeys = worldOrder.map(function (world) { return world.key; });
+  if (typeof window.spSyncProgressModel === "function") {
+    window.spSyncProgressModel(orderKeys, worldTotals);
   }
 
   function isUnlocked(worldKey) {
     if (typeof window.spIsWorldUnlocked === "function") {
-      const order = worldOrder.map(function (w) { return w.key; });
-      return window.spIsWorldUnlocked(worldKey, order);
+      return window.spIsWorldUnlocked(worldKey, orderKeys);
     }
     return true;
   }
 
   function worldProgress(worldKey, totalLessons) {
-    if (worldKey === "alphabet") {
-      const status = typeof window.spGetAlphabetUnlockStatus === "function"
-        ? window.spGetAlphabetUnlockStatus()
-        : { unlocked: false, learningCompletedCount: 0, practiceCompletedCount: 0 };
-      const completed = status.unlocked
-        ? totalLessons
-        : Math.max(0, Math.min(totalLessons - 1, status.learningCompletedCount + Math.min(2, status.practiceCompletedCount)));
-      return { completed: completed, total: totalLessons };
+    const snapshot = typeof window.spGetProgressSnapshot === "function"
+      ? window.spGetProgressSnapshot(orderKeys, worldTotals)
+      : null;
+    if (snapshot) {
+      if (worldKey === "alphabet") {
+        const completed = Math.max(0, Math.min(totalLessons, Number(snapshot.alphabet.learningCompletedCount || 0) + Number(snapshot.alphabet.practiceCompletedCount || 0)));
+        return { completed: completed, total: totalLessons };
+      }
+      const world = snapshot.worlds[worldKey];
+      if (world) {
+        return { completed: Math.min(totalLessons, world.completedLessonsCount), total: totalLessons };
+      }
     }
-    const key = "sanskritParichay.world." + worldKey + ".progress";
-    const p = readJson(key, { completedLessons: [] });
-    const completed = Array.isArray(p.completedLessons) ? p.completedLessons.length : 0;
-    return { completed: Math.min(totalLessons, completed), total: totalLessons };
+    return { completed: 0, total: totalLessons };
   }
 
   grid.innerHTML = "";

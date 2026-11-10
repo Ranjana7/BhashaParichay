@@ -81,6 +81,9 @@
   }
 
   function getForestState() {
+    if (window.SPProgressStore && typeof window.SPProgressStore.loadForestState === "function") {
+      return window.SPProgressStore.loadForestState();
+    }
     const fallback = {
       activities: {},
       completionRewarded: {},
@@ -92,6 +95,9 @@
   }
 
   function getAlphabetUnlockStatus() {
+    if (window.SPProgressStore && typeof window.SPProgressStore.getAlphabetJourney === "function") {
+      return window.SPProgressStore.getAlphabetJourney();
+    }
     const forest = getForestState();
     const activities = forest.activities || {};
     const treeComplete = Boolean(activities["magical-tree"] && activities["magical-tree"].isComplete);
@@ -119,6 +125,16 @@
   }
 
   function isWorldUnlocked(worldKey, order) {
+    if (window.SPProgressStore && typeof window.SPProgressStore.isWorldUnlocked === "function") {
+      const worldTotals = {};
+      if (window.SANSKRIT_WORLDS && typeof window.SANSKRIT_WORLDS === "object") {
+        Object.keys(window.SANSKRIT_WORLDS).forEach(function (key) {
+          const world = window.SANSKRIT_WORLDS[key];
+          worldTotals[key] = Array.isArray(world.lessons) ? world.lessons.length : 3;
+        });
+      }
+      return window.SPProgressStore.isWorldUnlocked(worldKey, order, Boolean(config.TEST_MODE), worldTotals);
+    }
     if (config.TEST_MODE) return true;
     if (worldKey === "alphabet") return true;
     const worldOrder = Array.isArray(order) ? order.slice() : [];
@@ -291,6 +307,30 @@
   window.spGetAlphabetUnlockStatus = getAlphabetUnlockStatus;
   window.spIsWorldUnlocked = isWorldUnlocked;
   window.spGetContinueLearningUrl = getContinueUrl;
+  window.spGetProgressSnapshot = function spGetProgressSnapshot(worldOrder, worldTotals) {
+    if (window.SPProgressStore && typeof window.SPProgressStore.getProgressSnapshot === "function") {
+      return window.SPProgressStore.getProgressSnapshot(worldOrder, worldTotals);
+    }
+    return {
+      currentWorld: localStorage.getItem(LAST_WORLD_KEY) || "alphabet",
+      alphabet: getAlphabetUnlockStatus(),
+      worlds: {},
+      totals: {
+        worldsExplored: 1,
+        worldsCompleted: 0,
+        learningActivitiesCompleted: 0,
+        practiceActivitiesCompleted: 0,
+        forestActivitiesCompleted: 0,
+        stars: 0
+      }
+    };
+  };
+  window.spSyncProgressModel = function spSyncProgressModel(worldOrder, worldTotals) {
+    if (window.SPProgressStore && typeof window.SPProgressStore.syncHomeAggregate === "function") {
+      return window.SPProgressStore.syncHomeAggregate(worldOrder, worldTotals);
+    }
+    return readJson(HOME_KEY, { xp: 0, completed: [] });
+  };
 
   attachContinueLearningLinks();
   renderTestModeBadge();

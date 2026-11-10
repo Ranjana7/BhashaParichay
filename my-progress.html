@@ -22,16 +22,28 @@
 
   <main id="main-content" class="page-wrap">
     <section class="panel">
-      <h1>My Progress</h1>
-      <p>See what you completed, what is next, and jump back into lessons.</p>
+      <h1>MY LEARNING ADVENTURE</h1>
+      <p>See your stars, completed activities, and jump back into your next lesson.</p>
       <div class="hero-actions">
-        <div class="star-box">⭐ Stars: <span id="progressStars">0</span></div>
-        <div class="star-box">⚡ XP: <span id="progressXp">0</span></div>
+        <div class="star-box">🌍 Worlds explored: <span id="progressWorldsExplored">0</span></div>
+        <div class="star-box">🎓 Learning activities: <span id="progressLearningActivities">0</span></div>
+        <div class="star-box">🎮 Practice games: <span id="progressPracticeActivities">0</span></div>
+        <div class="star-box">⭐ Stars earned: <span id="progressStars">0</span></div>
+        <div class="star-box">🧭 Current world: <span id="progressCurrentWorld">Alphabet Forest</span></div>
       </div>
       <div class="hero-actions">
         <button id="continueLearningBtn" class="button primary" type="button">Continue Learning</button>
         <a class="button ghost" href="explore-worlds.html">Back to Worlds</a>
       </div>
+    </section>
+
+    <section class="panel">
+      <h2>Alphabet Forest</h2>
+      <p><strong>Learning:</strong> <span id="forestLearningSummary">0 of 2 completed</span></p>
+      <p><strong>Practice:</strong> <span id="forestPracticeSummary">0 of 7 completed</span></p>
+      <div class="progress-meter" aria-hidden="true"><div id="forestLearningFill" class="progress-fill"></div></div>
+      <div class="progress-meter" aria-hidden="true"><div id="forestPracticeFill" class="progress-fill"></div></div>
+      <p class="footer-note">Finish Magical Tree, Letter Garden, and any two practice games to unlock your next adventure.</p>
     </section>
 
     <section class="panel">
@@ -42,6 +54,7 @@
 
   <script src="assets/site-config.js"></script>
   <script src="assets/messages.js"></script>
+  <script src="assets/progress-store.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/worlds-data.js"></script>
   <script src="assets/my-progress.js"></script>

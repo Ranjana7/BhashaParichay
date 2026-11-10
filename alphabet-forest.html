@@ -299,7 +299,15 @@
           <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
           <div class="hero-actions">
             <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
-            <button id="checkTraceBtn" class="button secondary" type="button">Check</button>
+            <button id="checkTraceBtn" class="button secondary" type="button">Check My Writing</button>
+          </div>
+          <div id="traceSelfCheck" class="trace-self-check" hidden>
+            <p id="traceSelfCheckQuestion"><strong>Does your letter look like this?</strong></p>
+            <p class="trace-self-check-letter" id="traceSelfCheckLetter">अ</p>
+            <div class="hero-actions">
+              <button id="traceConfirmBtn" class="button primary" type="button">Yes, I did it!</button>
+              <button id="traceRetryBtn" class="button ghost" type="button">Let me try again!</button>
+            </div>
           </div>
           <p id="traceStatus" class="status" aria-live="polite"></p>
         </div>
@@ -326,6 +334,7 @@
   <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/site-config.js"></script>
   <script src="assets/messages.js"></script>
+  <script src="assets/progress-store.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
