@@ -14,8 +14,8 @@
     <nav class="main-nav" aria-label="Main">
       <a href="index.html" aria-current="page">Home</a>
       <a href="explore-worlds.html">Explore Worlds</a>
+      <a href="#" data-continue-learning>Continue Learning</a>
       <a href="my-progress.html">My Progress</a>
-      <a href="about.html">About</a>
     </nav>
     <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
   </header>
@@ -50,17 +50,18 @@
             <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
             <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
           </svg>
-          <p id="mascotSpeech" class="mascot-speech">Namaste! I am Mithu the Parrot. Let's begin your first Sanskrit adventure!</p>
+          <p id="mascotSpeech" class="mascot-speech">Hi! I'm Mithu, your learning buddy! Come explore magical forests, meet friendly animals, discover beautiful Sanskrit words and collect stars along the way! Ready? Let's play!</p>
         </div>
 
         <div class="hero-copy">
           <p class="hero-badge">SanskritParichay Learning Adventure</p>
-          <h1>A Magical Sanskrit Quest</h1>
-          <p>Explore colourful worlds, play interactive mini-games, earn XP, and learn Sanskrit one joyful step at a time.</p>
+          <h1>Namaste, Little Explorer!</h1>
+          <p id="homeHeroSubtitle">Welcome to SanskritParichay, where Sanskrit comes alive through magical adventures, playful games, wonderful stories and exciting discoveries!</p>
+          <p id="homeReturningMessage" class="footer-note" hidden>Welcome back, superstar! Ready to continue your adventure?</p>
           <div class="hero-actions">
-            <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Play!</a>
-            <button class="button ghost big-action" id="continueBtn" type="button">Continue Adventure</button>
-            <a class="button secondary big-action" id="exploreBtn" href="explore-worlds.html">Explore Learning Worlds</a>
+            <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Start Our Adventure!</a>
+            <button class="button ghost big-action" id="continueBtn" type="button">Continue My Adventure</button>
+            <a class="button secondary big-action" id="exploreBtn" href="explore-worlds.html">Explore Magical Worlds</a>
             <button class="button challenge big-action" id="challengeBtn" type="button">Today's Challenge</button>
           </div>
 
@@ -143,6 +144,8 @@
   <script src="assets/vendor/motion.min.js"></script>
   <script src="assets/vendor/lottie.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
+  <script src="assets/site-config.js"></script>
+  <script src="assets/messages.js"></script>
   <script src="assets/common.js"></script>
   <script src="assets/home.js"></script>
 </body>

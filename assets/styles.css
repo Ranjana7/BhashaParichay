@@ -126,6 +126,21 @@ body {
   cursor: pointer;
 }
 
+.test-mode-badge {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  z-index: 30;
+  border-radius: 999px;
+  border: 1px solid #f2c85f;
+  background: #fff6d8;
+  color: #6a4b00;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
 .page-wrap {
   width: min(1100px, 94vw);
   margin: 14px auto 28px;

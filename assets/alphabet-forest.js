@@ -5,6 +5,7 @@
   const TREE_GROUP_SIZE = 5;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const CORE = window.SPAlphabetForestCore;
+  const MESSAGE_SET = (window.SP_MESSAGES && window.SP_MESSAGES.alphabetForest) || {};
   const VOCAB = window.SP_VOCABULARY_MAP || { words: {}, fallback: { image: "", alt: "" } };
   const MOTION = window.Motion || {};
   const animate = MOTION.animate || function () {};
@@ -30,16 +31,26 @@
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
   const ACTIVITY_SPEECH = {
-    "magical-tree": "Let's discover magical letters!",
-    "letter-garden": "Choose a letter and explore!",
-    "hear-and-pick": "Listen carefully and choose the letter!",
-    "picture-match": "Can you find the matching picture?",
-    "arrange-word": "Build the Sanskrit word in order!",
-    "flashcard-flip": "Can you remember what this means?",
-    "feed-mithu": "Can you find my favourite fruit?",
-    "letter-tracing": "Let's practise writing Sanskrit!",
-    "hidden-letter-hunt": "Can you spot the hidden letter?"
+    "magical-tree": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["magical-tree"]) || "Look! Magical letters are hiding in the tree! Let's discover them together!",
+    "letter-garden": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["letter-garden"]) || "Every letter has a story! Tap one and let's explore!",
+    "hear-and-pick": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["hear-and-pick"]) || "Listen closely! Which letter did you hear?",
+    "picture-match": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["picture-match"]) || "Look carefully! Which picture matches our Sanskrit word?",
+    "arrange-word": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["arrange-word"]) || "Let's build this Sanskrit word together!",
+    "flashcard-flip": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["flashcard-flip"]) || "Can you guess what this word means? Tap the card to find out!",
+    "feed-mithu": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["feed-mithu"]) || "Yummy! I'm hungry! Can you find the right fruit for me?",
+    "letter-tracing": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["letter-tracing"]) || "Let's make beautiful Sanskrit letters! Your turn to write!",
+    "hidden-letter-hunt": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["hidden-letter-hunt"]) || "Ready for a hunt? Find the hidden letter!"
   };
+  const CORRECT_SPEECH = Array.isArray(MESSAGE_SET.correct) && MESSAGE_SET.correct.length
+    ? MESSAGE_SET.correct.slice()
+    : ["Shabash! You got it!", "Wonderful! Let's keep going!", "Yay! You're getting really good!"];
+  const INCORRECT_SPEECH = Array.isArray(MESSAGE_SET.incorrect) && MESSAGE_SET.incorrect.length
+    ? MESSAGE_SET.incorrect.slice()
+    : ["Oops! Let's try that again!", "Not quite! Have another look!", "Almost there! You can do it!"];
+  const COMPLETE_SPEECH = Array.isArray(MESSAGE_SET.completed) && MESSAGE_SET.completed.length
+    ? MESSAGE_SET.completed.slice()
+    : ["Wow! You did it! Let's celebrate!", "Fantastic work! Ready for another adventure?"];
+  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! A new magical world is waiting for you!";
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -214,6 +225,7 @@
     mascotStateTimeout: null,
     autoAdvance: {},
     treeGroupAdvanceTimer: null,
+    messageLast: {},
     tracing: {
       drawing: false,
       points: [],
@@ -426,14 +438,24 @@
     if (ui.lessonMascotSpeech) ui.lessonMascotSpeech.textContent = text;
   }
 
+  function pickSpeech(pool, bucket) {
+    if (!Array.isArray(pool) || !pool.length) return "";
+    const key = bucket || "shared";
+    const previous = runtime.messageLast[key] || "";
+    const options = pool.length > 1 ? pool.filter(function (item) { return item !== previous; }) : pool;
+    const selected = options[Math.floor(Math.random() * options.length)] || pool[0];
+    runtime.messageLast[key] = selected;
+    return selected;
+  }
+
   function updateMascotSpeechForActivity(activityId) {
-    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Let's keep learning Sanskrit together!");
+    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Let's keep learning together!");
   }
 
   function initMascotCompanion() {
     if (!ui.lessonMascot) return;
     setMascotState("idle");
-    updateMascotSpeechForActivity("magical-tree");
+    setMascotSpeech(MESSAGE_SET.welcome || "Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?");
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
     function applyActiveSection(section) {
@@ -598,12 +620,12 @@
         const answer = runtime.byActivity[activityId].tempAnswer || "";
         if (answer === letter.exampleText) {
           markCurrentComplete(activityId, "Correct arrangement.");
-          if (ui.arrangeStatus) ui.arrangeStatus.textContent = "Correct!";
+          if (ui.arrangeStatus) ui.arrangeStatus.textContent = "Shabash! You got it!";
         } else {
           incrementAttempt(activityId);
-          if (ui.arrangeStatus) ui.arrangeStatus.textContent = "Try again.";
+          if (ui.arrangeStatus) ui.arrangeStatus.textContent = pickSpeech(INCORRECT_SPEECH, "arrange-wrong");
           setMascotState("thinking");
-          setMascotSpeech("Good try! Let's try again!");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"));
         }
       });
     }
@@ -686,7 +708,7 @@
         const validation = validateTraceAgainstLetter(letter);
         if (!validation.available) {
           setMascotState("thinking");
-          setMascotSpeech("We're preparing handwriting checking.");
+          setMascotSpeech("You're doing great! Handwriting checking is coming soon.");
           if (ui.traceStatus) {
             ui.traceStatus.textContent = "Automatic Sanskrit handwriting validation is coming soon. Keep practising this letter.";
           }
@@ -695,7 +717,7 @@
         if (!validation.isCorrect) {
           incrementAttempt(activityId);
           setMascotState("encouraging");
-          setMascotSpeech("Almost there! Try writing it again.");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "trace-wrong"));
           if (ui.traceStatus) ui.traceStatus.textContent = "Almost there! Try writing it again.";
           return;
         }
@@ -870,6 +892,10 @@
       mount.querySelector('[data-action="finish"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "finish"); });
       mount.querySelector('[data-action="continue"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "continue"); });
       mount.querySelector('[data-action="restart"]').addEventListener("click", function () { dispatchActivityAction(activity.id, "restart"); });
+      if (activity.id === "letter-garden") {
+        mount.querySelector('[data-action="continue"]').textContent = "Continue to Practice";
+        mount.querySelector('[data-action="restart"]').textContent = "Play Letter Garden Again";
+      }
     });
   }
 
@@ -953,13 +979,13 @@
     }
     if (ACTIVITY_META[activityId].type !== "tree") {
       if (activity.isComplete) {
-        setMascotSpeech("Fantastic! You finished this adventure!");
+        setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"));
         setMascotStateForDuration("dancing", 950);
         fireConfetti(true);
       } else {
-        setMascotSpeech("Wonderful! Let's keep going!");
+        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"));
         setMascotStateForDuration("celebrating", 650);
-        if (!wasResolved && ACTIVITY_META[activityId].type === "quiz") {
+        if (!wasResolved && (ACTIVITY_META[activityId].type === "quiz" || ACTIVITY_META[activityId].type === "letter")) {
           scheduleAutoAdvance(activityId, sourceIndex, 900);
         }
       }
@@ -1004,18 +1030,18 @@
     }
     if (action === "finish") {
       if (!CORE.finalizeActivity(forestState, activityId)) {
-        setActivityStatus(activityId, "Complete all questions first.");
+        setActivityStatus(activityId, "Finish all questions first, then tap Finish.");
         saveAndRender();
         return;
       }
-      setActivityStatus(activityId, "Activity completed!");
+      setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "finish-status"));
       fireConfetti(false);
       setMascotStateForDuration("dancing", 900);
-      setMascotSpeech("Fantastic! You finished this adventure!");
+      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"));
       const global = CORE.computeGlobalProgress(forestState);
       if (global.completedActivityCount === global.totalActivities) {
         fireConfetti(true);
-        setMascotSpeech("Amazing! You completed the whole Alphabet Forest.");
+        setMascotSpeech("Amazing! You completed the whole Alphabet Forest!");
       }
       saveAndRender();
       const completeNote = document.getElementById("complete-" + activityId);
@@ -1024,8 +1050,16 @@
     }
     if (action === "restart") {
       if (!activity.isComplete) return;
-      const ok = window.confirm("Restart this completed activity from item 1?");
+      const ok = window.confirm(activityId === "letter-garden"
+        ? "Replay Letter Garden from the first letter? Your stars and completion stay saved."
+        : "Restart this completed activity from item 1?");
       if (!ok) return;
+      if (activityId === "letter-garden") {
+        activity.currentIndex = 0;
+        setActivityStatus(activityId, "Replay started from letter 1. Your completion is still saved.");
+        saveAndRender();
+        return;
+      }
       CORE.resetActivity(forestState, activityId);
       runtime.byActivity[activityId].optionOrderByQuestion = {};
       if (activityId === "letter-tracing") {
@@ -1141,7 +1175,7 @@
           CORE.markCurrentItemCompleted(forestState, activityId, 1);
           growTreeBloom();
           playLottie("treeSparkle");
-          setActivityStatus(activityId, "Letter discovered!");
+          setActivityStatus(activityId, "Shabash! Letter discovered!");
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
             return activity.completedItems.includes(groupStart + innerOffset);
           });
@@ -1163,7 +1197,7 @@
               setMascotState("dancing");
               fireConfetti(true);
               playLottie("treeCelebrate");
-              setActivityStatus(activityId, "Magical Tree complete!");
+              setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "tree-complete"));
             }
           }
           saveAndRender();
@@ -1365,13 +1399,13 @@
         cancelAutoAdvance(activityId);
         if (option.id === letter.id) {
           btn.classList.add("correct");
-          markCurrentComplete(activityId, "Correct!");
+          markCurrentComplete(activityId, pickSpeech(CORRECT_SPEECH, "hear-correct"));
         } else {
           btn.classList.add("wrong");
           incrementAttempt(activityId);
-          ui.hearStatus.textContent = "Try again.";
+          ui.hearStatus.textContent = pickSpeech(INCORRECT_SPEECH, "hear-wrong");
           setMascotState("encouraging");
-          setMascotSpeech("Good try! Let's try again!");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"));
         }
       });
       ui.hearChoices.appendChild(btn);
@@ -1439,7 +1473,7 @@
           incrementAttempt(activityId);
           ui.pictureStatus.textContent = "Good try. Hint: match the word with the correct picture.";
           setMascotState("thinking");
-          setMascotSpeech("Good try! Let's try again!");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"));
           window.setTimeout(function () {
             btn.classList.remove("wrong");
           }, 420);
@@ -1540,7 +1574,7 @@
           incrementAttempt(activityId);
           ui.feedStatus.textContent = "Try a different fruit.";
           setMascotState("encouraging");
-          setMascotSpeech("Good try! Let's try again!");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"));
         }
       });
       ui.feedChoices.appendChild(btn);
@@ -1616,7 +1650,7 @@
           incrementAttempt(activityId);
           ui.huntStatus.textContent = "Keep searching.";
           setMascotState("encouraging");
-          setMascotSpeech("Good try! Let's try again!");
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"));
         }
       });
       ui.huntGrid.appendChild(btn);
@@ -1679,7 +1713,7 @@
       forestState.worldCompleted = true;
       stateApi.saveState(forestState);
       setMascotStateForDuration("dancing", 1250);
-      setMascotSpeech("Fantastic! You finished this adventure!");
+      setMascotSpeech(WORLD_UNLOCKED_SPEECH);
       fireConfetti(true);
       fireSectionConfetti("completionScreen", true);
       playLottie("treeCelebrate");

@@ -1,6 +1,5 @@
 (function initMyProgress() {
   const HOME_KEY = "sanskritParichay.home.progress";
-  const LESSON_KEY = "sanskritParichay.alphabetForest.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const worldList = document.getElementById("progressWorldList");
   if (!worldList) return;
@@ -26,17 +25,17 @@
   }
 
   const home = readJson(HOME_KEY, { xp: 0, completed: [] });
-  const alphabet = readJson(LESSON_KEY, { stars: 0, lessonIndex: 0, done: {} });
+  const alphabetStatus = typeof window.spGetAlphabetUnlockStatus === "function"
+    ? window.spGetAlphabetUnlockStatus()
+    : { stars: 0, unlocked: false, learningCompletedCount: 0, practiceCompletedCount: 0 };
   const starsNode = document.getElementById("progressStars");
   const xpNode = document.getElementById("progressXp");
-  if (starsNode) starsNode.textContent = String(Number(alphabet.stars || 0));
+  if (starsNode) starsNode.textContent = String(Number(alphabetStatus.stars || 0));
   if (xpNode) xpNode.textContent = String(Number(home.xp || 0));
 
   function alphabetProgress() {
-    const done = alphabet.done || {};
-    const allDone = Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.trace && done.hunt);
-    if (allDone) return 6;
-    return Math.max(0, Math.min(6, Number(alphabet.lessonIndex || 0)));
+    if (alphabetStatus.unlocked) return 6;
+    return Math.max(0, Math.min(5, alphabetStatus.learningCompletedCount + Math.min(2, alphabetStatus.practiceCompletedCount)));
   }
 
   worldList.innerHTML = "";

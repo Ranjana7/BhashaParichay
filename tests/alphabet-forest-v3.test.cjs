@@ -31,6 +31,7 @@ test("renders nine activity sections", () => {
   ACTIVITY_IDS.forEach((id) => {
     assert.ok(html.includes(`data-activity-id="${id}"`));
   });
+  assert.ok(html.includes('data-continue-learning'));
 });
 
 test("jump links target all activity sections", () => {
@@ -174,6 +175,7 @@ test("auto progression uses cancellable timers and manual controls", () => {
   assert.ok(js.includes("scheduleAutoAdvance("));
   assert.ok(js.includes("cancelAutoAdvance("));
   assert.ok(js.includes("data-action=\"continue\""));
+  assert.ok(js.includes("ACTIVITY_META[activityId].type === \"quiz\" || ACTIVITY_META[activityId].type === \"letter\""));
 });
 
 test("next world unlock condition requires 2 learning and 2 practice completions", () => {

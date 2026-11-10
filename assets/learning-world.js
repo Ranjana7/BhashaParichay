@@ -15,6 +15,12 @@
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const messages = window.SP_MESSAGES || {};
+  const worldWelcome = (messages.worldWelcome && messages.worldWelcome[worldKey]) || ("Namaste! Let's learn " + world.title + ".");
+  const praisePool = (messages.alphabetForest && messages.alphabetForest.correct) || ["Wonderful! Let's keep going!"];
+  const retryPool = (messages.alphabetForest && messages.alphabetForest.incorrect) || ["Not quite! Have another look!"];
+  const completePool = (messages.alphabetForest && messages.alphabetForest.completed) || ["Wow! You did it! Let's celebrate!"];
+  const messageCursor = {};
 
   const ui = {
     worldTitle: document.getElementById("worldTitle"),
@@ -64,6 +70,15 @@
     buildSelected: []
   };
   let worldSparkleAnim = null;
+
+  function pickMessage(key, list) {
+    if (!Array.isArray(list) || !list.length) return "";
+    const previous = messageCursor[key] || "";
+    const options = list.length > 1 ? list.filter(function (item) { return item !== previous; }) : list;
+    const selected = options[Math.floor(Math.random() * options.length)] || list[0];
+    messageCursor[key] = selected;
+    return selected;
+  }
 
   function loadProgress() {
     try {
@@ -188,7 +203,7 @@
   function renderHeader() {
     const lesson = currentLesson();
     ui.worldTitle.textContent = world.title;
-    ui.worldSubtitle.textContent = world.subtitle;
+    ui.worldSubtitle.textContent = worldWelcome;
     ui.worldLessonName.textContent = lesson.title;
     ui.worldLessonIndex.textContent = "Lesson " + (state.progress.lessonIndex + 1) + " / " + world.lessons.length;
     ui.worldLessonObjective.textContent = lesson.objective;
@@ -213,7 +228,7 @@
       }
       updateHomeCompletion();
       setMascot("dance");
-      setSpeech("You completed " + world.title + "!");
+      setSpeech(pickMessage("activity-complete", completePool));
       pulseWorldIllustration();
     } else {
       ui.worldNextLessonBtn.disabled = true;
@@ -299,17 +314,17 @@
           state.progress.stars += 2;
           saveProgress();
           renderHeader();
-          ui.matchStatus.textContent = "Correct! +2 stars";
+          ui.matchStatus.textContent = "Shabash! +2 stars";
           setMascot("correct");
-          setSpeech("Lovely! You matched it.");
+          setSpeech(pickMessage("correct", praisePool));
           confetti();
           pulseWorldIllustration();
           renderMatch();
         } else {
           btn.classList.add("wrong");
-          ui.matchStatus.textContent = "Try again.";
+          ui.matchStatus.textContent = "Oops! Let's try that again.";
           setMascot("wrong");
-          setSpeech("Good attempt. Try once more.");
+          setSpeech(pickMessage("wrong", retryPool));
         }
       });
       ui.matchChoices.appendChild(btn);
@@ -339,17 +354,17 @@
           state.progress.stars += 2;
           saveProgress();
           renderHeader();
-          ui.listenStatus.textContent = "Great listening! +2 stars";
+          ui.listenStatus.textContent = "Wonderful listening! +2 stars";
           setMascot("correct");
-          setSpeech("Excellent listening.");
+          setSpeech(pickMessage("correct", praisePool));
           confetti();
           pulseWorldIllustration();
           renderListen();
         } else {
           btn.classList.add("wrong");
-          ui.listenStatus.textContent = "Try again after listening once more.";
+          ui.listenStatus.textContent = "Not quite! Listen once more and try again.";
           setMascot("wrong");
-          setSpeech("Let's listen carefully and try again.");
+          setSpeech(pickMessage("wrong", retryPool));
         }
       });
       ui.listenChoices.appendChild(btn);
@@ -398,16 +413,16 @@
       state.progress.stars += 2;
       saveProgress();
       renderHeader();
-      ui.buildStatus.textContent = "Perfect build! +2 stars";
+      ui.buildStatus.textContent = "Brilliant building! +2 stars";
       setMascot("correct");
-      setSpeech("Wonderful sentence building.");
+      setSpeech(pickMessage("correct", praisePool));
       confetti();
       pulseWorldIllustration();
       renderBuild();
     } else {
-      ui.buildStatus.textContent = "Almost there. Retry the tile order.";
+      ui.buildStatus.textContent = "Almost there! Try the tile order again.";
       setMascot("wrong");
-      setSpeech("Keep going. You can do it.");
+      setSpeech(pickMessage("wrong", retryPool));
       animate(ui.buildTiles, { transform: ["translateX(0px)", "translateX(-5px)", "translateX(5px)", "translateX(0px)"] }, { duration: 0.35, easing: "ease-in-out" });
     }
   }
@@ -450,10 +465,9 @@
   function renderReview() {
     ui.worldReviewList.innerHTML = "";
     const notes = [
-      "Curriculum order informed by user's authorized Sanskrit From Home progression.",
-      "All lesson content here is original and needs Sanskrit expert review before child-wide release.",
-      "Do not treat generated pronunciation as fully verified human pronunciation.",
-      "Cross-check terms with Samskrita Bharati and standard Sanskrit dictionaries before final publication."
+      "Tip: Tap words again to hear and remember them.",
+      "Try each activity slowly first, then challenge yourself!",
+      "Collect stars by finishing all three lesson activities."
     ];
     notes.forEach(function (note) {
       const li = document.createElement("li");
@@ -493,7 +507,7 @@
         saveProgress();
         renderAll();
         setMascot("thinking");
-        setSpeech("New lesson unlocked!");
+        setSpeech("Fantastic! A new lesson is ready!");
       }
     });
     if (ui.worldPrevLessonBtn) {
@@ -504,7 +518,7 @@
         saveProgress();
         renderAll();
         setMascot("flying");
-        setSpeech("Going to previous lesson.");
+        setSpeech("Let's revisit this lesson together!");
       });
     }
     if (ui.worldContinueBtn) {
@@ -523,6 +537,6 @@
   initWorldIllustration();
   wire();
   setMascot("idle");
-  setSpeech("Namaste! Let's learn " + world.title + ".");
+  setSpeech(worldWelcome);
   setupMascotFollowOnScroll();
 })();

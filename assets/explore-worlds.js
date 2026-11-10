@@ -1,6 +1,5 @@
 (function initExploreWorlds() {
   const HOME_KEY = "sanskritParichay.home.progress";
-  const LESSON_KEY = "sanskritParichay.alphabetForest.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const grid = document.getElementById("exploreWorldGrid");
   if (!grid) return;
@@ -21,7 +20,6 @@
 
   const status = document.getElementById("exploreStatus");
   const home = readJson(HOME_KEY, { xp: 0, completed: [] });
-  const alphabet = readJson(LESSON_KEY, { lessonIndex: 0, done: {}, stars: 0 });
 
   function readJson(key, fallback) {
     try {
@@ -32,25 +30,22 @@
     }
   }
 
-  function alphabetCompleted() {
-    const done = alphabet.done || {};
-    return Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.trace && done.hunt);
-  }
-
   function isUnlocked(worldKey) {
-    if (worldKey === "alphabet") return true;
-    const order = worldOrder.map(function (w) { return w.key; });
-    const idx = order.indexOf(worldKey);
-    if (idx <= 0) return true;
-    const previous = order[idx - 1];
-    if (previous === "alphabet") return alphabetCompleted();
-    return Array.isArray(home.completed) && home.completed.includes(previous);
+    if (typeof window.spIsWorldUnlocked === "function") {
+      const order = worldOrder.map(function (w) { return w.key; });
+      return window.spIsWorldUnlocked(worldKey, order);
+    }
+    return true;
   }
 
   function worldProgress(worldKey, totalLessons) {
     if (worldKey === "alphabet") {
-      const lessonIndex = Number(alphabet.lessonIndex || 0);
-      const completed = alphabetCompleted() ? totalLessons : Math.max(0, Math.min(totalLessons - 1, lessonIndex));
+      const status = typeof window.spGetAlphabetUnlockStatus === "function"
+        ? window.spGetAlphabetUnlockStatus()
+        : { unlocked: false, learningCompletedCount: 0, practiceCompletedCount: 0 };
+      const completed = status.unlocked
+        ? totalLessons
+        : Math.max(0, Math.min(totalLessons - 1, status.learningCompletedCount + Math.min(2, status.practiceCompletedCount)));
       return { completed: completed, total: totalLessons };
     }
     const key = "sanskritParichay.world." + worldKey + ".progress";
@@ -71,7 +66,7 @@
       '<span class="world-text">' + world.subtitle + "</span>" +
       '<span class="world-text">Lessons: ' + progress.completed + "/" + progress.total + "</span>" +
       '<div class="hero-actions">' +
-      '<button class="button ' + (unlocked ? "primary" : "ghost") + '" type="button">' + (unlocked ? "Play / Continue" : "Locked") + "</button>" +
+      '<button class="button ' + (unlocked ? "primary" : "ghost") + '" type="button">' + (unlocked ? "Continue Adventure" : "Locked") + "</button>" +
       "</div>";
     const actionButton = card.querySelector("button");
     actionButton.disabled = !unlocked;
@@ -86,6 +81,8 @@
   });
 
   if (status) {
-    status.textContent = "World progress is saved locally on this device.";
+    status.textContent = window.spIsTestMode && window.spIsTestMode()
+      ? "Testing Mode is on. All worlds are open while progress still saves normally."
+      : "World progress is saved locally on this device.";
   }
 })();

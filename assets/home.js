@@ -1,6 +1,5 @@
 (function initHomeAdventure() {
   const HOME_KEY = "sanskritParichay.home.progress";
-  const LESSON_KEY = "sanskritParichay.alphabetForest.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const MUTE_KEY = "sanskritParichay.muted";
   const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
@@ -9,6 +8,8 @@
 
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
+  const messages = window.SP_MESSAGES || {};
+  const homeMsg = messages.home || {};
   const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
   const worldLinks = {
     alphabet: "alphabet-forest.html",
@@ -75,6 +76,8 @@
     challengeActionBtn: document.getElementById("challengeActionBtn"),
     mascot: document.getElementById("mascot"),
     mascotSpeech: document.getElementById("mascotSpeech"),
+    homeReturningMessage: document.getElementById("homeReturningMessage"),
+    homeHeroSubtitle: document.getElementById("homeHeroSubtitle"),
     homeStars: document.getElementById("homeStars"),
     homeXp: document.getElementById("homeXp"),
     continueBtn: document.getElementById("continueBtn"),
@@ -95,7 +98,12 @@
   renderChallengeIdle();
   wireUi();
   initHomeLottie();
-  setMascotState("greeting", "Namaste! Choose a world or play today's challenge.");
+  if (ui.homeHeroSubtitle && homeMsg.heroSubtitle) ui.homeHeroSubtitle.textContent = homeMsg.heroSubtitle;
+  setMascotState("greeting", homeMsg.mascotIntro || "Namaste! Choose a world or play today's challenge.");
+  if (ui.homeReturningMessage && state.xp > 0) {
+    ui.homeReturningMessage.hidden = false;
+    ui.homeReturningMessage.textContent = homeMsg.returning || "Welcome back! Ready to continue your adventure?";
+  }
 
   function londonDateKey() {
     const parts = new Intl.DateTimeFormat("en-GB", {
@@ -157,33 +165,17 @@
   }
 
   function lessonStars() {
-    try {
-      const raw = localStorage.getItem(LESSON_KEY);
-      if (!raw) return 0;
-      return Number((JSON.parse(raw).stars) || 0);
-    } catch (_error) {
-      return 0;
+    if (typeof window.spGetAlphabetUnlockStatus === "function") {
+      return Number(window.spGetAlphabetUnlockStatus().stars || 0);
     }
-  }
-
-  function alphabetCompleted() {
-    try {
-      const raw = localStorage.getItem(LESSON_KEY);
-      if (!raw) return false;
-      const done = JSON.parse(raw).done || {};
-      return Boolean(done.hear && done.picture && done.arrange && done.flash && done.feed && done.trace && done.hunt);
-    } catch (_error) {
-      return false;
-    }
+    return 0;
   }
 
   function isWorldUnlocked(world) {
-    if (world === "alphabet") return true;
-    const idx = pathOrder.indexOf(world);
-    if (idx <= 0) return true;
-    const prev = pathOrder[idx - 1];
-    if (prev === "alphabet") return alphabetCompleted();
-    return state.completed.includes(prev);
+    if (typeof window.spIsWorldUnlocked === "function") {
+      return window.spIsWorldUnlocked(world, pathOrder);
+    }
+    return true;
   }
 
   function renderStats() {
@@ -466,7 +458,8 @@
     if (ui.resetBtn) {
       ui.resetBtn.addEventListener("click", function () {
         localStorage.removeItem(HOME_KEY);
-        localStorage.removeItem(LESSON_KEY);
+        localStorage.removeItem("sanskritParichay.alphabetForest.v3");
+        localStorage.removeItem("sanskritParichay.alphabetForest.progress");
         localStorage.removeItem(LAST_WORLD_KEY);
         localStorage.removeItem(MUTE_KEY);
         localStorage.removeItem(CHALLENGE_KEY);
