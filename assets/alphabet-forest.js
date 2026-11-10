@@ -836,7 +836,7 @@
       const label =
         state.letterCategory === "practice"
           ? "Practice letters from current lesson"
-          : "Showing " + letters.length + " of " + canonicalLetters.length + " PDF letters";
+          : "Browse and revise letters in the grid.";
       ui.gardenCoverage.textContent = label;
     }
     letters.forEach(function (letter) {
@@ -929,16 +929,7 @@
 
   function renderTreeCounter() {
     if (!ui.treeCounter) return;
-    ui.treeCounter.textContent =
-      "Group " +
-      (state.treeGroupIndex + 1) +
-      " of " +
-      treeGroupCount() +
-      " · Discovered " +
-      state.treeDiscovered.size +
-      " of " +
-      canonicalLetters.length +
-      " PDF letters";
+    ui.treeCounter.textContent = "Keep discovering glowing letters.";
   }
 
   function handleTreeCompletionOnce() {
