@@ -577,7 +577,8 @@
         if (category === "vowels") {
           state.currentIndex = findFirstLetterIndex(function (letter) { return letter.category !== "consonant"; });
         } else {
-          const subgroup = (state.answers.subgroup && state.answers.subgroup !== "all") ? state.answers.subgroup : "ka-varga";
+          const currentView = getLetterGardenViewForIndex(state.currentIndex);
+          const subgroup = currentView.category === "consonants" ? currentView.subgroup : "ka-varga";
           state.currentIndex = findFirstLetterIndex(function (letter) {
             return letter.category === "consonant" && (letter.subgroup || "other") === subgroup;
           });
@@ -1181,17 +1182,20 @@
     return found >= 0 ? found : 0;
   }
 
+  function getLetterGardenViewForIndex(index) {
+    const letter = letters[Math.max(0, Math.min(letters.length - 1, index))];
+    if (!letter || letter.category !== "consonant") {
+      return { category: "vowels", subgroup: "ka-varga" };
+    }
+    return { category: "consonants", subgroup: letter.subgroup || "ka-varga" };
+  }
+
   function syncLetterGardenCategoryFromCurrent() {
     const activity = forestState.activities["letter-garden"];
-    const currentLetter = getCurrentLetter("letter-garden");
-    if (!activity || !currentLetter) return;
-    if (currentLetter.category === "consonant") {
-      activity.answers.category = "consonants";
-      activity.answers.subgroup = currentLetter.subgroup || "ka-varga";
-      return;
-    }
-    activity.answers.category = "vowels";
-    activity.answers.subgroup = "ka-varga";
+    if (!activity) return;
+    const view = getLetterGardenViewForIndex(activity.currentIndex);
+    activity.answers.category = view.category;
+    activity.answers.subgroup = view.subgroup;
   }
 
   function renderLetterGarden() {
