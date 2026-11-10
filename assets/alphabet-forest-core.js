@@ -14,6 +14,7 @@
     "arrange-word",
     "flashcard-flip",
     "feed-mithu",
+    "letter-tracing",
     "hidden-letter-hunt"
   ];
   const LEGACY_ACTIVITY_MAP = {
@@ -21,6 +22,7 @@
     "letter-garden": "letter-garden",
     "listen-identify": "hear-and-pick",
     "letter-matching": "picture-match",
+    "letter-tracing": "letter-tracing",
     "letter-hunt": "hidden-letter-hunt"
   };
   const LEGACY_DONE_FLAG_MAP = {
@@ -29,6 +31,7 @@
     arrange: "arrange-word",
     flash: "flashcard-flip",
     feed: "feed-mithu",
+    trace: "letter-tracing",
     hunt: "hidden-letter-hunt"
   };
 

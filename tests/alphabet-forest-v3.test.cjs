@@ -17,6 +17,7 @@ const ACTIVITY_IDS = [
   "arrange-word",
   "flashcard-flip",
   "feed-mithu",
+  "letter-tracing",
   "hidden-letter-hunt"
 ];
 
@@ -25,8 +26,8 @@ function countMatches(text, pattern) {
   return matches ? matches.length : 0;
 }
 
-test("renders exactly eight activity sections", () => {
-  assert.equal(countMatches(html, /data-activity-id="/g), 8);
+test("renders nine activity sections", () => {
+  assert.equal(countMatches(html, /data-activity-id="/g), 9);
   ACTIVITY_IDS.forEach((id) => {
     assert.ok(html.includes(`data-activity-id="${id}"`));
   });
@@ -41,6 +42,7 @@ test("jump links target all activity sections", () => {
     "#activityArrangeGamePanel",
     "#activityFlashGamePanel",
     "#activityFeedGamePanel",
+    "#activityTraceGamePanel",
     "#activityHuntGamePanel"
   ];
   sectionAnchors.forEach((anchor) => {
@@ -55,14 +57,14 @@ test("all activity controls are present in DOM", () => {
 });
 
 test("global panel is summary-only and no 3-of-6 wording", () => {
-  assert.ok(html.includes("0 of 8 activities complete"));
+  assert.ok(html.includes("0 of 9 activities complete"));
   assert.equal(html.includes("Activity 3 of 6"), false);
 });
 
-test("audio is disabled by feature flag and no speechSynthesis usage", () => {
-  assert.ok(js.includes("const AUDIO_ENABLED = false;"));
+test("audio uses local playback and no speechSynthesis usage", () => {
+  assert.ok(js.includes("const AUDIO_ENABLED = true;"));
   assert.equal(js.includes("speechSynthesis"), false);
-  assert.ok(js.includes("if (!AUDIO_ENABLED) return;"));
+  assert.ok(js.includes("new Audio("));
 });
 
 test("full-page celebration canvas exists", () => {
@@ -76,7 +78,7 @@ test("full-page celebration canvas exists", () => {
 test("default forest state has independent activity buckets", () => {
   const state = core.createDefaultForestState(48);
   assert.equal(state.schemaVersion, 3);
-  assert.equal(Object.keys(state.activities).length, 8);
+  assert.equal(Object.keys(state.activities).length, 9);
   ACTIVITY_IDS.forEach((id) => assert.ok(state.activities[id]));
 });
 
@@ -113,7 +115,7 @@ test("finish activity changes global completion by exactly one", () => {
   assert.equal(core.finalizeActivity(state, "feed-mithu"), true);
   const after = core.computeGlobalProgress(state);
   assert.equal(after.completedActivityCount, 1);
-  assert.equal(after.globalPercent, 12.5);
+  assert.equal(after.globalPercent, 100 / 9);
 });
 
 test("restart only works after completion", () => {
@@ -165,5 +167,5 @@ test("invalid saved JSON falls back to valid default state", () => {
   const api = core.createStateApi(storage, 48);
   const state = api.loadState();
   assert.equal(state.schemaVersion, 3);
-  assert.equal(Object.keys(state.activities).length, 8);
+  assert.equal(Object.keys(state.activities).length, 9);
 });

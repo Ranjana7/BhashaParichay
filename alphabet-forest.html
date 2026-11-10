@@ -25,16 +25,7 @@
     <section class="panel" id="lessonProgressPanel">
       <h1>Alphabet Forest</h1>
       <p>Choose letters, listen, play games, and earn stars.</p>
-      <div class="lesson-strip">
-        <p><strong id="lessonName">Sprout Lesson</strong> · <span id="lessonIndex">Lesson 1 of 6</span></p>
-        <p id="lessonObjective">Learn first 5 vowels</p>
-        <div class="hero-actions">
-          <button id="prevLessonTopBtn" class="button ghost" type="button">Previous Lesson</button>
-          <button id="nextLessonTopBtn" class="button secondary" type="button" disabled>Next Lesson (complete all activities)</button>
-          <button id="continueAdventureTopBtn" class="button primary" type="button">Continue Adventure</button>
-          <button id="backToWorldsTopBtn" class="button ghost" type="button">Back to Worlds</button>
-        </div>
-      </div>
+      <p class="footer-note">Tap any activity below to start, then return anytime to continue where you left off.</p>
       <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
         <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
           <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
@@ -71,8 +62,17 @@
       <a class="button ghost jump-link" href="#activityArrangeGamePanel">Arrange the Word</a>
       <a class="button ghost jump-link" href="#activityFlashGamePanel">Flashcard Flip</a>
       <a class="button ghost jump-link" href="#activityFeedGamePanel">Feed Mithu</a>
+      <a class="button ghost jump-link" href="#activityTraceGamePanel">Letter Tracing</a>
       <a class="button ghost jump-link" href="#activityHuntGamePanel">Hidden Letter Hunt</a>
     </nav>
+
+    <section class="panel" id="activityNavigator">
+      <h2>Alphabet Forest Progress</h2>
+      <p id="globalProgressSummary" class="footer-note">0 of 9 activities complete</p>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="globalProgressFill" class="progress-fill"></div>
+      </div>
+    </section>
 
     <section class="panel forest-scene" id="forestScene" data-activity-id="magical-tree">
       <h2>Magical Letter Tree</h2>
@@ -159,15 +159,11 @@
         <button id="nextTreeGroupBtn" class="button secondary" type="button">Next Group</button>
       </div>
       <p id="treeStatus" class="status" aria-live="polite"></p>
-      <div id="controls-magical-tree"></div>
-    </section>
-
-    <section class="panel" id="activityNavigator">
-      <h2>Alphabet Forest Progress</h2>
-      <p id="globalProgressSummary" class="footer-note">0 of 8 activities complete</p>
-      <div class="progress-meter" aria-hidden="true">
-        <div id="globalProgressFill" class="progress-fill"></div>
+      <div class="hero-actions" id="treeCompletionActions">
+        <button id="playTreeAgainBtn" class="button ghost" type="button" hidden>Play Magical Tree Again</button>
+        <button id="continueAfterTreeBtn" class="button primary" type="button" hidden>Continue to Next Activity</button>
       </div>
+      <div id="controls-magical-tree"></div>
     </section>
 
     <section class="forest-layout" id="letterGardenSection" data-activity-id="letter-garden">
@@ -209,11 +205,7 @@
     <section class="panel" id="lessonStatsPanel">
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="starCount">0</span></div>
-        <div class="star-box">✅ Activities done: <span id="doneCount">0</span>/8</div>
         <div class="star-box">🔥 Streak: <span id="streakCount">0</span></div>
-      </div>
-      <div class="progress-meter" aria-hidden="true">
-        <div id="progressFill" class="progress-fill"></div>
       </div>
       <p id="progressText" class="footer-note">Keep going! Finish all activities to complete Alphabet Forest.</p>
       <div id="doneBanner" class="done-banner" aria-live="polite">
@@ -290,8 +282,27 @@
       </div>
     </section>
 
+    <section class="panel" id="activityTraceGamePanel" data-activity-id="letter-tracing">
+      <h2>Activity 6: Letter Tracing</h2>
+      <div class="activity">
+        <p id="tracePrompt">Trace the displayed letter with your finger or mouse.</p>
+        <div class="trace-wrap">
+          <canvas id="traceCanvas" width="420" height="220" aria-label="Letter tracing board"></canvas>
+          <div class="trace-target">
+            <span id="traceTargetLetter">अ</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button id="clearTraceBtn" class="button ghost" type="button">Clear</button>
+          <button id="checkTraceBtn" class="button secondary" type="button">Check tracing</button>
+        </div>
+        <p id="traceStatus" class="status" aria-live="polite"></p>
+        <div id="controls-letter-tracing"></div>
+      </div>
+    </section>
+
     <section class="panel" id="activityHuntGamePanel" data-activity-id="hidden-letter-hunt">
-      <h2>Activity 6: Hidden Letter Hunt</h2>
+      <h2>Activity 7: Hidden Letter Hunt</h2>
       <div class="activity">
         <p id="huntPrompt">Hunt prompt</p>
         <div id="huntGrid" class="tiles"></div>
@@ -314,7 +325,8 @@
   <script src="assets/common.js"></script>
   <script src="assets/pdf-letter-inventory.js"></script>
   <script src="assets/lesson-data.js"></script>
-  <script src="assets/alphabet-forest-core.js?v=20261110m"></script>
-  <script src="assets/alphabet-forest.js?v=20261110m"></script>
+  <script src="assets/vocabulary-map.js?v=20261110n"></script>
+  <script src="assets/alphabet-forest-core.js?v=20261110n"></script>
+  <script src="assets/alphabet-forest.js?v=20261110n"></script>
 </body>
 </html>

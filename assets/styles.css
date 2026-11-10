@@ -12,6 +12,27 @@
   --shadow: 0 12px 28px rgba(44, 62, 120, 0.14);
 }
 
+.picture-choice {
+  width: min(210px, 100%);
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.picture-illustration {
+  width: 100%;
+  height: 112px;
+  border-radius: 10px;
+  border: 1px solid #dbe6ff;
+  object-fit: cover;
+  background: #f4f7ff;
+}
+
+.picture-label {
+  font-size: 0.86rem;
+  color: #2f3a6d;
+}
+
 .lesson-mascot {
   margin: 10px 0;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -256,6 +277,10 @@ p {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+
+.activity-jump-nav .jump-link {
+  flex: 0 0 auto;
 }
 
 .jump-link {
@@ -593,6 +618,10 @@ p {
   justify-content: space-between;
 }
 
+#treeCompletionActions {
+  margin-top: 8px;
+}
+
 .group-bloom {
   position: absolute;
   width: 20px;
@@ -682,6 +711,97 @@ p {
   height: 100vh;
   pointer-events: none;
   z-index: 9999;
+}
+
+.flying-fruit {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  font-size: 1.4rem;
+  transform: translate(-50%, -50%);
+}
+
+.lesson-mascot {
+  position: fixed;
+  right: 14px;
+  top: 120px;
+  z-index: 18;
+  width: 210px;
+}
+
+.lesson-mascot-mobile {
+  position: static;
+  width: 150px;
+  margin: 8px auto;
+}
+
+.state-welcome .mithu-body,
+.state-idle .mithu-body {
+  animation: mithuFloat 2.6s ease-in-out infinite;
+}
+
+.state-flying .mithu-body {
+  animation: mithuFly 0.7s ease-in-out 1;
+}
+
+.state-listening .mithu-head,
+.state-listening .mithu-body {
+  animation: mithuListen 0.7s ease-in-out infinite;
+}
+
+.state-pointing .mithu-wing-right {
+  animation: treeMithuPoint 0.7s ease-in-out 2;
+}
+
+.state-thinking .mithu-body {
+  animation: mithuThink 0.8s ease-in-out 2;
+}
+
+.state-eating .mithu-beak-top,
+.state-eating .mithu-beak-bottom {
+  animation: mithuEat 0.32s ease-in-out 3;
+}
+
+.state-encouraging .mithu-body {
+  animation: mithuEncourage 0.52s ease-in-out 2;
+}
+
+.state-celebrating .mithu-body {
+  animation: treeMithuCelebrate 0.9s ease-in-out 2;
+}
+
+.state-dancing .mithu-body {
+  animation: treeMithuDance 1s ease-in-out infinite;
+}
+
+@keyframes mithuFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes mithuFly {
+  0% { transform: translateX(-20px) scale(0.95); opacity: 0.75; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+@keyframes mithuListen {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes mithuThink {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes mithuEat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+@keyframes mithuEncourage {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px) scale(1.02); }
 }
 
 body.audio-disabled .audio-control {
@@ -1710,6 +1830,12 @@ th {
 
   .activity-jump-nav {
     justify-content: flex-start;
+  }
+
+  .lesson-mascot {
+    position: static;
+    width: 150px;
+    margin: 8px auto;
   }
 
   .magical-tree-stage {
