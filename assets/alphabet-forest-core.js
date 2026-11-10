@@ -23,6 +23,14 @@
     "letter-matching": "picture-match",
     "letter-hunt": "hidden-letter-hunt"
   };
+  const LEGACY_DONE_FLAG_MAP = {
+    hear: "hear-and-pick",
+    picture: "picture-match",
+    arrange: "arrange-word",
+    flash: "flashcard-flip",
+    feed: "feed-mithu",
+    hunt: "hidden-letter-hunt"
+  };
 
   function clampIndex(value, max) {
     if (!Number.isFinite(value)) return 0;
@@ -122,8 +130,21 @@
   function migrateForestState(oldState, letterCount) {
     const base = createDefaultForestState(letterCount);
     if (!oldState || typeof oldState !== "object") return base;
+    if (Array.isArray(oldState)) {
+      base.activities["letter-garden"].completedItems = uniqueIndexList(oldState, letterCount - 1);
+      return validateForestState(base, letterCount);
+    }
     if (oldState.schemaVersion === 3) return validateForestState(oldState, letterCount);
-    return validateForestState(migrateFromLegacyProgression(oldState, base, letterCount), letterCount);
+    const migrated = migrateFromLegacyProgression(oldState, base, letterCount);
+    if (oldState.done && typeof oldState.done === "object") {
+      Object.keys(oldState.done).forEach(function eachDoneFlag(flag) {
+        const mapped = LEGACY_DONE_FLAG_MAP[flag];
+        if (!mapped || !oldState.done[flag]) return;
+        migrated.activities[mapped].isComplete = true;
+        migrated.completionRewarded[mapped] = true;
+      });
+    }
+    return validateForestState(migrated, letterCount);
   }
 
   function computeGlobalProgress(state) {
