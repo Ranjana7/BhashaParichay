@@ -45,6 +45,9 @@
     .slice(0, LETTER_COUNT)
     .map(function mapLetter(item, index) {
       const example = item.example || {};
+      const localAudioPath = item.pronunciation && item.pronunciation.localPath
+        ? item.pronunciation.localPath.replace(/\.mp3$/i, ".wav")
+        : "";
       return {
         id: item.id || ("l-" + index),
         index: index,
@@ -54,7 +57,7 @@
         subgroup: item.subgroup || "other",
         exampleText: example.sanskrit || item.symbol || "",
         meaning: example.meaning || "Meaning pending review",
-        audioPath: item.pronunciation && item.pronunciation.localPath ? item.pronunciation.localPath : ""
+        audioPath: localAudioPath
       };
     })
     .filter(function hasSymbol(letter) { return Boolean(letter.symbol); });
