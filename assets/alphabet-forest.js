@@ -432,6 +432,26 @@
       });
   }
 
+  function resolvePronunciationSource(key, callback) {
+    const base = "assets/audio/pronunciation/" + key;
+    const candidates = [base + ".mp3", base + ".wav"];
+    function tryIndex(index) {
+      if (index >= candidates.length) {
+        callback(null);
+        return;
+      }
+      const src = candidates[index];
+      resolveAudioAvailability(src, function (available) {
+        if (available) {
+          callback(src);
+          return;
+        }
+        tryIndex(index + 1);
+      });
+    }
+    tryIndex(0);
+  }
+
   function playLocalPronunciation(key, onFail, playbackRate, onSuccess) {
     let failed = false;
     function failover() {
@@ -452,9 +472,8 @@
       if (onFail) onFail("missing");
       return;
     }
-    const src = "assets/audio/pronunciation/" + key + ".mp3";
-    resolveAudioAvailability(src, function (available) {
-      if (!available) {
+    resolvePronunciationSource(key, function (src) {
+      if (!src) {
         failover();
         return;
       }
