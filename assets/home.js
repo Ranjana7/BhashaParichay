@@ -3,6 +3,9 @@
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const MUTE_KEY = "sanskritParichay.muted";
   const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
+  const PENDING_SCROLL_KEY = "sanskritParichay.pendingScroll";
+  const UNLOCK_STAR_TARGET = 50;
+  const UNLOCK_GEM_TARGET = 1;
   const panel = document.getElementById("previewPanel");
   if (!panel) return;
 
@@ -113,6 +116,13 @@
 
   const state = loadHomeState();
   const daily = loadDailyProgress();
+  const runtime = {
+    mascotPriorityUntil: 0,
+    mascotActionWrap: null,
+    mascotActionBtn: null,
+    mascotDismissBtn: null,
+    lockedTargetWorld: null
+  };
   if (typeof window.spSyncProgressModel === "function") {
     window.spSyncProgressModel(pathOrder, worldTotals);
   }
@@ -242,6 +252,123 @@
       + ": " + stars + "/50 stars, " + gems + "/1 gem";
   }
 
+  function getUnlockProgress(world) {
+    const orderIndex = pathOrder.indexOf(world);
+    if (world === "alphabet" || orderIndex <= 0) {
+      return { previous: "alphabet", stars: UNLOCK_STAR_TARGET, gems: UNLOCK_GEM_TARGET };
+    }
+    const previous = pathOrder[orderIndex - 1];
+    const snapshot = getProgressSnapshot();
+    if (previous === "alphabet" && snapshot.alphabet) {
+      return {
+        previous: previous,
+        stars: Number(snapshot.alphabet.currentStars || 0),
+        gems: Number(snapshot.alphabet.currentGems || 0)
+      };
+    }
+    const prevWorld = snapshot.worlds && snapshot.worlds[previous];
+    return {
+      previous: previous,
+      stars: Number(prevWorld && prevWorld.currentStars || 0),
+      gems: Number(prevWorld && prevWorld.currentGems || 0)
+    };
+  }
+
+  function getPracticeAnchor(world) {
+    if (world === "alphabet") return "activityHearGamePanel";
+    return "matchPrompt";
+  }
+
+  function getBestEarnWorld(targetWorld) {
+    const orderIndex = pathOrder.indexOf(targetWorld);
+    if (orderIndex <= 0) return "alphabet";
+    for (let index = orderIndex - 1; index >= 0; index -= 1) {
+      const candidate = pathOrder[index];
+      if (isWorldUnlocked(candidate)) return candidate;
+    }
+    return "alphabet";
+  }
+
+  function buildLockedWorldGuidance(world) {
+    const progress = getUnlockProgress(world);
+    const stars = Math.max(0, Math.floor(progress.stars));
+    const gems = Math.max(0, Math.floor(progress.gems));
+    const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
+    const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
+    let requirement;
+    if (starsRemaining > 0 && gemsRemaining > 0) {
+      requirement = "Only " + starsRemaining + " stars and " + gemsRemaining + " gem"
+        + (gemsRemaining === 1 ? "" : "s") + " to go!";
+    } else if (starsRemaining > 0) {
+      requirement = "Just " + starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + "!";
+    } else if (gemsRemaining > 0) {
+      requirement = "Just " + gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + "!";
+    } else {
+      requirement = "Amazing! You're ready to enter this world now!";
+    }
+    const sourceWorld = getBestEarnWorld(world);
+    return {
+      sourceWorld: sourceWorld,
+      message: "🌟 You're doing great! " + stars + "/" + UNLOCK_STAR_TARGET + " stars, "
+        + gems + "/" + UNLOCK_GEM_TARGET + " gem. " + requirement
+    };
+  }
+
+  function ensureMascotActionUi() {
+    if (!ui.mascot || runtime.mascotActionWrap) return;
+    const wrap = document.createElement("div");
+    wrap.className = "hero-actions";
+    wrap.style.marginTop = "8px";
+    wrap.style.pointerEvents = "auto";
+    const actionBtn = document.createElement("button");
+    actionBtn.type = "button";
+    actionBtn.className = "button primary";
+    actionBtn.textContent = "✨ Let's Earn More Stars! →";
+    const dismissBtn = document.createElement("button");
+    dismissBtn.type = "button";
+    dismissBtn.className = "button ghost tiny";
+    dismissBtn.textContent = "Maybe later";
+    wrap.appendChild(actionBtn);
+    wrap.appendChild(dismissBtn);
+    wrap.hidden = true;
+    ui.mascot.appendChild(wrap);
+    runtime.mascotActionWrap = wrap;
+    runtime.mascotActionBtn = actionBtn;
+    runtime.mascotDismissBtn = dismissBtn;
+    actionBtn.addEventListener("click", function () {
+      const targetWorld = runtime.lockedTargetWorld || "alphabet";
+      clearLockedWorldMessage();
+      localStorage.setItem(LAST_WORLD_KEY, targetWorld);
+      const anchor = getPracticeAnchor(targetWorld);
+      localStorage.setItem(PENDING_SCROLL_KEY, JSON.stringify({
+        world: targetWorld,
+        anchorId: anchor
+      }));
+      const baseUrl = worldLinks[targetWorld] || worldLinks.alphabet;
+      window.location.href = baseUrl + "#" + anchor;
+    });
+    dismissBtn.addEventListener("click", function () {
+      clearLockedWorldMessage();
+      setMascotState("idle", homeMsg.mascotIntro || "Namaste! Choose a world or play Challenge of the Day.", { force: true });
+    });
+  }
+
+  function showLockedWorldMessage(world) {
+    ensureMascotActionUi();
+    const guidance = buildLockedWorldGuidance(world);
+    runtime.lockedTargetWorld = guidance.sourceWorld;
+    setMascotState("greeting", guidance.message, { priorityMs: 8000, force: true, tone: "world" });
+    if (runtime.mascotActionWrap) runtime.mascotActionWrap.hidden = false;
+    if (ui.mascot) ui.mascot.style.pointerEvents = "auto";
+  }
+
+  function clearLockedWorldMessage() {
+    runtime.mascotPriorityUntil = 0;
+    runtime.lockedTargetWorld = null;
+    if (runtime.mascotActionWrap) runtime.mascotActionWrap.hidden = true;
+    if (ui.mascot) ui.mascot.style.pointerEvents = "";
+  }
+
   function scrollChallengeIntoView() {
     const header = document.querySelector(".site-header");
     const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 82;
@@ -284,7 +411,13 @@
     });
   }
 
-  function setMascotState(kind, speech) {
+  function setMascotState(kind, speech, options) {
+    const opts = options || {};
+    const now = Date.now();
+    if (!opts.force && now < runtime.mascotPriorityUntil) return;
+    if (opts.priorityMs && Number.isFinite(opts.priorityMs)) {
+      runtime.mascotPriorityUntil = now + Math.max(0, opts.priorityMs);
+    }
     const body = ui.mascot.querySelector(".mithu-body");
     const wingL = ui.mascot.querySelector(".mithu-wing-left");
     const wingR = ui.mascot.querySelector(".mithu-wing-right");
@@ -293,10 +426,10 @@
     if (speech) ui.mascotSpeech.textContent = speech;
     if (ui.mascotSpeech) {
       ui.mascotSpeech.classList.remove("tone-instruction", "tone-encourage", "tone-correct", "tone-complete", "tone-world");
-      const tone = kind === "dance" ? "complete"
+      const tone = opts.tone || (kind === "dance" ? "complete"
         : kind === "correct" ? "correct"
         : kind === "incorrect" ? "encourage"
-        : "instruction";
+        : "instruction");
       ui.mascotSpeech.classList.add("tone-" + tone);
     }
     if (!body) return;
@@ -573,17 +706,16 @@
 
   function navigateToWorld(world) {
     if (!isWorldUnlocked(world)) {
-      ui.status.textContent = unlockRequirementFor(world);
-      panel.classList.add("wrong");
-      setMascotState("incorrect", "Keep exploring! Your next adventure awaits!");
-      scrollChallengeIntoView();
+      showLockedWorldMessage(world);
       return;
     }
+    clearLockedWorldMessage();
     localStorage.setItem(LAST_WORLD_KEY, world);
     window.location.href = worldLinks[world];
   }
 
   function startDailyChallenge() {
+    clearLockedWorldMessage();
     daily.started = true;
     if (daily.completed) {
       renderChallengeIdle();
@@ -607,6 +739,7 @@
     renderWorldCards();
 
     ui.continueBtn.addEventListener("click", function () {
+      clearLockedWorldMessage();
       const last = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
       navigateToWorld(last);
     });

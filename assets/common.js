@@ -2,6 +2,7 @@
   const MUTE_KEY = "sanskritParichay.muted";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const HOME_KEY = "sanskritParichay.home.progress";
+  const PENDING_SCROLL_KEY = "sanskritParichay.pendingScroll";
   const FOREST_STATE_KEY = "sanskritParichay.alphabetForest.v3";
   const LEGACY_FOREST_KEY = "sanskritParichay.alphabetForest.progress";
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
@@ -187,6 +188,38 @@
       if (key && WORLD_META[key]) return key;
     }
     return null;
+  }
+
+  function applyPendingScroll() {
+    let pending = null;
+    try {
+      const raw = localStorage.getItem(PENDING_SCROLL_KEY);
+      pending = raw ? JSON.parse(raw) : null;
+    } catch (_error) {
+      pending = null;
+    }
+    if (!pending || typeof pending !== "object") return;
+    const pendingWorld = pending.world;
+    const pendingAnchor = pending.anchorId;
+    if (!pendingWorld || !pendingAnchor) {
+      localStorage.removeItem(PENDING_SCROLL_KEY);
+      return;
+    }
+    const currentWorld = getRouteWorldKey() || localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
+    if (currentWorld !== pendingWorld) return;
+
+    window.setTimeout(function scrollToPendingAnchor() {
+      const target = document.getElementById(pendingAnchor);
+      if (!target) {
+        localStorage.removeItem(PENDING_SCROLL_KEY);
+        return;
+      }
+      const header = document.querySelector(".site-header");
+      const offset = header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 88;
+      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - offset);
+      window.scrollTo({ top: top, behavior: "smooth" });
+      localStorage.removeItem(PENDING_SCROLL_KEY);
+    }, 220);
   }
 
   function attachCurrentWorldLinks() {
@@ -476,6 +509,7 @@
   window.spResetWorldProgress = resetWorldProgress;
 
   attachCurrentWorldLinks();
+  applyPendingScroll();
   renderTestModeBadge();
   renderMute();
 })();
