@@ -10,6 +10,7 @@
   --card: #ffffff;
   --radius: 20px;
   --shadow: 0 12px 28px rgba(44, 62, 120, 0.14);
+  --page-max-width: 1320px;
 }
 
 .picture-choice {
@@ -142,10 +143,14 @@ body {
 }
 
 .page-wrap {
-  width: min(1100px, 94vw);
+  width: min(var(--page-max-width), 96vw);
   margin: 14px auto 28px;
   display: grid;
   gap: 16px;
+}
+
+.page-wrap.with-mascot {
+  padding-right: min(220px, 20vw);
 }
 
 .hero-card,
@@ -435,12 +440,18 @@ p {
 .tree-branches .b4 { animation: branchSwayB 6.6s ease-in-out infinite reverse; }
 .tree-branches .b5 { animation: branchSwayA 4.9s ease-in-out infinite; }
 
-.tree-flowers .flower-dot {
-  fill: #ff76ba;
-  opacity: 0.86;
-  filter: drop-shadow(0 0 10px rgba(255, 111, 182, 0.4));
+.tree-flowers .tree-flower {
   transform-origin: center;
   animation: blossomPulse 3.2s ease-in-out infinite;
+}
+
+.tree-flowers .petal {
+  fill: #ff7fbc;
+  filter: drop-shadow(0 0 6px rgba(255, 120, 188, 0.35));
+}
+
+.tree-flowers .center {
+  fill: #ffe48f;
 }
 
 .tree-flowers .f2 { animation-delay: -0.4s; }
@@ -448,6 +459,18 @@ p {
 .tree-flowers .f4 { animation-delay: -1.8s; }
 .tree-flowers .f5 { animation-delay: -2.3s; }
 .tree-flowers .f6 { animation-delay: -2.8s; }
+
+.tree-fruits .fruit {
+  fill: #ffb55c;
+  stroke: #e88929;
+  stroke-width: 2;
+  transform-origin: center;
+  animation: branchSwayA 5.8s ease-in-out infinite;
+}
+
+.tree-fruits .leaf {
+  fill: #56b768;
+}
 
 .tree-perch path {
   fill: none;
@@ -812,11 +835,12 @@ p {
 
 .lesson-mascot {
   position: fixed;
-  right: max(10px, calc((100vw - min(1100px, 94vw)) / 2 + 8px));
+  right: max(10px, calc((100vw - min(var(--page-max-width), 96vw)) / 2 + 8px));
   top: 120px;
   z-index: 20;
-  width: min(208px, 28vw);
+  width: min(198px, 24vw);
   transition: top 0.35s ease-out;
+  pointer-events: none;
 }
 
 .lesson-mascot.parrot-mascot {
@@ -1409,7 +1433,7 @@ th {
 .lesson-mascot-floating {
   position: fixed;
   top: 92px;
-  right: max(10px, calc((100vw - min(1100px, 94vw)) / 2 + 8px));
+  right: max(10px, calc((100vw - min(var(--page-max-width), 96vw)) / 2 + 8px));
   width: min(240px, 34vw);
   z-index: 26;
   box-shadow: 0 12px 28px rgba(33, 79, 152, 0.24);
@@ -2109,6 +2133,10 @@ th {
     width: 104px;
     right: 8px;
     top: 82px;
+  }
+
+  .page-wrap.with-mascot {
+    padding-right: 0;
   }
 
   .magical-tree-stage {

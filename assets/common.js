@@ -5,6 +5,16 @@
   const FOREST_STATE_KEY = "sanskritParichay.alphabetForest.v3";
   const LEGACY_FOREST_KEY = "sanskritParichay.alphabetForest.progress";
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const WORLD_TOTALS = {
+    alphabet: 9,
+    animals: 3,
+    numbers: 3,
+    colours: 3,
+    words: 3,
+    sentences: 3,
+    stories: 3,
+    culture: 3
+  };
   const WORLD_META = {
     alphabet: { title: "Alphabet Forest", url: "alphabet-forest.html" },
     animals: { title: "Animal Jungle", url: "learning-world.html?world=animals" },
@@ -373,6 +383,9 @@
     }
     return readJson(HOME_KEY, { xp: 0, completed: [] });
   };
+  window.SP_WORLD_ORDER = WORLD_ORDER.slice();
+  window.SP_WORLD_META = Object.assign({}, WORLD_META);
+  window.SP_WORLD_TOTALS = Object.assign({}, WORLD_TOTALS);
 
   attachCurrentWorldLinks();
   renderTestModeBadge();

@@ -6,21 +6,48 @@
   const worldsData = window.SANSKRIT_WORLDS || {};
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
-  const worldOrder = [
-    { key: "alphabet", title: "Alphabet Forest", subtitle: "Letters, sounds, and foundational games", lessons: 9, iconClass: "forest", cardClass: "world-alphabet", link: "alphabet-forest.html" },
-    { key: "animals", title: "Animal Jungle", subtitle: "Animal vocabulary", lessons: 3, iconClass: "jungle", cardClass: "world-jungle", link: "learning-world.html?world=animals" },
-    { key: "numbers", title: "Number Galaxy", subtitle: "Counting and number words", lessons: 3, iconClass: "galaxy", cardClass: "world-galaxy", link: "learning-world.html?world=numbers" },
-    { key: "colours", title: "Colour Kingdom", subtitle: "Color words", lessons: 3, iconClass: "colour", cardClass: "world-colour", link: "learning-world.html?world=colours" },
-    { key: "words", title: "Word Wonderland", subtitle: "Nouns and meanings", lessons: 3, iconClass: "word", cardClass: "world-word", link: "learning-world.html?world=words" },
-    { key: "sentences", title: "Sentence Castle", subtitle: "Sentence building", lessons: 3, iconClass: "sentence", cardClass: "world-sentence", link: "learning-world.html?world=sentences" },
-    { key: "stories", title: "Story Island", subtitle: "Story comprehension", lessons: 3, iconClass: "story", cardClass: "world-story", link: "learning-world.html?world=stories" },
-    { key: "culture", title: "Sanskrit and Culture", subtitle: "Greetings, values, and culture", lessons: 3, iconClass: "culture", cardClass: "world-culture", link: "learning-world.html?world=culture" }
-  ];
+  const orderKeys = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
+    ? window.SP_WORLD_ORDER.slice()
+    : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const worldMeta = window.SP_WORLD_META && typeof window.SP_WORLD_META === "object" ? window.SP_WORLD_META : {};
+  const worldTotalsConfig = window.SP_WORLD_TOTALS && typeof window.SP_WORLD_TOTALS === "object" ? window.SP_WORLD_TOTALS : {};
+  const iconClassByWorld = {
+    alphabet: "forest",
+    animals: "jungle",
+    numbers: "galaxy",
+    colours: "colour",
+    words: "word",
+    sentences: "sentence",
+    stories: "story",
+    culture: "culture"
+  };
+  const cardClassByWorld = {
+    alphabet: "world-alphabet",
+    animals: "world-jungle",
+    numbers: "world-galaxy",
+    colours: "world-colour",
+    words: "world-word",
+    sentences: "world-sentence",
+    stories: "world-story",
+    culture: "world-culture"
+  };
+  const worldOrder = orderKeys.map(function (key) {
+    const worldDef = worldsData[key];
+    const meta = worldMeta[key] || {};
+    return {
+      key: key,
+      title: meta.title || (worldDef && worldDef.title) || key,
+      subtitle: (worldDef && worldDef.subtitle) || "Let's explore together!",
+      lessons: Number(worldTotalsConfig[key] || (worldDef && Array.isArray(worldDef.lessons) ? worldDef.lessons.length : 3)),
+      iconClass: iconClassByWorld[key] || "forest",
+      cardClass: cardClassByWorld[key] || "world-alphabet",
+      link: meta.url || (key === "alphabet" ? "alphabet-forest.html" : ("learning-world.html?world=" + key))
+    };
+  });
 
   const status = document.getElementById("exploreStatus");
   const worldTotals = {};
   worldOrder.forEach(function (world) { worldTotals[world.key] = world.lessons; });
-  const orderKeys = worldOrder.map(function (world) { return world.key; });
   if (typeof window.spSyncProgressModel === "function") {
     window.spSyncProgressModel(orderKeys, worldTotals);
   }
@@ -65,10 +92,10 @@
       '<span class="world-icon ' + world.iconClass + '"><i></i><i></i><i></i></span>' +
       '<span class="world-title">' + world.title + "</span>" +
       '<span class="world-text">' + world.subtitle + "</span>" +
-      '<span class="world-text">Lessons: ' + progress.completed + "/" + progress.total + "</span>" +
+      '<span class="world-text">' + (progress.completed > 0 ? "Continue Learning" : "Start Adventure") + "</span>" +
       (!unlocked ? '<span class="world-text world-lock-note">' + unlockHint(world.key) + "</span>" : "") +
       '<div class="hero-actions">' +
-      '<button class="button ' + (unlocked ? "primary" : "ghost") + '" type="button">' + (unlocked ? "Continue Adventure" : "Locked") + "</button>" +
+      '<button class="button ' + (unlocked ? "primary" : "ghost") + '" type="button">' + (unlocked ? (progress.completed > 0 ? "Continue Learning" : "Let\'s Explore!") : "Locked") + "</button>" +
       "</div>";
     const actionButton = card.querySelector("button");
     actionButton.disabled = !unlocked;

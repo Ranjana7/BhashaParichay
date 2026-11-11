@@ -169,3 +169,18 @@ test("unlock checks any distinct practice activities in a world", () => {
   const totals = { alphabet: 9, words: 4, animals: 3 };
   assert.equal(api.isWorldUnlocked("words", order, false, totals), true);
 });
+
+test("stale out-of-order unlocks are corrected to strict sequence", () => {
+  const { api, storage } = loadStore({
+    "sanskritParichay.world.unlocks.v1": JSON.stringify({
+      unlocked: ["alphabet", "words", "culture"]
+    })
+  });
+  const order = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const totals = { alphabet: 9, animals: 3, numbers: 3, colours: 3, words: 3, sentences: 3, stories: 3, culture: 3 };
+  assert.equal(api.isWorldUnlocked("alphabet", order, false, totals), true);
+  assert.equal(api.isWorldUnlocked("animals", order, false, totals), false);
+  assert.equal(api.isWorldUnlocked("words", order, false, totals), false);
+  const persisted = JSON.parse(storage.getItem("sanskritParichay.world.unlocks.v1"));
+  assert.deepEqual(persisted.unlocked, ["alphabet"]);
+});

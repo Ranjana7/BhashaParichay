@@ -345,15 +345,13 @@
   function syncSequentialUnlocks(worldOrder, totalsByWorld) {
     const order = normalizeWorldOrder(worldOrder);
     const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
-    const unlockState = loadUnlockState(order);
-    const unlocked = unlockState.unlocked.slice();
+    const previousState = loadUnlockState(order).unlocked.slice();
     const forest = loadForestState();
     const alphabet = getAlphabetJourney(forest);
-    let changed = false;
+    const unlocked = ["alphabet"];
 
     for (let index = 1; index < order.length; index += 1) {
       const key = order[index];
-      if (unlocked.includes(key)) continue;
       const previous = order[index - 1];
       let canUnlock = false;
       if (previous === "alphabet") {
@@ -363,18 +361,14 @@
         const previousProgress = loadWorldProgress(previous, totalLessons);
         canUnlock = previousProgress.practiceCompletedCount >= MIN_PRACTICE_FOR_UNLOCK;
       }
-      if (canUnlock) {
-        unlocked.push(key);
-        changed = true;
-      }
-      break;
+      if (!canUnlock) break;
+      unlocked.push(key);
     }
 
-    if (changed) {
-      saveUnlockState({ unlocked: unlocked }, order);
-    } else {
-      saveUnlockState(unlockState, order);
-    }
+    const changed = unlocked.length !== previousState.length
+      || unlocked.some(function (key, index) { return previousState[index] !== key; });
+    if (changed) saveUnlockState({ unlocked: unlocked }, order);
+    else saveUnlockState({ unlocked: previousState }, order);
     return unlocked;
   }
 

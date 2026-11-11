@@ -12,17 +12,21 @@
   const WORLD_KEY = "sanskritParichay.world." + worldKey + ".progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const TOTAL = 3;
-  const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
-  const WORLD_TOTALS = {
-    alphabet: 9,
-    animals: 3,
-    numbers: 3,
-    colours: 3,
-    words: 3,
-    sentences: 3,
-    stories: 3,
-    culture: 3
-  };
+  const WORLD_ORDER = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
+    ? window.SP_WORLD_ORDER.slice()
+    : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const WORLD_TOTALS = window.SP_WORLD_TOTALS && typeof window.SP_WORLD_TOTALS === "object"
+    ? Object.assign({}, window.SP_WORLD_TOTALS)
+    : {
+        alphabet: 9,
+        animals: 3,
+        numbers: 3,
+        colours: 3,
+        words: 3,
+        sentences: 3,
+        stories: 3,
+        culture: 3
+      };
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -491,33 +495,45 @@
   }
 
   function setupMascotFollowOnScroll() {
-    if (window.matchMedia("(max-width: 860px)").matches) return;
-    const hostPanel = ui.lessonMascot.closest(".panel");
-    if (!hostPanel) return;
-    const placeholder = document.createElement("div");
-    placeholder.className = "lesson-mascot-placeholder";
-    ui.lessonMascot.insertAdjacentElement("afterend", placeholder);
+    if (!ui.lessonMascot) return;
+    const pageWrap = document.querySelector(".page-wrap");
+    const sections = Array.from(document.querySelectorAll("#main-content > section.panel"));
+    if (!sections.length) return;
 
-    function sync() {
-      if (ui.lessonMascot.classList.contains("lesson-mascot-floating")) {
-        placeholder.style.height = ui.lessonMascot.offsetHeight + 10 + "px";
-      }
+    function findActiveSectionRect() {
+      const anchorY = window.innerHeight * 0.34;
+      let bestRect = null;
+      let bestScore = -Infinity;
+      sections.forEach(function (section) {
+        const rect = section.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+        let score;
+        if (rect.top <= anchorY && rect.bottom >= anchorY) score = 10000 - Math.abs(anchorY - rect.top);
+        else score = -Math.abs((rect.top + rect.height * 0.5) - anchorY);
+        if (score > bestScore) {
+          bestScore = score;
+          bestRect = rect;
+        }
+      });
+      return bestRect;
     }
 
     function update() {
-      const panelBottom = hostPanel.getBoundingClientRect().bottom;
-      if (panelBottom > 240) {
-        ui.lessonMascot.classList.add("lesson-mascot-floating");
-        placeholder.classList.add("active");
-        const sway = Math.sin(window.scrollY / 110) * 6;
-        ui.lessonMascot.style.transform = "translateY(" + sway.toFixed(1) + "px)";
-        sync();
-      } else {
-        ui.lessonMascot.classList.remove("lesson-mascot-floating");
-        placeholder.classList.remove("active");
-        placeholder.style.height = "0px";
+      const mobile = window.matchMedia("(max-width: 860px)").matches;
+      ui.lessonMascot.classList.toggle("lesson-mascot-mobile", mobile);
+      if (pageWrap) pageWrap.classList.toggle("with-mascot", !mobile);
+      if (mobile) {
+        ui.lessonMascot.style.top = "82px";
+        ui.lessonMascot.style.right = "8px";
         ui.lessonMascot.style.transform = "";
+        return;
       }
+      const rect = findActiveSectionRect();
+      const targetTop = rect
+        ? Math.max(92, Math.min(window.innerHeight - 238, rect.top + rect.height * 0.18))
+        : 120;
+      ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
+      ui.lessonMascot.style.transform = "translateZ(0)";
     }
 
     window.addEventListener("scroll", update, { passive: true });

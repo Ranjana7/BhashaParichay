@@ -50,7 +50,7 @@
   const COMPLETE_SPEECH = Array.isArray(MESSAGE_SET.completed) && MESSAGE_SET.completed.length
     ? MESSAGE_SET.completed.slice()
     : ["Hooray! You finished this adventure!", "Wonderful! Ready for more?", "Look how much you've learned!"];
-  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! A new magical world is waiting for you!";
+  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! Your next adventure is ready!";
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -497,6 +497,11 @@
     setMascotSpeech(MESSAGE_SET.welcome || "Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?");
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
+    const pageWrap = document.querySelector(".page-wrap");
+    function syncLayoutClass() {
+      const mobile = window.matchMedia("(max-width: 860px)").matches;
+      if (pageWrap) pageWrap.classList.toggle("with-mascot", !mobile);
+    }
     function applyActiveSection(section) {
       const activity = ACTIVITIES.find(function (item) { return item.sectionId === section.id; });
       if (!activity || runtime.mascotActiveSection === activity.id) return;
@@ -549,11 +554,13 @@
       });
     }, { passive: true });
     window.addEventListener("resize", function () {
+      syncLayoutClass();
       if (!runtime.mascotActiveSection) return;
       const sectionId = ACTIVITY_META[runtime.mascotActiveSection].sectionId;
       const section = document.getElementById(sectionId);
       if (section) moveMascotNearSection(section);
     });
+    syncLayoutClass();
     updateActiveSection();
   }
 
@@ -564,11 +571,13 @@
     if (mobile) {
       ui.lessonMascot.style.top = "82px";
       ui.lessonMascot.style.right = "8px";
+      ui.lessonMascot.style.transform = "";
       return;
     }
     const rect = section.getBoundingClientRect();
-    const targetTop = Math.max(88, Math.min(window.innerHeight - 250, rect.top + rect.height * 0.2));
+    const targetTop = Math.max(92, Math.min(window.innerHeight - 238, rect.top + rect.height * 0.2));
     ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
+    ui.lessonMascot.style.transform = "translateZ(0)";
   }
 
   function initTreeControls() {
@@ -970,7 +979,9 @@
   function initCompletionActions() {
     if (!ui.completionNextBtn) return;
     ui.completionNextBtn.addEventListener("click", function () {
-      const worldOrder = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+      const worldOrder = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
+        ? window.SP_WORLD_ORDER
+        : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
       const nextWorld = worldOrder[1];
       window.location.href = nextWorld === "alphabet" ? "alphabet-forest.html" : "learning-world.html?world=" + nextWorld;
     });

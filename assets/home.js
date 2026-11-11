@@ -10,26 +10,33 @@
   const animate = motion.animate || function () {};
   const messages = window.SP_MESSAGES || {};
   const homeMsg = messages.home || {};
-  const pathOrder = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
-  const worldTotals = {
-    alphabet: 9,
-    animals: 3,
-    numbers: 3,
-    colours: 3,
-    words: 3,
-    sentences: 3,
-    stories: 3,
-    culture: 3
-  };
+  const pathOrder = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
+    ? window.SP_WORLD_ORDER.slice()
+    : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const worldTotals = window.SP_WORLD_TOTALS && typeof window.SP_WORLD_TOTALS === "object"
+    ? Object.assign({}, window.SP_WORLD_TOTALS)
+    : {
+        alphabet: 9,
+        animals: 3,
+        numbers: 3,
+        colours: 3,
+        words: 3,
+        sentences: 3,
+        stories: 3,
+        culture: 3
+      };
+  const worldMeta = window.SP_WORLD_META && typeof window.SP_WORLD_META === "object"
+    ? window.SP_WORLD_META
+    : {};
   const worldLinks = {
-    alphabet: "alphabet-forest.html",
-    animals: "learning-world.html?world=animals",
-    numbers: "learning-world.html?world=numbers",
-    colours: "learning-world.html?world=colours",
-    words: "learning-world.html?world=words",
-    sentences: "learning-world.html?world=sentences",
-    stories: "learning-world.html?world=stories",
-    culture: "learning-world.html?world=culture"
+    alphabet: (worldMeta.alphabet && worldMeta.alphabet.url) || "alphabet-forest.html",
+    animals: (worldMeta.animals && worldMeta.animals.url) || "learning-world.html?world=animals",
+    numbers: (worldMeta.numbers && worldMeta.numbers.url) || "learning-world.html?world=numbers",
+    colours: (worldMeta.colours && worldMeta.colours.url) || "learning-world.html?world=colours",
+    words: (worldMeta.words && worldMeta.words.url) || "learning-world.html?world=words",
+    sentences: (worldMeta.sentences && worldMeta.sentences.url) || "learning-world.html?world=sentences",
+    stories: (worldMeta.stories && worldMeta.stories.url) || "learning-world.html?world=stories",
+    culture: (worldMeta.culture && worldMeta.culture.url) || "learning-world.html?world=culture"
   };
   const challengeSteps = [
     {
