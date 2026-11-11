@@ -150,17 +150,24 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
   assert.ok(js.includes("animateFruitToMithu"));
 });
 
-test("write-it-yourself uses automatic tolerant handwriting validation", () => {
-  assert.ok(html.includes('id="traceSelfCheck"'));
+test("write-it-yourself uses simple draw and next flow without validation UI", () => {
+  assert.equal(html.includes('id="traceSelfCheck"'), false);
   assert.ok(html.includes('class="trace-work-area"'));
   assert.ok(html.includes('class="trace-canvas-wrap"'));
-  assert.ok(html.includes(">Check My Writing<"));
+  assert.equal(html.includes(">Check My Writing<"), false);
+  assert.equal(html.includes(">Yes, I did it!<"), false);
+  assert.equal(html.includes(">Let me try again!<"), false);
   assert.ok(html.includes(">Clear<"));
-  assert.ok(js.includes("const WRITING_VALIDATION_AVAILABLE = true;"));
-  assert.ok(js.includes("Let's write our letter first!"));
-  assert.ok(js.includes("evaluateTraceAgainstLetter("));
-  assert.ok(js.includes("normalizeAlphaMask("));
-  assert.ok(js.includes("showTraceFlowerBurst("));
+  assert.ok(js.includes("Draw the letter first, then tap Next."));
+  assert.ok(js.includes("Write the letter, then tap Next."));
+});
+
+test("magical tree includes mini mithu follower logic", () => {
+  assert.ok(js.includes("function initTreeMiniMithu()"));
+  assert.ok(js.includes("moveTreeMithuTowardPercent("));
+  assert.ok(js.includes("celebrateTreeMithu()"));
+  assert.ok(css.includes(".tree-mithu.following .mithu-wing-left"));
+  assert.ok(css.includes(".tree-mithu.hovering .mithu-body"));
 });
 
 test("alphabet forest does not render end-of-page review notes", () => {

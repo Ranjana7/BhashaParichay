@@ -769,11 +769,14 @@ p {
 }
 
 .tree-mithu {
-  width: 118px;
-  height: 118px;
-  inset: auto auto 104px 78%;
+  width: 84px;
+  height: 84px;
+  inset: auto;
+  left: 80%;
+  top: 62%;
   pointer-events: none;
-  z-index: 8;
+  z-index: 6;
+  will-change: transform, left, top;
 }
 
 .tree-mithu-svg {
@@ -786,8 +789,18 @@ p {
   animation: treeMithuListen 0.82s ease-in-out infinite;
 }
 
+.tree-mithu.following .mithu-wing-left,
+.tree-mithu.following .mithu-wing-right {
+  transform-origin: 50% 42%;
+  animation: mithuWingFlap 0.46s ease-in-out infinite;
+}
+
 .tree-mithu.pointing .mithu-wing-right {
   animation: treeMithuPoint 0.7s ease-in-out 2;
+}
+
+.tree-mithu.hovering .mithu-body {
+  animation: treeMithuHover 0.8s ease-in-out infinite;
 }
 
 .tree-mithu.celebrating .mithu-body {
@@ -2315,6 +2328,11 @@ th {
   75% { transform: translateY(-5px) rotate(4deg); }
 }
 
+@keyframes treeMithuHover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 @keyframes bloomPop {
   0% { transform: scale(0.35); opacity: 0; }
   45% { transform: scale(1.22); opacity: 1; }
@@ -2392,9 +2410,8 @@ th {
   }
 
   .tree-mithu {
-    width: 94px;
-    height: 94px;
-    inset: auto auto 90px 80%;
+    width: 74px;
+    height: 74px;
   }
 
   .letter-grid {

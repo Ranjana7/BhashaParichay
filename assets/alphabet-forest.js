@@ -1,6 +1,7 @@
 (function initAlphabetForestV4() {
   const AUDIO_ENABLED = true;
-  const WRITING_VALIDATION_AVAILABLE = true;
+  const TREE_MITHU_OFFSET_X = 16;
+  const TREE_MITHU_OFFSET_Y = -18;
   const LETTER_COUNT = 48;
   const TREE_GROUP_SIZE = 5;
   const UNLOCK_STAR_TARGET = 50;
@@ -210,11 +211,6 @@
     traceTargetLetter: document.getElementById("traceTargetLetter"),
     traceStatus: document.getElementById("traceStatus"),
     clearTraceBtn: document.getElementById("clearTraceBtn"),
-    checkTraceBtn: document.getElementById("checkTraceBtn"),
-    traceSelfCheck: document.getElementById("traceSelfCheck"),
-    traceSelfCheckQuestion: document.getElementById("traceSelfCheckQuestion"),
-    traceConfirmBtn: document.getElementById("traceConfirmBtn"),
-    traceRetryBtn: document.getElementById("traceRetryBtn"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
@@ -254,8 +250,16 @@
     tracing: {
       drawing: false,
       points: [],
-      reviewed: false,
       lastLetterIndex: -1
+    },
+    treeMithuMotion: {
+      initialized: false,
+      stage: null,
+      rafId: null,
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0
     },
     byActivity: {}
   };
@@ -276,6 +280,7 @@
   initJumpNavigation();
   initMascotCompanion();
   initTreeControls();
+  initTreeMiniMithu();
   initLetterGardenControls();
   initUnlockInviteControls();
   initArrangeControls();
@@ -291,6 +296,115 @@
     if (activityId === "flashcard-flip") return flashcardQuestions.length;
     if (activityId === "feed-mithu") return feedMithuQuestions.length;
     return letters.length;
+  }
+
+  function initTreeMiniMithu() {
+    if (!ui.treeMithu) return;
+    const stage = document.getElementById("magicalTreeStage");
+    if (!stage) return;
+    const motion = runtime.treeMithuMotion;
+    if (motion.initialized) return;
+    motion.initialized = true;
+    motion.stage = stage;
+    ui.treeMithu.classList.add("following");
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function syncPerchPosition() {
+      const rect = stage.getBoundingClientRect();
+      motion.targetX = rect.width * 0.8;
+      motion.targetY = rect.height * 0.62;
+      if (!motion.x && !motion.y) {
+        motion.x = motion.targetX;
+        motion.y = motion.targetY;
+      }
+    }
+
+    function runFrame() {
+      const prefersReducedMotion = REDUCED_MOTION || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const smoothing = prefersReducedMotion ? 1 : 0.2;
+      const nextX = motion.x + (motion.targetX - motion.x) * smoothing;
+      const nextY = motion.y + (motion.targetY - motion.y) * smoothing;
+      const dx = motion.targetX - motion.x;
+      motion.x = nextX;
+      motion.y = nextY;
+      const angle = prefersReducedMotion ? 0 : clamp(dx * 0.08, -10, 10);
+      ui.treeMithu.style.left = motion.x.toFixed(2) + "px";
+      ui.treeMithu.style.top = motion.y.toFixed(2) + "px";
+      ui.treeMithu.style.transform = "translate(-50%, -50%) rotate(" + angle.toFixed(1) + "deg)";
+      const settling = Math.abs(motion.targetX - motion.x) < 0.6 && Math.abs(motion.targetY - motion.y) < 0.6;
+      if (settling) {
+        motion.rafId = null;
+        return;
+      }
+      motion.rafId = window.requestAnimationFrame(runFrame);
+    }
+
+    function requestFrame() {
+      if (motion.rafId) return;
+      motion.rafId = window.requestAnimationFrame(runFrame);
+    }
+
+    function moveToClientPoint(clientX, clientY) {
+      const rect = stage.getBoundingClientRect();
+      const x = clamp(clientX - rect.left + TREE_MITHU_OFFSET_X, 52, rect.width - 52);
+      const y = clamp(clientY - rect.top + TREE_MITHU_OFFSET_Y, 56, rect.height - 44);
+      motion.targetX = x;
+      motion.targetY = y;
+      requestFrame();
+    }
+
+    stage.addEventListener("pointermove", function (event) {
+      moveToClientPoint(event.clientX, event.clientY);
+    });
+    stage.addEventListener("pointerleave", function () {
+      syncPerchPosition();
+      requestFrame();
+      ui.treeMithu.classList.remove("hovering");
+    });
+    stage.addEventListener("pointerdown", function (event) {
+      moveToClientPoint(event.clientX, event.clientY);
+    });
+    window.addEventListener("resize", function () {
+      syncPerchPosition();
+      requestFrame();
+    });
+
+    syncPerchPosition();
+    requestFrame();
+  }
+
+  function moveTreeMithuTowardPercent(xPercent, yPercent) {
+    const motion = runtime.treeMithuMotion;
+    const stage = motion.stage;
+    if (!stage || !ui.treeMithu) return;
+    const rect = stage.getBoundingClientRect();
+    motion.targetX = Math.max(52, Math.min(rect.width - 52, (xPercent / 100) * rect.width + TREE_MITHU_OFFSET_X));
+    motion.targetY = Math.max(56, Math.min(rect.height - 44, (yPercent / 100) * rect.height + TREE_MITHU_OFFSET_Y));
+    if (!motion.rafId) motion.rafId = window.requestAnimationFrame(function run() {
+      motion.rafId = null;
+      const nextX = motion.x + (motion.targetX - motion.x) * (REDUCED_MOTION ? 1 : 0.22);
+      const nextY = motion.y + (motion.targetY - motion.y) * (REDUCED_MOTION ? 1 : 0.22);
+      motion.x = nextX;
+      motion.y = nextY;
+      const dx = motion.targetX - motion.x;
+      const angle = REDUCED_MOTION ? 0 : Math.max(-10, Math.min(10, dx * 0.08));
+      ui.treeMithu.style.left = motion.x.toFixed(2) + "px";
+      ui.treeMithu.style.top = motion.y.toFixed(2) + "px";
+      ui.treeMithu.style.transform = "translate(-50%, -50%) rotate(" + angle.toFixed(1) + "deg)";
+      const settling = Math.abs(motion.targetX - motion.x) < 0.6 && Math.abs(motion.targetY - motion.y) < 0.6;
+      if (!settling) motion.rafId = window.requestAnimationFrame(run);
+    });
+  }
+
+  function celebrateTreeMithu() {
+    if (!ui.treeMithu) return;
+    ui.treeMithu.classList.add("celebrating");
+    window.setTimeout(function () {
+      ui.treeMithu.classList.remove("celebrating");
+    }, 800);
   }
 
   function scrollToActivity(target) {
@@ -903,7 +1017,6 @@
         ctx.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, width, height);
       } else {
         runtime.tracing.points = [];
-        runtime.tracing.reviewed = false;
       }
     }
 
@@ -919,7 +1032,6 @@
     function startDraw(event) {
       if (event.button !== undefined && event.button !== 0) return;
       runtime.tracing.drawing = true;
-      runtime.tracing.reviewed = false;
       if (event.pointerId !== undefined && ui.traceCanvas.setPointerCapture) {
         ui.traceCanvas.setPointerCapture(event.pointerId);
       }
@@ -927,7 +1039,7 @@
       runtime.tracing.points.push(point);
       ctx.beginPath();
       ctx.moveTo(point.x, point.y);
-      if (ui.traceStatus) ui.traceStatus.textContent = "Keep drawing, then tap Check My Writing.";
+      if (ui.traceStatus) ui.traceStatus.textContent = "Keep drawing, then tap Next.";
       event.preventDefault();
     }
     function moveDraw(event) {
@@ -954,40 +1066,6 @@
       clearTraceBoard();
       if (ui.traceStatus) ui.traceStatus.textContent = "Great! Try writing the letter again.";
     });
-    if (ui.checkTraceBtn) {
-      ui.checkTraceBtn.addEventListener("click", function () {
-        const activityId = "letter-tracing";
-        if (runtime.tracing.points.length < 2 && !traceCanvasHasInk()) {
-          if (ui.traceStatus) ui.traceStatus.textContent = "Let's write our letter first!";
-          return;
-        }
-        const activity = forestState.activities[activityId];
-        const letter = getCurrentLetter(activityId);
-        const sourceIndex = activity ? activity.currentIndex : 0;
-        const alreadyDone = activity ? activity.completedItems.includes(sourceIndex) : false;
-        const score = evaluateTraceAgainstLetter(letter.symbol);
-        if (score >= 0.52 || (score >= 0.42 && WRITING_VALIDATION_AVAILABLE)) {
-          playSuccessSound("applause");
-          setMascotStateForDuration("celebrating", 1000);
-          fireSectionConfetti("activityTraceGamePanel", true);
-          showTraceFlowerBurst();
-          markCurrentComplete(activityId, "Wonderful! Letter practised!");
-          if (ui.traceStatus) {
-            ui.traceStatus.textContent = alreadyDone
-              ? "Wonderful! Checked again. Tap Next when you're ready."
-              : "Wonderful! Letter checked. Tap Next when you're ready.";
-          }
-        } else {
-          incrementAttempt("letter-tracing");
-          setMascotState("encouraging");
-          setMascotSpeech("Great effort! Try this letter once more.", { priority: 3, holdMs: 3000, tone: "encourage" });
-          if (ui.traceStatus) ui.traceStatus.textContent = "Nice try! Draw the shape a little closer and check again.";
-        }
-      });
-    }
-    if (ui.traceConfirmBtn) ui.traceConfirmBtn.hidden = true;
-    if (ui.traceRetryBtn) ui.traceRetryBtn.hidden = true;
-    if (ui.traceSelfCheck) ui.traceSelfCheck.hidden = true;
   }
 
   function clearTraceBoard() {
@@ -996,8 +1074,6 @@
     if (!ctx) return;
     ctx.clearRect(0, 0, ui.traceCanvas.width, ui.traceCanvas.height);
     runtime.tracing.points = [];
-    runtime.tracing.reviewed = false;
-    closeTraceSelfCheck();
   }
 
   function traceCanvasHasInk() {
@@ -1009,98 +1085,6 @@
       if (data[index] > 8) return true;
     }
     return false;
-  }
-
-  function renderGlyphTemplate(symbol) {
-    const size = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = "#0f172a";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "94px 'Noto Sans Devanagari', 'Mangal', serif";
-    ctx.fillText(symbol, size / 2, size / 2 + 4);
-    return ctx.getImageData(0, 0, size, size).data;
-  }
-
-  function normalizeAlphaMask(data, width, height, threshold) {
-    let minX = width;
-    let minY = height;
-    let maxX = -1;
-    let maxY = -1;
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        const alpha = data[(y * width + x) * 4 + 3];
-        if (alpha >= threshold) {
-          if (x < minX) minX = x;
-          if (y < minY) minY = y;
-          if (x > maxX) maxX = x;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-    if (maxX < minX || maxY < minY) return null;
-    const boxW = maxX - minX + 1;
-    const boxH = maxY - minY + 1;
-    const target = 48;
-    const scale = Math.min(target / boxW, target / boxH);
-    const out = new Uint8Array(64 * 64);
-    for (let y = minY; y <= maxY; y += 1) {
-      for (let x = minX; x <= maxX; x += 1) {
-        const alpha = data[(y * width + x) * 4 + 3];
-        if (alpha < threshold) continue;
-        const nx = Math.round((x - minX) * scale + (64 - boxW * scale) / 2);
-        const ny = Math.round((y - minY) * scale + (64 - boxH * scale) / 2);
-        if (nx >= 0 && nx < 64 && ny >= 0 && ny < 64) out[ny * 64 + nx] = 1;
-      }
-    }
-    return out;
-  }
-
-  function compareMasks(a, b) {
-    let intersect = 0;
-    let union = 0;
-    let countA = 0;
-    let countB = 0;
-    for (let i = 0; i < a.length; i += 1) {
-      const va = a[i] === 1;
-      const vb = b[i] === 1;
-      if (va) countA += 1;
-      if (vb) countB += 1;
-      if (va || vb) union += 1;
-      if (va && vb) intersect += 1;
-    }
-    if (!union || !countA || !countB) return 0;
-    const iou = intersect / union;
-    const densityRatio = Math.min(countA, countB) / Math.max(countA, countB);
-    return (iou * 0.78) + (densityRatio * 0.22);
-  }
-
-  function evaluateTraceAgainstLetter(symbol) {
-    if (!ui.traceCanvas) return 0;
-    const ctx = ui.traceCanvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return 0;
-    const userData = ctx.getImageData(0, 0, ui.traceCanvas.width, ui.traceCanvas.height).data;
-    const tplData = renderGlyphTemplate(symbol);
-    if (!tplData) return 0;
-    const userMask = normalizeAlphaMask(userData, ui.traceCanvas.width, ui.traceCanvas.height, 18);
-    const tplMask = normalizeAlphaMask(tplData, 128, 128, 18);
-    if (!userMask || !tplMask) return 0;
-    return compareMasks(userMask, tplMask);
-  }
-
-  function openTraceSelfCheck() {
-    if (!ui.traceSelfCheck) return;
-    ui.traceSelfCheck.hidden = false;
-  }
-
-  function closeTraceSelfCheck() {
-    if (!ui.traceSelfCheck) return;
-    ui.traceSelfCheck.hidden = true;
   }
 
   function playSuccessSound(kind) {
@@ -1210,28 +1194,6 @@
     if (typeof window.spFlowerRain !== "function") return;
     const section = typeof sectionId === "string" ? document.getElementById(sectionId) : sectionId;
     window.spFlowerRain(section || null, Object.assign({ durationMs: 2600, density: 22 }, options || {}));
-  }
-
-  function showTraceFlowerBurst() {
-    const section = document.querySelector("#activityTraceGamePanel .activity");
-    if (!section || REDUCED_MOTION) return;
-    let overlay = section.querySelector(".trace-flower-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "trace-flower-overlay";
-      section.appendChild(overlay);
-    }
-    const tokens = ["✿", "❀", "✽"];
-    for (let index = 0; index < 9; index += 1) {
-      const flower = document.createElement("span");
-      flower.className = "trace-flower-burst";
-      flower.textContent = tokens[index % tokens.length];
-      flower.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
-      flower.style.top = (16 + Math.random() * 62).toFixed(1) + "%";
-      flower.style.animationDelay = (Math.random() * 0.12).toFixed(2) + "s";
-      overlay.appendChild(flower);
-      window.setTimeout(function () { flower.remove(); }, 1200);
-    }
   }
 
   function initActivityControls() {
@@ -1401,6 +1363,14 @@
     }
     if (action === "next") {
       const itemCount = getActivityItemCount(activityId);
+      if (activityId === "letter-tracing" && !isCurrentResolved(activityId)) {
+        if (!traceCanvasHasInk()) {
+          setActivityStatus(activityId, "Draw the letter first, then tap Next.");
+          saveAndRender();
+          return;
+        }
+        markCurrentComplete(activityId, "Wonderful! Letter practised!");
+      }
       if (!isCurrentResolved(activityId) || activity.currentIndex >= itemCount - 1) return;
       CORE.goNext(forestState, activityId);
       runtime.byActivity[activityId].tempAnswer = "";
@@ -1615,6 +1585,8 @@
         setMascotState("pointing");
         setMascotSpeech("Ready? Let's try this together!", { priority: 2, holdMs: 2200, tone: "instruction" });
         playLetterAudio(letter, 1, ui.treeStatus);
+        moveTreeMithuTowardPercent(slot.x, slot.y);
+        celebrateTreeMithu();
         button.classList.add("just-picked");
         window.setTimeout(function () { button.classList.remove("just-picked"); }, 650);
         if (!activity.completedItems.includes(letterIndex)) {
@@ -1655,6 +1627,15 @@
         }
         saveAndRender();
       });
+      button.addEventListener("pointerenter", function () {
+        if (!ui.treeMithu) return;
+        ui.treeMithu.classList.add("hovering");
+        moveTreeMithuTowardPercent(slot.x, slot.y);
+      });
+      button.addEventListener("pointerleave", function () {
+        if (!ui.treeMithu) return;
+        ui.treeMithu.classList.remove("hovering");
+      });
       ui.treeLetters.appendChild(button);
     });
 
@@ -1663,6 +1644,9 @@
       if (ui.spotlightDev) ui.spotlightDev.textContent = currentLetter.symbol;
       if (ui.spotlightTran) ui.spotlightTran.textContent = currentLetter.transliteration;
       if (ui.spotlightExample) ui.spotlightExample.textContent = currentLetter.exampleText + " · " + currentLetter.meaning;
+      const activeOffset = Math.max(0, Math.min(groupLetters.length - 1, activity.currentIndex - groupStart));
+      const activeSlot = slots[activeOffset] || slots[0];
+      if (activeSlot) moveTreeMithuTowardPercent(activeSlot.x, activeSlot.y);
     }
   }
 
@@ -2071,13 +2055,12 @@
     if (!letter || !ui.traceTargetLetter || !ui.traceStatus) return;
     const activity = forestState.activities[activityId];
     ui.traceTargetLetter.textContent = letter.symbol;
-    if (ui.checkTraceBtn) ui.checkTraceBtn.disabled = false;
     if (runtime.tracing.lastLetterIndex !== activity.currentIndex) {
       runtime.tracing.lastLetterIndex = activity.currentIndex;
       clearTraceBoard();
     }
     if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = "Write the letter, then tap Check My Writing.";
+      ui.traceStatus.textContent = runtime.byActivity[activityId].status || "Write the letter, then tap Next.";
     } else if (!runtime.byActivity[activityId].status) {
       ui.traceStatus.textContent = "Wonderful! This letter is practised. Continue when ready.";
     }
@@ -2150,6 +2133,26 @@
       const restart = mount.querySelector('[data-action="restart"]');
       if (previous) previous.disabled = state.currentIndex === 0;
       if (retry) retry.disabled = false;
+      if (activity.id === "letter-tracing") {
+        if (retry) retry.hidden = true;
+        if (finish) {
+          finish.hidden = true;
+          finish.disabled = true;
+        }
+        if (continueBtn) {
+          continueBtn.hidden = true;
+          continueBtn.disabled = true;
+        }
+        if (restart) {
+          restart.hidden = true;
+          restart.disabled = true;
+        }
+        if (next) {
+          next.hidden = false;
+          next.disabled = false;
+        }
+        return;
+      }
       if (next) {
         next.hidden = false;
         next.disabled = atLast || !resolved;
