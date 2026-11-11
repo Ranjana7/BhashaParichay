@@ -111,6 +111,10 @@
     window.spSyncProgressModel(pathOrder, worldTotals);
   }
   const snapshot = getProgressSnapshot();
+  if (ui.resetModal) ui.resetModal.hidden = true;
+  window.addEventListener("pageshow", function () {
+    if (ui.resetModal) ui.resetModal.hidden = true;
+  });
   renderStats();
   renderChallengeIdle();
   wireUi();
@@ -498,6 +502,12 @@
   }
 
   function wireUi() {
+    document.querySelectorAll('.main-nav a[href="index.html"]').forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (ui.resetModal) ui.resetModal.hidden = true;
+      });
+    });
+
     ui.worldCards.forEach(function (card) {
       const world = card.getAttribute("data-world");
       const iconLeaves = card.querySelectorAll(".world-icon i");

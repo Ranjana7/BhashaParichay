@@ -1777,6 +1777,11 @@ th {
   padding: 16px;
 }
 
+.reset-confirm-modal[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
 .reset-confirm-card {
   width: min(520px, 94vw);
   background: #fff;
