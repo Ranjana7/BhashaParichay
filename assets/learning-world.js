@@ -508,6 +508,7 @@
     const homeNextSibling = ui.lessonMascot.nextElementSibling;
     let mascotRail = null;
     const sections = Array.from(document.querySelectorAll("#main-content > section.panel"));
+    let activeSectionId = "";
     if (!sections.length) return;
 
     function getMascotRail() {
@@ -530,9 +531,9 @@
       }
       pageWrap.classList.add("with-mascot");
       ui.lessonMascot.classList.remove("lesson-mascot-mobile");
+      ui.lessonMascot.classList.add("is-journey-guide");
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
-      ui.lessonMascot.style.transform = "";
     }
 
     function placeMascotCompact() {
@@ -546,14 +547,15 @@
       }
       if (pageWrap) pageWrap.classList.remove("with-mascot");
       ui.lessonMascot.classList.add("lesson-mascot-mobile");
+      ui.lessonMascot.classList.remove("is-journey-guide");
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
       ui.lessonMascot.style.transform = "";
     }
 
-    function findActiveSectionRect() {
+    function findActiveSection() {
       const anchorY = window.innerHeight * 0.34;
-      let bestRect = null;
+      let bestSection = null;
       let bestScore = -Infinity;
       sections.forEach(function (section) {
         const rect = section.getBoundingClientRect();
@@ -563,19 +565,69 @@
         else score = -Math.abs((rect.top + rect.height * 0.5) - anchorY);
         if (score > bestScore) {
           bestScore = score;
-          bestRect = rect;
+          bestSection = section;
         }
       });
-      return bestRect;
+      return bestSection;
+    }
+
+    function sectionMessage(section) {
+      if (!section) return worldWelcome;
+      const heading = section.querySelector("h2");
+      const title = heading ? (heading.textContent || "").trim() : "";
+      if (!title) return "Let's keep exploring this lesson together!";
+      if (title.indexOf("Lesson Path") === 0) return "Choose your lesson path and let's continue!";
+      if (title.indexOf("Focus Cards") === 0) return "Let's review these key words before the games.";
+      if (title.indexOf("Activity 1") === 0) return "Match carefully. You can do it!";
+      if (title.indexOf("Activity 2") === 0) return "Listen closely, then choose the right answer.";
+      if (title.indexOf("Activity 3") === 0) return "Build the phrase step by step. I'll cheer you on!";
+      if (title.indexOf("Adventure Notes") === 0) return "Wonderful progress! Here are your learning notes.";
+      return "Now we are in " + title + ".";
+    }
+
+    function moveMascotToSection(section, compact) {
+      if (compact || !section || !pageWrap || !ui.lessonMascot) {
+        ui.lessonMascot.style.transform = "";
+        return;
+      }
+      const rail = getMascotRail();
+      if (!rail) return;
+      let sectionTop = 0;
+      let node = section;
+      while (node && node !== pageWrap) {
+        sectionTop += node.offsetTop || 0;
+        node = node.offsetParent;
+      }
+      const sectionHeight = Math.max(section.offsetHeight || 0, section.getBoundingClientRect().height || 0);
+      const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
+      const railHeight = Math.max(rail.offsetHeight || 0, pageWrap.scrollHeight || 0);
+      const targetTop = sectionTop + sectionHeight * 0.18;
+      const maxTop = Math.max(0, railHeight - mascotHeight - 8);
+      const clampedTop = Math.max(0, Math.min(maxTop, targetTop));
+      const nextY = Math.round(clampedTop);
+      const currentY = Number(ui.lessonMascot.dataset.railY || "0");
+      if (Math.abs(nextY - currentY) > 1) {
+        ui.lessonMascot.dataset.railY = String(nextY);
+        ui.lessonMascot.style.transform = "translate3d(0," + nextY + "px,0)";
+      }
     }
 
     function update() {
       const compact = window.matchMedia("(max-width: 980px)").matches;
       if (compact) placeMascotCompact();
       else placeMascotDesktop();
-      const rect = findActiveSectionRect();
-      ui.lessonMascot.setAttribute("data-active-section", rect ? "active" : "");
-      ui.lessonMascot.style.transform = compact ? "" : "translate3d(0,0,0)";
+      const section = findActiveSection();
+      const nextId = section ? (section.id || "") : "";
+      ui.lessonMascot.setAttribute("data-active-section", nextId || "active");
+      moveMascotToSection(section, compact);
+      if (nextId && nextId !== activeSectionId) {
+        activeSectionId = nextId;
+        setSpeech(sectionMessage(section));
+        if (!prefersReducedMotion) {
+          setMascot("flying");
+          window.setTimeout(function () { setMascot("idle"); }, 260);
+        }
+      }
     }
 
     window.addEventListener("scroll", update, { passive: true });

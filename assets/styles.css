@@ -10,8 +10,8 @@
   --card: #ffffff;
   --radius: 20px;
   --shadow: 0 12px 28px rgba(44, 62, 120, 0.14);
-  --page-max-width: 1480px;
-  --site-edge-gap: clamp(10px, 2vw, 24px);
+  --page-max-width: 100%;
+  --site-edge-gap: clamp(10px, 2vw, 28px);
   --header-offset: 86px;
 }
 
@@ -140,8 +140,10 @@ body {
 }
 
 .page-wrap {
-  width: min(var(--page-max-width), calc(100vw - (var(--site-edge-gap) * 2)));
+  width: 100%;
+  max-width: none;
   margin: 12px auto 28px;
+  padding-inline: var(--site-edge-gap);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
@@ -152,8 +154,8 @@ body {
 }
 
 .page-wrap.with-mascot {
-  grid-template-columns: minmax(0, 1fr) clamp(220px, 24vw, 300px);
-  column-gap: 16px;
+  grid-template-columns: minmax(0, 1fr) clamp(220px, 20vw, 290px);
+  column-gap: 20px;
   align-items: start;
 }
 
@@ -165,8 +167,10 @@ body {
 .mascot-rail {
   grid-column: 2;
   grid-row: 1 / span 100;
+  position: relative;
   align-self: start;
-  min-height: 1px;
+  min-height: 100%;
+  pointer-events: none;
 }
 
 .hero-card,
@@ -850,13 +854,21 @@ p {
 }
 
 .mascot-rail .lesson-mascot {
-  position: sticky;
-  top: calc(var(--header-offset) + 4px);
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 290px;
+  max-width: 100%;
   margin: 0;
   z-index: 4;
   pointer-events: auto;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+
+.mascot-rail .lesson-mascot.is-journey-guide {
+  box-shadow: 0 14px 26px rgba(51, 88, 156, 0.2);
 }
 
 .lesson-mascot-mobile {
@@ -1577,8 +1589,8 @@ th {
 .world-grid {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
 }
 
 .world-card {
@@ -2120,6 +2132,16 @@ th {
   25% { transform: translateY(-6px) rotate(5deg); }
   50% { transform: translateY(-1px) rotate(-5deg); }
   75% { transform: translateY(-5px) rotate(4deg); }
+}
+
+@media (max-width: 980px) {
+  .page-wrap.with-mascot {
+    grid-template-columns: 1fr;
+  }
+
+  .mascot-rail {
+    display: none;
+  }
 }
 
 @media (max-width: 860px) {

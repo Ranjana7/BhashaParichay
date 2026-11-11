@@ -500,7 +500,7 @@
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
     const pageWrap = document.querySelector(".page-wrap");
-    const homeContainer = ui.lessonProgressPanel || (ui.lessonMascot && ui.lessonMascot.parentElement);
+    const homeContainer = document.getElementById("lessonProgressPanel") || (ui.lessonMascot && ui.lessonMascot.parentElement);
     const homeNextSibling = ui.lessonMascot ? ui.lessonMascot.nextElementSibling : null;
     let mascotRail = null;
 
@@ -526,7 +526,7 @@
       ui.lessonMascot.classList.remove("lesson-mascot-mobile");
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
-      ui.lessonMascot.style.transform = "";
+      ui.lessonMascot.classList.add("is-journey-guide");
     }
 
     function placeMascotCompact() {
@@ -540,6 +540,7 @@
       }
       if (pageWrap) pageWrap.classList.remove("with-mascot");
       ui.lessonMascot.classList.add("lesson-mascot-mobile");
+      ui.lessonMascot.classList.remove("is-journey-guide");
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
       ui.lessonMascot.style.transform = "";
@@ -621,7 +622,27 @@
       ui.lessonMascot.style.transform = "";
       return;
     }
-    ui.lessonMascot.style.transform = "translate3d(0,0,0)";
+    const pageWrap = document.querySelector(".page-wrap");
+    const rail = pageWrap ? pageWrap.querySelector(".mascot-rail") : null;
+    if (!pageWrap || !rail) return;
+    let sectionTop = 0;
+    let node = section;
+    while (node && node !== pageWrap) {
+      sectionTop += node.offsetTop || 0;
+      node = node.offsetParent;
+    }
+    const sectionHeight = Math.max(section.offsetHeight || 0, section.getBoundingClientRect().height || 0);
+    const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
+    const railHeight = Math.max(rail.offsetHeight || 0, pageWrap.scrollHeight || 0);
+    const targetTop = sectionTop + sectionHeight * 0.18;
+    const maxTop = Math.max(0, railHeight - mascotHeight - 8);
+    const clampedTop = Math.max(0, Math.min(maxTop, targetTop));
+    const nextY = Math.round(clampedTop);
+    const currentY = Number(ui.lessonMascot.dataset.railY || "0");
+    if (Math.abs(nextY - currentY) > 1) {
+      ui.lessonMascot.dataset.railY = String(nextY);
+      ui.lessonMascot.style.transform = "translate3d(0," + nextY + "px,0)";
+    }
   }
 
   function initTreeControls() {
