@@ -63,7 +63,8 @@ test("global panel uses learning/practice/stars/unlock summary", () => {
   assert.ok(html.includes('id="practiceProgressText"'));
   assert.ok(html.includes('id="nextWorldStatus"'));
   assert.ok(html.includes('id="globalStars"'));
-  assert.ok(html.includes("Finish Magical Tree and any two practice games"));
+  assert.ok(html.includes("Complete Magical Tree and 2 practice games"));
+  assert.equal(html.includes("2 of 7"), false);
   assert.equal(html.includes("0 of 9 activities complete"), false);
   assert.equal(html.includes('id="lessonStatsPanel"'), false);
   assert.equal(html.includes("Activity 3 of 6"), false);

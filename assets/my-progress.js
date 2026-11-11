@@ -55,9 +55,9 @@
   const learningCount = Number(snapshot.alphabet.learningCompletedCount || 0);
   const practiceCount = Number(snapshot.alphabet.practiceCompletedCount || 0);
   if (forestLearningSummary) forestLearningSummary.textContent = learningCount + " of 2 completed";
-  if (forestPracticeSummary) forestPracticeSummary.textContent = practiceCount + " of 7 completed";
+  if (forestPracticeSummary) forestPracticeSummary.textContent = practiceCount + " practice games completed";
   if (forestLearningFill) forestLearningFill.style.width = ((learningCount / 2) * 100).toFixed(1) + "%";
-  if (forestPracticeFill) forestPracticeFill.style.width = ((practiceCount / 7) * 100).toFixed(1) + "%";
+  if (forestPracticeFill) forestPracticeFill.style.width = (Math.min(practiceCount, 2) / 2 * 100).toFixed(1) + "%";
 
   worldList.innerHTML = "";
   worldMeta.forEach(function (world) {

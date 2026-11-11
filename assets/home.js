@@ -205,7 +205,19 @@
   function unlockRequirementFor(world) {
     if (world === "alphabet") return "";
     const previous = pathOrder[pathOrder.indexOf(world) - 1] || "alphabet";
-    if (previous === "alphabet") return "Unlock: Complete Magical Tree + any 2 practice games in Alphabet Forest.";
+    const snapshot = getProgressSnapshot();
+    if (previous === "alphabet") {
+      const treeComplete = Boolean(snapshot.alphabet && snapshot.alphabet.treeComplete);
+      const practiceCompleted = Number((snapshot.alphabet && snapshot.alphabet.practiceCompletedCount) || 0);
+      const remainingPractice = Math.max(0, 2 - practiceCompleted);
+      if (treeComplete && remainingPractice <= 0) return "Wonderful! Your next world is ready!";
+      if (!treeComplete && remainingPractice <= 0) return "Complete Magical Tree to unlock your next adventure!";
+      if (!treeComplete && remainingPractice === 1) return "Complete Magical Tree and 1 more practice game to unlock your next adventure!";
+      if (!treeComplete) return "Complete Magical Tree and 2 practice games to unlock your next adventure!";
+      return remainingPractice === 1
+        ? "1 more practice game to unlock your next adventure!"
+        : remainingPractice + " more practice games to unlock your next adventure!";
+    }
     const prevTitle = previous === "words" ? "Word Wonderland"
       : previous === "animals" ? "Animal Jungle"
       : previous === "numbers" ? "Number Galaxy"
@@ -214,7 +226,12 @@
       : previous === "stories" ? "Story Island"
       : previous === "culture" ? "Sanskrit and Culture"
       : "previous world";
-    return "Unlock: Complete any 2 practice activities in " + prevTitle + ".";
+    const previousProgress = snapshot.worlds && snapshot.worlds[previous] ? snapshot.worlds[previous] : null;
+    const remainingPractice = Math.max(0, 2 - Number((previousProgress && previousProgress.practiceCompletedCount) || 0));
+    if (remainingPractice <= 0) return "Wonderful! Your next world is ready!";
+    return remainingPractice === 1
+      ? "1 more practice game in " + prevTitle + " to unlock your next adventure!"
+      : remainingPractice + " more practice games in " + prevTitle + " to unlock your next adventure!";
   }
 
   function renderWorldCards() {

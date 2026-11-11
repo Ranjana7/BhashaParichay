@@ -24,6 +24,9 @@
   if (typeof window.spSyncProgressModel === "function") {
     window.spSyncProgressModel(orderKeys, worldTotals);
   }
+  const snapshot = typeof window.spGetProgressSnapshot === "function"
+    ? window.spGetProgressSnapshot(orderKeys, worldTotals)
+    : null;
 
   function isUnlocked(worldKey) {
     if (typeof window.spIsWorldUnlocked === "function") {
@@ -33,9 +36,6 @@
   }
 
   function worldProgress(worldKey, totalLessons) {
-    const snapshot = typeof window.spGetProgressSnapshot === "function"
-      ? window.spGetProgressSnapshot(orderKeys, worldTotals)
-      : null;
     if (snapshot) {
       if (worldKey === "alphabet") {
         const completed = Math.max(0, Math.min(totalLessons, Number(snapshot.alphabet.learningCompletedCount || 0) + Number(snapshot.alphabet.practiceCompletedCount || 0)));
@@ -53,9 +53,25 @@
     if (worldKey === "alphabet") return "";
     const index = orderKeys.indexOf(worldKey);
     const previous = orderKeys[index - 1] || "alphabet";
-    if (previous === "alphabet") return "Unlock by completing Magical Tree and any two practice games in Alphabet Forest.";
+    if (previous === "alphabet") {
+      const treeComplete = Boolean(snapshot && snapshot.alphabet && snapshot.alphabet.treeComplete);
+      const practiceCompleted = Number((snapshot && snapshot.alphabet && snapshot.alphabet.practiceCompletedCount) || 0);
+      const remainingPractice = Math.max(0, 2 - practiceCompleted);
+      if (treeComplete && remainingPractice <= 0) return "Wonderful! Your next world is ready!";
+      if (!treeComplete && remainingPractice <= 0) return "Complete Magical Tree to unlock your next adventure!";
+      if (!treeComplete && remainingPractice === 1) return "Complete Magical Tree and 1 more practice game to unlock your next adventure!";
+      if (!treeComplete) return "Complete Magical Tree and 2 practice games to unlock your next adventure!";
+      return remainingPractice === 1
+        ? "1 more practice game to unlock your next adventure!"
+        : remainingPractice + " more practice games to unlock your next adventure!";
+    }
     const previousWorld = worldOrder.find(function (item) { return item.key === previous; });
-    return "Unlock by completing any two practice activities in " + (previousWorld ? previousWorld.title : "the previous world") + ".";
+    const previousProgress = snapshot && snapshot.worlds && snapshot.worlds[previous] ? snapshot.worlds[previous] : null;
+    const remainingPractice = Math.max(0, 2 - Number((previousProgress && previousProgress.practiceCompletedCount) || 0));
+    if (remainingPractice <= 0) return "Wonderful! Your next world is ready!";
+    return remainingPractice === 1
+      ? "1 more practice game in " + (previousWorld ? previousWorld.title : "the previous world") + " to unlock your next adventure!"
+      : remainingPractice + " more practice games in " + (previousWorld ? previousWorld.title : "the previous world") + " to unlock your next adventure!";
   }
 
   grid.innerHTML = "";

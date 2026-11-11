@@ -137,3 +137,35 @@ test("unlock check keeps completed world access independent of test mode", () =>
   assert.equal(api.isWorldUnlocked("animals", order, false, totals), true);
   assert.equal(api.isWorldUnlocked("animals", order, true, totals), true);
 });
+
+test("unlock checks any distinct practice activities in a world", () => {
+  const { api } = loadStore({
+    "sanskritParichay.alphabetForest.v3": JSON.stringify({
+      schemaVersion: 3,
+      activities: {
+        "magical-tree": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "letter-garden": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "hear-and-pick": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "picture-match": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "arrange-word": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "flashcard-flip": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "feed-mithu": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "letter-tracing": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "hidden-letter-hunt": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false }
+      },
+      completionRewarded: {},
+      worldCompleted: false,
+      xp: 0
+    }),
+    "sanskritParichay.world.words.progress": JSON.stringify({
+      lessonIndex: 1,
+      stars: 4,
+      completedLessons: [0],
+      done: { match: false, listen: false, build: false },
+      practiceCompleted: { gameOne: true, gameTwo: true, gameThree: false }
+    })
+  });
+  const order = ["alphabet", "words", "animals"];
+  const totals = { alphabet: 9, words: 4, animals: 3 };
+  assert.equal(api.isWorldUnlocked("animals", order, false, totals), true);
+});

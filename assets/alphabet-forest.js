@@ -1189,19 +1189,29 @@
     updateWorldCompletionPanels();
   }
 
+  function getUnlockHintText(unlocked, journey) {
+    if (unlocked) return "Wonderful! Your next world is ready!";
+    const treeComplete = Boolean(forestState.activities["magical-tree"] && forestState.activities["magical-tree"].isComplete);
+    const remainingPractice = Math.max(0, 2 - Number(journey.practiceCompletedCount || 0));
+    if (!treeComplete && remainingPractice <= 0) return "Complete Magical Tree to unlock your next adventure!";
+    if (!treeComplete && remainingPractice === 1) return "Complete Magical Tree and 1 more practice game to unlock your next adventure!";
+    if (!treeComplete) return "Complete Magical Tree and 2 practice games to unlock your next adventure!";
+    return remainingPractice === 1
+      ? "1 more practice game to unlock your next adventure!"
+      : remainingPractice + " more practice games to unlock your next adventure!";
+  }
+
   function renderGlobalProgress() {
     const journey = computeJourneyProgress();
     const unlocked = Boolean(forestState.completionRewarded && forestState.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
     if (ui.globalSummary) ui.globalSummary.textContent = "Follow the journey and unlock your next adventure.";
     if (ui.learningProgressText) ui.learningProgressText.textContent = journey.learningCompletedCount + " of " + journey.learningTotal + " completed";
-    if (ui.practiceProgressText) ui.practiceProgressText.textContent = journey.practiceCompletedCount + " of " + journey.practiceTotal + " completed";
+    if (ui.practiceProgressText) ui.practiceProgressText.textContent = journey.practiceCompletedCount + " practice games completed";
     if (ui.learningProgressFill) ui.learningProgressFill.style.width = ((journey.learningCompletedCount / journey.learningTotal) * 100).toFixed(1) + "%";
     if (ui.practiceProgressFill) ui.practiceProgressFill.style.width = ((journey.practiceCompletedCount / journey.practiceTotal) * 100).toFixed(1) + "%";
     if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
     if (ui.unlockHintText) {
-      ui.unlockHintText.textContent = unlocked
-        ? "Your next adventure is ready!"
-        : "Finish Magical Tree and any two practice games to unlock your next adventure!";
+      ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
     }
     if (ui.globalStars) ui.globalStars.textContent = String(forestState.xp);
   }
@@ -1801,16 +1811,14 @@
     const unlocked = alreadyUnlocked || canUnlock;
     if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
     if (ui.unlockHintText) {
-      ui.unlockHintText.textContent = unlocked
-        ? "Your next adventure is ready!"
-        : "Finish Magical Tree and any two practice games to unlock your next adventure!";
+      ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
     }
     if (ui.completionScreen) ui.completionScreen.classList.toggle("show", unlocked);
     if (ui.completionTitle) ui.completionTitle.textContent = unlocked ? "Next World Unlocked!" : "Keep Going!";
     if (ui.completionMessage) {
       ui.completionMessage.textContent = unlocked
-        ? "Your next adventure is ready!"
-        : "Complete the learning goals to unlock your next adventure.";
+        ? "Wonderful! Your next world is ready!"
+        : getUnlockHintText(false, journey);
     }
     if (ui.completionStars) ui.completionStars.textContent = String(forestState.xp);
   }

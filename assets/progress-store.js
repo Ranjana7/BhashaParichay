@@ -10,6 +10,7 @@
   const WORLD_UNLOCKS_KEY = "sanskritParichay.world.unlocks.v1";
   const LETTER_COUNT = 48;
   const NEXT_WORLD_UNLOCK_KEY = "next-world-unlock-v1";
+  const MIN_PRACTICE_FOR_UNLOCK = 2;
   const FOREST_ACTIVITY_IDS = [
     "magical-tree",
     "letter-garden",
@@ -164,7 +165,7 @@
       const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
         return count + (migrated.activities[id].isComplete ? 1 : 0);
       }, 0);
-      if (practiceDone >= 2) migrated.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
+      if (practiceDone >= MIN_PRACTICE_FOR_UNLOCK) migrated.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
     }
     return sanitizeForestState(migrated);
   }
@@ -217,7 +218,7 @@
       const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
         return count + (merged.activities[id].isComplete ? 1 : 0);
       }, 0);
-      if (practiceDone >= 2) merged.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
+      if (practiceDone >= MIN_PRACTICE_FOR_UNLOCK) merged.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
     }
     return sanitizeForestState(merged);
   }
@@ -246,7 +247,7 @@
       return count + (activities[id] && activities[id].isComplete ? 1 : 0);
     }, 0);
     const treeComplete = Boolean(activities["magical-tree"] && activities["magical-tree"].isComplete);
-    const unlockedByRule = treeComplete && practiceCompleted >= 2;
+    const unlockedByRule = treeComplete && practiceCompleted >= MIN_PRACTICE_FOR_UNLOCK;
     const unlockedEarned = Boolean(state.completionRewarded && state.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
     return {
       treeComplete: treeComplete,
@@ -287,12 +288,19 @@
     const stars = Number.isFinite(raw.stars) ? Math.max(0, Math.floor(raw.stars)) : 0;
     const done = raw.done && typeof raw.done === "object" ? raw.done : {};
     const persistedPractice = raw.practiceCompleted && typeof raw.practiceCompleted === "object" ? raw.practiceCompleted : {};
-    const practiceCompleted = {
-      match: Boolean(persistedPractice.match || done.match),
-      listen: Boolean(persistedPractice.listen || done.listen),
-      build: Boolean(persistedPractice.build || done.build)
-    };
-    const practiceCompletedCount = WORLD_PRACTICE_IDS.reduce(function (count, id) {
+    const practiceCompleted = {};
+    WORLD_PRACTICE_IDS.forEach(function (id) {
+      practiceCompleted[id] = Boolean((persistedPractice && persistedPractice[id]) || (done && done[id]));
+    });
+    Object.keys(done || {}).forEach(function (id) {
+      if (Object.prototype.hasOwnProperty.call(practiceCompleted, id)) return;
+      practiceCompleted[id] = Boolean(done[id]);
+    });
+    Object.keys(persistedPractice || {}).forEach(function (id) {
+      if (Object.prototype.hasOwnProperty.call(practiceCompleted, id)) return;
+      practiceCompleted[id] = Boolean(persistedPractice[id]);
+    });
+    const practiceCompletedCount = Object.keys(practiceCompleted).reduce(function (count, id) {
       return count + (practiceCompleted[id] ? 1 : 0);
     }, 0);
     return {
@@ -349,11 +357,11 @@
       const previous = order[index - 1];
       let canUnlock = false;
       if (previous === "alphabet") {
-        canUnlock = Boolean(alphabet.treeComplete && alphabet.practiceCompletedCount >= 2);
+        canUnlock = Boolean(alphabet.treeComplete && alphabet.practiceCompletedCount >= MIN_PRACTICE_FOR_UNLOCK);
       } else {
         const totalLessons = Number(totals[previous] || 3);
         const previousProgress = loadWorldProgress(previous, totalLessons);
-        canUnlock = previousProgress.practiceCompletedCount >= 2;
+        canUnlock = previousProgress.practiceCompletedCount >= MIN_PRACTICE_FOR_UNLOCK;
       }
       if (canUnlock) {
         unlocked.push(key);
