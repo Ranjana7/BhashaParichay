@@ -1218,6 +1218,13 @@ th {
   display: block;
 }
 
+.compact-next-adventure {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+}
+
 .completion-lottie {
   width: 240px;
   height: 200px;

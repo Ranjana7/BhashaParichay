@@ -10,23 +10,23 @@
   const animate = motion.animate || function () {};
   const messages = window.SP_MESSAGES || {};
   const homeMsg = messages.home || {};
-  const pathOrder = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const pathOrder = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const worldTotals = {
     alphabet: 9,
-    words: 3,
     animals: 3,
     numbers: 3,
     colours: 3,
+    words: 3,
     sentences: 3,
     stories: 3,
     culture: 3
   };
   const worldLinks = {
     alphabet: "alphabet-forest.html",
-    words: "learning-world.html?world=words",
     animals: "learning-world.html?world=animals",
     numbers: "learning-world.html?world=numbers",
     colours: "learning-world.html?world=colours",
+    words: "learning-world.html?world=words",
     sentences: "learning-world.html?world=sentences",
     stories: "learning-world.html?world=stories",
     culture: "learning-world.html?world=culture"
@@ -92,6 +92,7 @@
     homeXp: document.getElementById("homeXp"),
     continueBtn: document.getElementById("continueBtn"),
     challengeBtn: document.getElementById("challengeBtn"),
+    challengeSubtitle: document.getElementById("challengeSubtitle"),
     playNowBtn: document.getElementById("playNowBtn"),
     resetBtn: document.getElementById("resetProgressBtn"),
     resetModal: document.getElementById("resetConfirmModal"),
@@ -125,6 +126,9 @@
   if (ui.homeReturningMessage && snapshot.totals && snapshot.totals.stars > 0) {
     ui.homeReturningMessage.hidden = false;
     ui.homeReturningMessage.textContent = homeMsg.returning || "Welcome back! Ready to continue your adventure?";
+  }
+  if (ui.challengeSubtitle) {
+    ui.challengeSubtitle.textContent = "Play a little extra and collect more stars!";
   }
 
   function londonDateKey() {
@@ -208,34 +212,15 @@
 
   function unlockRequirementFor(world) {
     if (world === "alphabet") return "";
-    const previous = pathOrder[pathOrder.indexOf(world) - 1] || "alphabet";
-    const snapshot = getProgressSnapshot();
-    if (previous === "alphabet") {
-      const treeComplete = Boolean(snapshot.alphabet && snapshot.alphabet.treeComplete);
-      const practiceCompleted = Number((snapshot.alphabet && snapshot.alphabet.practiceCompletedCount) || 0);
-      const remainingPractice = Math.max(0, 2 - practiceCompleted);
-      if (treeComplete && remainingPractice <= 0) return "Wonderful! Your next world is ready!";
-      if (!treeComplete && remainingPractice <= 0) return "Complete Magical Tree to unlock your next adventure!";
-      if (!treeComplete && remainingPractice === 1) return "Complete Magical Tree and 1 more practice game to unlock your next adventure!";
-      if (!treeComplete) return "Complete Magical Tree and 2 practice games to unlock your next adventure!";
-      return remainingPractice === 1
-        ? "1 more practice game to unlock your next adventure!"
-        : remainingPractice + " more practice games to unlock your next adventure!";
-    }
-    const prevTitle = previous === "words" ? "Word Wonderland"
-      : previous === "animals" ? "Animal Jungle"
-      : previous === "numbers" ? "Number Galaxy"
-      : previous === "colours" ? "Colour Kingdom"
-      : previous === "sentences" ? "Sentence Castle"
-      : previous === "stories" ? "Story Island"
-      : previous === "culture" ? "Sanskrit and Culture"
-      : "previous world";
-    const previousProgress = snapshot.worlds && snapshot.worlds[previous] ? snapshot.worlds[previous] : null;
-    const remainingPractice = Math.max(0, 2 - Number((previousProgress && previousProgress.practiceCompletedCount) || 0));
-    if (remainingPractice <= 0) return "Wonderful! Your next world is ready!";
-    return remainingPractice === 1
-      ? "1 more practice game in " + prevTitle + " to unlock your next adventure!"
-      : remainingPractice + " more practice games in " + prevTitle + " to unlock your next adventure!";
+    return "Keep exploring! Your next adventure awaits!";
+  }
+
+  function scrollChallengeIntoView() {
+    const header = document.querySelector(".site-header");
+    const topPad = header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 90;
+    const rect = panel.getBoundingClientRect();
+    const targetTop = Math.max(0, window.scrollY + rect.top - topPad);
+    window.scrollTo({ top: targetTop, behavior: "smooth" });
   }
 
   function renderWorldCards() {
@@ -336,7 +321,7 @@
     renderChallengeProgress();
     ui.challengeActionBtn.style.display = "none";
     if (daily.completed) {
-      ui.title.textContent = "Today's Challenge Complete";
+      ui.title.textContent = "Challenge of the Day Complete";
       ui.text.textContent = "You completed all five activities today. Come back tomorrow for a new challenge.";
       ui.status.textContent = daily.rewardClaimed ? "Daily reward already claimed today." : "";
       ui.challengeMeta.textContent = "Daily progress is saved on this device.";
@@ -344,7 +329,7 @@
       return;
     }
     if (!daily.started) {
-      ui.title.textContent = "Today's Challenge";
+      ui.title.textContent = "Challenge of the Day";
       ui.text.textContent = "Play five short activities: listening, picture matching, vocabulary, word building, and revision.";
       ui.status.textContent = "";
       ui.challengeMeta.textContent = "Daily reward can be claimed once per day on this device.";
@@ -389,7 +374,7 @@
     renderChallengeProgress();
     const step = challengeSteps[daily.stepIndex];
     if (!step) return;
-    ui.title.textContent = "Today's Challenge: " + step.title;
+    ui.title.textContent = "Challenge of the Day: " + step.title;
     ui.text.textContent = step.prompt;
     ui.status.textContent = "";
     ui.choices.innerHTML = "";
@@ -482,8 +467,8 @@
     if (!isWorldUnlocked(world)) {
       ui.status.textContent = unlockRequirementFor(world);
       panel.classList.add("wrong");
-      setMascotState("incorrect", "Let's finish the unlock challenge first.");
-      document.getElementById("previewPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+      setMascotState("incorrect", "Keep exploring! Your next adventure awaits!");
+      scrollChallengeIntoView();
       return;
     }
     localStorage.setItem(LAST_WORLD_KEY, world);
@@ -524,7 +509,7 @@
     });
     ui.challengeBtn.addEventListener("click", function () {
       startDailyChallenge();
-      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollChallengeIntoView();
     });
     ui.challengeActionBtn.addEventListener("click", function () {
       completeChallengeStep();

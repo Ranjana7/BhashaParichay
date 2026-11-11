@@ -19,5 +19,5 @@ test("message library includes cheerful world and mascot text", () => {
   assert.ok(messagesJs.includes("Namaste, little explorer! I'm Mithu!"));
   assert.ok(messagesJs.includes("alphabetForest"));
   assert.ok(messagesJs.includes("worldWelcome"));
-  assert.ok(messagesJs.includes("Hooray! A new magical world is waiting for you!"));
+  assert.ok(messagesJs.includes("Hooray! Your next adventure is ready!"));
 });

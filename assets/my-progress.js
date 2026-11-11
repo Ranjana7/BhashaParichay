@@ -5,10 +5,10 @@
 
   const worldMeta = [
     { key: "alphabet", title: "Alphabet Forest", total: 9, link: "alphabet-forest.html" },
-    { key: "words", title: "Word Wonderland", total: 3, link: "learning-world.html?world=words" },
     { key: "animals", title: "Animal Jungle", total: 3, link: "learning-world.html?world=animals" },
     { key: "numbers", title: "Number Galaxy", total: 3, link: "learning-world.html?world=numbers" },
     { key: "colours", title: "Colour Kingdom", total: 3, link: "learning-world.html?world=colours" },
+    { key: "words", title: "Word Wonderland", total: 3, link: "learning-world.html?world=words" },
     { key: "sentences", title: "Sentence Castle", total: 3, link: "learning-world.html?world=sentences" },
     { key: "stories", title: "Story Island", total: 3, link: "learning-world.html?world=stories" },
     { key: "culture", title: "Sanskrit and Culture", total: 3, link: "learning-world.html?world=culture" }

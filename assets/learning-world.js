@@ -12,13 +12,13 @@
   const WORLD_KEY = "sanskritParichay.world." + worldKey + ".progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
   const TOTAL = 3;
-  const WORLD_ORDER = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const WORLD_TOTALS = {
     alphabet: 9,
-    words: 3,
     animals: 3,
     numbers: 3,
     colours: 3,
+    words: 3,
     sentences: 3,
     stories: 3,
     culture: 3
@@ -225,6 +225,19 @@
     return Object.values(state.progress.done).filter(Boolean).length;
   }
 
+  function getNextWorldKey() {
+    const index = WORLD_ORDER.indexOf(worldKey);
+    if (index < 0 || index >= WORLD_ORDER.length - 1) return null;
+    return WORLD_ORDER[index + 1];
+  }
+
+  function getNextWorldUrl() {
+    const nextWorld = getNextWorldKey();
+    if (!nextWorld) return "index.html#worlds";
+    if (nextWorld === "alphabet") return "alphabet-forest.html";
+    return "learning-world.html?world=" + nextWorld;
+  }
+
   function rewardKey(activityId) {
     return String(state.progress.lessonIndex) + ":" + String(activityId);
   }
@@ -256,10 +269,11 @@
       ui.worldNextLessonBtn.textContent = "Unlock Next Lesson";
       ui.worldProgressText.textContent = "Great! Unlock the next lesson.";
       pulseWorldIllustration();
+      ui.worldContinueBtn.textContent = "Continue Adventure";
     } else if (lessonDone && isLast) {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "World Completed";
-      ui.worldProgressText.textContent = "World complete! Go back home for the next world.";
+      ui.worldProgressText.textContent = "Hooray! Your next adventure is ready!";
       if (!state.progress.completedLessons.includes(state.progress.lessonIndex)) {
         state.progress.completedLessons.push(state.progress.lessonIndex);
       }
@@ -267,10 +281,19 @@
       setMascot("dance");
       setSpeech(pickMessage("activity-complete", completePool));
       pulseWorldIllustration();
+      const nextWorldKey = getNextWorldKey();
+      const canContinue = nextWorldKey && typeof window.spIsWorldUnlocked === "function"
+        ? window.spIsWorldUnlocked(nextWorldKey, WORLD_ORDER)
+        : Boolean(nextWorldKey);
+      ui.worldContinueBtn.textContent = canContinue ? "Continue Adventure" : "Back to Home";
+      ui.worldContinueBtn.dataset.targetUrl = canContinue ? getNextWorldUrl() : "index.html#worlds";
+      if (canContinue) confetti();
     } else {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "Next Lesson (complete all activities)";
       ui.worldProgressText.textContent = "Finish all activities in this lesson.";
+      ui.worldContinueBtn.textContent = "Continue Adventure";
+      ui.worldContinueBtn.dataset.targetUrl = "index.html#worlds";
     }
   }
 
@@ -352,7 +375,7 @@
           rewardIfFirstTime("match");
           saveProgress();
           renderHeader();
-          ui.matchStatus.textContent = "Shabash!";
+          ui.matchStatus.textContent = "✅ Completed for this lesson.";
           setMascot("correct");
           setSpeech(pickMessage("correct", praisePool));
           confetti();
@@ -393,7 +416,7 @@
           rewardIfFirstTime("listen");
           saveProgress();
           renderHeader();
-          ui.listenStatus.textContent = "Wonderful listening!";
+          ui.listenStatus.textContent = "✅ Completed for this lesson.";
           setMascot("correct");
           setSpeech(pickMessage("correct", praisePool));
           confetti();
@@ -453,7 +476,7 @@
       rewardIfFirstTime("build");
       saveProgress();
       renderHeader();
-      ui.buildStatus.textContent = "Brilliant building!";
+      ui.buildStatus.textContent = "✅ Completed for this lesson.";
       setMascot("correct");
       setSpeech(pickMessage("correct", praisePool));
       confetti();
@@ -563,7 +586,7 @@
     }
     if (ui.worldContinueBtn) {
       ui.worldContinueBtn.addEventListener("click", function () {
-        window.location.href = "index.html#worlds";
+        window.location.href = ui.worldContinueBtn.dataset.targetUrl || "index.html#worlds";
       });
     }
     if (ui.worldBackBtn) {

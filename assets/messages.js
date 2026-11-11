@@ -34,24 +34,24 @@
         "hidden-letter-hunt": "Ready for a hunt? Find the hidden letter!"
       },
       correct: [
-        "Shabash! You got it!",
-        "Wonderful! Let's keep going!",
-        "Yay! You're getting really good!",
-        "Fantastic! Another star for you!",
-        "Brilliant! You found the answer!"
+        "Wonderful! You got it!",
+        "Fantastic! Keep going!",
+        "Brilliant! Another one!",
+        "Yay! You found it!",
+        "Excellent work!"
       ],
       incorrect: [
-        "Oops! Let's try that again!",
-        "Not quite! Have another look!",
-        "You're learning! Give it another try!",
-        "Almost there! You can do it!"
+        "Almost! Let's try again!",
+        "Take another look!",
+        "You're getting closer!",
+        "Let's give it another go!"
       ],
       completed: [
-        "Wow! You did it! Let's celebrate!",
-        "Fantastic work! Ready for another adventure?",
-        "You're becoming a Sanskrit superstar!"
+        "Hooray! You finished this adventure!",
+        "Wonderful! Ready for more?",
+        "Look how much you've learned!"
       ],
-      worldUnlocked: "Hooray! A new magical world is waiting for you!"
+      worldUnlocked: "Hooray! Your next adventure is ready!"
     }
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -4,13 +4,13 @@
   const HOME_KEY = "sanskritParichay.home.progress";
   const FOREST_STATE_KEY = "sanskritParichay.alphabetForest.v3";
   const LEGACY_FOREST_KEY = "sanskritParichay.alphabetForest.progress";
-  const WORLD_ORDER = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const WORLD_META = {
     alphabet: { title: "Alphabet Forest", url: "alphabet-forest.html" },
-    words: { title: "Word Wonderland", url: "learning-world.html?world=words" },
     animals: { title: "Animal Jungle", url: "learning-world.html?world=animals" },
     numbers: { title: "Number Galaxy", url: "learning-world.html?world=numbers" },
     colours: { title: "Colour Kingdom", url: "learning-world.html?world=colours" },
+    words: { title: "Word Wonderland", url: "learning-world.html?world=words" },
     sentences: { title: "Sentence Castle", url: "learning-world.html?world=sentences" },
     stories: { title: "Story Island", url: "learning-world.html?world=stories" },
     culture: { title: "Sanskrit and Culture", url: "learning-world.html?world=culture" }

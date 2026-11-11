@@ -317,7 +317,7 @@
 
   function normalizeWorldOrder(worldOrder) {
     if (Array.isArray(worldOrder) && worldOrder.length) return worldOrder.slice();
-    return ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+    return ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   }
 
   function loadUnlockState(worldOrder) {
@@ -366,9 +366,8 @@
       if (canUnlock) {
         unlocked.push(key);
         changed = true;
-      } else {
-        break;
       }
+      break;
     }
 
     if (changed) {

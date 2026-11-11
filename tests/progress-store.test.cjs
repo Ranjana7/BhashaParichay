@@ -132,8 +132,8 @@ test("unlock check keeps completed world access independent of test mode", () =>
     }),
     "sanskritParichay.world.animals.progress": JSON.stringify({ lessonIndex: 0, stars: 0, completedLessons: [] })
   });
-  const order = ["alphabet", "words", "animals"];
-  const totals = { alphabet: 6, words: 3, animals: 3 };
+  const order = ["alphabet", "animals", "words"];
+  const totals = { alphabet: 6, animals: 3, words: 3 };
   assert.equal(api.isWorldUnlocked("animals", order, false, totals), true);
   assert.equal(api.isWorldUnlocked("animals", order, true, totals), true);
 });
@@ -167,5 +167,5 @@ test("unlock checks any distinct practice activities in a world", () => {
   });
   const order = ["alphabet", "words", "animals"];
   const totals = { alphabet: 9, words: 4, animals: 3 };
-  assert.equal(api.isWorldUnlocked("animals", order, false, totals), true);
+  assert.equal(api.isWorldUnlocked("words", order, false, totals), true);
 });

@@ -8,10 +8,10 @@
   const animate = motion.animate || function () {};
   const worldOrder = [
     { key: "alphabet", title: "Alphabet Forest", subtitle: "Letters, sounds, and foundational games", lessons: 9, iconClass: "forest", cardClass: "world-alphabet", link: "alphabet-forest.html" },
-    { key: "words", title: "Word Wonderland", subtitle: "Nouns and meanings", lessons: 3, iconClass: "word", cardClass: "world-word", link: "learning-world.html?world=words" },
     { key: "animals", title: "Animal Jungle", subtitle: "Animal vocabulary", lessons: 3, iconClass: "jungle", cardClass: "world-jungle", link: "learning-world.html?world=animals" },
     { key: "numbers", title: "Number Galaxy", subtitle: "Counting and number words", lessons: 3, iconClass: "galaxy", cardClass: "world-galaxy", link: "learning-world.html?world=numbers" },
     { key: "colours", title: "Colour Kingdom", subtitle: "Color words", lessons: 3, iconClass: "colour", cardClass: "world-colour", link: "learning-world.html?world=colours" },
+    { key: "words", title: "Word Wonderland", subtitle: "Nouns and meanings", lessons: 3, iconClass: "word", cardClass: "world-word", link: "learning-world.html?world=words" },
     { key: "sentences", title: "Sentence Castle", subtitle: "Sentence building", lessons: 3, iconClass: "sentence", cardClass: "world-sentence", link: "learning-world.html?world=sentences" },
     { key: "stories", title: "Story Island", subtitle: "Story comprehension", lessons: 3, iconClass: "story", cardClass: "world-story", link: "learning-world.html?world=stories" },
     { key: "culture", title: "Sanskrit and Culture", subtitle: "Greetings, values, and culture", lessons: 3, iconClass: "culture", cardClass: "world-culture", link: "learning-world.html?world=culture" }
@@ -51,27 +51,8 @@
 
   function unlockHint(worldKey) {
     if (worldKey === "alphabet") return "";
-    const index = orderKeys.indexOf(worldKey);
-    const previous = orderKeys[index - 1] || "alphabet";
-    if (previous === "alphabet") {
-      const treeComplete = Boolean(snapshot && snapshot.alphabet && snapshot.alphabet.treeComplete);
-      const practiceCompleted = Number((snapshot && snapshot.alphabet && snapshot.alphabet.practiceCompletedCount) || 0);
-      const remainingPractice = Math.max(0, 2 - practiceCompleted);
-      if (treeComplete && remainingPractice <= 0) return "Wonderful! Your next world is ready!";
-      if (!treeComplete && remainingPractice <= 0) return "Complete Magical Tree to unlock your next adventure!";
-      if (!treeComplete && remainingPractice === 1) return "Complete Magical Tree and 1 more practice game to unlock your next adventure!";
-      if (!treeComplete) return "Complete Magical Tree and 2 practice games to unlock your next adventure!";
-      return remainingPractice === 1
-        ? "1 more practice game to unlock your next adventure!"
-        : remainingPractice + " more practice games to unlock your next adventure!";
-    }
-    const previousWorld = worldOrder.find(function (item) { return item.key === previous; });
-    const previousProgress = snapshot && snapshot.worlds && snapshot.worlds[previous] ? snapshot.worlds[previous] : null;
-    const remainingPractice = Math.max(0, 2 - Number((previousProgress && previousProgress.practiceCompletedCount) || 0));
-    if (remainingPractice <= 0) return "Wonderful! Your next world is ready!";
-    return remainingPractice === 1
-      ? "1 more practice game in " + (previousWorld ? previousWorld.title : "the previous world") + " to unlock your next adventure!"
-      : remainingPractice + " more practice games in " + (previousWorld ? previousWorld.title : "the previous world") + " to unlock your next adventure!";
+    if (isUnlocked(worldKey)) return "Hooray! Your next adventure is ready!";
+    return "Keep exploring! Your next adventure awaits!";
   }
 
   grid.innerHTML = "";
