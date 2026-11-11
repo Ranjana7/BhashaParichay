@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#f7fff7"/>
+  <ellipse cx="102" cy="92" rx="34" ry="30" fill="#8f5e3b"/>
+  <ellipse cx="132" cy="86" rx="28" ry="24" fill="#f5f3eb" stroke="#bdb69f" stroke-width="3"/>
+  <path d="M88 58 C96 46,108 40,122 38" stroke="#5a9d46" stroke-width="4" fill="none"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#5a412f">Coconut</text>
+</svg>

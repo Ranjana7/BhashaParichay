@@ -1,0 +1,41 @@
+{
+  "reportDate": "2026-11-10",
+  "scope": "Alphabet Forest content audit",
+  "disclaimer": "This report improves structural consistency and flags issues, but Sanskrit linguistic correctness still requires qualified human review.",
+  "inventoryAudit": {
+    "curriculumSource": "assets/pdf-letter-inventory.js (sourcePdf: 1_AchHal_Pada_Samamnaayah.pdf)",
+    "loadedLetterCount": 48,
+    "fullInventoryItemCount": 48,
+    "conjunctLettersHandledAsIndependent": false,
+    "notes": [
+      "App currently uses the first 48 inventory items.",
+      "OCR-derived examples/transliterations in the inventory remain marked for Sanskrit review."
+    ]
+  },
+  "devanagariRendering": {
+    "fontStack": "Noto Sans Devanagari, Mangal, Nirmala UI, Segoe UI, sans-serif",
+    "writingPracticeMode": "self-assessment (no fake handwriting validation claims)",
+    "testedLettersForCanvasDisplay": ["अ", "आ", "क", "म", "ट", "ष"],
+    "knownIncompleteLetters": []
+  },
+  "activityVocabularyMapping": {
+    "letterGarden": "letter symbol + transliteration + example + meaning from inventory, illustration from vocabulary map when available",
+    "pictureMatch": "structured unique question pool from words with mapped local illustrations",
+    "flashcardFlip": "uses pictureMatch pool; Sanskrit front, meaning+illustration back",
+    "feedMithu": "16 fruit vocabulary items with local fruit illustrations and transliteration"
+  },
+  "reviewRequired": {
+    "sanskritExpertReviewNeeded": true,
+    "itemsRequiringLinguisticValidation": [
+      "All OCR-derived transliterations/meanings in the PDF inventory",
+      "Fruit vocabulary spellings/transliterations used in Feed Mithu",
+      "Any word-level pronunciation acceptance beyond clip playback integrity"
+    ]
+  },
+  "pronunciationStatus": {
+    "enabledInApp": false,
+    "reason": "Existing clip set is not approved for Sanskrit teaching quality.",
+    "fallbackToBrowserSpeech": false,
+    "userFacingMessage": "Pronunciation unavailable until verified Sanskrit audio is approved."
+  }
+}

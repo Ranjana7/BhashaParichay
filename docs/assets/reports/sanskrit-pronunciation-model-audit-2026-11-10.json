@@ -1,0 +1,44 @@
+{
+  "reportDate": "2026-11-10",
+  "scope": "Offline Sanskrit pronunciation options audit",
+  "candidates": [
+    {
+      "name": "EdgeSanskrit",
+      "installedCli": false,
+      "installedPythonPackage": false,
+      "sanskritSupportVerified": false,
+      "offlineGenerationReady": false,
+      "licenseVerified": false,
+      "notes": "No local installation found during audit."
+    },
+    {
+      "name": "AI4Bharat Indic Parler-TTS",
+      "installedCli": false,
+      "installedPythonPackage": false,
+      "sanskritSupportVerified": "pending",
+      "offlineGenerationReady": false,
+      "license": "apache-2.0 (repository metadata)",
+      "modelAvailability": "gated access (requires Hugging Face approval)",
+      "redistributionPermissionsVerified": "pending legal/content review"
+    },
+    {
+      "name": "Vakyansh TTS",
+      "installedCli": false,
+      "installedPythonPackage": false,
+      "sanskritSupportVerified": false,
+      "offlineGenerationReady": false,
+      "licenseVerified": false,
+      "notes": "No local installation found during audit."
+    }
+  ],
+  "sampleGeneration": {
+    "status": "blocked",
+    "reason": "No verified Sanskrit-capable offline model available locally during this audit.",
+    "generatedFiles": []
+  },
+  "appPolicyUpdate": {
+    "currentPronunciationMode": "disabled_until_verified",
+    "browserSpeechFallbackEnabled": false,
+    "teachingRiskGuardrail": "Show unavailable state instead of playing unverified pronunciation."
+  }
+}

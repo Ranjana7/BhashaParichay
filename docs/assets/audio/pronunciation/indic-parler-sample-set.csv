@@ -1,0 +1,16 @@
+type,text,target_file,source_model,status,notes
+vowel-short,अ,samples/indic-parler/a_short.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+vowel-long,आ,samples/indic-parler/aa_long.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+vowel-short,इ,samples/indic-parler/i_short.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+vowel-long,ई,samples/indic-parler/ii_long.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+aspirated_pair,क / ख,samples/indic-parler/ka_kha_pair.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+aspirated_pair,ग / घ,samples/indic-parler/ga_gha_pair.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+dental_retroflex,त / ट,samples/indic-parler/ta_tta_pair.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+dental_retroflex,द / ड,samples/indic-parler/da_dda_pair.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+anusvara,अं,samples/indic-parler/anusvara_am.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+visarga,अः,samples/indic-parler/visarga_ah.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+word,गजः,samples/indic-parler/gajah.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+word,कमलम्,samples/indic-parler/kamalam.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+word,नदी,samples/indic-parler/nadee.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+word,माता,samples/indic-parler/maataa.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required
+word,सेवफलम्,samples/indic-parler/sevaphalam.mp3,ai4bharat/indic-parler-tts,blocked,model is gated; HF auth + access approval required

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#f9f1ff"/>
+  <circle cx="110" cy="88" r="36" fill="#7f4dc5"/>
+  <ellipse cx="130" cy="58" rx="14" ry="8" fill="#5ba14b"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#49306f">Plum</text>
+</svg>

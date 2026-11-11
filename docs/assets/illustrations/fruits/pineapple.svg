@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#fff9ec"/>
+  <ellipse cx="110" cy="90" rx="34" ry="42" fill="#f6c744"/>
+  <path d="M110 34 L120 22 L116 40 L132 28 L122 46 L138 40" stroke="#4f9a3f" stroke-width="4" fill="none"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#7a5d00">Pineapple</text>
+</svg>

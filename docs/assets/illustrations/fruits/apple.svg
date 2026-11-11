@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#fff7f7"/>
+  <ellipse cx="108" cy="92" rx="46" ry="40" fill="#e44b3c"/>
+  <path d="M104 52 C104 40,118 34,128 34" stroke="#7b4a1e" stroke-width="6" fill="none"/>
+  <ellipse cx="134" cy="47" rx="16" ry="10" fill="#5ea84f"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#5a2e2a">Apple</text>
+</svg>

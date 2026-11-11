@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
+  <rect width="220" height="160" rx="16" fill="#fff4f8"/>
+  <circle cx="110" cy="86" r="38" fill="#c23358"/>
+  <path d="M98 46 L104 58 L110 48 L116 58 L122 46" stroke="#8c1f42" stroke-width="4" fill="none"/>
+  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#6b2136">Pomegranate</text>
+</svg>

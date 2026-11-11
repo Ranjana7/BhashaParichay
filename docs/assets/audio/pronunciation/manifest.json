@@ -1,0 +1,39 @@
+{
+  "status": "draft",
+  "policy": {
+    "browserSpeechFallbackEnabled": false,
+    "missingClipMessage": "Pronunciation not available yet."
+  },
+  "inventory": {
+    "auditFile": "assets/audio/pronunciation/alphabet-forest-audio-audit.csv",
+    "audioManifestFile": "assets/audio/pronunciation/audio-manifest.csv",
+    "totalItems": 116,
+    "nonZeroPronunciationFiles": 48
+  },
+  "sourceModelEvaluation": {
+    "model": "ai4bharat/indic-parler-tts",
+    "license": "apache-2.0",
+    "access": "gated",
+    "accessRequirement": "Hugging Face account authentication and explicit model access approval are required before download/inference."
+  },
+  "comparisonSampleSet": {
+    "file": "assets/audio/pronunciation/review-samples/first-pass-letters-20261110",
+    "status": "ready_for_user_review",
+    "letters": [
+      "अ",
+      "आ",
+      "इ",
+      "ई",
+      "ऋ",
+      "क",
+      "ख",
+      "ट",
+      "त",
+      "ष"
+    ]
+  },
+  "review": {
+    "sanskritSpeakerReview": "pending",
+    "notes": "No pronunciation clip is marked verified until Sanskrit speaker review is completed."
+  }
+}
