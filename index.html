@@ -67,7 +67,6 @@
           <div class="hero-actions">
             <div class="star-box">⭐ Stars: <span id="homeStars">0</span></div>
             <div class="star-box">💎 Gems: <span id="homeGems">0</span></div>
-            <button class="button ghost" id="resetProgressBtn" type="button">Reset Progress</button>
           </div>
         </div>
       </div>
@@ -124,7 +123,7 @@
     <section id="previewPanel" class="panel preview-panel" aria-live="polite">
       <h2 id="previewTitle">Challenge of the Day</h2>
       <p id="previewText">Tap “Challenge of the Day” to play your five-step daily quest.</p>
-      <p id="challengeMeta" class="footer-note">Finish the challenge to earn 5 Gems once per day on this device.</p>
+      <p id="challengeMeta" class="footer-note">Finish the challenge to earn 2 Gems once per day on this device.</p>
       <div class="progress-meter" aria-hidden="true">
         <div id="challengeProgressFill" class="progress-fill"></div>
       </div>
@@ -136,16 +135,6 @@
       </div>
     </section>
 
-    <div id="resetConfirmModal" class="reset-confirm-modal" hidden>
-      <div class="reset-confirm-card" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle">
-        <h2 id="resetConfirmTitle">Start a brand-new adventure?</h2>
-        <p>This will clear your stars, gems, and learning progress on this device.</p>
-        <div class="hero-actions">
-          <button id="resetKeepBtn" class="button ghost" type="button">Keep My Adventure</button>
-          <button id="resetStartBtn" class="button primary" type="button">Start Again</button>
-        </div>
-      </div>
-    </div>
   </main>
 
   <script src="assets/vendor/motion.min.js"></script>

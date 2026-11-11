@@ -100,7 +100,7 @@ test("snapshot reports learning/practice counts from alphabet forest v3", () => 
   assert.equal(snapshot.currentWorld, "numbers");
   assert.equal(snapshot.alphabet.learningCompletedCount, 2);
   assert.equal(snapshot.alphabet.practiceCompletedCount, 1);
-  assert.equal(snapshot.alphabet.unlocked, false);
+  assert.equal(snapshot.alphabet.unlocked, true);
   assert.equal(snapshot.totals.learningActivitiesCompleted, 2);
   assert.equal(snapshot.totals.practiceActivitiesCompleted, 1);
 });

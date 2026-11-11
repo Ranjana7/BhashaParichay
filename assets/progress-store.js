@@ -9,8 +9,9 @@
   const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
   const WORLD_UNLOCKS_KEY = "sanskritParichay.world.unlocks.v1";
   const LETTER_COUNT = 48;
-  const NEXT_WORLD_UNLOCK_KEY = "next-world-unlock-v1";
-  const MIN_PRACTICE_FOR_UNLOCK = 2;
+  const UNLOCK_STAR_TARGET = 50;
+  const UNLOCK_GEM_TARGET = 1;
+  const CHALLENGE_GEMS_PER_DAY = 2;
   const FOREST_ACTIVITY_IDS = [
     "magical-tree",
     "letter-garden",
@@ -24,7 +25,7 @@
   ];
   const FOREST_LEARNING_IDS = ["magical-tree", "letter-garden"];
   const FOREST_PRACTICE_IDS = FOREST_ACTIVITY_IDS.filter(function (id) { return !FOREST_LEARNING_IDS.includes(id); });
-  const WORLD_PRACTICE_IDS = ["match", "listen", "build"];
+  const WORLD_ACTIVITY_IDS = ["match", "listen", "build"];
   const LEGACY_DONE_MAP = {
     hear: "hear-and-pick",
     picture: "picture-match",
@@ -100,6 +101,32 @@
     };
   }
 
+  function getForestCurrentRewards(forestState) {
+    const state = sanitizeForestState(forestState || loadForestState());
+    let questionStars = 0;
+    let activityBonusStars = 0;
+    let currentGems = 0;
+    let lifetimeGems = 0;
+    FOREST_ACTIVITY_IDS.forEach(function (id) {
+      const activity = state.activities[id] || createActivityState();
+      const completedCount = normalizeIndexList(activity.completedItems, LETTER_COUNT - 1).length;
+      questionStars += completedCount;
+      if (activity.isComplete) {
+        activityBonusStars += 5;
+        currentGems += 1;
+      }
+      if (state.completionRewarded && (state.completionRewarded["gem:" + id] || state.completionRewarded[id])) {
+        lifetimeGems += 1;
+      }
+    });
+    return {
+      currentStars: questionStars + activityBonusStars,
+      currentGems: currentGems,
+      lifetimeStars: Math.max(0, Math.floor(Number(state.xp || 0))),
+      lifetimeGems: lifetimeGems
+    };
+  }
+
   function sanitizeForestState(input) {
     const state = createForestState();
     if (!input || typeof input !== "object") return state;
@@ -161,12 +188,6 @@
       });
     }
     migrated.xp = Number.isFinite(legacy.stars) ? Math.max(0, Math.floor(legacy.stars)) : 0;
-    if (migrated.activities["magical-tree"].isComplete) {
-      const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
-        return count + (migrated.activities[id].isComplete ? 1 : 0);
-      }, 0);
-      if (practiceDone >= MIN_PRACTICE_FOR_UNLOCK) migrated.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
-    }
     return sanitizeForestState(migrated);
   }
 
@@ -214,12 +235,6 @@
       merged = merged ? mergeForestStates(merged, migrated) : migrated;
     });
     if (!merged) return null;
-    if (merged.activities["magical-tree"].isComplete) {
-      const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
-        return count + (merged.activities[id].isComplete ? 1 : 0);
-      }, 0);
-      if (practiceDone >= MIN_PRACTICE_FOR_UNLOCK) merged.completionRewarded[NEXT_WORLD_UNLOCK_KEY] = true;
-    }
     return sanitizeForestState(merged);
   }
 
@@ -246,17 +261,19 @@
     const practiceCompleted = FOREST_PRACTICE_IDS.reduce(function (count, id) {
       return count + (activities[id] && activities[id].isComplete ? 1 : 0);
     }, 0);
-    const treeComplete = Boolean(activities["magical-tree"] && activities["magical-tree"].isComplete);
-    const unlockedByRule = treeComplete && practiceCompleted >= MIN_PRACTICE_FOR_UNLOCK;
-    const unlockedEarned = Boolean(state.completionRewarded && state.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
+    const rewards = getForestCurrentRewards(state);
+    const unlockedByRule = rewards.currentStars >= UNLOCK_STAR_TARGET && rewards.currentGems >= UNLOCK_GEM_TARGET;
     return {
-      treeComplete: treeComplete,
+      treeComplete: Boolean(activities["magical-tree"] && activities["magical-tree"].isComplete),
       learningCompletedCount: learningCompleted,
       practiceCompletedCount: practiceCompleted,
       unlockedByRule: unlockedByRule,
-      unlocked: unlockedByRule || unlockedEarned,
-      unlockedEarned: unlockedEarned,
-      stars: Number(state.xp || 0),
+      unlocked: unlockedByRule,
+      unlockedEarned: false,
+      stars: rewards.lifetimeStars,
+      currentStars: rewards.currentStars,
+      currentGems: rewards.currentGems,
+      lifetimeGems: rewards.lifetimeGems,
       activities: FOREST_ACTIVITY_IDS.map(function (id) {
         const activity = activities[id] || createActivityState();
         return {
@@ -274,9 +291,14 @@
     const fallback = {
       lessonIndex: 0,
       stars: 0,
+      gems: 0,
       completedLessons: [],
       done: { match: false, listen: false, build: false },
-      practiceCompleted: { match: false, listen: false, build: false }
+      practiceCompleted: { match: false, listen: false, build: false },
+      completedActivities: {},
+      rewardedActivities: {},
+      rewardedGroupBonuses: {},
+      rewardedActivityGems: {}
     };
     const raw = readJson("sanskritParichay.world." + worldKey + ".progress", fallback) || fallback;
     const completedLessons = Array.isArray(raw.completedLessons)
@@ -286,10 +308,15 @@
       : [];
     const lessonIndex = clampIndex(Number(raw.lessonIndex || 0), Math.max(0, totalLessons - 1));
     const stars = Number.isFinite(raw.stars) ? Math.max(0, Math.floor(raw.stars)) : 0;
+    const gems = Number.isFinite(raw.gems) ? Math.max(0, Math.floor(raw.gems)) : 0;
     const done = raw.done && typeof raw.done === "object" ? raw.done : {};
     const persistedPractice = raw.practiceCompleted && typeof raw.practiceCompleted === "object" ? raw.practiceCompleted : {};
+    const completedActivities = raw.completedActivities && typeof raw.completedActivities === "object" ? raw.completedActivities : {};
+    const rewardedActivities = raw.rewardedActivities && typeof raw.rewardedActivities === "object" ? raw.rewardedActivities : {};
+    const rewardedGroupBonuses = raw.rewardedGroupBonuses && typeof raw.rewardedGroupBonuses === "object" ? raw.rewardedGroupBonuses : {};
+    const rewardedActivityGems = raw.rewardedActivityGems && typeof raw.rewardedActivityGems === "object" ? raw.rewardedActivityGems : {};
     const practiceCompleted = {};
-    WORLD_PRACTICE_IDS.forEach(function (id) {
+    WORLD_ACTIVITY_IDS.forEach(function (id) {
       practiceCompleted[id] = Boolean((persistedPractice && persistedPractice[id]) || (done && done[id]));
     });
     Object.keys(done || {}).forEach(function (id) {
@@ -303,15 +330,35 @@
     const practiceCompletedCount = Object.keys(practiceCompleted).reduce(function (count, id) {
       return count + (practiceCompleted[id] ? 1 : 0);
     }, 0);
+    const completionKeys = Object.keys(completedActivities).filter(function (key) { return Boolean(completedActivities[key]); });
+    const currentQuestionStars = completionKeys.length;
+    const lessonsWithAllDone = [];
+    for (let lessonIdx = 0; lessonIdx < totalLessons; lessonIdx += 1) {
+      const allDone = WORLD_ACTIVITY_IDS.every(function (activityId) {
+        return Boolean(completedActivities[String(lessonIdx) + ":" + activityId]);
+      });
+      if (allDone) lessonsWithAllDone.push(lessonIdx);
+    }
+    const currentBonusStars = lessonsWithAllDone.length * 5;
+    const currentGems = completionKeys.length;
+    const currentStars = currentQuestionStars + currentBonusStars;
     return {
       lessonIndex: lessonIndex,
       stars: stars,
+      gems: gems,
       completedLessons: completedLessons,
       completedLessonsCount: completedLessons.length,
       totalLessons: totalLessons,
       isComplete: completedLessons.length >= totalLessons,
       practiceCompleted: practiceCompleted,
-      practiceCompletedCount: practiceCompletedCount
+      practiceCompletedCount: practiceCompletedCount,
+      completedActivities: completedActivities,
+      rewardedActivities: rewardedActivities,
+      rewardedGroupBonuses: rewardedGroupBonuses,
+      rewardedActivityGems: rewardedActivityGems,
+      currentStars: currentStars,
+      currentGems: currentGems,
+      unlockEligible: currentStars >= UNLOCK_STAR_TARGET && currentGems >= UNLOCK_GEM_TARGET
     };
   }
 
@@ -346,8 +393,7 @@
     const order = normalizeWorldOrder(worldOrder);
     const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
     const previousState = loadUnlockState(order).unlocked.slice();
-    const forest = loadForestState();
-    const alphabet = getAlphabetJourney(forest);
+    const alphabet = getAlphabetJourney(loadForestState());
     const unlocked = ["alphabet"];
 
     for (let index = 1; index < order.length; index += 1) {
@@ -355,11 +401,11 @@
       const previous = order[index - 1];
       let canUnlock = false;
       if (previous === "alphabet") {
-        canUnlock = Boolean(alphabet.treeComplete && alphabet.practiceCompletedCount >= MIN_PRACTICE_FOR_UNLOCK);
+        canUnlock = Boolean(alphabet.currentStars >= UNLOCK_STAR_TARGET && alphabet.currentGems >= UNLOCK_GEM_TARGET);
       } else {
         const totalLessons = Number(totals[previous] || 3);
         const previousProgress = loadWorldProgress(previous, totalLessons);
-        canUnlock = previousProgress.practiceCompletedCount >= MIN_PRACTICE_FOR_UNLOCK;
+        canUnlock = Boolean(previousProgress.currentStars >= UNLOCK_STAR_TARGET && previousProgress.currentGems >= UNLOCK_GEM_TARGET);
       }
       if (!canUnlock) break;
       unlocked.push(key);
@@ -379,6 +425,7 @@
     const alphabet = getAlphabetJourney(forest);
     const worlds = {};
     let worldStars = 0;
+    let worldGems = 0;
     let worldsExplored = 0;
     let completedWorlds = 0;
     order.forEach(function (worldKey) {
@@ -387,6 +434,7 @@
       const progress = loadWorldProgress(worldKey, totalLessons);
       worlds[worldKey] = progress;
       worldStars += progress.stars;
+      worldGems += progress.gems;
       if (progress.lessonIndex > 0 || progress.completedLessonsCount > 0 || progress.stars > 0 || progress.practiceCompletedCount > 0) {
         worldsExplored += 1;
       }
@@ -404,6 +452,10 @@
         practiceActivitiesCompleted: alphabet.practiceCompletedCount,
         forestActivitiesCompleted: alphabet.activities.filter(function (activity) { return activity.isComplete; }).length,
         stars: alphabet.stars + worldStars
+      },
+      rewards: {
+        lifetimeStars: alphabet.stars + worldStars,
+        lifetimeGems: getHomeRewardState().challengeGems + alphabet.lifetimeGems + worldGems
       }
     };
   }
@@ -418,18 +470,61 @@
 
   function syncHomeAggregate(worldOrder, totalsByWorld) {
     const snapshot = getProgressSnapshot(worldOrder, totalsByWorld);
-    const existing = readJson(HOME_KEY, { gems: 0, completed: [] }) || { gems: 0, completed: [] };
+    const existing = getHomeRewardState();
     const completedWorldKeys = Object.keys(snapshot.worlds).filter(function (worldKey) {
       return snapshot.worlds[worldKey].isComplete;
     });
-    const fallbackGems = Number(existing.xp || 0);
-    const existingGems = Number.isFinite(Number(existing.gems)) ? Number(existing.gems) : fallbackGems;
+    const worldGems = Object.keys(snapshot.worlds).reduce(function (count, key) {
+      return count + Number((snapshot.worlds[key] && snapshot.worlds[key].gems) || 0);
+    }, 0);
+    const alphabetGems = Number(snapshot.alphabet && snapshot.alphabet.lifetimeGems || 0);
+    const challengeGems = Number(existing.challengeGems || 0);
+    const computedLifetimeGems = Math.max(0, Math.floor(worldGems + alphabetGems + challengeGems));
+    const lifetimeGems = Math.max(Math.max(0, Math.floor(Number(existing.gems || 0))), computedLifetimeGems);
     const merged = {
-      gems: Math.max(0, Math.floor(Number.isFinite(existingGems) ? existingGems : 0)),
-      completed: completedWorldKeys
+      gems: lifetimeGems,
+      challengeGems: challengeGems,
+      completed: completedWorldKeys,
+      lifetimeStars: Number(snapshot.totals.stars || 0)
     };
     writeJson(HOME_KEY, merged);
     return merged;
+  }
+
+  function getHomeRewardState() {
+    const existing = readJson(HOME_KEY, { gems: 0, completed: [] }) || { gems: 0, completed: [] };
+    const challengeGems = Number.isFinite(Number(existing.challengeGems))
+      ? Math.max(0, Math.floor(Number(existing.challengeGems)))
+      : 0;
+    const legacyXp = Number.isFinite(Number(existing.xp))
+      ? Math.max(0, Math.floor(Number(existing.xp)))
+      : 0;
+    const gems = Number.isFinite(Number(existing.gems))
+      ? Math.max(0, Math.floor(Number(existing.gems)))
+      : legacyXp;
+    return {
+      gems: gems,
+      challengeGems: challengeGems,
+      completed: Array.isArray(existing.completed) ? existing.completed.slice() : []
+    };
+  }
+
+  function awardDailyChallengeGems(dateKey) {
+    const key = CHALLENGE_KEY + ".rewards";
+    const rewards = readJson(key, { days: {}, totalGems: 0 }) || { days: {}, totalGems: 0 };
+    if (!rewards.days || typeof rewards.days !== "object") rewards.days = {};
+    if (dateKey && rewards.days[dateKey]) return false;
+    if (dateKey) rewards.days[dateKey] = true;
+    rewards.totalGems = Math.max(0, Math.floor(Number(rewards.totalGems || 0))) + CHALLENGE_GEMS_PER_DAY;
+    writeJson(key, rewards);
+    const home = getHomeRewardState();
+    home.challengeGems = rewards.totalGems;
+    writeJson(HOME_KEY, {
+      gems: Math.max(0, Math.floor(Number(home.gems || 0))),
+      challengeGems: home.challengeGems,
+      completed: home.completed
+    });
+    return true;
   }
 
   function resetProgress(worldOrder) {
@@ -446,6 +541,41 @@
     });
     saveUnlockState({ unlocked: ["alphabet"] }, order);
     localStorage.setItem(LAST_WORLD_KEY, "alphabet");
+    return true;
+  }
+
+  function resetWorldProgress(worldKey, worldOrder, totalsByWorld) {
+    const order = normalizeWorldOrder(worldOrder);
+    const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
+    if (!order.includes(worldKey)) return false;
+    if (worldKey === "alphabet") {
+      const state = sanitizeForestState(loadForestState());
+      FOREST_ACTIVITY_IDS.forEach(function (activityId) {
+        const prev = state.activities[activityId] || createActivityState();
+        const next = createActivityState();
+        next.rewardedItems = normalizeIndexList(prev.rewardedItems || [], LETTER_COUNT - 1);
+        state.activities[activityId] = next;
+      });
+      state.worldCompleted = false;
+      writeJson(FOREST_V3_KEY, state);
+    } else {
+      const totalLessons = Number(totals[worldKey] || 3);
+      const progress = loadWorldProgress(worldKey, totalLessons);
+      writeJson("sanskritParichay.world." + worldKey + ".progress", {
+        lessonIndex: 0,
+        stars: Number(progress.stars || 0),
+        gems: Number(progress.gems || 0),
+        completedLessons: [],
+        done: { match: false, listen: false, build: false },
+        practiceCompleted: { match: false, listen: false, build: false },
+        completedActivities: {},
+        rewardedActivities: progress.rewardedActivities || {},
+        rewardedGroupBonuses: progress.rewardedGroupBonuses || {},
+        rewardedActivityGems: progress.rewardedActivityGems || {}
+      });
+    }
+    syncSequentialUnlocks(order, totals);
+    syncHomeAggregate(order, totals);
     return true;
   }
 
@@ -467,6 +597,8 @@
     isWorldUnlocked: isWorldUnlocked,
     syncHomeAggregate: syncHomeAggregate,
     syncSequentialUnlocks: syncSequentialUnlocks,
-    resetProgress: resetProgress
+    resetProgress: resetProgress,
+    resetWorldProgress: resetWorldProgress,
+    awardDailyChallengeGems: awardDailyChallengeGems
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -63,7 +63,7 @@ test("global panel uses learning/practice/stars/unlock summary", () => {
   assert.ok(html.includes('id="practiceProgressText"'));
   assert.ok(html.includes('id="nextWorldStatus"'));
   assert.ok(html.includes('id="globalStars"'));
-  assert.ok(html.includes("Complete Magical Tree and 2 practice games"));
+  assert.ok(html.includes("Unlock target for next world: 50 stars and 1 gem in Alphabet Forest."));
   assert.equal(html.includes("2 of 7"), false);
   assert.equal(html.includes("0 of 9 activities complete"), false);
   assert.equal(html.includes('id="lessonStatsPanel"'), false);
@@ -150,22 +150,17 @@ test("feed mithu uses fruit question pool between 15 and 20 entries", () => {
   assert.ok(js.includes("animateFruitToMithu"));
 });
 
-test("write-it-yourself uses self-check flow without fake machine validation", () => {
+test("write-it-yourself uses automatic tolerant handwriting validation", () => {
   assert.ok(html.includes('id="traceSelfCheck"'));
-  assert.ok(html.includes("Does your writing look like this?"));
-  assert.equal(html.includes('id="traceSelfCheckLetter"'), false);
   assert.ok(html.includes('class="trace-work-area"'));
   assert.ok(html.includes('class="trace-canvas-wrap"'));
-  assert.ok(html.includes("Yes, I did it!"));
-  assert.ok(html.includes("Let me try again!"));
   assert.ok(html.includes(">Check My Writing<"));
   assert.ok(html.includes(">Clear<"));
-  assert.ok(js.includes("const WRITING_VALIDATION_AVAILABLE = false;"));
+  assert.ok(js.includes("const WRITING_VALIDATION_AVAILABLE = true;"));
   assert.ok(js.includes("Let's write our letter first!"));
-  assert.ok(js.includes("openTraceSelfCheck("));
-  assert.ok(js.includes("closeTraceSelfCheck("));
+  assert.ok(js.includes("evaluateTraceAgainstLetter("));
+  assert.ok(js.includes("normalizeAlphaMask("));
   assert.ok(js.includes("showTraceFlowerBurst("));
-  assert.equal(js.includes("validateTraceAgainstLetter("), false);
 });
 
 test("alphabet forest does not render end-of-page review notes", () => {
@@ -188,11 +183,11 @@ test("auto progression uses cancellable timers and manual controls", () => {
   assert.ok(js.includes("ACTIVITY_META[activityId].type === \"quiz\" || ACTIVITY_META[activityId].type === \"letter\""));
 });
 
-test("next world unlock condition requires magical tree and 2 practice completions", () => {
+test("next world unlock condition requires 50 stars and 1 gem", () => {
   assert.ok(js.includes("const LEARNING_ACTIVITY_IDS = [\"magical-tree\", \"letter-garden\"]"));
-  assert.ok(js.includes("const NEXT_WORLD_UNLOCK_KEY = \"next-world-unlock-v1\""));
-  assert.ok(js.includes("forestState.activities[\"magical-tree\"]"));
-  assert.ok(js.includes("journey.practiceCompletedCount >= 2"));
+  assert.ok(js.includes("const UNLOCK_STAR_TARGET = 50;"));
+  assert.ok(js.includes("const UNLOCK_GEM_TARGET = 1;"));
+  assert.ok(js.includes("isNextWorldUnlocked()"));
 });
 
 test("letter garden derives selected tab and subgroup from current letter", () => {

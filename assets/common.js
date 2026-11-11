@@ -168,14 +168,25 @@
   }
 
   function getContinueUrl() {
-    const world = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
+    const world = getRouteWorldKey() || localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
     const current = WORLD_META[world] || WORLD_META.alphabet;
     return current.url;
   }
 
   function getCurrentWorldMeta() {
-    const key = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
+    const key = getRouteWorldKey() || localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
     return WORLD_META[key] || WORLD_META.alphabet;
+  }
+
+  function getRouteWorldKey() {
+    const path = window.location.pathname.split("/").pop() || "";
+    if (path === "alphabet-forest.html") return "alphabet";
+    if (path === "learning-world.html") {
+      const query = new URLSearchParams(window.location.search);
+      const key = query.get("world");
+      if (key && WORLD_META[key]) return key;
+    }
+    return null;
   }
 
   function attachCurrentWorldLinks() {
@@ -205,15 +216,14 @@
   }
 
   function resetProgress() {
-    if (window.SPProgressStore && typeof window.SPProgressStore.resetProgress === "function") {
-      window.SPProgressStore.resetProgress(WORLD_ORDER);
-      return true;
+    return false;
+  }
+
+  function resetWorldProgress(worldKey, worldOrder, worldTotals) {
+    if (window.SPProgressStore && typeof window.SPProgressStore.resetWorldProgress === "function") {
+      return window.SPProgressStore.resetWorldProgress(worldKey, worldOrder || WORLD_ORDER, worldTotals || WORLD_TOTALS);
     }
-    localStorage.removeItem(HOME_KEY);
-    localStorage.removeItem(FOREST_STATE_KEY);
-    localStorage.removeItem(LEGACY_FOREST_KEY);
-    localStorage.setItem(LAST_WORLD_KEY, "alphabet");
-    return true;
+    return false;
   }
 
   function renderTestModeBadge() {
@@ -448,8 +458,7 @@
   window.spGetRewards = function spGetRewards(worldOrder, worldTotals) {
     const snapshot = window.spGetProgressSnapshot(worldOrder, worldTotals);
     const home = readJson(HOME_KEY, { gems: 0 });
-    const legacyXp = Number(home && home.xp || 0);
-    const gems = Number.isFinite(Number(home && home.gems)) ? Number(home.gems) : legacyXp;
+    const gems = Number.isFinite(Number(home && home.gems)) ? Number(home.gems) : 0;
     return {
       stars: Number((snapshot && snapshot.totals && snapshot.totals.stars) || 0),
       gems: Math.max(0, Math.floor(Number.isFinite(gems) ? gems : 0))
@@ -464,6 +473,7 @@
   window.SP_WORLD_ORDER = WORLD_ORDER.slice();
   window.SP_WORLD_META = Object.assign({}, WORLD_META);
   window.SP_WORLD_TOTALS = Object.assign({}, WORLD_TOTALS);
+  window.spResetWorldProgress = resetWorldProgress;
 
   attachCurrentWorldLinks();
   renderTestModeBadge();

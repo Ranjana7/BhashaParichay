@@ -103,10 +103,6 @@
     challengeBtn: document.getElementById("challengeBtn"),
     challengeSubtitle: document.getElementById("challengeSubtitle"),
     playNowBtn: document.getElementById("playNowBtn"),
-    resetBtn: document.getElementById("resetProgressBtn"),
-    resetModal: document.getElementById("resetConfirmModal"),
-    resetKeepBtn: document.getElementById("resetKeepBtn"),
-    resetStartBtn: document.getElementById("resetStartBtn"),
     worldCards: document.querySelectorAll(".world-card"),
     lottieButterflyOne: document.getElementById("lottieButterflyOne"),
     lottieButterflyTwo: document.getElementById("lottieButterflyTwo"),
@@ -121,10 +117,6 @@
     window.spSyncProgressModel(pathOrder, worldTotals);
   }
   const snapshot = getProgressSnapshot();
-  if (ui.resetModal) ui.resetModal.hidden = true;
-  window.addEventListener("pageshow", function () {
-    if (ui.resetModal) ui.resetModal.hidden = true;
-  });
   renderStats();
   renderChallengeIdle();
   wireUi();
@@ -233,7 +225,21 @@
 
   function unlockRequirementFor(world) {
     if (world === "alphabet") return "";
-    return "Keep exploring! Your next adventure awaits!";
+    const orderIndex = pathOrder.indexOf(world);
+    if (orderIndex <= 0) return "Locked";
+    const previous = pathOrder[orderIndex - 1];
+    const snapshot = getProgressSnapshot();
+    if (previous === "alphabet" && snapshot.alphabet) {
+      const stars = Number(snapshot.alphabet.currentStars || 0);
+      const gems = Number(snapshot.alphabet.currentGems || 0);
+      return "Unlock " + (window.SP_WORLD_META[previous] ? window.SP_WORLD_META[previous].title : previous)
+        + ": " + stars + "/50 stars, " + gems + "/1 gem";
+    }
+    const prevWorld = snapshot.worlds && snapshot.worlds[previous];
+    const stars = Number(prevWorld && prevWorld.currentStars || 0);
+    const gems = Number(prevWorld && prevWorld.currentGems || 0);
+    return "Unlock " + (window.SP_WORLD_META[previous] ? window.SP_WORLD_META[previous].title : previous)
+      + ": " + stars + "/50 stars, " + gems + "/1 gem";
   }
 
   function scrollChallengeIntoView() {
@@ -400,7 +406,7 @@
     if (daily.completed) {
       ui.title.textContent = "Challenge of the Day Complete";
       ui.text.textContent = "You completed all five activities today. Come back tomorrow for a new challenge.";
-      ui.status.textContent = daily.rewardClaimed ? "Today's 5 Gem reward has already been collected." : "";
+      ui.status.textContent = daily.rewardClaimed ? "Today's 2 Gem reward has already been collected." : "";
       ui.challengeMeta.textContent = "Daily progress is saved on this device.";
       ui.choices.innerHTML = "";
       return;
@@ -409,7 +415,7 @@
       ui.title.textContent = "Challenge of the Day";
       ui.text.textContent = "Play five short activities: listening, picture matching, vocabulary, word building, and revision.";
       ui.status.textContent = "";
-      ui.challengeMeta.textContent = "Finish the challenge to earn 5 Gems once per day on this device.";
+      ui.challengeMeta.textContent = "Finish the challenge to earn 2 Gems once per day on this device.";
       ui.choices.innerHTML = "";
       return;
     }
@@ -427,18 +433,24 @@
       daily.completed = true;
       daily.stepIndex = challengeSteps.length;
       if (!daily.rewardClaimed) {
-        state.gems += 5;
+        if (window.SPProgressStore && typeof window.SPProgressStore.awardDailyChallengeGems === "function") {
+          window.SPProgressStore.awardDailyChallengeGems(daily.date);
+        } else {
+          state.gems += 2;
+          saveHomeState();
+        }
         daily.rewardClaimed = true;
-        saveHomeState();
       }
+      if (typeof window.spSyncProgressModel === "function") window.spSyncProgressModel(pathOrder, worldTotals);
       saveDailyProgress();
       renderChallengeProgress();
       ui.challengeActionBtn.style.display = "none";
       ui.choices.innerHTML = "";
       ui.title.textContent = "Challenge Complete!";
       ui.text.textContent = "You finished all five challenge activities.";
-      ui.status.textContent = "🎉 +5 Gems awarded for today.";
-      setMascotState("dance", "Hooray! You earned 5 magical Gems!");
+      ui.status.textContent = "🎉 +2 Gems awarded for today.";
+      setMascotState("dance", "Hooray! You earned 2 magical Gems!");
+      renderStats();
       launchGemRewardAnimation();
       launchConfettiBurst();
       if (typeof window.spFlowerRain === "function") window.spFlowerRain(panel, { density: 24, durationMs: 2600 });
@@ -584,12 +596,6 @@
   }
 
   function wireUi() {
-    document.querySelectorAll('.main-nav a[href="index.html"]').forEach(function (link) {
-      link.addEventListener("click", function () {
-        if (ui.resetModal) ui.resetModal.hidden = true;
-      });
-    });
-
     ui.worldCards.forEach(function (card) {
       const world = card.getAttribute("data-world");
       const iconLeaves = card.querySelectorAll(".world-icon i");
@@ -614,34 +620,6 @@
     if (ui.playNowBtn) {
       ui.playNowBtn.addEventListener("click", function () {
         localStorage.setItem(LAST_WORLD_KEY, "alphabet");
-      });
-    }
-    if (ui.resetBtn && ui.resetModal && ui.resetKeepBtn && ui.resetStartBtn) {
-      ui.resetBtn.addEventListener("click", function () {
-        ui.resetModal.hidden = false;
-      });
-      ui.resetKeepBtn.addEventListener("click", function () {
-        ui.resetModal.hidden = true;
-      });
-      ui.resetStartBtn.addEventListener("click", function () {
-        ui.resetModal.hidden = true;
-        if (typeof window.spResetProgress === "function") {
-          window.spResetProgress();
-        }
-        state.gems = 0;
-        state.completed = [];
-        daily.started = false;
-        daily.stepIndex = 0;
-        daily.completed = false;
-        daily.rewardClaimed = false;
-        saveHomeState();
-        saveDailyProgress();
-        panel.classList.remove("correct", "wrong");
-        ui.status.textContent = "";
-        renderChallengeIdle();
-        renderStats();
-        renderWorldCards();
-        setMascotState("greeting", "Welcome back! Let's begin a brand-new adventure.");
       });
     }
   }

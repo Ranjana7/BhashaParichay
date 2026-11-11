@@ -1,15 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160">
-  <rect width="240" height="160" rx="18" fill="#eaf6ff"/>
-  <ellipse cx="132" cy="98" rx="70" ry="36" fill="#8f9fb6"/>
-  <ellipse cx="83" cy="84" rx="34" ry="30" fill="#95a7bf"/>
-  <ellipse cx="63" cy="88" rx="18" ry="23" fill="#8090a8"/>
-  <ellipse cx="68" cy="89" rx="10" ry="16" fill="#6f7f97"/>
-  <path d="M93 94 C106 96,112 106,112 120 C112 132,102 140,92 136 C86 133,84 127,86 123 C88 119,93 118,96 121 C99 124,98 128,96 130 C100 130,103 126,103 120 C103 111,98 102,91 100 Z" fill="#7f8fa8"/>
-  <circle cx="79" cy="79" r="3.7" fill="#1f2a3f"/>
-  <ellipse cx="100" cy="89" rx="12" ry="10" fill="#cfd8e4"/>
-  <rect x="94" y="113" width="16" height="28" rx="8" fill="#7e8ea6"/>
-  <rect x="124" y="114" width="16" height="28" rx="8" fill="#7e8ea6"/>
-  <rect x="151" y="112" width="16" height="30" rx="8" fill="#7e8ea6"/>
-  <rect x="176" y="111" width="16" height="31" rx="8" fill="#7e8ea6"/>
-  <path d="M192 89 C206 95,210 108,201 118" fill="none" stroke="#7f8fa8" stroke-width="7" stroke-linecap="round"/>
+  <rect width="240" height="160" rx="16" fill="#e9f5ff"/>
+  <ellipse cx="122" cy="136" rx="90" ry="14" fill="#d4e7f8"/>
+  <ellipse cx="136" cy="92" rx="72" ry="40" fill="#8fa2b8"/>
+  <ellipse cx="84" cy="82" rx="34" ry="30" fill="#98acc3"/>
+  <ellipse cx="70" cy="86" rx="23" ry="28" fill="#879bb1"/>
+  <path d="M62 94 C62 108,67 118,77 124 C88 131,91 144,82 148 C73 152,63 146,60 136 C57 124,51 110,47 102 Z" fill="#7a8ea4"/>
+  <ellipse cx="90" cy="92" rx="16" ry="20" fill="#c8d5e5"/>
+  <circle cx="78" cy="78" r="4" fill="#1f2a3f"/>
+  <circle cx="79.4" cy="76.6" r="1.2" fill="#fff"/>
+  <path d="M78 89 C83 90,87 90,91 88" fill="none" stroke="#6f8298" stroke-width="2" stroke-linecap="round"/>
+  <path d="M103 101 C111 95,117 95,125 100" fill="none" stroke="#f7f9ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M104 105 C112 99,118 99,126 104" fill="none" stroke="#f7f9ff" stroke-width="4" stroke-linecap="round"/>
+  <rect x="96" y="116" width="16" height="28" rx="8" fill="#7f93a9"/>
+  <rect x="126" y="118" width="16" height="26" rx="8" fill="#7f93a9"/>
+  <rect x="156" y="116" width="16" height="28" rx="8" fill="#7f93a9"/>
+  <rect x="182" y="114" width="16" height="30" rx="8" fill="#7f93a9"/>
+  <path d="M198 92 C212 96,217 108,210 118" fill="none" stroke="#7f93a9" stroke-width="7" stroke-linecap="round"/>
+  <path d="M42 116 C30 126,24 140,26 150" fill="none" stroke="#7a8ea4" stroke-width="5" stroke-linecap="round"/>
 </svg>

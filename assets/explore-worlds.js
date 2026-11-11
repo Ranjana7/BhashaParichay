@@ -79,7 +79,20 @@
   function unlockHint(worldKey) {
     if (worldKey === "alphabet") return "";
     if (isUnlocked(worldKey)) return "Hooray! Your next adventure is ready!";
-    return "Keep exploring! Your next adventure awaits!";
+    const index = orderKeys.indexOf(worldKey);
+    if (index <= 0 || !snapshot) return "Locked";
+    const previous = orderKeys[index - 1];
+    if (previous === "alphabet") {
+      const stars = Number(snapshot.alphabet && snapshot.alphabet.currentStars || 0);
+      const gems = Number(snapshot.alphabet && snapshot.alphabet.currentGems || 0);
+      return "Unlock " + (worldMeta[previous] ? worldMeta[previous].title : previous) + ": "
+        + stars + "/50 stars, " + gems + "/1 gem";
+    }
+    const prev = snapshot.worlds && snapshot.worlds[previous];
+    const stars = Number(prev && prev.currentStars || 0);
+    const gems = Number(prev && prev.currentGems || 0);
+    return "Unlock " + (worldMeta[previous] ? worldMeta[previous].title : previous) + ": "
+      + stars + "/50 stars, " + gems + "/1 gem";
   }
 
   grid.innerHTML = "";
