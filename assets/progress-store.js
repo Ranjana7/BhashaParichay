@@ -418,12 +418,14 @@
 
   function syncHomeAggregate(worldOrder, totalsByWorld) {
     const snapshot = getProgressSnapshot(worldOrder, totalsByWorld);
-    const existing = readJson(HOME_KEY, { xp: 0, completed: [] }) || { xp: 0, completed: [] };
+    const existing = readJson(HOME_KEY, { gems: 0, completed: [] }) || { gems: 0, completed: [] };
     const completedWorldKeys = Object.keys(snapshot.worlds).filter(function (worldKey) {
       return snapshot.worlds[worldKey].isComplete;
     });
+    const fallbackGems = Number(existing.xp || 0);
+    const existingGems = Number.isFinite(Number(existing.gems)) ? Number(existing.gems) : fallbackGems;
     const merged = {
-      xp: Math.max(Number(existing.xp || 0), snapshot.totals.stars),
+      gems: Math.max(0, Math.floor(Number.isFinite(existingGems) ? existingGems : 0)),
       completed: completedWorldKeys
     };
     writeJson(HOME_KEY, merged);

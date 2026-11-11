@@ -377,11 +377,21 @@
       }
     };
   };
+  window.spGetRewards = function spGetRewards(worldOrder, worldTotals) {
+    const snapshot = window.spGetProgressSnapshot(worldOrder, worldTotals);
+    const home = readJson(HOME_KEY, { gems: 0 });
+    const legacyXp = Number(home && home.xp || 0);
+    const gems = Number.isFinite(Number(home && home.gems)) ? Number(home.gems) : legacyXp;
+    return {
+      stars: Number((snapshot && snapshot.totals && snapshot.totals.stars) || 0),
+      gems: Math.max(0, Math.floor(Number.isFinite(gems) ? gems : 0))
+    };
+  };
   window.spSyncProgressModel = function spSyncProgressModel(worldOrder, worldTotals) {
     if (window.SPProgressStore && typeof window.SPProgressStore.syncHomeAggregate === "function") {
       return window.SPProgressStore.syncHomeAggregate(worldOrder, worldTotals);
     }
-    return readJson(HOME_KEY, { xp: 0, completed: [] });
+    return readJson(HOME_KEY, { gems: 0, completed: [] });
   };
   window.SP_WORLD_ORDER = WORLD_ORDER.slice();
   window.SP_WORLD_META = Object.assign({}, WORLD_META);

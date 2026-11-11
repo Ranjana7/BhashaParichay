@@ -1160,6 +1160,15 @@ body.audio-disabled .audio-control {
   font-weight: 800;
 }
 
+.gem-reward-fly {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  font-size: 1.35rem;
+  filter: drop-shadow(0 3px 5px rgba(72, 48, 140, 0.25));
+  will-change: transform, opacity;
+}
+
 .progress-meter {
   width: 100%;
   height: 10px;

@@ -51,6 +51,7 @@
     worldIllustrationSparkle: document.getElementById("worldIllustrationSparkle"),
     worldLessonPath: document.getElementById("worldLessonPath"),
     worldStars: document.getElementById("worldStars"),
+    worldGems: document.getElementById("worldGems"),
     worldDone: document.getElementById("worldDone"),
     worldProgressFill: document.getElementById("worldProgressFill"),
     worldProgressText: document.getElementById("worldProgressText"),
@@ -263,6 +264,12 @@
     ui.worldLessonObjective.textContent = lesson.objective;
     if (ui.worldPrevLessonBtn) ui.worldPrevLessonBtn.disabled = state.progress.lessonIndex === 0;
     ui.worldStars.textContent = String(state.progress.stars);
+    if (ui.worldGems) {
+      const rewards = typeof window.spGetRewards === "function"
+        ? window.spGetRewards(WORLD_ORDER, WORLD_TOTALS)
+        : { gems: 0 };
+      ui.worldGems.textContent = String(Number(rewards.gems || 0));
+    }
     ui.worldDone.textContent = String(doneCount());
     ui.worldProgressFill.style.width = Math.round((doneCount() / TOTAL) * 100) + "%";
 

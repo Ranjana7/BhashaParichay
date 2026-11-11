@@ -184,3 +184,16 @@ test("stale out-of-order unlocks are corrected to strict sequence", () => {
   const persisted = JSON.parse(storage.getItem("sanskritParichay.world.unlocks.v1"));
   assert.deepEqual(persisted.unlocked, ["alphabet"]);
 });
+
+test("home aggregate preserves gems and migrates legacy xp fallback", () => {
+  const { api, storage } = loadStore({
+    "sanskritParichay.home.progress": JSON.stringify({ xp: 14, completed: [] })
+  });
+  api.syncHomeAggregate(
+    ["alphabet", "animals", "numbers"],
+    { alphabet: 9, animals: 3, numbers: 3 }
+  );
+  const merged = JSON.parse(storage.getItem("sanskritParichay.home.progress"));
+  assert.equal(merged.gems, 14);
+  assert.ok(Array.isArray(merged.completed));
+});

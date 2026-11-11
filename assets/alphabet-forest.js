@@ -27,6 +27,7 @@
   const PRACTICE_ACTIVITY_IDS = ACTIVITIES
     .map(function (activity) { return activity.id; })
     .filter(function (activityId) { return !LEARNING_ACTIVITY_IDS.includes(activityId); });
+  const HOME_KEY = "sanskritParichay.home.progress";
   const NEXT_WORLD_UNLOCK_KEY = "next-world-unlock-v1";
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
@@ -144,6 +145,7 @@
     nextWorldStatus: document.getElementById("nextWorldStatus"),
     unlockHintText: document.getElementById("unlockHintText"),
     globalStars: document.getElementById("globalStars"),
+    globalGems: document.getElementById("globalGems"),
     treeLetters: document.getElementById("magicalTreeLetters"),
     treeSparkleLottie: document.getElementById("treeSparkleLottie"),
     treeCelebrationLottie: document.getElementById("treeCelebrationLottie"),
@@ -1230,6 +1232,17 @@
       ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
     }
     if (ui.globalStars) ui.globalStars.textContent = String(forestState.xp);
+    if (ui.globalGems) {
+      let gems = 0;
+      try {
+        const home = JSON.parse(localStorage.getItem(HOME_KEY) || "{}");
+        const fallback = Number(home.xp || 0);
+        gems = Number.isFinite(Number(home.gems)) ? Number(home.gems) : fallback;
+      } catch (_error) {
+        gems = 0;
+      }
+      ui.globalGems.textContent = String(Math.max(0, Math.floor(Number(gems) || 0)));
+    }
   }
 
   function renderMagicalTree() {

@@ -96,7 +96,7 @@
     homeReturningMessage: document.getElementById("homeReturningMessage"),
     homeHeroSubtitle: document.getElementById("homeHeroSubtitle"),
     homeStars: document.getElementById("homeStars"),
-    homeXp: document.getElementById("homeXp"),
+    homeGems: document.getElementById("homeGems"),
     continueBtn: document.getElementById("continueBtn"),
     challengeBtn: document.getElementById("challengeBtn"),
     challengeSubtitle: document.getElementById("challengeSubtitle"),
@@ -135,7 +135,7 @@
     ui.homeReturningMessage.textContent = homeMsg.returning || "Welcome back! Ready to continue your adventure?";
   }
   if (ui.challengeSubtitle) {
-    ui.challengeSubtitle.textContent = "Play a little extra and collect more stars!";
+    ui.challengeSubtitle.textContent = "Play a little extra and collect more stars and gems!";
   }
 
   function londonDateKey() {
@@ -154,14 +154,16 @@
   function loadHomeState() {
     try {
       const raw = localStorage.getItem(HOME_KEY);
-      if (!raw) return { xp: 0, completed: [] };
+      if (!raw) return { gems: 0, completed: [] };
       const data = JSON.parse(raw);
+      const legacyXp = Number(data.xp || 0);
+      const gems = Number.isFinite(Number(data.gems)) ? Number(data.gems) : legacyXp;
       return {
-        xp: Number(data.xp || 0),
+        gems: Math.max(0, Math.floor(Number.isFinite(gems) ? gems : 0)),
         completed: Array.isArray(data.completed) ? data.completed : []
       };
     } catch (_error) {
-      return { xp: 0, completed: [] };
+      return { gems: 0, completed: [] };
     }
   }
 
@@ -212,9 +214,19 @@
   }
 
   function renderStats() {
-    const latest = getProgressSnapshot();
-    ui.homeStars.textContent = String((latest.totals && latest.totals.stars) || 0);
-    ui.homeXp.textContent = String(state.xp);
+    let stars = 0;
+    let gems = state.gems;
+    if (typeof window.spGetRewards === "function") {
+      const rewards = window.spGetRewards(pathOrder, worldTotals);
+      stars = Number(rewards.stars || 0);
+      gems = Number(rewards.gems || 0);
+    } else {
+      const latest = getProgressSnapshot();
+      stars = Number((latest.totals && latest.totals.stars) || 0);
+    }
+    if (ui.homeStars) ui.homeStars.textContent = String(stars);
+    if (ui.homeGems) ui.homeGems.textContent = String(gems);
+    state.gems = gems;
   }
 
   function unlockRequirementFor(world) {
@@ -291,6 +303,39 @@
     });
   }
 
+  function launchGemRewardAnimation() {
+    if (!ui.homeGems) return;
+    const counterRect = ui.homeGems.getBoundingClientRect();
+    const startRect = panel.getBoundingClientRect();
+    const originX = startRect.left + Math.min(startRect.width * 0.45, 300);
+    const originY = startRect.top + 120;
+    for (let i = 0; i < 5; i += 1) {
+      const gem = document.createElement("span");
+      gem.className = "gem-reward-fly";
+      gem.textContent = "💎";
+      gem.style.left = originX + "px";
+      gem.style.top = originY + "px";
+      document.body.appendChild(gem);
+      const tx = (counterRect.left + counterRect.width * 0.5) - originX + ((i - 2) * 10);
+      const ty = (counterRect.top + counterRect.height * 0.5) - originY - (i * 6);
+      animate(
+        gem,
+        {
+          transform: [
+            "translate3d(0px, 0px, 0) scale(0.8)",
+            "translate3d(" + Math.round(tx * 0.55) + "px, " + Math.round((ty * 0.45) - 28) + "px, 0) scale(1.12)",
+            "translate3d(" + Math.round(tx) + "px, " + Math.round(ty) + "px, 0) scale(0.45)"
+          ],
+          opacity: [0, 1, 1, 0]
+        },
+        { duration: 1.05, delay: i * 0.08, easing: "ease-out" }
+      );
+      window.setTimeout(function () {
+        gem.remove();
+      }, 1450 + i * 80);
+    }
+  }
+
   function initHomeLottie() {
     if (!window.lottie) return;
     const butterflies = [ui.lottieButterflyOne, ui.lottieButterflyTwo, ui.lottieButterflyThree].filter(Boolean);
@@ -330,7 +375,7 @@
     if (daily.completed) {
       ui.title.textContent = "Challenge of the Day Complete";
       ui.text.textContent = "You completed all five activities today. Come back tomorrow for a new challenge.";
-      ui.status.textContent = daily.rewardClaimed ? "Daily reward already claimed today." : "";
+      ui.status.textContent = daily.rewardClaimed ? "Today's 5 Gem reward has already been collected." : "";
       ui.challengeMeta.textContent = "Daily progress is saved on this device.";
       ui.choices.innerHTML = "";
       return;
@@ -339,7 +384,7 @@
       ui.title.textContent = "Challenge of the Day";
       ui.text.textContent = "Play five short activities: listening, picture matching, vocabulary, word building, and revision.";
       ui.status.textContent = "";
-      ui.challengeMeta.textContent = "Daily reward can be claimed once per day on this device.";
+      ui.challengeMeta.textContent = "Finish the challenge to earn 5 Gems once per day on this device.";
       ui.choices.innerHTML = "";
       return;
     }
@@ -357,7 +402,7 @@
       daily.completed = true;
       daily.stepIndex = challengeSteps.length;
       if (!daily.rewardClaimed) {
-        state.xp += 25;
+        state.gems += 5;
         daily.rewardClaimed = true;
         saveHomeState();
       }
@@ -367,8 +412,9 @@
       ui.choices.innerHTML = "";
       ui.title.textContent = "Challenge Complete!";
       ui.text.textContent = "You finished all five challenge activities.";
-      ui.status.textContent = "🎉 +25 XP awarded once for today.";
-      setMascotState("dance", "Fantastic! You completed today's full challenge.");
+      ui.status.textContent = "🎉 +5 Gems awarded for today.";
+      setMascotState("dance", "Hooray! You earned 5 magical Gems!");
+      launchGemRewardAnimation();
       launchConfettiBurst();
       if (window.spApplause && !(window.SP_STATE && window.SP_STATE.muted)) window.spApplause();
       return;
@@ -538,7 +584,7 @@
         if (typeof window.spResetProgress === "function") {
           window.spResetProgress();
         }
-        state.xp = 0;
+        state.gems = 0;
         state.completed = [];
         daily.started = false;
         daily.stepIndex = 0;
