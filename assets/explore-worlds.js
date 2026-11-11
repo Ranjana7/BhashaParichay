@@ -49,6 +49,15 @@
     return { completed: 0, total: totalLessons };
   }
 
+  function unlockHint(worldKey) {
+    if (worldKey === "alphabet") return "";
+    const index = orderKeys.indexOf(worldKey);
+    const previous = orderKeys[index - 1] || "alphabet";
+    if (previous === "alphabet") return "Unlock by completing Magical Tree and any two practice games in Alphabet Forest.";
+    const previousWorld = worldOrder.find(function (item) { return item.key === previous; });
+    return "Unlock by completing any two practice activities in " + (previousWorld ? previousWorld.title : "the previous world") + ".";
+  }
+
   grid.innerHTML = "";
   worldOrder.forEach(function (world) {
     const unlocked = isUnlocked(world.key);
@@ -80,11 +89,3 @@
     status.textContent = "World progress is saved locally on this device.";
   }
 })();
-  function unlockHint(worldKey) {
-    if (worldKey === "alphabet") return "";
-    const index = orderKeys.indexOf(worldKey);
-    const previous = orderKeys[index - 1] || "alphabet";
-    if (previous === "alphabet") return "Unlock by completing Magical Tree and any two practice games in Alphabet Forest.";
-    const previousWorld = worldOrder.find(function (item) { return item.key === previous; });
-    return "Unlock by completing any two practice activities in " + (previousWorld ? previousWorld.title : "the previous world") + ".";
-  }
