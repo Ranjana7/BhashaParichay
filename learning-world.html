@@ -29,8 +29,6 @@
         <div class="hero-actions">
           <button id="worldPrevLessonBtn" class="button ghost" type="button">Previous Lesson</button>
           <button id="worldNextLessonBtn" class="button secondary" type="button" disabled>Next Lesson (complete all activities)</button>
-          <button id="worldContinueBtn" class="button primary" type="button">Continue Adventure</button>
-          <button id="worldResetBtn" class="button ghost" type="button">Reset World Progress</button>
           <button id="worldBackBtn" class="button ghost" type="button">Back to Home</button>
         </div>
       </div>
@@ -86,6 +84,10 @@
           <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
         </svg>
         <p id="worldMascotSpeech" class="mascot-speech">Namaste! Ready for your next magical Sanskrit step?</p>
+        <div id="worldUnlockInvite" class="mascot-invite" hidden>
+          <button id="worldUnlockInviteBtn" class="button primary tiny" type="button">✨ Let's Go Together! →</button>
+          <button id="worldUnlockDismissBtn" class="button ghost tiny" type="button">Maybe later</button>
+        </div>
       </div>
       <p class="privacy-note">
         Privacy: no account, no ads, no trackers. Progress is saved only on this browser.
@@ -115,6 +117,7 @@
       <h2>Activity 1: Match Meaning</h2>
       <div class="activity">
         <p id="matchPrompt">Prompt</p>
+        <div class="hero-actions"><button id="restartMatchActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
         <div id="matchChoices" class="choices"></div>
         <p id="matchStatus" class="status" aria-live="polite"></p>
       </div>
@@ -125,6 +128,7 @@
       <div class="activity">
         <p id="listenPrompt">Prompt</p>
         <button id="playListenBtn" class="button secondary" type="button">▶ Play word</button>
+        <div class="hero-actions"><button id="restartListenActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
         <div id="listenChoices" class="choices"></div>
         <p id="listenStatus" class="status" aria-live="polite"></p>
       </div>
@@ -134,6 +138,7 @@
       <h2>Activity 3: Build the Phrase</h2>
       <div class="activity">
         <p id="buildPrompt">Prompt</p>
+        <div class="hero-actions"><button id="restartBuildActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
         <div id="buildTiles" class="tiles"></div>
         <p><strong>Your answer:</strong> <span id="buildAnswer"></span></p>
         <div class="hero-actions">
@@ -155,9 +160,9 @@
   <script src="assets/vendor/canvas-confetti.min.js"></script>
   <script src="assets/site-config.js?v=20261111u1"></script>
   <script src="assets/messages.js?v=20261111u4"></script>
-  <script src="assets/progress-store.js?v=20261111u6"></script>
+  <script src="assets/progress-store.js?v=20261111u7"></script>
   <script src="assets/common.js?v=20261111u11"></script>
   <script src="assets/worlds-data.js?v=20261111u1"></script>
-  <script src="assets/learning-world.js?v=20261111u11"></script>
+  <script src="assets/learning-world.js?v=20261111u12"></script>
 </body>
 </html>

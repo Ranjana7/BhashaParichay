@@ -1,11 +1,14 @@
 (function initAlphabetForestV4() {
-  const AUDIO_ENABLED = false;
+  const AUDIO_ENABLED = true;
   const WRITING_VALIDATION_AVAILABLE = true;
   const LETTER_COUNT = 48;
   const TREE_GROUP_SIZE = 5;
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+  const UNLOCK_EVENT_KEY = "sanskritParichay.unlock.event.alphabet";
+  const UNLOCK_INVITE_KEY = "sanskritParichay.unlock.invite.alphabet";
   const CORE = window.SPAlphabetForestCore;
   const MESSAGE_SET = (window.SP_MESSAGES && window.SP_MESSAGES.alphabetForest) || {};
   const VOCAB = window.SP_VOCABULARY_MAP || { words: {}, fallback: { image: "", alt: "" } };
@@ -135,10 +138,12 @@
     jumpNav: document.getElementById("activityJumpNav"),
     muteToggle: document.getElementById("muteToggle"),
     testSoundBtn: document.getElementById("testSoundBtn"),
-    resetWorldBtn: document.getElementById("resetWorldBtn"),
     audioDisclaimer: document.getElementById("audioDisclaimer"),
     lessonMascot: document.getElementById("lessonMascot"),
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
+    worldUnlockInvite: document.getElementById("worldUnlockInvite"),
+    worldUnlockInviteBtn: document.getElementById("worldUnlockInviteBtn"),
+    worldUnlockDismissBtn: document.getElementById("worldUnlockDismissBtn"),
     globalSummary: document.getElementById("globalProgressSummary"),
     learningProgressText: document.getElementById("learningProgressText"),
     practiceProgressText: document.getElementById("practiceProgressText"),
@@ -217,12 +222,12 @@
     completionScreen: document.getElementById("completionScreen"),
     completionStars: document.getElementById("completionStars"),
     completionTitle: document.getElementById("completionTitle"),
-    completionMessage: document.getElementById("completionMessage"),
-    completionNextBtn: document.getElementById("completionNextBtn")
+    completionMessage: document.getElementById("completionMessage")
   };
 
   const stateApi = CORE.createStateApi(window.localStorage, letters.length);
   const forestState = stateApi.loadState();
+  if (!Number.isFinite(Number(forestState.gems))) forestState.gems = 0;
   stateApi.saveState(forestState);
 
   const runtime = {
@@ -272,14 +277,13 @@
   initMascotCompanion();
   initTreeControls();
   initLetterGardenControls();
-  initWorldResetControl();
+  initUnlockInviteControls();
   initArrangeControls();
   initFlashControls();
   initTracingCanvas();
   initConfetti();
   initLottieAnimations();
   initActivityControls();
-  initCompletionActions();
   renderAll();
 
   function getActivityItemCount(activityId) {
@@ -517,6 +521,14 @@
     return selected;
   }
 
+  function toTitleCaseLabel(value) {
+    const text = String(value || "").trim();
+    if (!text) return "";
+    return text.split(/\s+/).map(function (part) {
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    }).join(" ");
+  }
+
   function updateMascotSpeechForActivity(activityId) {
     setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Ready? Let's try this together!", {
       priority: 1,
@@ -742,8 +754,6 @@
           runtime.treeGroupAdvanceTimer = null;
         }
         if (!forestState.activities["magical-tree"].isComplete) return;
-        const ok = window.confirm("Play Magical Tree again from the first group?");
-        if (!ok) return;
         const treeState = forestState.activities["magical-tree"];
         treeState.currentIndex = 0;
         treeState.completedItems = [];
@@ -777,32 +787,6 @@
             return letter.category === "consonant" && (letter.subgroup || "other") === subgroup;
           });
         }
-
-        function initWorldResetControl() {
-          if (!ui.resetWorldBtn) return;
-          ui.resetWorldBtn.addEventListener("click", function () {
-            const ok = window.confirm("Reset only Alphabet Forest learning progress? Lifetime stars, gems, and XP will stay saved.");
-            if (!ok) return;
-            if (typeof window.spResetWorldProgress === "function") {
-              window.spResetWorldProgress("alphabet", ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"], { alphabet: 9, animals: 3, numbers: 3, colours: 3, words: 3, sentences: 3, stories: 3, culture: 3 });
-            }
-            const refreshed = stateApi.loadState();
-            Object.keys(forestState).forEach(function (key) { delete forestState[key]; });
-            Object.assign(forestState, refreshed);
-            runtime.byActivity = {};
-            ACTIVITY_IDS.forEach(function (activityId) {
-              runtime.byActivity[activityId] = { status: "", selected: "", tempAnswer: "", flipped: false, optionOrderByQuestion: {} };
-            });
-            if (runtime.treeGroupAdvanceTimer) {
-              window.clearTimeout(runtime.treeGroupAdvanceTimer);
-              runtime.treeGroupAdvanceTimer = null;
-            }
-            clearTraceBoard();
-            saveAndRender();
-            setMascotSpeech("Alphabet Forest reset. Let's begin again!", { priority: 3, holdMs: 2600, force: true, tone: "instruction" });
-            setMascotState("pointing");
-          });
-        }
         saveAndRender();
       });
     });
@@ -814,6 +798,40 @@
     if (ui.continueToPracticeBtn) ui.continueToPracticeBtn.addEventListener("click", function () {
       dispatchActivityAction("letter-garden", "continue");
     });
+  }
+
+  function getNextWorldFromOrder() {
+    return WORLD_ORDER.length > 1 ? WORLD_ORDER[1] : null;
+  }
+
+  function showUnlockInvite() {
+    if (!ui.worldUnlockInvite) return;
+    ui.worldUnlockInvite.hidden = false;
+  }
+
+  function hideUnlockInvite() {
+    if (!ui.worldUnlockInvite) return;
+    ui.worldUnlockInvite.hidden = true;
+  }
+
+  function initUnlockInviteControls() {
+    hideUnlockInvite();
+    if (ui.worldUnlockInviteBtn) {
+      ui.worldUnlockInviteBtn.addEventListener("click", function () {
+        const nextWorld = getNextWorldFromOrder();
+        if (!nextWorld) return;
+        localStorage.setItem("sanskritParichay.lastWorld", nextWorld);
+        localStorage.removeItem(UNLOCK_INVITE_KEY);
+        const target = nextWorld === "alphabet" ? "alphabet-forest.html" : ("learning-world.html?world=" + nextWorld);
+        window.location.href = target;
+      });
+    }
+    if (ui.worldUnlockDismissBtn) {
+      ui.worldUnlockDismissBtn.addEventListener("click", function () {
+        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed");
+        hideUnlockInvite();
+      });
+    }
   }
 
   function initArrangeControls() {
@@ -852,16 +870,34 @@
 
   function initTracingCanvas() {
     if (!ui.traceCanvas) return;
+    if (ui.traceCanvas.dataset.initialized === "true") return;
     const ctx = ui.traceCanvas.getContext("2d");
     if (!ctx) return;
+    ui.traceCanvas.dataset.initialized = "true";
+    ui.traceCanvas.style.touchAction = "none";
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.lineWidth = 8;
     ctx.strokeStyle = "#4b63cf";
 
+    function syncCanvasSize() {
+      const rect = ui.traceCanvas.getBoundingClientRect();
+      const width = Math.max(280, Math.floor(rect.width || 420));
+      const height = Math.max(160, Math.floor(rect.height || 220));
+      if (ui.traceCanvas.width === width && ui.traceCanvas.height === height) return;
+      ui.traceCanvas.width = width;
+      ui.traceCanvas.height = height;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "#4b63cf";
+      runtime.tracing.points = [];
+      runtime.tracing.reviewed = false;
+    }
+
     function getPoint(event) {
       const rect = ui.traceCanvas.getBoundingClientRect();
-      const source = event.touches ? event.touches[0] : event;
+      const source = event;
       return {
         x: (source.clientX - rect.left) * (ui.traceCanvas.width / rect.width),
         y: (source.clientY - rect.top) * (ui.traceCanvas.height / rect.height)
@@ -869,7 +905,12 @@
     }
 
     function startDraw(event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      syncCanvasSize();
       runtime.tracing.drawing = true;
+      if (event.pointerId !== undefined && ui.traceCanvas.setPointerCapture) {
+        ui.traceCanvas.setPointerCapture(event.pointerId);
+      }
       const point = getPoint(event);
       runtime.tracing.points.push(point);
       ctx.beginPath();
@@ -888,13 +929,13 @@
       runtime.tracing.drawing = false;
     }
 
+    syncCanvasSize();
+    window.addEventListener("resize", syncCanvasSize);
     ui.traceCanvas.addEventListener("pointerdown", startDraw);
     ui.traceCanvas.addEventListener("pointermove", moveDraw);
     ui.traceCanvas.addEventListener("pointerup", endDraw);
     ui.traceCanvas.addEventListener("pointerleave", endDraw);
-    ui.traceCanvas.addEventListener("touchstart", startDraw, { passive: false });
-    ui.traceCanvas.addEventListener("touchmove", moveDraw, { passive: false });
-    ui.traceCanvas.addEventListener("touchend", endDraw);
+    ui.traceCanvas.addEventListener("pointercancel", endDraw);
 
     if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
       clearTraceBoard();
@@ -1196,7 +1237,7 @@
         '<button class="button secondary" type="button" data-action="next">Next</button>' +
         '<button class="button secondary" type="button" data-action="finish" hidden>Finish Activity</button>' +
         '<button class="button primary" type="button" data-action="continue" hidden>Continue to Next Activity</button>' +
-        '<button class="button ghost" type="button" data-action="restart">Restart Activity</button>' +
+        '<button class="button ghost tiny" type="button" data-action="restart">🔄 Restart Activity</button>' +
         "</div>" +
         '<p class="status" id="status-' + activity.id + '" aria-live="polite"></p>' +
         '<p class="activity-complete-note" id="complete-' + activity.id + '" tabindex="-1"></p>';
@@ -1302,8 +1343,8 @@
     }
     setActivityStatus(activityId, message);
     if (activity && activity.completedItems.length >= activity.order.length && !activity.isComplete) {
-      CORE.finalizeActivity(forestState, activityId);
-      ensureActivityCompletionRewards(activityId);
+      const finalized = CORE.finalizeActivity(forestState, activityId);
+      ensureActivityCompletionRewards(activityId, finalized);
     }
     if (ACTIVITY_META[activityId].type !== "tree") {
       if (activity.isComplete) {
@@ -1371,7 +1412,7 @@
         saveAndRender();
         return;
       }
-      ensureActivityCompletionRewards(activityId);
+      ensureActivityCompletionRewards(activityId, true);
       setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "finish-status"));
       fireConfetti(false);
       triggerFlowerRain(ACTIVITY_META[activityId].sectionId, { density: 26, durationMs: 2800 });
@@ -1388,14 +1429,10 @@
       return;
     }
     if (action === "restart") {
-      if (!activity.isComplete) return;
-      const ok = window.confirm(activityId === "letter-garden"
-        ? "Replay Letter Garden from the first letter? Your stars and completion stay saved."
-        : "Restart this completed activity from item 1?");
-      if (!ok) return;
       if (activityId === "letter-garden") {
-        activity.currentIndex = 0;
-        setActivityStatus(activityId, "Replay started from letter 1. Your completion is still saved.");
+        CORE.resetActivity(forestState, activityId);
+        forestState.activities[activityId].currentIndex = 0;
+        setActivityStatus(activityId, "Let's practise again! Every try makes us better!");
         saveAndRender();
         return;
       }
@@ -1404,7 +1441,7 @@
       if (activityId === "letter-tracing") {
         clearTraceBoard();
       }
-      setActivityStatus(activityId, "");
+      setActivityStatus(activityId, "Let's practise again! Every try makes us better!");
       saveAndRender();
       return;
     }
@@ -1446,34 +1483,20 @@
   }
 
   function getCurrentForestRewards() {
-    let questionStars = 0;
-    let bonusStars = 0;
-    let currentGems = 0;
-    ACTIVITY_IDS.forEach(function (activityId) {
-      const activity = forestState.activities[activityId];
-      if (!activity) return;
-      questionStars += activity.completedItems.length;
-      if (activity.isComplete) {
-        bonusStars += 5;
-        currentGems += 1;
-      }
-    });
+    const currentGems = Math.max(0, Math.floor(Number(forestState.gems || 0)));
     return {
-      currentStars: questionStars + bonusStars,
+      currentStars: Math.max(0, Math.floor(Number(forestState.xp || 0))),
       currentGems: currentGems
     };
   }
 
-  function ensureActivityCompletionRewards(activityId) {
-    const bonusKey = "bonus:" + activityId;
-    const gemKey = "gem:" + activityId;
-    if (!forestState.completionRewarded[bonusKey]) {
-      forestState.completionRewarded[bonusKey] = true;
-      forestState.xp += 5;
+  function ensureActivityCompletionRewards(activityId, finalizedNow) {
+    if (!finalizedNow) return;
+    if (!forestState.completionRewarded[activityId]) {
+      forestState.completionRewarded[activityId] = true;
     }
-    if (!forestState.completionRewarded[gemKey]) {
-      forestState.completionRewarded[gemKey] = true;
-    }
+    forestState.xp += 5;
+    forestState.gems = Math.max(0, Math.floor(Number(forestState.gems || 0))) + 1;
   }
 
   function isNextWorldUnlocked() {
@@ -1531,6 +1554,7 @@
     const activityId = "magical-tree";
     const activity = forestState.activities[activityId];
     if (!ui.treeLetters) return;
+    activity.currentIndex = Math.max(0, Math.min(letters.length - 1, Number(activity.currentIndex || 0)));
     const groupIndex = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
     const groupStart = groupIndex * TREE_GROUP_SIZE;
     const groupEndExclusive = Math.min(groupStart + TREE_GROUP_SIZE, letters.length);
@@ -1555,11 +1579,12 @@
     ];
     groupLetters.forEach(function (letter, offset) {
       const letterIndex = groupStart + offset;
+      const slot = slots[offset] || { x: 50 + offset * 3, y: 34 + offset * 2 };
       const button = document.createElement("button");
       button.type = "button";
       button.className = "tree-letter-btn";
-      button.style.left = slots[offset].x + "%";
-      button.style.top = slots[offset].y + "%";
+      button.style.left = slot.x + "%";
+      button.style.top = slot.y + "%";
       button.innerHTML =
         '<span class="tree-ornament">' +
         '<span class="tree-petal-ring" aria-hidden="true"></span>' +
@@ -1577,7 +1602,7 @@
         window.setTimeout(function () { button.classList.remove("just-picked"); }, 650);
         if (!activity.completedItems.includes(letterIndex)) {
           CORE.markCurrentItemCompleted(forestState, activityId, 1);
-          growTreeBloom(slots[offset]);
+          growTreeBloom(slot);
           playLottie("treeSparkle");
           setActivityStatus(activityId, "Wonderful! Letter discovered!");
           setMascotSpeech("Wonderful! You're doing great!", { priority: 3, holdMs: 3000, tone: "correct" });
@@ -1598,8 +1623,8 @@
               return;
             }
             if (!activity.isComplete && activity.completedItems.length >= letters.length) {
-              CORE.finalizeActivity(forestState, activityId);
-              ensureActivityCompletionRewards(activityId);
+              const finalized = CORE.finalizeActivity(forestState, activityId);
+              ensureActivityCompletionRewards(activityId, finalized);
               setMascotState("dancing");
               fireConfetti(true);
               triggerFlowerRain("forestScene", { density: 30, durationMs: 3200 });
@@ -1863,7 +1888,7 @@
       btn.className = "choice-btn picture-choice";
       btn.innerHTML =
         '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
-        '<span class="picture-label">' + option.sanskrit + "</span>";
+        '<span class="picture-label">' + toTitleCaseLabel(option.meaning || option.alt || option.sanskrit) + "</span>";
       btn.addEventListener("click", function () {
         cancelAutoAdvance(activityId);
         if (btn.disabled) return;
@@ -1872,6 +1897,8 @@
         if (option.id === item.id) {
           btn.classList.add("correct");
           ui.pictureChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.disabled = true; });
+          const wordLetter = letters.find(function (letter) { return letter.id === item.id; });
+          if (wordLetter) playLetterAudio(wordLetter, 1, ui.pictureStatus);
           animate(btn, { transform: ["scale(1)", "scale(1.06)", "scale(1)"] }, { duration: 0.35, easing: "ease-out" });
           playSuccessSound("chime");
           fireConfetti(false);
@@ -2121,7 +2148,7 @@
         continueBtn.hidden = !state.isComplete;
         continueBtn.disabled = !state.isComplete;
       }
-      if (restart) restart.disabled = !state.isComplete;
+      if (restart) restart.disabled = false;
     });
   }
 
@@ -2135,12 +2162,20 @@
     forestState.worldCompleted = unlocked;
     if (unlocked && !wasCompleted) {
       stateApi.saveState(forestState);
-      setMascotStateForDuration("dancing", 1250);
-      setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
-      fireConfetti(true);
-      fireSectionConfetti("completionScreen", true);
-      playLottie("treeCelebrate");
+      const hasCelebrated = localStorage.getItem(UNLOCK_EVENT_KEY) === "true";
+      localStorage.setItem(UNLOCK_INVITE_KEY, "visible");
+      if (!hasCelebrated) {
+        localStorage.setItem(UNLOCK_EVENT_KEY, "true");
+        setMascotStateForDuration("dancing", 1250);
+        setMascotSpeech("🌟 Hooray! You earned 50 stars and 1 gem! A magical new world is unlocked! Shall we explore it together? 🎉", { priority: 6, holdMs: 6500, force: true, tone: "world" });
+        fireConfetti(true);
+        fireSectionConfetti("completionScreen", true);
+        triggerFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
+        playLottie("treeCelebrate");
+      }
     }
+    if (unlocked && localStorage.getItem(UNLOCK_INVITE_KEY) !== "dismissed") showUnlockInvite();
+    else hideUnlockInvite();
     if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
     if (ui.unlockHintText) {
       ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
@@ -2149,7 +2184,7 @@
     if (ui.completionTitle) ui.completionTitle.textContent = unlocked ? "Next World Unlocked!" : "Keep Going!";
     if (ui.completionMessage) {
       ui.completionMessage.textContent = unlocked
-        ? "Hooray! Your next adventure is ready!"
+        ? "Mithu has unlocked your next world invitation."
         : getUnlockHintText(false, journey);
     }
     if (ui.completionStars) ui.completionStars.textContent = String(forestState.xp);

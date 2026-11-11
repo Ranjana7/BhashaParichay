@@ -227,18 +227,20 @@
 
   function resetActivity(state, activityId) {
     const current = state.activities[activityId];
-    if (!current || !current.isComplete) return false;
+    if (!current) return false;
     const letterCount = current.order.length;
-    const rewardedItems = Array.isArray(current.rewardedItems) ? current.rewardedItems.slice() : [];
+    const order = Array.isArray(current.order) && current.order.length === letterCount
+      ? current.order.slice()
+      : Array.from({ length: letterCount }, function (_, index) { return index; });
     state.activities[activityId] = createActivityState(letterCount);
-    state.activities[activityId].rewardedItems = rewardedItems;
-    state.worldCompleted = false;
+    state.activities[activityId].order = order;
     return true;
   }
 
   function finalizeActivity(state, activityId) {
     const activity = state.activities[activityId];
     if (!activity) return false;
+    if (activity.isComplete) return false;
     if (activity.completedItems.length < activity.order.length) return false;
     activity.isComplete = true;
     state.completionRewarded[activityId] = true;

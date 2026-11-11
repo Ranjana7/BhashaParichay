@@ -11,9 +11,11 @@
   const HOME_KEY = "sanskritParichay.home.progress";
   const WORLD_KEY = "sanskritParichay.world." + worldKey + ".progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
-  const TOTAL = 3;
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
+  const UNLOCK_EVENT_KEY = "sanskritParichay.unlock.event." + worldKey;
+  const UNLOCK_INVITE_KEY = "sanskritParichay.unlock.invite." + worldKey;
+  const TOTAL = 3;
   const ACTIVITY_IDS = ["match", "listen", "build"];
   const WORLD_ORDER = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
     ? window.SP_WORLD_ORDER.slice()
@@ -56,8 +58,6 @@
     worldLessonObjective: document.getElementById("worldLessonObjective"),
     worldPrevLessonBtn: document.getElementById("worldPrevLessonBtn"),
     worldNextLessonBtn: document.getElementById("worldNextLessonBtn"),
-    worldContinueBtn: document.getElementById("worldContinueBtn"),
-    worldResetBtn: document.getElementById("worldResetBtn"),
     worldBackBtn: document.getElementById("worldBackBtn"),
     worldIllustration: document.getElementById("worldIllustration"),
     worldIllustrationSparkle: document.getElementById("worldIllustrationSparkle"),
@@ -83,7 +83,13 @@
     buildStatus: document.getElementById("buildStatus"),
     worldReviewList: document.getElementById("worldReviewList"),
     lessonMascot: document.getElementById("lessonMascot"),
-    worldMascotSpeech: document.getElementById("worldMascotSpeech")
+    worldMascotSpeech: document.getElementById("worldMascotSpeech"),
+    worldUnlockInvite: document.getElementById("worldUnlockInvite"),
+    worldUnlockInviteBtn: document.getElementById("worldUnlockInviteBtn"),
+    worldUnlockDismissBtn: document.getElementById("worldUnlockDismissBtn"),
+    restartMatchActivityBtn: document.getElementById("restartMatchActivityBtn"),
+    restartListenActivityBtn: document.getElementById("restartListenActivityBtn"),
+    restartBuildActivityBtn: document.getElementById("restartBuildActivityBtn")
   };
 
   const safe = {
@@ -96,7 +102,9 @@
     completedActivities: {},
     rewardedActivities: {},
     rewardedGroupBonuses: {},
-    rewardedActivityGems: {}
+    rewardedActivityGems: {},
+    activityAttempts: { match: 0, listen: 0, build: 0 },
+    attemptCycleByLesson: {}
   };
 
   const state = {
@@ -137,7 +145,15 @@
         completedActivities: p.completedActivities && typeof p.completedActivities === "object" ? p.completedActivities : {},
         rewardedActivities: p.rewardedActivities && typeof p.rewardedActivities === "object" ? p.rewardedActivities : {},
         rewardedGroupBonuses: p.rewardedGroupBonuses && typeof p.rewardedGroupBonuses === "object" ? p.rewardedGroupBonuses : {},
-        rewardedActivityGems: p.rewardedActivityGems && typeof p.rewardedActivityGems === "object" ? p.rewardedActivityGems : {}
+        rewardedActivityGems: p.rewardedActivityGems && typeof p.rewardedActivityGems === "object" ? p.rewardedActivityGems : {},
+        activityAttempts: p.activityAttempts && typeof p.activityAttempts === "object"
+          ? {
+              match: Number(p.activityAttempts.match || 0),
+              listen: Number(p.activityAttempts.listen || 0),
+              build: Number(p.activityAttempts.build || 0)
+            }
+          : { match: 0, listen: 0, build: 0 },
+        attemptCycleByLesson: p.attemptCycleByLesson && typeof p.attemptCycleByLesson === "object" ? p.attemptCycleByLesson : {}
       };
     } catch (error) {
       return JSON.parse(JSON.stringify(safe));
@@ -276,11 +292,10 @@
   }
 
   function syncDoneForCurrentLesson() {
-    const idx = state.progress.lessonIndex;
     state.progress.done = {
-      match: Boolean(state.progress.completedActivities[activityKey(idx, "match")]),
-      listen: Boolean(state.progress.completedActivities[activityKey(idx, "listen")]),
-      build: Boolean(state.progress.completedActivities[activityKey(idx, "build")])
+      match: Boolean(state.progress.done.match),
+      listen: Boolean(state.progress.done.listen),
+      build: Boolean(state.progress.done.build)
     };
     state.progress.practiceCompleted = {
       match: state.progress.done.match,
@@ -290,20 +305,10 @@
   }
 
   function getCurrentRewardProgress() {
-    const completedKeys = Object.keys(state.progress.completedActivities || {}).filter(function (key) {
-      return Boolean(state.progress.completedActivities[key]);
-    });
-    let completedLessonCount = 0;
-    for (let i = 0; i < world.lessons.length; i += 1) {
-      const complete = ACTIVITY_IDS.every(function (activityId) {
-        return Boolean(state.progress.completedActivities[activityKey(i, activityId)]);
-      });
-      if (complete) completedLessonCount += 1;
-    }
     return {
-      currentStars: completedKeys.length + (completedLessonCount * 5),
-      currentGems: completedKeys.length,
-      completedLessonCount: completedLessonCount
+      currentStars: Math.max(0, Math.floor(Number(state.progress.stars || 0))),
+      currentGems: Math.max(0, Math.floor(Number(state.progress.gems || 0))),
+      completedLessonCount: state.progress.completedLessons.length
     };
   }
 
@@ -320,32 +325,82 @@
     return "learning-world.html?world=" + nextWorld;
   }
 
+  function restartActivity(activityId) {
+    state.progress.done[activityId] = false;
+    state.progress.practiceCompleted[activityId] = false;
+    state.progress.activityAttempts[activityId] = Number(state.progress.activityAttempts[activityId] || 0) + 1;
+    const idx = state.progress.lessonIndex;
+    state.progress.attemptCycleByLesson[idx] = Number(state.progress.attemptCycleByLesson[idx] || 0) + 1;
+    if (activityId === "build") {
+      state.buildSelected = [];
+      renderBuild();
+    }
+    if (activityId === "match") renderMatch();
+    if (activityId === "listen") renderListen();
+    saveProgress();
+    renderHeader();
+    setMascot("encouraging");
+    setSpeech("Let's practise again! Every try makes us better!", "encourage");
+  }
+
+  function showUnlockInvite() {
+    if (!ui.worldUnlockInvite) return;
+    ui.worldUnlockInvite.hidden = false;
+  }
+
+  function hideUnlockInvite() {
+    if (!ui.worldUnlockInvite) return;
+    ui.worldUnlockInvite.hidden = true;
+  }
+
+  function updateUnlockInvitation() {
+    const nextWorldKey = getNextWorldKey();
+    if (!nextWorldKey) {
+      hideUnlockInvite();
+      return;
+    }
+    const meetsThreshold = state.progress.stars >= UNLOCK_STAR_TARGET && state.progress.gems >= UNLOCK_GEM_TARGET;
+    const unlocked = typeof window.spIsWorldUnlocked === "function"
+      ? window.spIsWorldUnlocked(nextWorldKey, WORLD_ORDER)
+      : meetsThreshold;
+    if (!unlocked || !meetsThreshold) {
+      hideUnlockInvite();
+      return;
+    }
+    localStorage.setItem(UNLOCK_INVITE_KEY, "visible");
+    if (localStorage.getItem(UNLOCK_EVENT_KEY) !== "true") {
+      localStorage.setItem(UNLOCK_EVENT_KEY, "true");
+      setMascot("dance");
+      setSpeech("🌟 Hooray! You earned 50 stars and 1 gem! A magical new world is unlocked! Shall we explore it together? 🎉", "world");
+      confetti();
+      if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
+    }
+    if (localStorage.getItem(UNLOCK_INVITE_KEY) === "dismissed") {
+      hideUnlockInvite();
+      return;
+    }
+    showUnlockInvite();
+  }
+
   function rewardIfFirstTime(activityId) {
+    if (state.progress.done[activityId]) return false;
     const key = activityKey(state.progress.lessonIndex, activityId);
-    if (!state.progress.completedActivities[key]) {
-      state.progress.completedActivities[key] = true;
-    }
-    let changed = false;
-    if (!state.progress.rewardedActivities[key]) {
-      state.progress.rewardedActivities[key] = true;
-      state.progress.stars += 1;
-      changed = true;
-    }
-    if (!state.progress.rewardedActivityGems[key]) {
-      state.progress.rewardedActivityGems[key] = true;
-      state.progress.gems += 1;
-      changed = true;
-    }
-    const lessonKey = lessonBonusKey(state.progress.lessonIndex);
-    const lessonComplete = ACTIVITY_IDS.every(function (id) {
-      return Boolean(state.progress.completedActivities[activityKey(state.progress.lessonIndex, id)]);
-    });
+    state.progress.completedActivities[key] = true;
+    state.progress.done[activityId] = true;
+    state.progress.practiceCompleted[activityId] = true;
+    state.progress.stars += 1;
+    state.progress.gems += 1;
+    const cycle = Number((state.progress.attemptCycleByLesson || {})[state.progress.lessonIndex] || 0);
+    const lessonKey = lessonBonusKey(state.progress.lessonIndex) + ":cycle:" + cycle;
+    const lessonComplete = ACTIVITY_IDS.every(function (id) { return Boolean(state.progress.done[id]); });
     if (lessonComplete && !state.progress.rewardedGroupBonuses[lessonKey]) {
       state.progress.rewardedGroupBonuses[lessonKey] = true;
       state.progress.stars += 5;
-      changed = true;
+      if (!state.progress.completedLessons.includes(state.progress.lessonIndex)) {
+        state.progress.completedLessons.push(state.progress.lessonIndex);
+      }
     }
-    return changed;
+    return true;
   }
 
   function renderHeader() {
@@ -370,40 +425,24 @@
       ui.worldNextLessonBtn.textContent = "Unlock Next Lesson";
       ui.worldProgressText.textContent = "Great! Unlock the next lesson.";
       pulseWorldIllustration();
-      ui.worldContinueBtn.textContent = "Continue Adventure";
     } else if (lessonDone && isLast) {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "World Completed";
       ui.worldProgressText.textContent = "Great job! Keep building 50 stars + 1 gem in this world to unlock the next one.";
-      if (!state.progress.completedLessons.includes(state.progress.lessonIndex)) {
-        state.progress.completedLessons.push(state.progress.lessonIndex);
-        saveProgress();
-      }
       updateHomeCompletion();
       setMascot("dance");
       setSpeech("Hooray! Another magical adventure completed!", "world");
       pulseWorldIllustration();
-      const nextWorldKey = getNextWorldKey();
-      const canContinue = nextWorldKey && typeof window.spIsWorldUnlocked === "function"
-        ? window.spIsWorldUnlocked(nextWorldKey, WORLD_ORDER)
-        : Boolean(nextWorldKey);
-      ui.worldContinueBtn.textContent = canContinue ? "Continue Adventure" : "Back to Home";
-      ui.worldContinueBtn.dataset.targetUrl = canContinue ? getNextWorldUrl() : "index.html#worlds";
-      if (canContinue) {
-        confetti();
-        if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 28, durationMs: 3000 });
-      }
     } else {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "Next Lesson (complete all activities)";
       ui.worldProgressText.textContent = "Finish all activities in this lesson.";
-      ui.worldContinueBtn.textContent = "Continue Adventure";
-      ui.worldContinueBtn.dataset.targetUrl = "index.html#worlds";
     }
     if (currentRewards.currentStars < UNLOCK_STAR_TARGET || currentRewards.currentGems < UNLOCK_GEM_TARGET) {
       ui.worldProgressText.textContent += " Unlock target: " + currentRewards.currentStars + "/" + UNLOCK_STAR_TARGET + " stars, "
         + currentRewards.currentGems + "/" + UNLOCK_GEM_TARGET + " gems.";
     }
+    updateUnlockInvitation();
   }
 
   function renderLessonPath() {
@@ -479,8 +518,6 @@
         if (state.progress.done.match) return;
         if (opt === lesson.match.answer) {
           btn.classList.add("correct");
-          state.progress.done.match = true;
-          state.progress.practiceCompleted.match = true;
           rewardIfFirstTime("match");
           saveProgress();
           renderHeader();
@@ -522,8 +559,6 @@
         if (state.progress.done.listen) return;
         if (opt === lesson.listen.answer) {
           btn.classList.add("correct");
-          state.progress.done.listen = true;
-          state.progress.practiceCompleted.listen = true;
           rewardIfFirstTime("listen");
           saveProgress();
           renderHeader();
@@ -584,8 +619,6 @@
     const guess = state.buildSelected.join("").replace(/\s+/g, "");
     const answer = lesson.build.answer.replace(/\s+/g, "");
     if (guess === answer) {
-      state.progress.done.build = true;
-      state.progress.practiceCompleted.build = true;
       rewardIfFirstTime("build");
       saveProgress();
       renderHeader();
@@ -797,33 +830,28 @@
         setSpeech("Let's revisit this lesson together!", "instruction");
       });
     }
-    if (ui.worldContinueBtn) {
-      ui.worldContinueBtn.addEventListener("click", function () {
-        const target = ui.worldContinueBtn.dataset.targetUrl || "index.html#worlds";
-        if (target.indexOf("learning-world.html?world=") === 0) {
-          const targetWorld = target.split("=").pop();
-          if (targetWorld) localStorage.setItem(LAST_WORLD_KEY, targetWorld);
-        } else if (target.indexOf("alphabet-forest.html") === 0) {
-          localStorage.setItem(LAST_WORLD_KEY, "alphabet");
-        }
-        window.location.href = target;
+    if (ui.restartMatchActivityBtn) {
+      ui.restartMatchActivityBtn.addEventListener("click", function () { restartActivity("match"); });
+    }
+    if (ui.restartListenActivityBtn) {
+      ui.restartListenActivityBtn.addEventListener("click", function () { restartActivity("listen"); });
+    }
+    if (ui.restartBuildActivityBtn) {
+      ui.restartBuildActivityBtn.addEventListener("click", function () { restartActivity("build"); });
+    }
+    if (ui.worldUnlockInviteBtn) {
+      ui.worldUnlockInviteBtn.addEventListener("click", function () {
+        const nextWorld = getNextWorldKey();
+        if (!nextWorld) return;
+        localStorage.setItem(LAST_WORLD_KEY, nextWorld);
+        localStorage.removeItem(UNLOCK_INVITE_KEY);
+        window.location.href = getNextWorldUrl();
       });
     }
-    if (ui.worldResetBtn) {
-      ui.worldResetBtn.addEventListener("click", function () {
-        const ok = window.confirm("Reset only this world's learning progress? Lifetime stars, gems, and XP will stay saved.");
-        if (!ok) return;
-        if (typeof window.spResetWorldProgress === "function") {
-          window.spResetWorldProgress(worldKey, WORLD_ORDER, WORLD_TOTALS);
-        } else {
-          localStorage.removeItem(WORLD_KEY);
-        }
-        state.progress = loadProgress();
-        state.buildSelected = [];
-        saveProgress();
-        renderAll();
-        setMascot("thinking");
-        setSpeech("World progress reset. Let's begin again!", "instruction");
+    if (ui.worldUnlockDismissBtn) {
+      ui.worldUnlockDismissBtn.addEventListener("click", function () {
+        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed");
+        hideUnlockInvite();
       });
     }
     if (ui.worldBackBtn) {

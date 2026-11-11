@@ -100,12 +100,12 @@ test("snapshot reports learning/practice counts from alphabet forest v3", () => 
   assert.equal(snapshot.currentWorld, "numbers");
   assert.equal(snapshot.alphabet.learningCompletedCount, 2);
   assert.equal(snapshot.alphabet.practiceCompletedCount, 1);
-  assert.equal(snapshot.alphabet.unlocked, true);
+  assert.equal(snapshot.alphabet.unlocked, false);
   assert.equal(snapshot.totals.learningActivitiesCompleted, 2);
   assert.equal(snapshot.totals.practiceActivitiesCompleted, 1);
 });
 
-test("unlock check keeps completed world access independent of test mode", () => {
+test("unlock check uses 50-stars-plus-1-gem rule", () => {
   const { api } = loadStore({
     "sanskritParichay.alphabetForest.v3": JSON.stringify({
       schemaVersion: 3,
@@ -122,23 +122,25 @@ test("unlock check keeps completed world access independent of test mode", () =>
       },
       completionRewarded: {},
       worldCompleted: false,
-      xp: 0
+      xp: 50,
+      gems: 1
     }),
-    "sanskritParichay.world.words.progress": JSON.stringify({
+    "sanskritParichay.world.animals.progress": JSON.stringify({
       lessonIndex: 2,
-      stars: 10,
+      stars: 50,
+      gems: 1,
       completedLessons: [0, 1, 2],
-      practiceCompleted: { match: true, listen: true, build: false }
+      practiceCompleted: { match: true, listen: true, build: true }
     }),
-    "sanskritParichay.world.animals.progress": JSON.stringify({ lessonIndex: 0, stars: 0, completedLessons: [] })
+    "sanskritParichay.world.words.progress": JSON.stringify({ lessonIndex: 0, stars: 0, gems: 0, completedLessons: [] })
   });
   const order = ["alphabet", "animals", "words"];
   const totals = { alphabet: 6, animals: 3, words: 3 };
   assert.equal(api.isWorldUnlocked("animals", order, false, totals), true);
-  assert.equal(api.isWorldUnlocked("animals", order, true, totals), true);
+  assert.equal(api.isWorldUnlocked("words", order, false, totals), true);
 });
 
-test("unlock checks any distinct practice activities in a world", () => {
+test("world remains locked when stars or gems threshold is not met", () => {
   const { api } = loadStore({
     "sanskritParichay.alphabetForest.v3": JSON.stringify({
       schemaVersion: 3,
@@ -155,22 +157,18 @@ test("unlock checks any distinct practice activities in a world", () => {
       },
       completionRewarded: {},
       worldCompleted: false,
-      xp: 0
+      xp: 49,
+      gems: 1
     }),
-    "sanskritParichay.world.words.progress": JSON.stringify({
-      lessonIndex: 1,
-      stars: 4,
-      completedLessons: [0],
-      done: { match: false, listen: false, build: false },
-      practiceCompleted: { gameOne: true, gameTwo: true, gameThree: false }
-    })
+    "sanskritParichay.world.words.progress": JSON.stringify({ lessonIndex: 0, stars: 0, gems: 0, completedLessons: [] })
   });
   const order = ["alphabet", "words", "animals"];
   const totals = { alphabet: 9, words: 4, animals: 3 };
-  assert.equal(api.isWorldUnlocked("words", order, false, totals), true);
+  assert.equal(api.isWorldUnlocked("words", order, false, totals), false);
+  assert.equal(api.isWorldUnlocked("animals", order, false, totals), false);
 });
 
-test("stale out-of-order unlocks are corrected to strict sequence", () => {
+test("previously unlocked worlds stay unlocked", () => {
   const { api, storage } = loadStore({
     "sanskritParichay.world.unlocks.v1": JSON.stringify({
       unlocked: ["alphabet", "words", "culture"]
@@ -180,9 +178,9 @@ test("stale out-of-order unlocks are corrected to strict sequence", () => {
   const totals = { alphabet: 9, animals: 3, numbers: 3, colours: 3, words: 3, sentences: 3, stories: 3, culture: 3 };
   assert.equal(api.isWorldUnlocked("alphabet", order, false, totals), true);
   assert.equal(api.isWorldUnlocked("animals", order, false, totals), false);
-  assert.equal(api.isWorldUnlocked("words", order, false, totals), false);
+  assert.equal(api.isWorldUnlocked("words", order, false, totals), true);
   const persisted = JSON.parse(storage.getItem("sanskritParichay.world.unlocks.v1"));
-  assert.deepEqual(persisted.unlocked, ["alphabet"]);
+  assert.deepEqual(persisted.unlocked, ["alphabet", "words", "culture"]);
 });
 
 test("home aggregate preserves gems and migrates legacy xp fallback", () => {

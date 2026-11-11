@@ -97,32 +97,22 @@
       activities: activities,
       completionRewarded: {},
       worldCompleted: false,
-      xp: 0
+      xp: 0,
+      gems: 0
     };
   }
 
   function getForestCurrentRewards(forestState) {
     const state = sanitizeForestState(forestState || loadForestState());
-    let questionStars = 0;
-    let activityBonusStars = 0;
-    let currentGems = 0;
-    let lifetimeGems = 0;
-    FOREST_ACTIVITY_IDS.forEach(function (id) {
-      const activity = state.activities[id] || createActivityState();
-      const completedCount = normalizeIndexList(activity.completedItems, LETTER_COUNT - 1).length;
-      questionStars += completedCount;
-      if (activity.isComplete) {
-        activityBonusStars += 5;
-        currentGems += 1;
-      }
-      if (state.completionRewarded && (state.completionRewarded["gem:" + id] || state.completionRewarded[id])) {
-        lifetimeGems += 1;
-      }
-    });
+    const lifetimeStars = Math.max(0, Math.floor(Number(state.xp || 0)));
+    const fallbackGems = FOREST_ACTIVITY_IDS.reduce(function (count, id) {
+      return count + (state.completionRewarded && (state.completionRewarded["gem:" + id] || state.completionRewarded[id]) ? 1 : 0);
+    }, 0);
+    const lifetimeGems = Math.max(fallbackGems, Math.max(0, Math.floor(Number(state.gems || 0))));
     return {
-      currentStars: questionStars + activityBonusStars,
-      currentGems: currentGems,
-      lifetimeStars: Math.max(0, Math.floor(Number(state.xp || 0))),
+      currentStars: lifetimeStars,
+      currentGems: lifetimeGems,
+      lifetimeStars: lifetimeStars,
       lifetimeGems: lifetimeGems
     };
   }
@@ -152,6 +142,12 @@
       : {};
     state.worldCompleted = Boolean(input.worldCompleted);
     state.xp = Number.isFinite(input.xp) ? Math.max(0, Math.floor(input.xp)) : 0;
+    const fallbackGems = FOREST_ACTIVITY_IDS.reduce(function (count, id) {
+      return count + (state.completionRewarded && (state.completionRewarded["gem:" + id] || state.completionRewarded[id]) ? 1 : 0);
+    }, 0);
+    state.gems = Number.isFinite(input.gems)
+      ? Math.max(0, Math.floor(input.gems))
+      : fallbackGems;
     return state;
   }
 
@@ -330,18 +326,8 @@
     const practiceCompletedCount = Object.keys(practiceCompleted).reduce(function (count, id) {
       return count + (practiceCompleted[id] ? 1 : 0);
     }, 0);
-    const completionKeys = Object.keys(completedActivities).filter(function (key) { return Boolean(completedActivities[key]); });
-    const currentQuestionStars = completionKeys.length;
-    const lessonsWithAllDone = [];
-    for (let lessonIdx = 0; lessonIdx < totalLessons; lessonIdx += 1) {
-      const allDone = WORLD_ACTIVITY_IDS.every(function (activityId) {
-        return Boolean(completedActivities[String(lessonIdx) + ":" + activityId]);
-      });
-      if (allDone) lessonsWithAllDone.push(lessonIdx);
-    }
-    const currentBonusStars = lessonsWithAllDone.length * 5;
-    const currentGems = completionKeys.length;
-    const currentStars = currentQuestionStars + currentBonusStars;
+    const currentGems = gems;
+    const currentStars = stars;
     return {
       lessonIndex: lessonIndex,
       stars: stars,
@@ -394,11 +380,16 @@
     const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
     const previousState = loadUnlockState(order).unlocked.slice();
     const alphabet = getAlphabetJourney(loadForestState());
-    const unlocked = ["alphabet"];
+    const unlocked = previousState.filter(function (key, index, arr) {
+      return key === "alphabet" || (order.includes(key) && arr.indexOf(key) === index);
+    });
+    if (!unlocked.includes("alphabet")) unlocked.unshift("alphabet");
 
     for (let index = 1; index < order.length; index += 1) {
       const key = order[index];
+      if (unlocked.includes(key)) continue;
       const previous = order[index - 1];
+      if (!unlocked.includes(previous)) break;
       let canUnlock = false;
       if (previous === "alphabet") {
         canUnlock = Boolean(alphabet.currentStars >= UNLOCK_STAR_TARGET && alphabet.currentGems >= UNLOCK_GEM_TARGET);

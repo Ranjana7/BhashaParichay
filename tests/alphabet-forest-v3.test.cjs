@@ -75,10 +75,10 @@ test("page includes two learning category sections", () => {
   assert.ok(html.includes(">Play &amp; Practise<"));
 });
 
-test("audio is paused without browser speech fallback", () => {
-  assert.ok(js.includes("const AUDIO_ENABLED = false;"));
+test("audio uses local clips without browser speech fallback", () => {
+  assert.ok(js.includes("const AUDIO_ENABLED = true;"));
   assert.equal(js.includes("speechSynthesis"), false);
-  assert.ok(js.includes("Pronunciation is unavailable until verified Sanskrit audio is approved."));
+  assert.ok(js.includes("Tap Sanskrit letters or words to hear reviewed local pronunciation clips."));
   assert.equal(html.includes('id="audioDebug"'), false);
 });
 
@@ -244,9 +244,13 @@ test("finish activity changes global completion by exactly one", () => {
   assert.equal(after.globalPercent, 100 / 9);
 });
 
-test("restart only works after completion", () => {
+test("restart resets activity state for a fresh attempt", () => {
   const state = core.createDefaultForestState(48);
-  assert.equal(core.resetActivity(state, "arrange-word"), false);
+  state.activities["arrange-word"].currentIndex = 12;
+  state.activities["arrange-word"].completedItems = [0, 1, 2];
+  assert.equal(core.resetActivity(state, "arrange-word"), true);
+  assert.equal(state.activities["arrange-word"].currentIndex, 0);
+  assert.equal(state.activities["arrange-word"].completedItems.length, 0);
   state.activities["arrange-word"].isComplete = true;
   state.activities["arrange-word"].currentIndex = 47;
   state.activities["arrange-word"].completedItems = Array.from({ length: 48 }, (_, index) => index);
@@ -255,7 +259,7 @@ test("restart only works after completion", () => {
   assert.equal(state.activities["arrange-word"].completedItems.length, 0);
 });
 
-test("restart keeps historical rewards and prevents duplicate star awarding", () => {
+test("restart keeps historical rewards and allows re-earning on next attempt", () => {
   const state = core.createDefaultForestState(48);
   const activity = state.activities["arrange-word"];
   activity.currentIndex = 0;
@@ -266,7 +270,7 @@ test("restart keeps historical rewards and prevents duplicate star awarding", ()
   assert.equal(core.resetActivity(state, "arrange-word"), true);
   state.activities["arrange-word"].currentIndex = 0;
   core.markCurrentItemCompleted(state, "arrange-word", 1);
-  assert.equal(state.xp, 1);
+  assert.equal(state.xp, 2);
 });
 
 test("legacy progression state migrates safely", () => {
