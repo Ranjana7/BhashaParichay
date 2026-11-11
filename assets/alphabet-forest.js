@@ -908,6 +908,7 @@
       if (event.button !== undefined && event.button !== 0) return;
       syncCanvasSize();
       runtime.tracing.drawing = true;
+      runtime.tracing.reviewed = false;
       if (event.pointerId !== undefined && ui.traceCanvas.setPointerCapture) {
         ui.traceCanvas.setPointerCapture(event.pointerId);
       }
@@ -915,6 +916,7 @@
       runtime.tracing.points.push(point);
       ctx.beginPath();
       ctx.moveTo(point.x, point.y);
+      if (ui.traceStatus) ui.traceStatus.textContent = "Keep drawing, then tap Check My Writing.";
       event.preventDefault();
     }
     function moveDraw(event) {
@@ -959,7 +961,11 @@
           fireSectionConfetti("activityTraceGamePanel", true);
           showTraceFlowerBurst();
           markCurrentComplete(activityId, "Wonderful! Letter practised!");
-          if (!alreadyDone) scheduleAutoAdvance(activityId, sourceIndex, 900);
+          if (ui.traceStatus) {
+            ui.traceStatus.textContent = alreadyDone
+              ? "Wonderful! Checked again. Tap Next when you're ready."
+              : "Wonderful! Letter checked. Tap Next when you're ready.";
+          }
         } else {
           incrementAttempt("letter-tracing");
           setMascotState("encouraging");
