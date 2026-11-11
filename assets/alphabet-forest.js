@@ -150,10 +150,6 @@
     practiceProgressText: document.getElementById("practiceProgressText"),
     learningProgressFill: document.getElementById("learningProgressFill"),
     practiceProgressFill: document.getElementById("practiceProgressFill"),
-    nextWorldStatus: document.getElementById("nextWorldStatus"),
-    unlockHintText: document.getElementById("unlockHintText"),
-    globalStars: document.getElementById("globalStars"),
-    globalGems: document.getElementById("globalGems"),
     treeLetters: document.getElementById("magicalTreeLetters"),
     treeSparkleLottie: document.getElementById("treeSparkleLottie"),
     treeCelebrationLottie: document.getElementById("treeCelebrationLottie"),
@@ -210,7 +206,7 @@
     traceCanvas: document.getElementById("traceCanvas"),
     traceTargetLetter: document.getElementById("traceTargetLetter"),
     traceStatus: document.getElementById("traceStatus"),
-    clearTraceBtn: document.getElementById("clearTraceBtn"),
+    checkTraceBtn: document.getElementById("checkTraceBtn"),
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
@@ -250,7 +246,8 @@
     tracing: {
       drawing: false,
       points: [],
-      lastLetterIndex: -1
+      lastLetterIndex: -1,
+      templateCache: {}
     },
     treeMithuMotion: {
       initialized: false,
@@ -1062,9 +1059,22 @@
     ui.traceCanvas.addEventListener("pointerleave", endDraw);
     ui.traceCanvas.addEventListener("pointercancel", endDraw);
 
-    if (ui.clearTraceBtn) ui.clearTraceBtn.addEventListener("click", function () {
-      clearTraceBoard();
-      if (ui.traceStatus) ui.traceStatus.textContent = "Great! Try writing the letter again.";
+    if (ui.checkTraceBtn) ui.checkTraceBtn.addEventListener("click", function () {
+      const activityId = "letter-tracing";
+      const letter = getCurrentLetter(activityId);
+      if (!letter || !ui.traceStatus) return;
+      if (!traceCanvasHasInk()) {
+        ui.traceStatus.textContent = "Draw the letter first, then tap Check My Writing.";
+        return;
+      }
+      const result = evaluateWritingMatch(letter.symbol);
+      if (result.level === "good") {
+        ui.traceStatus.textContent = "Great writing! This looks close to " + letter.symbol + ".";
+      } else if (result.level === "neutral") {
+        ui.traceStatus.textContent = "Nice effort! You're close. Try one more neat version if you like.";
+      } else {
+        ui.traceStatus.textContent = "Great try! Make the shape a little closer to " + letter.symbol + " and try again.";
+      }
     });
   }
 
@@ -1085,6 +1095,115 @@
       if (data[index] > 8) return true;
     }
     return false;
+  }
+
+  function normalizeMaskFromCanvas(sourceCanvas, size) {
+    const temp = document.createElement("canvas");
+    temp.width = size;
+    temp.height = size;
+    const ctx = temp.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(sourceCanvas, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    const mask = new Uint8Array(size * size);
+    let inkCount = 0;
+    for (let i = 0, p = 0; i < data.length; i += 4, p += 1) {
+      const alpha = data[i + 3];
+      if (alpha > 24) {
+        mask[p] = 1;
+        inkCount += 1;
+      }
+    }
+    return { mask: mask, inkCount: inkCount, size: size };
+  }
+
+  function getLetterTemplateMask(symbol, size) {
+    const cacheKey = symbol + ":" + size;
+    if (runtime.tracing.templateCache[cacheKey]) return runtime.tracing.templateCache[cacheKey];
+    const temp = document.createElement("canvas");
+    temp.width = size;
+    temp.height = size;
+    const ctx = temp.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = "#000";
+    const fontSize = Math.round(size * 0.68);
+    ctx.font = "700 " + fontSize + "px \"Noto Sans Devanagari\", \"Mangal\", \"Nirmala UI\", sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(symbol, size / 2, size / 2 + size * 0.03);
+    const image = ctx.getImageData(0, 0, size, size).data;
+    const mask = new Uint8Array(size * size);
+    let inkCount = 0;
+    for (let i = 0, p = 0; i < image.length; i += 4, p += 1) {
+      const alpha = image[i + 3];
+      if (alpha > 16) {
+        mask[p] = 1;
+        inkCount += 1;
+      }
+    }
+    const template = { mask: mask, inkCount: inkCount, size: size, symbol: symbol };
+    runtime.tracing.templateCache[cacheKey] = template;
+    return template;
+  }
+
+  function compareMasks(userMaskData, templateMaskData) {
+    if (!userMaskData || !templateMaskData || !userMaskData.mask || !templateMaskData.mask) {
+      return { score: 0, coverage: 0, precision: 0, iou: 0 };
+    }
+    const len = Math.min(userMaskData.mask.length, templateMaskData.mask.length);
+    let overlap = 0;
+    let union = 0;
+    for (let index = 0; index < len; index += 1) {
+      const user = userMaskData.mask[index];
+      const template = templateMaskData.mask[index];
+      if (user || template) union += 1;
+      if (user && template) overlap += 1;
+    }
+    if (union === 0 || userMaskData.inkCount === 0 || templateMaskData.inkCount === 0) {
+      return { score: 0, coverage: 0, precision: 0, iou: 0 };
+    }
+    const coverage = overlap / templateMaskData.inkCount;
+    const precision = overlap / userMaskData.inkCount;
+    const iou = overlap / union;
+    const score = (coverage * 0.46) + (precision * 0.34) + (iou * 0.2);
+    return { score: score, coverage: coverage, precision: precision, iou: iou };
+  }
+
+  function evaluateWritingMatch(targetSymbol) {
+    if (!ui.traceCanvas) return { level: "neutral" };
+    const SAMPLE = 128;
+    const userMaskData = normalizeMaskFromCanvas(ui.traceCanvas, SAMPLE);
+    if (!userMaskData || userMaskData.inkCount < 90) {
+      return { level: "neutral" };
+    }
+    const uniqueSymbols = letters.map(function (letter) { return letter.symbol; }).filter(function (value, index, arr) {
+      return arr.indexOf(value) === index;
+    });
+    const scored = uniqueSymbols.map(function (symbol) {
+      const template = getLetterTemplateMask(symbol, SAMPLE);
+      const metrics = compareMasks(userMaskData, template);
+      return {
+        symbol: symbol,
+        score: metrics.score,
+        coverage: metrics.coverage,
+        precision: metrics.precision
+      };
+    }).sort(function (a, b) { return b.score - a.score; });
+    const best = scored[0] || { symbol: "", score: 0 };
+    const second = scored[1] || { symbol: "", score: 0 };
+    const target = scored.find(function (entry) { return entry.symbol === targetSymbol; }) || { score: 0, coverage: 0, precision: 0 };
+    const confidenceMargin = best.score - second.score;
+    const targetVsBest = best.score - target.score;
+    const uncertain = confidenceMargin < 0.045 || target.score < 0.34 || target.coverage < 0.25;
+    if (best.symbol === targetSymbol && target.score >= 0.56 && target.precision >= 0.4) {
+      return { level: "good" };
+    }
+    if (uncertain || targetVsBest <= 0.05 || target.score >= 0.44) {
+      return { level: "neutral" };
+    }
+    return { level: "improve" };
   }
 
   function playSuccessSound(kind) {
@@ -1487,8 +1606,12 @@
   }
 
   function isNextWorldUnlocked() {
-    const rewards = getCurrentForestRewards();
-    return rewards.currentStars >= UNLOCK_STAR_TARGET && rewards.currentGems >= UNLOCK_GEM_TARGET;
+    const nextWorld = getNextWorldFromOrder();
+    if (!nextWorld) return false;
+    if (typeof window.spIsWorldUnlocked === "function") {
+      return window.spIsWorldUnlocked(nextWorld, WORLD_ORDER);
+    }
+    return false;
   }
 
   function renderAll() {
@@ -1508,8 +1631,23 @@
 
   function getUnlockHintText(unlocked, journey) {
     if (unlocked) return "Hooray! Your next adventure is ready!";
-    return "Unlock target: " + journey.currentStars + "/" + UNLOCK_STAR_TARGET + " stars and "
-      + journey.currentGems + "/" + UNLOCK_GEM_TARGET + " gems in Alphabet Forest.";
+    const rewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(WORLD_ORDER, window.SP_WORLD_TOTALS || {})
+      : { stars: 0, gems: 0 };
+    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
+    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
+    const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
+    const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
+    if (starsRemaining > 0 && gemsRemaining > 0) {
+      return "Unlock progress: " + stars + "/" + UNLOCK_STAR_TARGET + " stars and " + gems + "/" + UNLOCK_GEM_TARGET + " gems.";
+    }
+    if (starsRemaining > 0) {
+      return "Unlock progress: " + stars + "/" + UNLOCK_STAR_TARGET + " stars. Just " + starsRemaining + " more!";
+    }
+    if (gemsRemaining > 0) {
+      return "Unlock progress: " + gems + "/" + UNLOCK_GEM_TARGET + " gems. Just " + gemsRemaining + " more!";
+    }
+    return "Hooray! Your next adventure is ready!";
   }
 
   function renderGlobalProgress() {
@@ -1523,18 +1661,6 @@
     if (ui.practiceProgressText) ui.practiceProgressText.textContent = journey.practiceCompletedCount + " practice games completed";
     if (ui.learningProgressFill) ui.learningProgressFill.style.width = ((journey.learningCompletedCount / journey.learningTotal) * 100).toFixed(1) + "%";
     if (ui.practiceProgressFill) ui.practiceProgressFill.style.width = ((journey.practiceCompletedCount / journey.practiceTotal) * 100).toFixed(1) + "%";
-    if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
-    if (ui.unlockHintText) {
-      ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
-    }
-    if (ui.globalStars) ui.globalStars.textContent = String(forestState.xp);
-    if (ui.globalGems) {
-      const rewardsSnapshot = typeof window.spGetRewards === "function"
-        ? window.spGetRewards(["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"], { alphabet: 9, animals: 3, numbers: 3, colours: 3, words: 3, sentences: 3, stories: 3, culture: 3 })
-        : { gems: 0 };
-      const gems = Number(rewardsSnapshot.gems || 0);
-      ui.globalGems.textContent = String(Math.max(0, Math.floor(Number(gems) || 0)));
-    }
   }
 
   function renderMagicalTree() {
@@ -2060,7 +2186,7 @@
       clearTraceBoard();
     }
     if (!isCurrentResolved(activityId)) {
-      ui.traceStatus.textContent = runtime.byActivity[activityId].status || "Write the letter, then tap Next.";
+      ui.traceStatus.textContent = runtime.byActivity[activityId].status || "Write the letter, then tap Check My Writing or Next.";
     } else if (!runtime.byActivity[activityId].status) {
       ui.traceStatus.textContent = "Wonderful! This letter is practised. Continue when ready.";
     }
@@ -2196,10 +2322,6 @@
     }
     if (unlocked && localStorage.getItem(UNLOCK_INVITE_KEY) !== "dismissed") showUnlockInvite();
     else hideUnlockInvite();
-    if (ui.nextWorldStatus) ui.nextWorldStatus.textContent = unlocked ? "Unlocked" : "Locked";
-    if (ui.unlockHintText) {
-      ui.unlockHintText.textContent = getUnlockHintText(unlocked, journey);
-    }
     if (ui.completionScreen) ui.completionScreen.classList.toggle("show", unlocked);
     if (ui.completionTitle) ui.completionTitle.textContent = unlocked ? "Next World Unlocked!" : "Keep Going!";
     if (ui.completionMessage) {

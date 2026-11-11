@@ -58,12 +58,13 @@ test("all activity controls are present in DOM", () => {
   });
 });
 
-test("global panel uses learning/practice/stars/unlock summary", () => {
+test("global panel keeps compact learning and practice summary only", () => {
   assert.ok(html.includes('id="learningProgressText"'));
   assert.ok(html.includes('id="practiceProgressText"'));
-  assert.ok(html.includes('id="nextWorldStatus"'));
-  assert.ok(html.includes('id="globalStars"'));
-  assert.ok(html.includes("Unlock target for next world: 50 stars and 1 gem in Alphabet Forest."));
+  assert.equal(html.includes('id="nextWorldStatus"'), false);
+  assert.equal(html.includes('id="globalStars"'), false);
+  assert.equal(html.includes('id="globalGems"'), false);
+  assert.equal(html.includes('id="unlockHintText"'), false);
   assert.equal(html.includes("2 of 7"), false);
   assert.equal(html.includes("0 of 9 activities complete"), false);
   assert.equal(html.includes('id="lessonStatsPanel"'), false);
@@ -154,12 +155,13 @@ test("write-it-yourself uses simple draw and next flow without validation UI", (
   assert.equal(html.includes('id="traceSelfCheck"'), false);
   assert.ok(html.includes('class="trace-work-area"'));
   assert.ok(html.includes('class="trace-canvas-wrap"'));
-  assert.equal(html.includes(">Check My Writing<"), false);
+  assert.ok(html.includes(">Check My Writing<"));
   assert.equal(html.includes(">Yes, I did it!<"), false);
   assert.equal(html.includes(">Let me try again!<"), false);
-  assert.ok(html.includes(">Clear<"));
+  assert.equal(html.includes(">Clear<"), false);
+  assert.ok(js.includes("Draw the letter first, then tap Check My Writing."));
   assert.ok(js.includes("Draw the letter first, then tap Next."));
-  assert.ok(js.includes("Write the letter, then tap Next."));
+  assert.ok(js.includes("Write the letter, then tap Check My Writing or Next."));
 });
 
 test("magical tree includes mini mithu follower logic", () => {

@@ -26,6 +26,7 @@
   const FOREST_LEARNING_IDS = ["magical-tree", "letter-garden"];
   const FOREST_PRACTICE_IDS = FOREST_ACTIVITY_IDS.filter(function (id) { return !FOREST_LEARNING_IDS.includes(id); });
   const WORLD_ACTIVITY_IDS = ["match", "listen", "build"];
+  const DEFAULT_WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const LEGACY_DONE_MAP = {
     hear: "hear-and-pick",
     picture: "picture-match",
@@ -350,18 +351,56 @@
 
   function normalizeWorldOrder(worldOrder) {
     if (Array.isArray(worldOrder) && worldOrder.length) return worldOrder.slice();
-    return ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
+    return DEFAULT_WORLD_ORDER.slice();
   }
 
   function loadUnlockState(worldOrder) {
     const order = normalizeWorldOrder(worldOrder);
-    const raw = readJson(WORLD_UNLOCKS_KEY, null);
-    const unlocked = Array.isArray(raw && raw.unlocked) ? raw.unlocked.slice() : [];
+    const rawValue = readJson(WORLD_UNLOCKS_KEY, null);
+    const raw = rawValue && typeof rawValue === "object" ? rawValue : {};
+    const unlocked = Array.isArray(raw.unlocked) ? raw.unlocked.slice() : [];
     const clean = unlocked.filter(function (key, index, arr) {
       return order.includes(key) && arr.indexOf(key) === index;
     });
     if (!clean.includes("alphabet")) clean.unshift("alphabet");
-    return { unlocked: clean };
+    const spentUnlocksRaw = raw.spentUnlocks && typeof raw.spentUnlocks === "object" ? raw.spentUnlocks : {};
+    const spentUnlocks = {};
+    Object.keys(spentUnlocksRaw).forEach(function (key) {
+      if (!order.includes(key) || key === "alphabet") return;
+      if (!spentUnlocksRaw[key]) return;
+      spentUnlocks[key] = true;
+    });
+    const spentCount = Object.keys(spentUnlocks).length;
+    const spentStars = Number.isFinite(Number(raw.spentStars))
+      ? Math.max(0, Math.floor(Number(raw.spentStars)))
+      : spentCount * UNLOCK_STAR_TARGET;
+    const spentGems = Number.isFinite(Number(raw.spentGems))
+      ? Math.max(0, Math.floor(Number(raw.spentGems)))
+      : spentCount * UNLOCK_GEM_TARGET;
+    const lastUnlockLifetimeStars = Number.isFinite(Number(raw.lastUnlockLifetimeStars))
+      ? Math.max(0, Math.floor(Number(raw.lastUnlockLifetimeStars)))
+      : 0;
+    const lastUnlockLifetimeGems = Number.isFinite(Number(raw.lastUnlockLifetimeGems))
+      ? Math.max(0, Math.floor(Number(raw.lastUnlockLifetimeGems)))
+      : 0;
+    const lastUnlockNonce = Number.isFinite(Number(raw.lastUnlockNonce))
+      ? Math.max(0, Math.floor(Number(raw.lastUnlockNonce)))
+      : 0;
+    const lastUnlockedWorld = typeof raw.lastUnlockedWorld === "string" ? raw.lastUnlockedWorld : "";
+    const lastUnlockedAt = Number.isFinite(Number(raw.lastUnlockedAt))
+      ? Math.max(0, Math.floor(Number(raw.lastUnlockedAt)))
+      : 0;
+    return {
+      unlocked: clean,
+      spentUnlocks: spentUnlocks,
+      spentStars: spentStars,
+      spentGems: spentGems,
+      lastUnlockLifetimeStars: lastUnlockLifetimeStars,
+      lastUnlockLifetimeGems: lastUnlockLifetimeGems,
+      lastUnlockNonce: lastUnlockNonce,
+      lastUnlockedWorld: lastUnlockedWorld,
+      lastUnlockedAt: lastUnlockedAt
+    };
   }
 
   function saveUnlockState(state, worldOrder) {
@@ -371,41 +410,138 @@
       return order.includes(key) && arr.indexOf(key) === index;
     });
     if (!clean.includes("alphabet")) clean.unshift("alphabet");
-    writeJson(WORLD_UNLOCKS_KEY, { unlocked: clean });
+    const spentUnlocksRaw = state && state.spentUnlocks && typeof state.spentUnlocks === "object" ? state.spentUnlocks : {};
+    const spentUnlocks = {};
+    Object.keys(spentUnlocksRaw).forEach(function (key) {
+      if (!order.includes(key) || key === "alphabet") return;
+      if (!spentUnlocksRaw[key]) return;
+      spentUnlocks[key] = true;
+    });
+    const spentCount = Object.keys(spentUnlocks).length;
+    const spentStars = Number.isFinite(Number(state && state.spentStars))
+      ? Math.max(0, Math.floor(Number(state.spentStars)))
+      : spentCount * UNLOCK_STAR_TARGET;
+    const spentGems = Number.isFinite(Number(state && state.spentGems))
+      ? Math.max(0, Math.floor(Number(state.spentGems)))
+      : spentCount * UNLOCK_GEM_TARGET;
+    writeJson(WORLD_UNLOCKS_KEY, {
+      unlocked: clean,
+      spentUnlocks: spentUnlocks,
+      spentStars: spentStars,
+      spentGems: spentGems,
+      lastUnlockLifetimeStars: Number.isFinite(Number(state && state.lastUnlockLifetimeStars))
+        ? Math.max(0, Math.floor(Number(state.lastUnlockLifetimeStars)))
+        : 0,
+      lastUnlockLifetimeGems: Number.isFinite(Number(state && state.lastUnlockLifetimeGems))
+        ? Math.max(0, Math.floor(Number(state.lastUnlockLifetimeGems)))
+        : 0,
+      lastUnlockNonce: Number.isFinite(Number(state && state.lastUnlockNonce))
+        ? Math.max(0, Math.floor(Number(state.lastUnlockNonce)))
+        : 0,
+      lastUnlockedWorld: typeof (state && state.lastUnlockedWorld) === "string" ? state.lastUnlockedWorld : "",
+      lastUnlockedAt: Number.isFinite(Number(state && state.lastUnlockedAt))
+        ? Math.max(0, Math.floor(Number(state.lastUnlockedAt)))
+        : 0
+    });
     return clean;
+  }
+
+  function computeRewardLedger(worldOrder, totalsByWorld) {
+    const order = normalizeWorldOrder(worldOrder);
+    const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
+    const forest = loadForestState();
+    const alphabet = getAlphabetJourney(forest);
+    let worldStars = 0;
+    let worldGems = 0;
+    order.forEach(function (worldKey) {
+      if (worldKey === "alphabet") return;
+      const totalLessons = Number(totals[worldKey] || 3);
+      const progress = loadWorldProgress(worldKey, totalLessons);
+      worldStars += progress.stars;
+      worldGems += progress.gems;
+    });
+    const home = getHomeRewardState();
+    const challengeGems = Number(home.challengeGems || 0);
+    const lifetimeStars = Math.max(0, Math.floor(Number(alphabet.stars || 0) + Number(worldStars || 0)));
+    const lifetimeGems = Math.max(0, Math.floor(Number(alphabet.lifetimeGems || 0) + Number(worldGems || 0) + challengeGems));
+    const unlockState = loadUnlockState(order);
+    const spentStars = Math.max(0, Math.floor(Number(unlockState.spentStars || 0)));
+    const spentGems = Math.max(0, Math.floor(Number(unlockState.spentGems || 0)));
+    const availableStars = Math.max(0, lifetimeStars - spentStars);
+    const availableGems = Math.max(0, lifetimeGems - spentGems);
+    return {
+      lifetimeStars: lifetimeStars,
+      lifetimeGems: lifetimeGems,
+      spentStars: spentStars,
+      spentGems: spentGems,
+      availableStars: availableStars,
+      availableGems: availableGems,
+      challengeGems: challengeGems
+    };
   }
 
   function syncSequentialUnlocks(worldOrder, totalsByWorld) {
     const order = normalizeWorldOrder(worldOrder);
-    const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
-    const previousState = loadUnlockState(order).unlocked.slice();
-    const alphabet = getAlphabetJourney(loadForestState());
+    const unlockState = loadUnlockState(order);
+    const previousState = unlockState.unlocked.slice();
     const unlocked = previousState.filter(function (key, index, arr) {
       return key === "alphabet" || (order.includes(key) && arr.indexOf(key) === index);
     });
     if (!unlocked.includes("alphabet")) unlocked.unshift("alphabet");
+    const spentUnlocks = unlockState.spentUnlocks && typeof unlockState.spentUnlocks === "object"
+      ? Object.assign({}, unlockState.spentUnlocks)
+      : {};
+    let spentStars = Math.max(0, Math.floor(Number(unlockState.spentStars || 0)));
+    let spentGems = Math.max(0, Math.floor(Number(unlockState.spentGems || 0)));
+    let lastUnlockLifetimeStars = Math.max(0, Math.floor(Number(unlockState.lastUnlockLifetimeStars || 0)));
+    let lastUnlockLifetimeGems = Math.max(0, Math.floor(Number(unlockState.lastUnlockLifetimeGems || 0)));
+    let lastUnlockNonce = Math.max(0, Math.floor(Number(unlockState.lastUnlockNonce || 0)));
+    let lastUnlockedWorld = typeof unlockState.lastUnlockedWorld === "string" ? unlockState.lastUnlockedWorld : "";
+    let lastUnlockedAt = Math.max(0, Math.floor(Number(unlockState.lastUnlockedAt || 0)));
+    const rewards = computeRewardLedger(order, totalsByWorld);
+    let availableStars = rewards.availableStars;
+    let availableGems = rewards.availableGems;
+    const earnedSinceLastUnlock = rewards.lifetimeStars > lastUnlockLifetimeStars
+      || rewards.lifetimeGems > lastUnlockLifetimeGems;
+    let unlockedThisSync = false;
 
     for (let index = 1; index < order.length; index += 1) {
       const key = order[index];
       if (unlocked.includes(key)) continue;
       const previous = order[index - 1];
       if (!unlocked.includes(previous)) break;
-      let canUnlock = false;
-      if (previous === "alphabet") {
-        canUnlock = Boolean(alphabet.currentStars >= UNLOCK_STAR_TARGET && alphabet.currentGems >= UNLOCK_GEM_TARGET);
-      } else {
-        const totalLessons = Number(totals[previous] || 3);
-        const previousProgress = loadWorldProgress(previous, totalLessons);
-        canUnlock = Boolean(previousProgress.currentStars >= UNLOCK_STAR_TARGET && previousProgress.currentGems >= UNLOCK_GEM_TARGET);
-      }
+      if (unlockedThisSync) break;
+      const canUnlock = earnedSinceLastUnlock
+        && availableStars >= UNLOCK_STAR_TARGET
+        && availableGems >= UNLOCK_GEM_TARGET;
       if (!canUnlock) break;
       unlocked.push(key);
+      spentUnlocks[key] = true;
+      spentStars += UNLOCK_STAR_TARGET;
+      spentGems += UNLOCK_GEM_TARGET;
+      availableStars = Math.max(0, availableStars - UNLOCK_STAR_TARGET);
+      availableGems = Math.max(0, availableGems - UNLOCK_GEM_TARGET);
+      unlockedThisSync = true;
+      lastUnlockLifetimeStars = rewards.lifetimeStars;
+      lastUnlockLifetimeGems = rewards.lifetimeGems;
+      lastUnlockNonce += 1;
+      lastUnlockedWorld = key;
+      lastUnlockedAt = Date.now();
     }
 
     const changed = unlocked.length !== previousState.length
       || unlocked.some(function (key, index) { return previousState[index] !== key; });
-    if (changed) saveUnlockState({ unlocked: unlocked }, order);
-    else saveUnlockState({ unlocked: previousState }, order);
+    saveUnlockState({
+      unlocked: changed ? unlocked : previousState,
+      spentUnlocks: spentUnlocks,
+      spentStars: spentStars,
+      spentGems: spentGems,
+      lastUnlockLifetimeStars: lastUnlockLifetimeStars,
+      lastUnlockLifetimeGems: lastUnlockLifetimeGems,
+      lastUnlockNonce: lastUnlockNonce,
+      lastUnlockedWorld: lastUnlockedWorld,
+      lastUnlockedAt: lastUnlockedAt
+    }, order);
     return unlocked;
   }
 
@@ -432,6 +568,8 @@
       if (progress.isComplete) completedWorlds += 1;
     });
     const currentWorld = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
+    const rewardLedger = computeRewardLedger(order, totals);
+    const unlockState = loadUnlockState(order);
     return {
       currentWorld: order.includes(currentWorld) ? currentWorld : "alphabet",
       alphabet: alphabet,
@@ -442,11 +580,20 @@
         learningActivitiesCompleted: alphabet.learningCompletedCount,
         practiceActivitiesCompleted: alphabet.practiceCompletedCount,
         forestActivitiesCompleted: alphabet.activities.filter(function (activity) { return activity.isComplete; }).length,
-        stars: alphabet.stars + worldStars
+        stars: rewardLedger.lifetimeStars,
+        availableStars: rewardLedger.availableStars
       },
       rewards: {
-        lifetimeStars: alphabet.stars + worldStars,
-        lifetimeGems: getHomeRewardState().challengeGems + alphabet.lifetimeGems + worldGems
+        stars: rewardLedger.availableStars,
+        gems: rewardLedger.availableGems,
+        availableStars: rewardLedger.availableStars,
+        availableGems: rewardLedger.availableGems,
+        lifetimeStars: rewardLedger.lifetimeStars,
+        lifetimeGems: rewardLedger.lifetimeGems,
+        spentStars: rewardLedger.spentStars,
+        spentGems: rewardLedger.spentGems,
+        unlockNonce: Number(unlockState.lastUnlockNonce || 0),
+        lastUnlockedWorld: unlockState.lastUnlockedWorld || ""
       }
     };
   }
@@ -465,18 +612,19 @@
     const completedWorldKeys = Object.keys(snapshot.worlds).filter(function (worldKey) {
       return snapshot.worlds[worldKey].isComplete;
     });
-    const worldGems = Object.keys(snapshot.worlds).reduce(function (count, key) {
-      return count + Number((snapshot.worlds[key] && snapshot.worlds[key].gems) || 0);
-    }, 0);
-    const alphabetGems = Number(snapshot.alphabet && snapshot.alphabet.lifetimeGems || 0);
-    const challengeGems = Number(existing.challengeGems || 0);
-    const computedLifetimeGems = Math.max(0, Math.floor(worldGems + alphabetGems + challengeGems));
-    const lifetimeGems = Math.max(Math.max(0, Math.floor(Number(existing.gems || 0))), computedLifetimeGems);
+    const rewards = snapshot.rewards && typeof snapshot.rewards === "object" ? snapshot.rewards : {};
+    const challengeGems = Number(existing.challengeGems || rewards.challengeGems || 0);
+    const lifetimeGems = Math.max(0, Math.floor(Number(rewards.lifetimeGems || existing.lifetimeGems || existing.gems || 0)));
+    const availableGems = Math.max(0, Math.floor(Number(rewards.availableGems || 0)));
+    const availableStars = Math.max(0, Math.floor(Number(rewards.availableStars || 0)));
     const merged = {
-      gems: lifetimeGems,
+      gems: availableGems,
       challengeGems: challengeGems,
       completed: completedWorldKeys,
-      lifetimeStars: Number(snapshot.totals.stars || 0)
+      availableStars: availableStars,
+      availableGems: availableGems,
+      lifetimeStars: Math.max(0, Math.floor(Number(rewards.lifetimeStars || snapshot.totals.stars || 0))),
+      lifetimeGems: lifetimeGems
     };
     writeJson(HOME_KEY, merged);
     return merged;
@@ -496,7 +644,19 @@
     return {
       gems: gems,
       challengeGems: challengeGems,
-      completed: Array.isArray(existing.completed) ? existing.completed.slice() : []
+      completed: Array.isArray(existing.completed) ? existing.completed.slice() : [],
+      availableStars: Number.isFinite(Number(existing.availableStars))
+        ? Math.max(0, Math.floor(Number(existing.availableStars)))
+        : 0,
+      availableGems: Number.isFinite(Number(existing.availableGems))
+        ? Math.max(0, Math.floor(Number(existing.availableGems)))
+        : gems,
+      lifetimeStars: Number.isFinite(Number(existing.lifetimeStars))
+        ? Math.max(0, Math.floor(Number(existing.lifetimeStars)))
+        : 0,
+      lifetimeGems: Number.isFinite(Number(existing.lifetimeGems))
+        ? Math.max(0, Math.floor(Number(existing.lifetimeGems)))
+        : gems
     };
   }
 
@@ -513,7 +673,11 @@
     writeJson(HOME_KEY, {
       gems: Math.max(0, Math.floor(Number(home.gems || 0))),
       challengeGems: home.challengeGems,
-      completed: home.completed
+      completed: home.completed,
+      availableStars: Math.max(0, Math.floor(Number(home.availableStars || 0))),
+      availableGems: Math.max(0, Math.floor(Number(home.availableGems || home.gems || 0))),
+      lifetimeStars: Math.max(0, Math.floor(Number(home.lifetimeStars || 0))),
+      lifetimeGems: Math.max(0, Math.floor(Number(home.lifetimeGems || home.gems || 0)))
     });
     return true;
   }
@@ -530,7 +694,17 @@
     order.forEach(function (worldKey) {
       localStorage.removeItem("sanskritParichay.world." + worldKey + ".progress");
     });
-    saveUnlockState({ unlocked: ["alphabet"] }, order);
+    saveUnlockState({
+      unlocked: ["alphabet"],
+      spentUnlocks: {},
+      spentStars: 0,
+      spentGems: 0,
+      lastUnlockLifetimeStars: 0,
+      lastUnlockLifetimeGems: 0,
+      lastUnlockNonce: 0,
+      lastUnlockedWorld: "",
+      lastUnlockedAt: 0
+    }, order);
     localStorage.setItem(LAST_WORLD_KEY, "alphabet");
     return true;
   }

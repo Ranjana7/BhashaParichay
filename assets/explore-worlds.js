@@ -79,20 +79,19 @@
   function unlockHint(worldKey) {
     if (worldKey === "alphabet") return "";
     if (isUnlocked(worldKey)) return "Hooray! Your next adventure is ready!";
-    const index = orderKeys.indexOf(worldKey);
-    if (index <= 0 || !snapshot) return "Locked";
-    const previous = orderKeys[index - 1];
-    if (previous === "alphabet") {
-      const stars = Number(snapshot.alphabet && snapshot.alphabet.currentStars || 0);
-      const gems = Number(snapshot.alphabet && snapshot.alphabet.currentGems || 0);
-      return "Unlock " + (worldMeta[previous] ? worldMeta[previous].title : previous) + ": "
-        + stars + "/50 stars, " + gems + "/1 gem";
+    const rewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(orderKeys, worldTotals)
+      : { stars: 0, gems: 0 };
+    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
+    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
+    const starsRemaining = Math.max(0, 50 - stars);
+    const gemsRemaining = Math.max(0, 1 - gems);
+    if (starsRemaining > 0 && gemsRemaining > 0) {
+      return starsRemaining + " stars and " + gemsRemaining + " gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
     }
-    const prev = snapshot.worlds && snapshot.worlds[previous];
-    const stars = Number(prev && prev.currentStars || 0);
-    const gems = Number(prev && prev.currentGems || 0);
-    return "Unlock " + (worldMeta[previous] ? worldMeta[previous].title : previous) + ": "
-      + stars + "/50 stars, " + gems + "/1 gem";
+    if (starsRemaining > 0) return starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + " needed";
+    if (gemsRemaining > 0) return gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
+    return "Ready to unlock!";
   }
 
   grid.innerHTML = "";

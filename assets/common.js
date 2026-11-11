@@ -222,6 +222,99 @@
     }, 220);
   }
 
+  function initMiniCursorMithu() {
+    const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+    const coarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+    if (reducedMotion || !finePointer || coarsePointer || ("ontouchstart" in window)) return;
+    if (document.getElementById("treeMithu")) return;
+    if (document.getElementById("miniCursorMithu")) return;
+
+    const node = document.createElement("div");
+    node.id = "miniCursorMithu";
+    node.className = "mini-cursor-mithu";
+    node.setAttribute("aria-hidden", "true");
+    node.innerHTML =
+      '<span class="mini-cursor-mithu-body">🦜</span>' +
+      '<span class="mini-cursor-mithu-wing mini-cursor-mithu-wing-left"></span>' +
+      '<span class="mini-cursor-mithu-wing mini-cursor-mithu-wing-right"></span>';
+    document.body.appendChild(node);
+
+    const state = {
+      x: Math.max(80, window.innerWidth * 0.3),
+      y: Math.max(80, window.innerHeight * 0.3),
+      tx: Math.max(80, window.innerWidth * 0.3),
+      ty: Math.max(80, window.innerHeight * 0.3),
+      vx: 0,
+      rafId: 0,
+      visible: false,
+      paused: false
+    };
+    const OFFSET_X = 16;
+    const OFFSET_Y = 14;
+
+    function renderFrame() {
+      state.x += (state.tx - state.x) * 0.22;
+      state.y += (state.ty - state.y) * 0.22;
+      const dx = state.tx - state.x;
+      state.vx = state.vx * 0.7 + dx * 0.3;
+      const angle = Math.max(-16, Math.min(16, state.vx * 0.12));
+      node.style.left = state.x.toFixed(2) + "px";
+      node.style.top = state.y.toFixed(2) + "px";
+      node.style.transform = "translate(-50%, -50%) rotate(" + angle.toFixed(1) + "deg)";
+      state.rafId = window.requestAnimationFrame(renderFrame);
+    }
+
+    function show() {
+      if (state.visible || state.paused) return;
+      state.visible = true;
+      node.classList.add("visible");
+    }
+
+    function hide() {
+      state.visible = false;
+      node.classList.remove("visible");
+    }
+
+    function setTarget(clientX, clientY) {
+      if (state.paused) return;
+      state.tx = clientX + OFFSET_X;
+      state.ty = clientY + OFFSET_Y;
+      show();
+    }
+
+    document.addEventListener("pointermove", function (event) {
+      setTarget(event.clientX, event.clientY);
+    }, { passive: true });
+    document.addEventListener("pointerdown", function (event) {
+      setTarget(event.clientX, event.clientY);
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () {
+      hide();
+    });
+    document.addEventListener("mouseleave", function () {
+      hide();
+    });
+
+    const traceCanvas = document.getElementById("traceCanvas");
+    if (traceCanvas) {
+      const pause = function () {
+        state.paused = true;
+        hide();
+      };
+      const resume = function () {
+        state.paused = false;
+      };
+      traceCanvas.addEventListener("pointerenter", pause);
+      traceCanvas.addEventListener("pointerleave", resume);
+      traceCanvas.addEventListener("pointerdown", pause);
+      traceCanvas.addEventListener("pointerup", resume);
+      traceCanvas.addEventListener("pointercancel", resume);
+    }
+
+    state.rafId = window.requestAnimationFrame(renderFrame);
+  }
+
   function attachCurrentWorldLinks() {
     const current = getCurrentWorldMeta();
     const currentPath = window.location.pathname.split("/").pop() || "index.html";
@@ -490,11 +583,18 @@
   };
   window.spGetRewards = function spGetRewards(worldOrder, worldTotals) {
     const snapshot = window.spGetProgressSnapshot(worldOrder, worldTotals);
-    const home = readJson(HOME_KEY, { gems: 0 });
-    const gems = Number.isFinite(Number(home && home.gems)) ? Number(home.gems) : 0;
+    const rewards = snapshot && snapshot.rewards && typeof snapshot.rewards === "object" ? snapshot.rewards : {};
+    const stars = Number.isFinite(Number(rewards.stars))
+      ? Number(rewards.stars)
+      : Number((snapshot && snapshot.totals && snapshot.totals.availableStars) || 0);
+    const gems = Number.isFinite(Number(rewards.gems))
+      ? Number(rewards.gems)
+      : Number((rewards && rewards.availableGems) || 0);
     return {
-      stars: Number((snapshot && snapshot.totals && snapshot.totals.stars) || 0),
-      gems: Math.max(0, Math.floor(Number.isFinite(gems) ? gems : 0))
+      stars: Math.max(0, Math.floor(Number.isFinite(stars) ? stars : 0)),
+      gems: Math.max(0, Math.floor(Number.isFinite(gems) ? gems : 0)),
+      lifetimeStars: Number.isFinite(Number(rewards.lifetimeStars)) ? Math.max(0, Math.floor(Number(rewards.lifetimeStars))) : 0,
+      lifetimeGems: Number.isFinite(Number(rewards.lifetimeGems)) ? Math.max(0, Math.floor(Number(rewards.lifetimeGems))) : 0
     };
   };
   window.spSyncProgressModel = function spSyncProgressModel(worldOrder, worldTotals) {
@@ -510,6 +610,7 @@
 
   attachCurrentWorldLinks();
   applyPendingScroll();
+  initMiniCursorMithu();
   renderTestModeBadge();
   renderMute();
 })();

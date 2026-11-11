@@ -118,10 +118,7 @@
   const daily = loadDailyProgress();
   const runtime = {
     mascotPriorityUntil: 0,
-    mascotActionWrap: null,
-    mascotActionBtn: null,
-    mascotDismissBtn: null,
-    lockedTargetWorld: null
+    topLockGuide: null
   };
   if (typeof window.spSyncProgressModel === "function") {
     window.spSyncProgressModel(pathOrder, worldTotals);
@@ -235,43 +232,19 @@
 
   function unlockRequirementFor(world) {
     if (world === "alphabet") return "";
-    const orderIndex = pathOrder.indexOf(world);
-    if (orderIndex <= 0) return "Locked";
-    const previous = pathOrder[orderIndex - 1];
-    const snapshot = getProgressSnapshot();
-    if (previous === "alphabet" && snapshot.alphabet) {
-      const stars = Number(snapshot.alphabet.currentStars || 0);
-      const gems = Number(snapshot.alphabet.currentGems || 0);
-      return "Unlock " + (window.SP_WORLD_META[previous] ? window.SP_WORLD_META[previous].title : previous)
-        + ": " + stars + "/50 stars, " + gems + "/1 gem";
+    const rewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(pathOrder, worldTotals)
+      : { stars: 0, gems: 0 };
+    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
+    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
+    const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
+    const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
+    if (starsRemaining <= 0 && gemsRemaining <= 0) return "Ready to unlock!";
+    if (starsRemaining > 0 && gemsRemaining > 0) {
+      return starsRemaining + " stars and " + gemsRemaining + " gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
     }
-    const prevWorld = snapshot.worlds && snapshot.worlds[previous];
-    const stars = Number(prevWorld && prevWorld.currentStars || 0);
-    const gems = Number(prevWorld && prevWorld.currentGems || 0);
-    return "Unlock " + (window.SP_WORLD_META[previous] ? window.SP_WORLD_META[previous].title : previous)
-      + ": " + stars + "/50 stars, " + gems + "/1 gem";
-  }
-
-  function getUnlockProgress(world) {
-    const orderIndex = pathOrder.indexOf(world);
-    if (world === "alphabet" || orderIndex <= 0) {
-      return { previous: "alphabet", stars: UNLOCK_STAR_TARGET, gems: UNLOCK_GEM_TARGET };
-    }
-    const previous = pathOrder[orderIndex - 1];
-    const snapshot = getProgressSnapshot();
-    if (previous === "alphabet" && snapshot.alphabet) {
-      return {
-        previous: previous,
-        stars: Number(snapshot.alphabet.currentStars || 0),
-        gems: Number(snapshot.alphabet.currentGems || 0)
-      };
-    }
-    const prevWorld = snapshot.worlds && snapshot.worlds[previous];
-    return {
-      previous: previous,
-      stars: Number(prevWorld && prevWorld.currentStars || 0),
-      gems: Number(prevWorld && prevWorld.currentGems || 0)
-    };
+    if (starsRemaining > 0) return starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + " needed";
+    return gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
   }
 
   function getPracticeAnchor(world) {
@@ -290,53 +263,51 @@
   }
 
   function buildLockedWorldGuidance(world) {
-    const progress = getUnlockProgress(world);
-    const stars = Math.max(0, Math.floor(progress.stars));
-    const gems = Math.max(0, Math.floor(progress.gems));
+    const rewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(pathOrder, worldTotals)
+      : { stars: 0, gems: 0 };
+    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
+    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
     const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
     const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
-    let requirement;
-    if (starsRemaining > 0 && gemsRemaining > 0) {
-      requirement = "Only " + starsRemaining + " stars and " + gemsRemaining + " gem"
-        + (gemsRemaining === 1 ? "" : "s") + " to go!";
-    } else if (starsRemaining > 0) {
-      requirement = "Just " + starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + "!";
-    } else if (gemsRemaining > 0) {
-      requirement = "Just " + gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + "!";
-    } else {
-      requirement = "Amazing! You're ready to enter this world now!";
-    }
     const sourceWorld = getBestEarnWorld(world);
+    const message = (starsRemaining <= 0 && gemsRemaining <= 0)
+      ? "🌟 Amazing! You've earned enough rewards. Let's open your next world together."
+      : "🌟 Nearly there! Earn " + starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s")
+        + (gemsRemaining > 0 ? (" and " + gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s")) : "")
+        + " and we can explore the next world together.";
     return {
       sourceWorld: sourceWorld,
-      message: "🌟 You're doing great! " + stars + "/" + UNLOCK_STAR_TARGET + " stars, "
-        + gems + "/" + UNLOCK_GEM_TARGET + " gem. " + requirement
+      message: message
     };
   }
 
-  function ensureMascotActionUi() {
-    if (!ui.mascot || runtime.mascotActionWrap) return;
-    const wrap = document.createElement("div");
-    wrap.className = "hero-actions";
-    wrap.style.marginTop = "8px";
-    wrap.style.pointerEvents = "auto";
-    const actionBtn = document.createElement("button");
-    actionBtn.type = "button";
-    actionBtn.className = "button primary";
-    actionBtn.textContent = "✨ Let's Earn More Stars! →";
-    const dismissBtn = document.createElement("button");
-    dismissBtn.type = "button";
-    dismissBtn.className = "button ghost tiny";
-    dismissBtn.textContent = "Maybe later";
-    wrap.appendChild(actionBtn);
-    wrap.appendChild(dismissBtn);
-    wrap.hidden = true;
-    ui.mascot.appendChild(wrap);
-    runtime.mascotActionWrap = wrap;
-    runtime.mascotActionBtn = actionBtn;
-    runtime.mascotDismissBtn = dismissBtn;
-    actionBtn.addEventListener("click", function () {
-      const targetWorld = runtime.lockedTargetWorld || "alphabet";
+  function ensureTopLockGuide() {
+    if (runtime.topLockGuide) return runtime.topLockGuide;
+    const host = document.getElementById("worlds") || document.querySelector(".magic-hero");
+    if (!host || !host.parentElement) return null;
+    const panel = document.createElement("section");
+    panel.className = "panel top-lock-guide";
+    panel.hidden = true;
+    panel.innerHTML =
+      '<div class="top-lock-guide-layout">' +
+      '<div class="top-lock-guide-mithu" aria-hidden="true">🦜</div>' +
+      '<div class="top-lock-guide-content">' +
+      '<p class="top-lock-guide-message" id="topLockGuideMessage"></p>' +
+      '<div class="hero-actions">' +
+      '<button type="button" class="button primary tiny" id="topLockGuideAction">✨ Let\'s Earn More Stars! →</button>' +
+      '<button type="button" class="button ghost tiny" id="topLockGuideDismiss">Maybe later</button>' +
+      '</div></div></div>';
+    host.parentElement.insertBefore(panel, host);
+    runtime.topLockGuide = {
+      panel: panel,
+      message: panel.querySelector("#topLockGuideMessage"),
+      action: panel.querySelector("#topLockGuideAction"),
+      dismiss: panel.querySelector("#topLockGuideDismiss"),
+      targetWorld: "alphabet"
+    };
+    runtime.topLockGuide.action.addEventListener("click", function () {
+      const targetWorld = runtime.topLockGuide.targetWorld || "alphabet";
       clearLockedWorldMessage();
       localStorage.setItem(LAST_WORLD_KEY, targetWorld);
       const anchor = getPracticeAnchor(targetWorld);
@@ -347,26 +318,30 @@
       const baseUrl = worldLinks[targetWorld] || worldLinks.alphabet;
       window.location.href = baseUrl + "#" + anchor;
     });
-    dismissBtn.addEventListener("click", function () {
+    runtime.topLockGuide.dismiss.addEventListener("click", function () {
       clearLockedWorldMessage();
-      setMascotState("idle", homeMsg.mascotIntro || "Namaste! Choose a world or play Challenge of the Day.", { force: true });
     });
+    return runtime.topLockGuide;
   }
 
   function showLockedWorldMessage(world) {
-    ensureMascotActionUi();
+    const guide = ensureTopLockGuide();
+    if (!guide) return;
     const guidance = buildLockedWorldGuidance(world);
-    runtime.lockedTargetWorld = guidance.sourceWorld;
-    setMascotState("greeting", guidance.message, { priorityMs: 8000, force: true, tone: "world" });
-    if (runtime.mascotActionWrap) runtime.mascotActionWrap.hidden = false;
-    if (ui.mascot) ui.mascot.style.pointerEvents = "auto";
+    guide.targetWorld = guidance.sourceWorld;
+    if (guide.message) guide.message.textContent = guidance.message;
+    guide.panel.hidden = false;
+    setMascotState("greeting", null, { force: true });
+    const header = document.querySelector(".site-header");
+    const offset = header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 88;
+    const top = Math.max(0, window.scrollY + guide.panel.getBoundingClientRect().top - offset);
+    window.scrollTo({ top: top, behavior: "smooth" });
   }
 
   function clearLockedWorldMessage() {
-    runtime.mascotPriorityUntil = 0;
-    runtime.lockedTargetWorld = null;
-    if (runtime.mascotActionWrap) runtime.mascotActionWrap.hidden = true;
-    if (ui.mascot) ui.mascot.style.pointerEvents = "";
+    if (runtime.topLockGuide && runtime.topLockGuide.panel) {
+      runtime.topLockGuide.panel.hidden = true;
+    }
   }
 
   function scrollChallengeIntoView() {

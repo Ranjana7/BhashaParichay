@@ -359,7 +359,10 @@
       hideUnlockInvite();
       return;
     }
-    const meetsThreshold = state.progress.stars >= UNLOCK_STAR_TARGET && state.progress.gems >= UNLOCK_GEM_TARGET;
+    const rewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(WORLD_ORDER, WORLD_TOTALS)
+      : { stars: 0, gems: 0 };
+    const meetsThreshold = Number(rewards.stars || 0) >= UNLOCK_STAR_TARGET && Number(rewards.gems || 0) >= UNLOCK_GEM_TARGET;
     const unlocked = typeof window.spIsWorldUnlocked === "function"
       ? window.spIsWorldUnlocked(nextWorldKey, WORLD_ORDER)
       : meetsThreshold;
@@ -406,7 +409,6 @@
   function renderHeader() {
     syncDoneForCurrentLesson();
     const lesson = currentLesson();
-    const currentRewards = getCurrentRewardProgress();
     ui.worldTitle.textContent = world.title;
     ui.worldSubtitle.textContent = worldWelcome;
     ui.worldLessonName.textContent = lesson.title;
@@ -438,9 +440,13 @@
       ui.worldNextLessonBtn.textContent = "Next Lesson (complete all activities)";
       ui.worldProgressText.textContent = "Finish all activities in this lesson.";
     }
-    if (currentRewards.currentStars < UNLOCK_STAR_TARGET || currentRewards.currentGems < UNLOCK_GEM_TARGET) {
-      ui.worldProgressText.textContent += " Unlock target: " + currentRewards.currentStars + "/" + UNLOCK_STAR_TARGET + " stars, "
-        + currentRewards.currentGems + "/" + UNLOCK_GEM_TARGET + " gems.";
+    const unlockRewards = typeof window.spGetRewards === "function"
+      ? window.spGetRewards(WORLD_ORDER, WORLD_TOTALS)
+      : { stars: 0, gems: 0 };
+    const availableStars = Math.max(0, Math.floor(Number(unlockRewards.stars || 0)));
+    const availableGems = Math.max(0, Math.floor(Number(unlockRewards.gems || 0)));
+    if (availableStars < UNLOCK_STAR_TARGET || availableGems < UNLOCK_GEM_TARGET) {
+      ui.worldProgressText.textContent += " Available unlock balance: " + availableStars + " stars, " + availableGems + " gems.";
     }
     updateUnlockInvitation();
   }

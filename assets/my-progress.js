@@ -33,7 +33,10 @@
         }
       };
 
-  const starsNode = document.getElementById("progressStars");
+  const availableStarsNode = document.getElementById("progressAvailableStars");
+  const availableGemsNode = document.getElementById("progressAvailableGems");
+  const lifetimeStarsNode = document.getElementById("progressLifetimeStars");
+  const lifetimeGemsNode = document.getElementById("progressLifetimeGems");
   const worldsExploredNode = document.getElementById("progressWorldsExplored");
   const learningActivitiesNode = document.getElementById("progressLearningActivities");
   const practiceActivitiesNode = document.getElementById("progressPracticeActivities");
@@ -43,7 +46,11 @@
   const forestLearningFill = document.getElementById("forestLearningFill");
   const forestPracticeFill = document.getElementById("forestPracticeFill");
 
-  if (starsNode) starsNode.textContent = String(snapshot.totals.stars || 0);
+  const rewards = snapshot.rewards && typeof snapshot.rewards === "object" ? snapshot.rewards : {};
+  if (availableStarsNode) availableStarsNode.textContent = String(Number(rewards.availableStars || rewards.stars || 0));
+  if (availableGemsNode) availableGemsNode.textContent = String(Number(rewards.availableGems || rewards.gems || 0));
+  if (lifetimeStarsNode) lifetimeStarsNode.textContent = String(Number(rewards.lifetimeStars || snapshot.totals.stars || 0));
+  if (lifetimeGemsNode) lifetimeGemsNode.textContent = String(Number(rewards.lifetimeGems || 0));
   if (worldsExploredNode) worldsExploredNode.textContent = String(snapshot.totals.worldsExplored || 0);
   if (learningActivitiesNode) learningActivitiesNode.textContent = String(snapshot.totals.learningActivitiesCompleted || 0);
   if (practiceActivitiesNode) practiceActivitiesNode.textContent = String(snapshot.totals.practiceActivitiesCompleted || 0);
