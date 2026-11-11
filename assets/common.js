@@ -226,7 +226,7 @@
     const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const finePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
     const coarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-    if (reducedMotion || !finePointer || coarsePointer || ("ontouchstart" in window)) return;
+    if (reducedMotion || !finePointer || coarsePointer) return;
     if (document.getElementById("treeMithu")) return;
     if (document.getElementById("miniCursorMithu")) return;
 
