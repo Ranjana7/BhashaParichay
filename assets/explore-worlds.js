@@ -60,6 +60,7 @@
       '<span class="world-title">' + world.title + "</span>" +
       '<span class="world-text">' + world.subtitle + "</span>" +
       '<span class="world-text">Lessons: ' + progress.completed + "/" + progress.total + "</span>" +
+      (!unlocked ? '<span class="world-text world-lock-note">' + unlockHint(world.key) + "</span>" : "") +
       '<div class="hero-actions">' +
       '<button class="button ' + (unlocked ? "primary" : "ghost") + '" type="button">' + (unlocked ? "Continue Adventure" : "Locked") + "</button>" +
       "</div>";
@@ -76,8 +77,14 @@
   });
 
   if (status) {
-    status.textContent = window.spIsTestMode && window.spIsTestMode()
-      ? "Testing Mode is on. All worlds are open while progress still saves normally."
-      : "World progress is saved locally on this device.";
+    status.textContent = "World progress is saved locally on this device.";
   }
 })();
+  function unlockHint(worldKey) {
+    if (worldKey === "alphabet") return "";
+    const index = orderKeys.indexOf(worldKey);
+    const previous = orderKeys[index - 1] || "alphabet";
+    if (previous === "alphabet") return "Unlock by completing Magical Tree and any two practice games in Alphabet Forest.";
+    const previousWorld = worldOrder.find(function (item) { return item.key === previous; });
+    return "Unlock by completing any two practice activities in " + (previousWorld ? previousWorld.title : "the previous world") + ".";
+  }

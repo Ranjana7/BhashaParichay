@@ -8,8 +8,8 @@ const configJs = fs.readFileSync(path.join(repoRoot, "assets", "site-config.js")
 const commonJs = fs.readFileSync(path.join(repoRoot, "assets", "common.js"), "utf8");
 const messagesJs = fs.readFileSync(path.join(repoRoot, "assets", "messages.js"), "utf8");
 
-test("test mode config exists and is enabled", () => {
-  assert.ok(configJs.includes("TEST_MODE: true"));
+test("test mode config exists and is disabled by default", () => {
+  assert.ok(configJs.includes("TEST_MODE: false"));
   assert.ok(commonJs.includes("window.spIsTestMode"));
   assert.ok(commonJs.includes("window.spIsWorldUnlocked"));
   assert.ok(commonJs.includes("test-mode-badge"));

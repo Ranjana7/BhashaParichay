@@ -4,6 +4,17 @@
   const HOME_KEY = "sanskritParichay.home.progress";
   const FOREST_STATE_KEY = "sanskritParichay.alphabetForest.v3";
   const LEGACY_FOREST_KEY = "sanskritParichay.alphabetForest.progress";
+  const WORLD_ORDER = ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  const WORLD_META = {
+    alphabet: { title: "Alphabet Forest", url: "alphabet-forest.html" },
+    words: { title: "Word Wonderland", url: "learning-world.html?world=words" },
+    animals: { title: "Animal Jungle", url: "learning-world.html?world=animals" },
+    numbers: { title: "Number Galaxy", url: "learning-world.html?world=numbers" },
+    colours: { title: "Colour Kingdom", url: "learning-world.html?world=colours" },
+    sentences: { title: "Sentence Castle", url: "learning-world.html?world=sentences" },
+    stories: { title: "Story Island", url: "learning-world.html?world=stories" },
+    culture: { title: "Sanskrit and Culture", url: "learning-world.html?world=culture" }
+  };
   const toggle = document.getElementById("muteToggle");
   const config = window.SP_CONFIG || { TEST_MODE: false };
   const messages = window.SP_MESSAGES || {};
@@ -119,7 +130,7 @@
       gardenComplete: gardenComplete,
       practiceCompletedCount: practiceCompletedCount,
       learningCompletedCount: Number(treeComplete) + Number(gardenComplete),
-      unlocked: treeComplete && gardenComplete && practiceCompletedCount >= 2,
+      unlocked: treeComplete && practiceCompletedCount >= 2,
       stars: Number(forest.xp || 0)
     };
   }
@@ -133,7 +144,7 @@
           worldTotals[key] = Array.isArray(world.lessons) ? world.lessons.length : 3;
         });
       }
-      return window.SPProgressStore.isWorldUnlocked(worldKey, order, Boolean(config.TEST_MODE), worldTotals);
+      return window.SPProgressStore.isWorldUnlocked(worldKey, WORLD_ORDER, Boolean(config.TEST_MODE), worldTotals);
     }
     if (config.TEST_MODE) return true;
     if (worldKey === "alphabet") return true;
@@ -148,22 +159,51 @@
 
   function getContinueUrl() {
     const world = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
-    if (world === "alphabet") return "alphabet-forest.html";
-    return "learning-world.html?world=" + encodeURIComponent(world);
+    const current = WORLD_META[world] || WORLD_META.alphabet;
+    return current.url;
   }
 
-  function attachContinueLearningLinks() {
+  function getCurrentWorldMeta() {
+    const key = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
+    return WORLD_META[key] || WORLD_META.alphabet;
+  }
+
+  function attachCurrentWorldLinks() {
+    const current = getCurrentWorldMeta();
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    const currentHref = current.url.split("?")[0];
+    document.querySelectorAll("[data-current-world]").forEach(function (node) {
+      node.textContent = current.title;
+      node.setAttribute("href", current.url);
+      if (currentPath === currentHref) {
+        node.setAttribute("aria-current", "page");
+      } else if (node.getAttribute("aria-current") === "page") {
+        node.removeAttribute("aria-current");
+      }
+    });
     document.querySelectorAll("[data-continue-learning]").forEach(function (node) {
-      node.setAttribute("href", getContinueUrl());
+      node.setAttribute("href", current.url);
       node.addEventListener("click", function (event) {
         if (node.tagName.toLowerCase() === "button") {
           event.preventDefault();
-          window.location.href = getContinueUrl();
+          window.location.href = current.url;
           return;
         }
-        node.setAttribute("href", getContinueUrl());
+        node.setAttribute("href", current.url);
       });
     });
+  }
+
+  function resetProgress() {
+    if (window.SPProgressStore && typeof window.SPProgressStore.resetProgress === "function") {
+      window.SPProgressStore.resetProgress(WORLD_ORDER);
+      return true;
+    }
+    localStorage.removeItem(HOME_KEY);
+    localStorage.removeItem(FOREST_STATE_KEY);
+    localStorage.removeItem(LEGACY_FOREST_KEY);
+    localStorage.setItem(LAST_WORLD_KEY, "alphabet");
+    return true;
   }
 
   function renderTestModeBadge() {
@@ -307,6 +347,8 @@
   window.spGetAlphabetUnlockStatus = getAlphabetUnlockStatus;
   window.spIsWorldUnlocked = isWorldUnlocked;
   window.spGetContinueLearningUrl = getContinueUrl;
+  window.spGetCurrentWorldMeta = getCurrentWorldMeta;
+  window.spResetProgress = resetProgress;
   window.spGetProgressSnapshot = function spGetProgressSnapshot(worldOrder, worldTotals) {
     if (window.SPProgressStore && typeof window.SPProgressStore.getProgressSnapshot === "function") {
       return window.SPProgressStore.getProgressSnapshot(worldOrder, worldTotals);
@@ -332,7 +374,7 @@
     return readJson(HOME_KEY, { xp: 0, completed: [] });
   };
 
-  attachContinueLearningLinks();
+  attachCurrentWorldLinks();
   renderTestModeBadge();
   renderMute();
 })();

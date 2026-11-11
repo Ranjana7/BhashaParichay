@@ -5,6 +5,7 @@ window.SP_VOCABULARY_MAP = {
   },
   words: {
     "गजः": { transliteration: "gajah", meaning: "elephant", image: "assets/illustrations/vocab/elephant.svg", alt: "Cartoon elephant" },
+    "सिंहः": { transliteration: "simhah", meaning: "lion", image: "assets/illustrations/vocab/lion.svg", alt: "Cartoon lion" },
     "फलम्": { transliteration: "phalam", meaning: "fruit", image: "assets/illustrations/vocab/fruit.svg", alt: "Cartoon fruit bowl" },
     "नदी": { transliteration: "nadee", meaning: "river", image: "assets/illustrations/vocab/river.svg", alt: "Flowing river" },
     "कमलम्": { transliteration: "kamalam", meaning: "lotus", image: "assets/illustrations/vocab/lotus.svg", alt: "Pink lotus flower" },

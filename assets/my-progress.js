@@ -63,7 +63,8 @@
   worldMeta.forEach(function (world) {
     const row = document.createElement("button");
     row.type = "button";
-    row.className = "path-node unlocked";
+    const unlocked = typeof window.spIsWorldUnlocked === "function" ? window.spIsWorldUnlocked(world.key, worldOrder) : true;
+    row.className = "path-node " + (unlocked ? "unlocked" : "locked");
     let completed = 0;
     if (world.key === "alphabet") {
       completed = Math.max(0, Math.min(world.total, learningCount + practiceCount));
@@ -78,8 +79,9 @@
 
     row.innerHTML =
       '<span class="path-title">' + world.title + "</span>" +
-      '<span class="path-state">Completed lessons: ' + Math.min(world.total, completed) + "/" + world.total + "</span>";
+      '<span class="path-state">' + (unlocked ? "Completed lessons: " + Math.min(world.total, completed) + "/" + world.total : "Locked") + "</span>";
     row.addEventListener("click", function () {
+      if (!unlocked) return;
       localStorage.setItem(LAST_WORLD_KEY, world.key);
       window.location.href = world.link;
     });

@@ -1,11 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160">
-  <rect width="240" height="160" rx="18" fill="#e9f7ff"/>
-  <ellipse cx="124" cy="94" rx="70" ry="34" fill="#8ea0b8"/>
-  <circle cx="82" cy="80" r="28" fill="#97a9c2"/>
-  <ellipse cx="72" cy="88" rx="12" ry="24" fill="#7f90a8"/>
-  <circle cx="76" cy="74" r="3.5" fill="#1d2b45"/>
-  <ellipse cx="108" cy="86" rx="18" ry="14" fill="#a7b7cc"/>
-  <rect x="90" y="110" width="16" height="28" rx="8" fill="#7f90a8"/>
-  <rect x="118" y="110" width="16" height="28" rx="8" fill="#7f90a8"/>
-  <rect x="144" y="110" width="16" height="28" rx="8" fill="#7f90a8"/>
+  <rect width="240" height="160" rx="18" fill="#eaf6ff"/>
+  <ellipse cx="132" cy="98" rx="70" ry="36" fill="#8f9fb6"/>
+  <ellipse cx="83" cy="84" rx="34" ry="30" fill="#95a7bf"/>
+  <ellipse cx="63" cy="88" rx="18" ry="23" fill="#8090a8"/>
+  <ellipse cx="68" cy="89" rx="10" ry="16" fill="#6f7f97"/>
+  <path d="M93 94 C106 96,112 106,112 120 C112 132,102 140,92 136 C86 133,84 127,86 123 C88 119,93 118,96 121 C99 124,98 128,96 130 C100 130,103 126,103 120 C103 111,98 102,91 100 Z" fill="#7f8fa8"/>
+  <circle cx="79" cy="79" r="3.7" fill="#1f2a3f"/>
+  <ellipse cx="100" cy="89" rx="12" ry="10" fill="#cfd8e4"/>
+  <rect x="94" y="113" width="16" height="28" rx="8" fill="#7e8ea6"/>
+  <rect x="124" y="114" width="16" height="28" rx="8" fill="#7e8ea6"/>
+  <rect x="151" y="112" width="16" height="30" rx="8" fill="#7e8ea6"/>
+  <rect x="176" y="111" width="16" height="31" rx="8" fill="#7e8ea6"/>
+  <path d="M192 89 C206 95,210 108,201 118" fill="none" stroke="#7f8fa8" stroke-width="7" stroke-linecap="round"/>
 </svg>

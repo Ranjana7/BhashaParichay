@@ -13,9 +13,8 @@
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
       <a href="index.html" aria-current="page">Home</a>
-      <a href="explore-worlds.html">Explore Worlds</a>
-      <a href="#" data-continue-learning>Continue Learning</a>
-      <a href="my-progress.html">My Progress</a>
+      <a href="alphabet-forest.html" data-current-world>Alphabet Forest</a>
+      <a href="about.html">About</a>
     </nav>
     <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
   </header>
@@ -61,7 +60,6 @@
           <div class="hero-actions">
             <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Start Our Adventure!</a>
             <button class="button ghost big-action" id="continueBtn" type="button">Continue My Adventure</button>
-            <a class="button secondary big-action" id="exploreBtn" href="explore-worlds.html">Explore Magical Worlds</a>
             <button class="button challenge big-action" id="challengeBtn" type="button">Today's Challenge</button>
           </div>
 
@@ -77,10 +75,7 @@
 
     <section id="worlds" class="panel">
       <h2>Choose a Learning World</h2>
-      <p>Follow a full learning journey world by world.</p>
-      <div class="hero-actions">
-        <a class="button ghost" href="explore-worlds.html">Open Explore Worlds</a>
-      </div>
+      <p>Follow your magical world map, one adventure at a time.</p>
       <div class="world-grid">
         <button class="world-card world-alphabet" data-world="alphabet" type="button">
           <span class="world-icon forest"><i></i><i></i><i></i></span>
@@ -139,6 +134,17 @@
         <button id="challengeActionBtn" class="button ghost" type="button" style="display:none;">Next challenge</button>
       </div>
     </section>
+
+    <div id="resetConfirmModal" class="reset-confirm-modal" hidden>
+      <div class="reset-confirm-card" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle">
+        <h2 id="resetConfirmTitle">Start a brand-new adventure?</h2>
+        <p>This will clear your stars and learning progress on this device.</p>
+        <div class="hero-actions">
+          <button id="resetKeepBtn" class="button ghost" type="button">Keep My Adventure</button>
+          <button id="resetStartBtn" class="button primary" type="button">Start Again</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="assets/vendor/motion.min.js"></script>

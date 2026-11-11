@@ -94,6 +94,9 @@
     challengeBtn: document.getElementById("challengeBtn"),
     playNowBtn: document.getElementById("playNowBtn"),
     resetBtn: document.getElementById("resetProgressBtn"),
+    resetModal: document.getElementById("resetConfirmModal"),
+    resetKeepBtn: document.getElementById("resetKeepBtn"),
+    resetStartBtn: document.getElementById("resetStartBtn"),
     worldCards: document.querySelectorAll(".world-card"),
     lottieButterflyOne: document.getElementById("lottieButterflyOne"),
     lottieButterflyTwo: document.getElementById("lottieButterflyTwo"),
@@ -114,6 +117,7 @@
   initHomeLottie();
   if (ui.homeHeroSubtitle && homeMsg.heroSubtitle) ui.homeHeroSubtitle.textContent = homeMsg.heroSubtitle;
   setMascotState("greeting", homeMsg.mascotIntro || "Namaste! Choose a world or play today's challenge.");
+  if (ui.challengeBtn) ui.challengeBtn.hidden = challengeSteps.length === 0;
   if (ui.homeReturningMessage && snapshot.totals && snapshot.totals.stars > 0) {
     ui.homeReturningMessage.hidden = false;
     ui.homeReturningMessage.textContent = homeMsg.returning || "Welcome back! Ready to continue your adventure?";
@@ -196,6 +200,40 @@
     const latest = getProgressSnapshot();
     ui.homeStars.textContent = String((latest.totals && latest.totals.stars) || 0);
     ui.homeXp.textContent = String(state.xp);
+  }
+
+  function unlockRequirementFor(world) {
+    if (world === "alphabet") return "";
+    const previous = pathOrder[pathOrder.indexOf(world) - 1] || "alphabet";
+    if (previous === "alphabet") return "Unlock: Complete Magical Tree + any 2 practice games in Alphabet Forest.";
+    const prevTitle = previous === "words" ? "Word Wonderland"
+      : previous === "animals" ? "Animal Jungle"
+      : previous === "numbers" ? "Number Galaxy"
+      : previous === "colours" ? "Colour Kingdom"
+      : previous === "sentences" ? "Sentence Castle"
+      : previous === "stories" ? "Story Island"
+      : previous === "culture" ? "Sanskrit and Culture"
+      : "previous world";
+    return "Unlock: Complete any 2 practice activities in " + prevTitle + ".";
+  }
+
+  function renderWorldCards() {
+    ui.worldCards.forEach(function (card) {
+      const world = card.getAttribute("data-world");
+      const unlocked = isWorldUnlocked(world);
+      card.classList.toggle("locked", !unlocked);
+      let lockNote = card.querySelector(".world-lock-note");
+      if (!unlocked) {
+        if (!lockNote) {
+          lockNote = document.createElement("span");
+          lockNote.className = "world-lock-note";
+          card.appendChild(lockNote);
+        }
+        lockNote.textContent = unlockRequirementFor(world);
+      } else if (lockNote) {
+        lockNote.remove();
+      }
+    });
   }
 
   function setMascotState(kind, speech) {
@@ -421,9 +459,9 @@
 
   function navigateToWorld(world) {
     if (!isWorldUnlocked(world)) {
-      ui.status.textContent = "Complete the previous world first to unlock this one.";
+      ui.status.textContent = unlockRequirementFor(world);
       panel.classList.add("wrong");
-      setMascotState("incorrect", "Let's complete the previous world first.");
+      setMascotState("incorrect", "Let's finish the unlock challenge first.");
       document.getElementById("previewPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
@@ -445,14 +483,13 @@
   function wireUi() {
     ui.worldCards.forEach(function (card) {
       const world = card.getAttribute("data-world");
-      const unlocked = isWorldUnlocked(world);
-      if (!unlocked) card.classList.add("locked");
       const iconLeaves = card.querySelectorAll(".world-icon i");
       animate(iconLeaves, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)"] }, { duration: 2.7, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.18; } });
       card.addEventListener("click", function () {
         navigateToWorld(world);
       });
     });
+    renderWorldCards();
 
     ui.continueBtn.addEventListener("click", function () {
       const last = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
@@ -470,17 +507,18 @@
         localStorage.setItem(LAST_WORLD_KEY, "alphabet");
       });
     }
-    if (ui.resetBtn) {
+    if (ui.resetBtn && ui.resetModal && ui.resetKeepBtn && ui.resetStartBtn) {
       ui.resetBtn.addEventListener("click", function () {
-        localStorage.removeItem(HOME_KEY);
-        localStorage.removeItem("sanskritParichay.alphabetForest.v3");
-        localStorage.removeItem("sanskritParichay.alphabetForest.progress");
-        localStorage.removeItem(LAST_WORLD_KEY);
-        localStorage.removeItem(MUTE_KEY);
-        localStorage.removeItem(CHALLENGE_KEY);
-        Object.keys(worldLinks).forEach(function (key) {
-          localStorage.removeItem("sanskritParichay.world." + key + ".progress");
-        });
+        ui.resetModal.hidden = false;
+      });
+      ui.resetKeepBtn.addEventListener("click", function () {
+        ui.resetModal.hidden = true;
+      });
+      ui.resetStartBtn.addEventListener("click", function () {
+        ui.resetModal.hidden = true;
+        if (typeof window.spResetProgress === "function") {
+          window.spResetProgress();
+        }
         state.xp = 0;
         state.completed = [];
         daily.started = false;
@@ -490,9 +528,11 @@
         saveHomeState();
         saveDailyProgress();
         panel.classList.remove("correct", "wrong");
-        ui.status.textContent = "Progress reset successfully.";
+        ui.status.textContent = "";
         renderChallengeIdle();
-        setMascotState("greeting", "All set! Let's begin again.");
+        renderStats();
+        renderWorldCards();
+        setMascotState("greeting", "Welcome back! Let's begin a brand-new adventure.");
       });
     }
   }

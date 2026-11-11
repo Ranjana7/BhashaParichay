@@ -31,7 +31,7 @@ test("renders nine activity sections", () => {
   ACTIVITY_IDS.forEach((id) => {
     assert.ok(html.includes(`data-activity-id="${id}"`));
   });
-  assert.ok(html.includes('data-continue-learning'));
+  assert.ok(html.includes('data-current-world'));
 });
 
 test("jump links target all activity sections", () => {
@@ -63,7 +63,7 @@ test("global panel uses learning/practice/stars/unlock summary", () => {
   assert.ok(html.includes('id="practiceProgressText"'));
   assert.ok(html.includes('id="nextWorldStatus"'));
   assert.ok(html.includes('id="globalStars"'));
-  assert.ok(html.includes("Finish Magical Tree, Letter Garden, and any two practice games"));
+  assert.ok(html.includes("Finish Magical Tree and any two practice games"));
   assert.equal(html.includes("0 of 9 activities complete"), false);
   assert.equal(html.includes('id="lessonStatsPanel"'), false);
   assert.equal(html.includes("Activity 3 of 6"), false);
@@ -187,10 +187,11 @@ test("auto progression uses cancellable timers and manual controls", () => {
   assert.ok(js.includes("ACTIVITY_META[activityId].type === \"quiz\" || ACTIVITY_META[activityId].type === \"letter\""));
 });
 
-test("next world unlock condition requires 2 learning and 2 practice completions", () => {
+test("next world unlock condition requires magical tree and 2 practice completions", () => {
   assert.ok(js.includes("const LEARNING_ACTIVITY_IDS = [\"magical-tree\", \"letter-garden\"]"));
   assert.ok(js.includes("const NEXT_WORLD_UNLOCK_KEY = \"next-world-unlock-v1\""));
-  assert.ok(js.includes("journey.learningCompletedCount === 2 && journey.practiceCompletedCount >= 2"));
+  assert.ok(js.includes("forestState.activities[\"magical-tree\"]"));
+  assert.ok(js.includes("journey.practiceCompletedCount >= 2"));
 });
 
 test("letter garden derives selected tab and subgroup from current letter", () => {

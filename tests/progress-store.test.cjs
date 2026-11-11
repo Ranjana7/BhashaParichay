@@ -107,7 +107,29 @@ test("snapshot reports learning/practice counts from alphabet forest v3", () => 
 
 test("unlock check keeps completed world access independent of test mode", () => {
   const { api } = loadStore({
-    "sanskritParichay.world.words.progress": JSON.stringify({ lessonIndex: 2, stars: 10, completedLessons: [0, 1, 2] }),
+    "sanskritParichay.alphabetForest.v3": JSON.stringify({
+      schemaVersion: 3,
+      activities: {
+        "magical-tree": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "letter-garden": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "hear-and-pick": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "picture-match": { currentIndex: 47, completedItems: Array.from({ length: 48 }, (_, i) => i), rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: true },
+        "arrange-word": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "flashcard-flip": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "feed-mithu": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "letter-tracing": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false },
+        "hidden-letter-hunt": { currentIndex: 0, completedItems: [], rewardedItems: [], answers: {}, attempts: {}, order: Array.from({ length: 48 }, (_, i) => i), isComplete: false }
+      },
+      completionRewarded: {},
+      worldCompleted: false,
+      xp: 0
+    }),
+    "sanskritParichay.world.words.progress": JSON.stringify({
+      lessonIndex: 2,
+      stars: 10,
+      completedLessons: [0, 1, 2],
+      practiceCompleted: { match: true, listen: true, build: false }
+    }),
     "sanskritParichay.world.animals.progress": JSON.stringify({ lessonIndex: 0, stars: 0, completedLessons: [] })
   });
   const order = ["alphabet", "words", "animals"];

@@ -73,7 +73,9 @@
     lessonIndex: 0,
     stars: 0,
     completedLessons: [],
-    done: { match: false, listen: false, build: false }
+    done: { match: false, listen: false, build: false },
+    practiceCompleted: { match: false, listen: false, build: false },
+    rewardedActivities: {}
   };
 
   const state = {
@@ -104,7 +106,13 @@
           match: Boolean(p.done && p.done.match),
           listen: Boolean(p.done && p.done.listen),
           build: Boolean(p.done && p.done.build)
-        }
+        },
+        practiceCompleted: {
+          match: Boolean((p.practiceCompleted && p.practiceCompleted.match) || (p.done && p.done.match)),
+          listen: Boolean((p.practiceCompleted && p.practiceCompleted.listen) || (p.done && p.done.listen)),
+          build: Boolean((p.practiceCompleted && p.practiceCompleted.build) || (p.done && p.done.build))
+        },
+        rewardedActivities: p.rewardedActivities && typeof p.rewardedActivities === "object" ? p.rewardedActivities : {}
       };
     } catch (error) {
       return JSON.parse(JSON.stringify(safe));
@@ -215,6 +223,18 @@
 
   function doneCount() {
     return Object.values(state.progress.done).filter(Boolean).length;
+  }
+
+  function rewardKey(activityId) {
+    return String(state.progress.lessonIndex) + ":" + String(activityId);
+  }
+
+  function rewardIfFirstTime(activityId) {
+    const key = rewardKey(activityId);
+    if (state.progress.rewardedActivities[key]) return false;
+    state.progress.rewardedActivities[key] = true;
+    state.progress.stars += 2;
+    return true;
   }
 
   function renderHeader() {
@@ -328,10 +348,11 @@
         if (opt === lesson.match.answer) {
           btn.classList.add("correct");
           state.progress.done.match = true;
-          state.progress.stars += 2;
+          state.progress.practiceCompleted.match = true;
+          rewardIfFirstTime("match");
           saveProgress();
           renderHeader();
-          ui.matchStatus.textContent = "Shabash! +2 stars";
+          ui.matchStatus.textContent = "Shabash!";
           setMascot("correct");
           setSpeech(pickMessage("correct", praisePool));
           confetti();
@@ -368,10 +389,11 @@
         if (opt === lesson.listen.answer) {
           btn.classList.add("correct");
           state.progress.done.listen = true;
-          state.progress.stars += 2;
+          state.progress.practiceCompleted.listen = true;
+          rewardIfFirstTime("listen");
           saveProgress();
           renderHeader();
-          ui.listenStatus.textContent = "Wonderful listening! +2 stars";
+          ui.listenStatus.textContent = "Wonderful listening!";
           setMascot("correct");
           setSpeech(pickMessage("correct", praisePool));
           confetti();
@@ -427,10 +449,11 @@
     const answer = lesson.build.answer.replace(/\s+/g, "");
     if (guess === answer) {
       state.progress.done.build = true;
-      state.progress.stars += 2;
+      state.progress.practiceCompleted.build = true;
+      rewardIfFirstTime("build");
       saveProgress();
       renderHeader();
-      ui.buildStatus.textContent = "Brilliant building! +2 stars";
+      ui.buildStatus.textContent = "Brilliant building!";
       setMascot("correct");
       setSpeech(pickMessage("correct", praisePool));
       confetti();
@@ -540,12 +563,12 @@
     }
     if (ui.worldContinueBtn) {
       ui.worldContinueBtn.addEventListener("click", function () {
-        window.location.href = "my-progress.html";
+        window.location.href = "index.html#worlds";
       });
     }
     if (ui.worldBackBtn) {
       ui.worldBackBtn.addEventListener("click", function () {
-        window.location.href = "explore-worlds.html";
+        window.location.href = "index.html#worlds";
       });
     }
   }

@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">
   <rect width="220" height="160" rx="16" fill="#fff9ef"/>
-  <ellipse cx="112" cy="88" rx="44" ry="34" fill="#ffb735"/>
-  <ellipse cx="140" cy="70" rx="14" ry="8" fill="#5ca94a"/>
-  <text x="110" y="148" text-anchor="middle" font-family="Segoe UI, Arial" font-size="18" fill="#8a4d00">Mango</text>
+  <path d="M94 38 C123 30,164 46,166 84 C168 116,136 134,103 128 C72 123,52 97,58 72 C63 52,78 42,94 38 Z" fill="#ffb83a" stroke="#d3881d" stroke-width="4"/>
+  <path d="M100 52 C120 48,145 60,146 82 C148 102,126 116,104 112" fill="none" stroke="#ffd57d" stroke-width="5" opacity="0.8"/>
+  <path d="M106 40 C111 30,122 25,136 28" fill="none" stroke="#5d9f45" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="141" cy="31" rx="16" ry="7" fill="#6fbf57" transform="rotate(18 141 31)"/>
 </svg>

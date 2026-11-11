@@ -6,6 +6,8 @@
   const FOREST_LEGACY_GARDEN_KEY = "sanskritParichay.alphabetForest.garden.learned";
   const HOME_KEY = "sanskritParichay.home.progress";
   const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
+  const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
+  const WORLD_UNLOCKS_KEY = "sanskritParichay.world.unlocks.v1";
   const LETTER_COUNT = 48;
   const NEXT_WORLD_UNLOCK_KEY = "next-world-unlock-v1";
   const FOREST_ACTIVITY_IDS = [
@@ -21,6 +23,7 @@
   ];
   const FOREST_LEARNING_IDS = ["magical-tree", "letter-garden"];
   const FOREST_PRACTICE_IDS = FOREST_ACTIVITY_IDS.filter(function (id) { return !FOREST_LEARNING_IDS.includes(id); });
+  const WORLD_PRACTICE_IDS = ["match", "listen", "build"];
   const LEGACY_DONE_MAP = {
     hear: "hear-and-pick",
     picture: "picture-match",
@@ -157,7 +160,7 @@
       });
     }
     migrated.xp = Number.isFinite(legacy.stars) ? Math.max(0, Math.floor(legacy.stars)) : 0;
-    if (migrated.activities["magical-tree"].isComplete && migrated.activities["letter-garden"].isComplete) {
+    if (migrated.activities["magical-tree"].isComplete) {
       const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
         return count + (migrated.activities[id].isComplete ? 1 : 0);
       }, 0);
@@ -210,7 +213,7 @@
       merged = merged ? mergeForestStates(merged, migrated) : migrated;
     });
     if (!merged) return null;
-    if (merged.activities["magical-tree"].isComplete && merged.activities["letter-garden"].isComplete) {
+    if (merged.activities["magical-tree"].isComplete) {
       const practiceDone = FOREST_PRACTICE_IDS.reduce(function (count, id) {
         return count + (merged.activities[id].isComplete ? 1 : 0);
       }, 0);
@@ -242,9 +245,11 @@
     const practiceCompleted = FOREST_PRACTICE_IDS.reduce(function (count, id) {
       return count + (activities[id] && activities[id].isComplete ? 1 : 0);
     }, 0);
-    const unlockedByRule = learningCompleted === 2 && practiceCompleted >= 2;
+    const treeComplete = Boolean(activities["magical-tree"] && activities["magical-tree"].isComplete);
+    const unlockedByRule = treeComplete && practiceCompleted >= 2;
     const unlockedEarned = Boolean(state.completionRewarded && state.completionRewarded[NEXT_WORLD_UNLOCK_KEY]);
     return {
+      treeComplete: treeComplete,
       learningCompletedCount: learningCompleted,
       practiceCompletedCount: practiceCompleted,
       unlockedByRule: unlockedByRule,
@@ -269,7 +274,8 @@
       lessonIndex: 0,
       stars: 0,
       completedLessons: [],
-      done: { match: false, listen: false, build: false }
+      done: { match: false, listen: false, build: false },
+      practiceCompleted: { match: false, listen: false, build: false }
     };
     const raw = readJson("sanskritParichay.world." + worldKey + ".progress", fallback) || fallback;
     const completedLessons = Array.isArray(raw.completedLessons)
@@ -279,18 +285,94 @@
       : [];
     const lessonIndex = clampIndex(Number(raw.lessonIndex || 0), Math.max(0, totalLessons - 1));
     const stars = Number.isFinite(raw.stars) ? Math.max(0, Math.floor(raw.stars)) : 0;
+    const done = raw.done && typeof raw.done === "object" ? raw.done : {};
+    const persistedPractice = raw.practiceCompleted && typeof raw.practiceCompleted === "object" ? raw.practiceCompleted : {};
+    const practiceCompleted = {
+      match: Boolean(persistedPractice.match || done.match),
+      listen: Boolean(persistedPractice.listen || done.listen),
+      build: Boolean(persistedPractice.build || done.build)
+    };
+    const practiceCompletedCount = WORLD_PRACTICE_IDS.reduce(function (count, id) {
+      return count + (practiceCompleted[id] ? 1 : 0);
+    }, 0);
     return {
       lessonIndex: lessonIndex,
       stars: stars,
       completedLessons: completedLessons,
       completedLessonsCount: completedLessons.length,
       totalLessons: totalLessons,
-      isComplete: completedLessons.length >= totalLessons
+      isComplete: completedLessons.length >= totalLessons,
+      practiceCompleted: practiceCompleted,
+      practiceCompletedCount: practiceCompletedCount
     };
   }
 
+  function normalizeWorldOrder(worldOrder) {
+    if (Array.isArray(worldOrder) && worldOrder.length) return worldOrder.slice();
+    return ["alphabet", "words", "animals", "numbers", "colours", "sentences", "stories", "culture"];
+  }
+
+  function loadUnlockState(worldOrder) {
+    const order = normalizeWorldOrder(worldOrder);
+    const raw = readJson(WORLD_UNLOCKS_KEY, null);
+    const unlocked = Array.isArray(raw && raw.unlocked) ? raw.unlocked.slice() : [];
+    const clean = unlocked.filter(function (key, index, arr) {
+      return order.includes(key) && arr.indexOf(key) === index;
+    });
+    if (!clean.includes("alphabet")) clean.unshift("alphabet");
+    return { unlocked: clean };
+  }
+
+  function saveUnlockState(state, worldOrder) {
+    const order = normalizeWorldOrder(worldOrder);
+    const unlocked = Array.isArray(state && state.unlocked) ? state.unlocked : [];
+    const clean = unlocked.filter(function (key, index, arr) {
+      return order.includes(key) && arr.indexOf(key) === index;
+    });
+    if (!clean.includes("alphabet")) clean.unshift("alphabet");
+    writeJson(WORLD_UNLOCKS_KEY, { unlocked: clean });
+    return clean;
+  }
+
+  function syncSequentialUnlocks(worldOrder, totalsByWorld) {
+    const order = normalizeWorldOrder(worldOrder);
+    const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
+    const unlockState = loadUnlockState(order);
+    const unlocked = unlockState.unlocked.slice();
+    const forest = loadForestState();
+    const alphabet = getAlphabetJourney(forest);
+    let changed = false;
+
+    for (let index = 1; index < order.length; index += 1) {
+      const key = order[index];
+      if (unlocked.includes(key)) continue;
+      const previous = order[index - 1];
+      let canUnlock = false;
+      if (previous === "alphabet") {
+        canUnlock = Boolean(alphabet.treeComplete && alphabet.practiceCompletedCount >= 2);
+      } else {
+        const totalLessons = Number(totals[previous] || 3);
+        const previousProgress = loadWorldProgress(previous, totalLessons);
+        canUnlock = previousProgress.practiceCompletedCount >= 2;
+      }
+      if (canUnlock) {
+        unlocked.push(key);
+        changed = true;
+      } else {
+        break;
+      }
+    }
+
+    if (changed) {
+      saveUnlockState({ unlocked: unlocked }, order);
+    } else {
+      saveUnlockState(unlockState, order);
+    }
+    return unlocked;
+  }
+
   function getProgressSnapshot(worldOrder, totalsByWorld) {
-    const order = Array.isArray(worldOrder) ? worldOrder.slice() : [];
+    const order = normalizeWorldOrder(worldOrder);
     const totals = totalsByWorld && typeof totalsByWorld === "object" ? totalsByWorld : {};
     const forest = loadForestState();
     const alphabet = getAlphabetJourney(forest);
@@ -304,17 +386,19 @@
       const progress = loadWorldProgress(worldKey, totalLessons);
       worlds[worldKey] = progress;
       worldStars += progress.stars;
-      if (progress.lessonIndex > 0 || progress.completedLessonsCount > 0 || progress.stars > 0) worldsExplored += 1;
+      if (progress.lessonIndex > 0 || progress.completedLessonsCount > 0 || progress.stars > 0 || progress.practiceCompletedCount > 0) {
+        worldsExplored += 1;
+      }
       if (progress.isComplete) completedWorlds += 1;
     });
     const currentWorld = localStorage.getItem(LAST_WORLD_KEY) || "alphabet";
     return {
-      currentWorld: currentWorld,
+      currentWorld: order.includes(currentWorld) ? currentWorld : "alphabet",
       alphabet: alphabet,
       worlds: worlds,
       totals: {
         worldsExplored: worldsExplored + 1,
-        worldsCompleted: completedWorlds + (alphabet.unlocked ? 1 : 0),
+        worldsCompleted: completedWorlds,
         learningActivitiesCompleted: alphabet.learningCompletedCount,
         practiceActivitiesCompleted: alphabet.practiceCompletedCount,
         forestActivitiesCompleted: alphabet.activities.filter(function (activity) { return activity.isComplete; }).length,
@@ -325,15 +409,10 @@
 
   function isWorldUnlocked(worldKey, worldOrder, testMode, totalsByWorld) {
     if (testMode) return true;
-    if (worldKey === "alphabet") return true;
-    const order = Array.isArray(worldOrder) ? worldOrder.slice() : [];
-    const index = order.indexOf(worldKey);
-    if (index <= 0) return true;
-    const snapshot = getProgressSnapshot(order, totalsByWorld);
-    const previous = order[index - 1];
-    if (previous === "alphabet") return snapshot.alphabet.unlocked;
-    const previousProgress = snapshot.worlds[previous];
-    return Boolean(previousProgress && previousProgress.isComplete);
+    const order = normalizeWorldOrder(worldOrder);
+    if (!order.includes(worldKey)) return false;
+    const unlocked = syncSequentialUnlocks(order, totalsByWorld);
+    return unlocked.includes(worldKey);
   }
 
   function syncHomeAggregate(worldOrder, totalsByWorld) {
@@ -350,6 +429,23 @@
     return merged;
   }
 
+  function resetProgress(worldOrder) {
+    const order = normalizeWorldOrder(worldOrder);
+    localStorage.removeItem(FOREST_V3_KEY);
+    localStorage.removeItem(FOREST_LEGACY_KEY);
+    localStorage.removeItem(FOREST_LEGACY_V1_KEY);
+    localStorage.removeItem(FOREST_LEGACY_TREE_KEY);
+    localStorage.removeItem(FOREST_LEGACY_GARDEN_KEY);
+    localStorage.removeItem(HOME_KEY);
+    localStorage.removeItem(CHALLENGE_KEY);
+    order.forEach(function (worldKey) {
+      localStorage.removeItem("sanskritParichay.world." + worldKey + ".progress");
+    });
+    saveUnlockState({ unlocked: ["alphabet"] }, order);
+    localStorage.setItem(LAST_WORLD_KEY, "alphabet");
+    return true;
+  }
+
   globalScope.SPProgressStore = {
     keys: {
       FOREST_V3_KEY: FOREST_V3_KEY,
@@ -358,12 +454,16 @@
       FOREST_LEGACY_TREE_KEY: FOREST_LEGACY_TREE_KEY,
       FOREST_LEGACY_GARDEN_KEY: FOREST_LEGACY_GARDEN_KEY,
       HOME_KEY: HOME_KEY,
-      LAST_WORLD_KEY: LAST_WORLD_KEY
+      LAST_WORLD_KEY: LAST_WORLD_KEY,
+      CHALLENGE_KEY: CHALLENGE_KEY,
+      WORLD_UNLOCKS_KEY: WORLD_UNLOCKS_KEY
     },
     loadForestState: loadForestState,
     getAlphabetJourney: getAlphabetJourney,
     getProgressSnapshot: getProgressSnapshot,
     isWorldUnlocked: isWorldUnlocked,
-    syncHomeAggregate: syncHomeAggregate
+    syncHomeAggregate: syncHomeAggregate,
+    syncSequentialUnlocks: syncSequentialUnlocks,
+    resetProgress: resetProgress
   };
 })(typeof window !== "undefined" ? window : globalThis);
