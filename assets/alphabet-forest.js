@@ -500,9 +500,55 @@
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
     const pageWrap = document.querySelector(".page-wrap");
+    const homeContainer = ui.lessonProgressPanel || (ui.lessonMascot && ui.lessonMascot.parentElement);
+    const homeNextSibling = ui.lessonMascot ? ui.lessonMascot.nextElementSibling : null;
+    let mascotRail = null;
+
+    function getMascotRail() {
+      if (!pageWrap) return null;
+      if (mascotRail && mascotRail.isConnected) return mascotRail;
+      mascotRail = pageWrap.querySelector(".mascot-rail");
+      if (mascotRail) return mascotRail;
+      mascotRail = document.createElement("aside");
+      mascotRail.className = "mascot-rail";
+      mascotRail.setAttribute("aria-hidden", "true");
+      pageWrap.appendChild(mascotRail);
+      return mascotRail;
+    }
+
+    function placeMascotDesktop() {
+      if (!pageWrap || !ui.lessonMascot) return;
+      const rail = getMascotRail();
+      if (rail && ui.lessonMascot.parentElement !== rail) {
+        rail.appendChild(ui.lessonMascot);
+      }
+      pageWrap.classList.add("with-mascot");
+      ui.lessonMascot.classList.remove("lesson-mascot-mobile");
+      ui.lessonMascot.style.top = "";
+      ui.lessonMascot.style.right = "";
+      ui.lessonMascot.style.transform = "";
+    }
+
+    function placeMascotCompact() {
+      if (!ui.lessonMascot || !homeContainer) return;
+      if (ui.lessonMascot.parentElement !== homeContainer) {
+        if (homeNextSibling && homeNextSibling.parentElement === homeContainer) {
+          homeContainer.insertBefore(ui.lessonMascot, homeNextSibling);
+        } else {
+          homeContainer.appendChild(ui.lessonMascot);
+        }
+      }
+      if (pageWrap) pageWrap.classList.remove("with-mascot");
+      ui.lessonMascot.classList.add("lesson-mascot-mobile");
+      ui.lessonMascot.style.top = "";
+      ui.lessonMascot.style.right = "";
+      ui.lessonMascot.style.transform = "";
+    }
+
     function syncLayoutClass() {
-      const mobile = window.matchMedia("(max-width: 860px)").matches;
-      if (pageWrap) pageWrap.classList.toggle("with-mascot", !mobile);
+      const compact = window.matchMedia("(max-width: 980px)").matches;
+      if (compact) placeMascotCompact();
+      else placeMascotDesktop();
     }
     function applyActiveSection(section) {
       const activity = ACTIVITIES.find(function (item) { return item.sectionId === section.id; });
@@ -568,20 +614,14 @@
 
   function moveMascotNearSection(section) {
     if (!ui.lessonMascot || !section) return;
-    const mobile = window.matchMedia("(max-width: 860px)").matches;
-    ui.lessonMascot.classList.toggle("lesson-mascot-mobile", mobile);
-    if (mobile) {
-      ui.lessonMascot.style.top = "82px";
-      ui.lessonMascot.style.right = "8px";
+    const compact = window.matchMedia("(max-width: 980px)").matches;
+    ui.lessonMascot.classList.toggle("lesson-mascot-mobile", compact);
+    ui.lessonMascot.setAttribute("data-active-section", section.id || "");
+    if (compact) {
       ui.lessonMascot.style.transform = "";
       return;
     }
-    const rect = section.getBoundingClientRect();
-    const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
-    const maxTop = Math.max(92, window.innerHeight - mascotHeight - 12);
-    const targetTop = Math.max(92, Math.min(maxTop, rect.top + rect.height * 0.2));
-    ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
-    ui.lessonMascot.style.transform = "translateZ(0)";
+    ui.lessonMascot.style.transform = "translate3d(0,0,0)";
   }
 
   function initTreeControls() {

@@ -236,10 +236,25 @@
 
   function scrollChallengeIntoView() {
     const header = document.querySelector(".site-header");
-    const topPad = header ? Math.ceil(header.getBoundingClientRect().height) + 8 : 90;
-    const rect = panel.getBoundingClientRect();
-    const targetTop = Math.max(0, window.scrollY + rect.top - topPad);
-    window.scrollTo({ top: targetTop, behavior: "smooth" });
+    const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 82;
+    const topPad = headerHeight + 10;
+    panel.style.scrollMarginTop = topPad + "px";
+    panel.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+  }
+
+  function focusFirstChallengeControl() {
+    const selector = [
+      "#previewChoices .choice-btn:not([disabled])",
+      "#previewChoices .tile-btn:not([disabled])",
+      "#previewChoices .button:not([disabled])",
+      "#challengeActionBtn:not([style*='display:none'])"
+    ].join(",");
+    const target = panel.querySelector(selector);
+    if (target && typeof target.focus === "function") {
+      window.setTimeout(function () {
+        target.focus({ preventScroll: true });
+      }, 220);
+    }
   }
 
   function renderWorldCards() {
@@ -421,6 +436,7 @@
     }
     saveDailyProgress();
     renderChallengeStep();
+    focusFirstChallengeControl();
   }
 
   function renderChallengeStep() {
@@ -514,6 +530,7 @@
       optionWrap.appendChild(btn);
     });
     ui.choices.appendChild(optionWrap);
+    focusFirstChallengeControl();
   }
 
   function navigateToWorld(world) {
@@ -537,6 +554,7 @@
     saveDailyProgress();
     setMascotState("thinking", "Let's begin today's five-step challenge.");
     renderChallengeStep();
+    focusFirstChallengeControl();
   }
 
   function wireUi() {
