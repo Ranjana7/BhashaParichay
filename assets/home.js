@@ -121,7 +121,7 @@
   wireUi();
   initHomeLottie();
   if (ui.homeHeroSubtitle && homeMsg.heroSubtitle) ui.homeHeroSubtitle.textContent = homeMsg.heroSubtitle;
-  setMascotState("greeting", homeMsg.mascotIntro || "Namaste! Choose a world or play today's challenge.");
+  setMascotState("greeting", homeMsg.mascotIntro || "Namaste! Choose a world or play Challenge of the Day.");
   if (ui.challengeBtn) ui.challengeBtn.hidden = challengeSteps.length === 0;
   if (ui.homeReturningMessage && snapshot.totals && snapshot.totals.stars > 0) {
     ui.homeReturningMessage.hidden = false;
