@@ -494,7 +494,10 @@
     const activePriority = runtime.mascotSpeechPriority || 0;
     if (!force && now < holdUntil && priority < activePriority) return false;
     if (!force && text === runtime.mascotSpeechText && now < holdUntil) return false;
+    const tone = opts.tone || "instruction";
     ui.lessonMascotSpeech.textContent = text;
+    ui.lessonMascotSpeech.classList.remove("tone-instruction", "tone-encourage", "tone-correct", "tone-complete", "tone-world");
+    ui.lessonMascotSpeech.classList.add("tone-" + tone);
     runtime.mascotSpeechText = text;
     runtime.mascotSpeechPriority = priority;
     runtime.mascotSpeechHoldUntil = now + holdMs;
@@ -512,7 +515,11 @@
   }
 
   function updateMascotSpeechForActivity(activityId) {
-    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Ready? Let's try this together!", { priority: 1, holdMs: 2200 });
+    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Ready? Let's try this together!", {
+      priority: 1,
+      holdMs: 2200,
+      tone: "instruction"
+    });
   }
 
   function initMascotCompanion() {
@@ -793,7 +800,7 @@
           incrementAttempt(activityId);
           if (ui.arrangeStatus) ui.arrangeStatus.textContent = pickSpeech(INCORRECT_SPEECH, "arrange-wrong");
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"), { priority: 3, holdMs: 3000 });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"), { priority: 3, holdMs: 3000, tone: "encourage" });
         }
       });
     }
@@ -873,7 +880,7 @@
         }
         openTraceSelfCheck();
         setMascotState("pointing");
-        setMascotSpeech("Does your writing look like this?", { priority: 2, holdMs: 2600 });
+        setMascotSpeech("Does your writing look like this?", { priority: 2, holdMs: 2600, tone: "instruction" });
         if (ui.traceStatus) ui.traceStatus.textContent = "";
       });
     }
@@ -898,7 +905,7 @@
         closeTraceSelfCheck();
         clearTraceBoard();
         setMascotState("encouraging");
-        setMascotSpeech("Good try! Let's give it another go!", { priority: 3, holdMs: 3000 });
+        setMascotSpeech("Good try! Let's give it another go!", { priority: 3, holdMs: 3000, tone: "encourage" });
         if (ui.traceStatus) ui.traceStatus.textContent = "Great effort! Try this same letter again.";
       });
     }
@@ -1038,9 +1045,21 @@
     });
   }
 
+  function triggerFlowerRain(sectionId, options) {
+    if (typeof window.spFlowerRain !== "function") return;
+    const section = typeof sectionId === "string" ? document.getElementById(sectionId) : sectionId;
+    window.spFlowerRain(section || null, Object.assign({ durationMs: 2600, density: 22 }, options || {}));
+  }
+
   function showTraceFlowerBurst() {
-    const section = document.getElementById("activityTraceGamePanel");
+    const section = document.querySelector("#activityTraceGamePanel .activity");
     if (!section || REDUCED_MOTION) return;
+    let overlay = section.querySelector(".trace-flower-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "trace-flower-overlay";
+      section.appendChild(overlay);
+    }
     const tokens = ["✿", "❀", "✽"];
     for (let index = 0; index < 9; index += 1) {
       const flower = document.createElement("span");
@@ -1049,7 +1068,7 @@
       flower.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
       flower.style.top = (16 + Math.random() * 62).toFixed(1) + "%";
       flower.style.animationDelay = (Math.random() * 0.12).toFixed(2) + "s";
-      section.appendChild(flower);
+      overlay.appendChild(flower);
       window.setTimeout(function () { flower.remove(); }, 1200);
     }
   }
@@ -1168,6 +1187,7 @@
     cancelAutoAdvance(activityId);
     const sourceIndex = activity.currentIndex;
     const wasResolved = activity.completedItems.includes(sourceIndex);
+    const wasActivityComplete = Boolean(activity.isComplete);
     CORE.markCurrentItemCompleted(forestState, activityId, 1);
     if (activityId === "letter-garden") {
       reconcileLetterGardenProgress();
@@ -1180,19 +1200,23 @@
       if (activity.isComplete) {
         if (activityId === "letter-garden") {
           setActivityStatus(activityId, "Wonderful! You learned all the letters!");
-          setMascotSpeech("Fantastic! You've completed this activity!", { priority: 4, holdMs: 4200, force: true });
+          setMascotSpeech("Fantastic! You've completed this activity!", { priority: 4, holdMs: 4200, force: true, tone: "complete" });
         } else {
-          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"), { priority: 4, holdMs: 4200, force: true });
+          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"), { priority: 4, holdMs: 4200, force: true, tone: "complete" });
         }
         setMascotStateForDuration("dancing", 950);
         fireConfetti(true);
+        triggerFlowerRain(ACTIVITY_META[activityId].sectionId, { density: 28, durationMs: 3000 });
       } else {
-        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"), { priority: 3, holdMs: 3000 });
+        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"), { priority: 3, holdMs: 3000, tone: "correct" });
         setMascotStateForDuration("celebrating", 650);
         if (!wasResolved && (ACTIVITY_META[activityId].type === "quiz" || ACTIVITY_META[activityId].type === "letter")) {
           scheduleAutoAdvance(activityId, sourceIndex, 900);
         }
       }
+    }
+    if (!wasActivityComplete && activity.isComplete && ACTIVITY_META[activityId].type !== "tree") {
+      setActivityStatus(activityId, "Fantastic! You've completed this activity!");
     }
     saveAndRender();
   }
@@ -1240,12 +1264,13 @@
       }
       setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "finish-status"));
       fireConfetti(false);
+      triggerFlowerRain(ACTIVITY_META[activityId].sectionId, { density: 26, durationMs: 2800 });
       setMascotStateForDuration("dancing", 900);
-      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"), { priority: 4, holdMs: 4200, force: true });
+      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"), { priority: 4, holdMs: 4200, force: true, tone: "complete" });
       const global = CORE.computeGlobalProgress(forestState);
       if (global.completedActivityCount === global.totalActivities) {
         fireConfetti(true);
-        setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
+        setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
       }
       saveAndRender();
       const completeNote = document.getElementById("complete-" + activityId);
@@ -1400,7 +1425,7 @@
       button.addEventListener("click", function () {
         activity.currentIndex = letterIndex;
         setMascotState("pointing");
-        setMascotSpeech("Ready? Let's try this together!", { priority: 2, holdMs: 2200 });
+        setMascotSpeech("Ready? Let's try this together!", { priority: 2, holdMs: 2200, tone: "instruction" });
         playLetterAudio(letter, 1, ui.treeStatus);
         button.classList.add("just-picked");
         window.setTimeout(function () { button.classList.remove("just-picked"); }, 650);
@@ -1409,7 +1434,7 @@
           growTreeBloom(slots[offset]);
           playLottie("treeSparkle");
           setActivityStatus(activityId, "Wonderful! Letter discovered!");
-          setMascotSpeech("Wonderful! You're doing great!", { priority: 3, holdMs: 3000 });
+          setMascotSpeech("Wonderful! You're doing great!", { priority: 3, holdMs: 3000, tone: "correct" });
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
             return activity.completedItems.includes(groupStart + innerOffset);
           });
@@ -1430,8 +1455,9 @@
               CORE.finalizeActivity(forestState, activityId);
               setMascotState("dancing");
               fireConfetti(true);
+              triggerFlowerRain("forestScene", { density: 30, durationMs: 3200 });
               playLottie("treeCelebrate");
-              setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
+              setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
               setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "tree-complete"));
             }
           }
@@ -1648,7 +1674,7 @@
           incrementAttempt(activityId);
           ui.hearStatus.textContent = pickSpeech(INCORRECT_SPEECH, "hear-wrong");
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"), { priority: 3, holdMs: 3000 });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"), { priority: 3, holdMs: 3000, tone: "encourage" });
         }
       });
       ui.hearChoices.appendChild(btn);
@@ -1694,6 +1720,8 @@
       btn.addEventListener("click", function () {
         cancelAutoAdvance(activityId);
         if (btn.disabled) return;
+        ui.pictureChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.classList.remove("selected"); });
+        btn.classList.add("selected");
         if (option.id === item.id) {
           btn.classList.add("correct");
           ui.pictureChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.disabled = true; });
@@ -1716,7 +1744,7 @@
           incrementAttempt(activityId);
           ui.pictureStatus.textContent = "Good try. Hint: match the word with the correct picture.";
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"), { priority: 3, holdMs: 3000 });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
           window.setTimeout(function () {
             btn.classList.remove("wrong");
           }, 420);
@@ -1807,6 +1835,8 @@
         '<span class="picture-label">' + option.sanskrit + " · " + option.meaning + "</span>";
       btn.addEventListener("click", function () {
         cancelAutoAdvance(activityId);
+        ui.feedChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.classList.remove("selected"); });
+        btn.classList.add("selected");
         if (option.sanskrit === item.sanskrit) {
           animateFruitToMithu(btn);
           btn.classList.add("correct");
@@ -1817,7 +1847,7 @@
           incrementAttempt(activityId);
           ui.feedStatus.textContent = "Try a different fruit.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"), { priority: 3, holdMs: 3000 });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
         }
       });
       ui.feedChoices.appendChild(btn);
@@ -1891,7 +1921,7 @@
           incrementAttempt(activityId);
           ui.huntStatus.textContent = "Keep searching.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"), { priority: 3, holdMs: 3000 });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
         }
       });
       ui.huntGrid.appendChild(btn);
@@ -1958,7 +1988,7 @@
       forestState.worldCompleted = true;
       stateApi.saveState(forestState);
       setMascotStateForDuration("dancing", 1250);
-      setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
+      setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
       fireConfetti(true);
       fireSectionConfetti("completionScreen", true);
       playLottie("treeCelebrate");

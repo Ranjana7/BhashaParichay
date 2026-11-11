@@ -135,8 +135,11 @@
     return world.lessons[Math.max(0, Math.min(world.lessons.length - 1, state.progress.lessonIndex))];
   }
 
-  function setSpeech(text) {
-    if (ui.worldMascotSpeech) ui.worldMascotSpeech.textContent = text;
+  function setSpeech(text, tone) {
+    if (!ui.worldMascotSpeech) return;
+    ui.worldMascotSpeech.textContent = text;
+    ui.worldMascotSpeech.classList.remove("tone-instruction", "tone-encourage", "tone-correct", "tone-complete", "tone-world");
+    ui.worldMascotSpeech.classList.add("tone-" + (tone || "instruction"));
   }
 
   function setMascot(kind) {
@@ -290,7 +293,7 @@
       }
       updateHomeCompletion();
       setMascot("dance");
-      setSpeech(pickMessage("activity-complete", completePool));
+      setSpeech("Hooray! Another magical adventure completed!", "world");
       pulseWorldIllustration();
       const nextWorldKey = getNextWorldKey();
       const canContinue = nextWorldKey && typeof window.spIsWorldUnlocked === "function"
@@ -298,7 +301,10 @@
         : Boolean(nextWorldKey);
       ui.worldContinueBtn.textContent = canContinue ? "Continue Adventure" : "Back to Home";
       ui.worldContinueBtn.dataset.targetUrl = canContinue ? getNextWorldUrl() : "index.html#worlds";
-      if (canContinue) confetti();
+      if (canContinue) {
+        confetti();
+        if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 28, durationMs: 3000 });
+      }
     } else {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "Next Lesson (complete all activities)";
@@ -387,16 +393,17 @@
           saveProgress();
           renderHeader();
           ui.matchStatus.textContent = "✅ Completed for this lesson.";
-          setMascot("correct");
-          setSpeech(pickMessage("correct", praisePool));
+          setMascot("dance");
+          setSpeech("Fantastic! You've completed this activity!", "complete");
           confetti();
+          if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.matchStatus.closest("section"), { density: 20, durationMs: 2300 });
           pulseWorldIllustration();
           renderMatch();
         } else {
           btn.classList.add("wrong");
           ui.matchStatus.textContent = "Oops! Let's try that again.";
-          setMascot("wrong");
-          setSpeech(pickMessage("wrong", retryPool));
+          setMascot("encouraging");
+          setSpeech("Good try! Let's give it another go!", "encourage");
         }
       });
       ui.matchChoices.appendChild(btn);
@@ -428,16 +435,17 @@
           saveProgress();
           renderHeader();
           ui.listenStatus.textContent = "✅ Completed for this lesson.";
-          setMascot("correct");
-          setSpeech(pickMessage("correct", praisePool));
+          setMascot("dance");
+          setSpeech("Fantastic! You've completed this activity!", "complete");
           confetti();
+          if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.listenStatus.closest("section"), { density: 20, durationMs: 2300 });
           pulseWorldIllustration();
           renderListen();
         } else {
           btn.classList.add("wrong");
           ui.listenStatus.textContent = "Not quite! Listen once more and try again.";
-          setMascot("wrong");
-          setSpeech(pickMessage("wrong", retryPool));
+          setMascot("encouraging");
+          setSpeech("Good try! Let's give it another go!", "encourage");
         }
       });
       ui.listenChoices.appendChild(btn);
@@ -488,15 +496,16 @@
       saveProgress();
       renderHeader();
       ui.buildStatus.textContent = "✅ Completed for this lesson.";
-      setMascot("correct");
-      setSpeech(pickMessage("correct", praisePool));
+      setMascot("dance");
+      setSpeech("Fantastic! You've completed this activity!", "complete");
       confetti();
+      if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.buildStatus.closest("section"), { density: 20, durationMs: 2300 });
       pulseWorldIllustration();
       renderBuild();
     } else {
       ui.buildStatus.textContent = "Almost there! Try the tile order again.";
-      setMascot("wrong");
-      setSpeech(pickMessage("wrong", retryPool));
+      setMascot("encouraging");
+      setSpeech("Good try! Let's give it another go!", "encourage");
       animate(ui.buildTiles, { transform: ["translateX(0px)", "translateX(-5px)", "translateX(5px)", "translateX(0px)"] }, { duration: 0.35, easing: "ease-in-out" });
     }
   }
@@ -622,7 +631,7 @@
       moveMascotToSection(section, compact);
       if (nextId && nextId !== activeSectionId) {
         activeSectionId = nextId;
-        setSpeech(sectionMessage(section));
+        setSpeech(sectionMessage(section), "instruction");
         if (!prefersReducedMotion) {
           setMascot("flying");
           window.setTimeout(function () { setMascot("idle"); }, 260);
@@ -664,7 +673,7 @@
     ui.playListenBtn.addEventListener("click", function () {
       const lesson = currentLesson();
       setMascot("listening");
-      setSpeech("Listen carefully and choose.");
+      setSpeech("Ready? Let's try this together!", "instruction");
       window.spSpeak(lesson.listen.dev, "hi-IN", ui.listenStatus, lesson.listen.dev);
     });
     ui.checkBuildBtn.addEventListener("click", checkBuildAnswer);
@@ -680,7 +689,7 @@
         saveProgress();
         renderAll();
         setMascot("thinking");
-        setSpeech("Fantastic! A new lesson is ready!");
+        setSpeech("Fantastic! A new lesson is ready!", "complete");
       }
     });
     if (ui.worldPrevLessonBtn) {
@@ -691,7 +700,7 @@
         saveProgress();
         renderAll();
         setMascot("flying");
-        setSpeech("Let's revisit this lesson together!");
+        setSpeech("Let's revisit this lesson together!", "instruction");
       });
     }
     if (ui.worldContinueBtn) {
@@ -710,6 +719,6 @@
   initWorldIllustration();
   wire();
   setMascot("idle");
-  setSpeech(worldWelcome);
+  setSpeech(worldWelcome, "instruction");
   setupMascotFollowOnScroll();
 })();

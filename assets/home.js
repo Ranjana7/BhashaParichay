@@ -38,6 +38,7 @@
     stories: (worldMeta.stories && worldMeta.stories.url) || "learning-world.html?world=stories",
     culture: (worldMeta.culture && worldMeta.culture.url) || "learning-world.html?world=culture"
   };
+  const vocabMap = window.SP_VOCABULARY_MAP && window.SP_VOCABULARY_MAP.words ? window.SP_VOCABULARY_MAP.words : {};
   const challengeSteps = [
     {
       id: "listen",
@@ -51,7 +52,8 @@
     {
       id: "picture",
       title: "Picture Match",
-      prompt: "Which Sanskrit word matches 🌙 (moon)?",
+      prompt: "Which Sanskrit word matches this picture?",
+      promptWord: "चन्द्रः",
       options: ["चन्द्रः", "फलम्", "माता"],
       answer: "चन्द्रः",
       success: "Correct picture match!"
@@ -283,6 +285,14 @@
     const eyeL = ui.mascot.querySelector(".mithu-eye-left");
     const eyeR = ui.mascot.querySelector(".mithu-eye-right");
     if (speech) ui.mascotSpeech.textContent = speech;
+    if (ui.mascotSpeech) {
+      ui.mascotSpeech.classList.remove("tone-instruction", "tone-encourage", "tone-correct", "tone-complete", "tone-world");
+      const tone = kind === "dance" ? "complete"
+        : kind === "correct" ? "correct"
+        : kind === "incorrect" ? "encourage"
+        : "instruction";
+      ui.mascotSpeech.classList.add("tone-" + tone);
+    }
     if (!body) return;
 
     if (kind === "idle") {
@@ -431,6 +441,7 @@
       setMascotState("dance", "Hooray! You earned 5 magical Gems!");
       launchGemRewardAnimation();
       launchConfettiBurst();
+      if (typeof window.spFlowerRain === "function") window.spFlowerRain(panel, { density: 24, durationMs: 2600 });
       if (window.spApplause && !(window.SP_STATE && window.SP_STATE.muted)) window.spApplause();
       return;
     }
@@ -483,15 +494,29 @@
           panel.classList.add("correct");
           ui.status.textContent = step.success;
           setMascotState("correct", "Perfect! Let's go to the next challenge.");
+          if (typeof window.spFlowerRain === "function") window.spFlowerRain(panel, { density: 14, durationMs: 1800 });
           ui.challengeActionBtn.style.display = "inline-flex";
         } else {
           panel.classList.add("wrong");
           ui.status.textContent = "Not yet. Try the tile order again.";
           setMascotState("incorrect", "Great try. Rearrange and retry.");
         }
+
       });
       ui.choices.appendChild(checkBtn);
       return;
+    }
+
+    if (step.id === "picture") {
+      const pictureWord = step.promptWord || step.answer;
+      const vocab = vocabMap[pictureWord];
+      if (vocab && vocab.image) {
+        const picture = document.createElement("img");
+        picture.className = "picture-illustration";
+        picture.src = vocab.image;
+        picture.alt = vocab.alt || (vocab.meaning || pictureWord);
+        ui.choices.appendChild(picture);
+      }
     }
 
     if (step.playText) {
@@ -518,6 +543,7 @@
           panel.classList.add("correct");
           ui.status.textContent = step.success;
           setMascotState("correct", "Wonderful! Move to the next one.");
+          if (typeof window.spFlowerRain === "function") window.spFlowerRain(panel, { density: 14, durationMs: 1800 });
           optionWrap.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
           ui.challengeActionBtn.style.display = "inline-flex";
         } else {

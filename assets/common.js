@@ -324,6 +324,74 @@
     }, 520);
   };
 
+  window.spFlowerRain = function spFlowerRain(section, options) {
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const opts = options || {};
+    const durationMs = Math.max(900, Number(opts.durationMs || 2400));
+    const density = Math.max(8, Math.min(60, Number(opts.density || 20)));
+    const sectionNode = section && section.nodeType === 1 ? section : null;
+    const rect = sectionNode ? sectionNode.getBoundingClientRect() : null;
+    const left = rect ? Math.max(0, rect.left) : 0;
+    const right = rect ? Math.min(window.innerWidth, rect.right) : window.innerWidth;
+    const top = rect ? Math.max(0, rect.top) : 0;
+    const width = Math.max(40, right - left);
+    const height = rect ? Math.max(160, Math.min(window.innerHeight - top, rect.height)) : Math.max(220, window.innerHeight * 0.55);
+
+    let overlay = document.getElementById("flowerRainOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "flowerRainOverlay";
+      overlay.className = "flower-rain-overlay";
+      document.body.appendChild(overlay);
+    }
+
+    const petals = [];
+    for (let index = 0; index < density; index += 1) {
+      const petal = document.createElement("span");
+      petal.className = "flower-rain-petal";
+      const x = left + Math.random() * width;
+      const startY = top - 14 - Math.random() * 22;
+      petal.style.left = x.toFixed(1) + "px";
+      petal.style.top = startY.toFixed(1) + "px";
+      petal.style.background = [
+        "linear-gradient(145deg, #ff9ccc, #ffd2e9)",
+        "linear-gradient(145deg, #ffc38e, #ffe0b8)",
+        "linear-gradient(145deg, #ffd95d, #fff1a2)",
+        "linear-gradient(145deg, #95e5b5, #d8f8e4)",
+        "linear-gradient(145deg, #9fd3ff, #d7ecff)"
+      ][index % 5];
+      const driftX = Math.round((Math.random() * 2 - 1) * 110);
+      const driftY = Math.round(height + Math.random() * 90);
+      const rot = Math.round((Math.random() * 2 - 1) * 220);
+      petal.style.setProperty("--flower-rain-x", driftX + "px");
+      petal.style.setProperty("--flower-rain-y", driftY + "px");
+      petal.style.setProperty("--flower-rain-rot", rot + "deg");
+      petal.style.animationDuration = (1.9 + Math.random() * 1.3).toFixed(2) + "s";
+      petal.style.animationDelay = (Math.random() * 0.7).toFixed(2) + "s";
+      overlay.appendChild(petal);
+      petals.push(petal);
+    }
+
+    if (window.confetti) {
+      const originX = Math.max(0.08, Math.min(0.92, (left + width * 0.5) / Math.max(window.innerWidth, 1)));
+      window.confetti({
+        particleCount: Math.round(Math.max(24, density * 1.2)),
+        spread: 84,
+        startVelocity: 22,
+        gravity: 0.9,
+        scalar: 0.92,
+        colors: ["#ff8fc4", "#ffd66b", "#95e2b1", "#9dd2ff", "#d7b4ff"],
+        origin: { x: originX, y: Math.max(0.08, (top + 8) / Math.max(window.innerHeight, 1)) }
+      });
+    }
+
+    window.setTimeout(function clearRain() {
+      petals.forEach(function (petal) { petal.remove(); });
+      if (overlay && overlay.childElementCount === 0) overlay.remove();
+    }, durationMs);
+  };
+
   if (hasSpeechSupport()) {
     window.speechSynthesis.onvoiceschanged = function onVoicesChanged() {
       renderMute();
