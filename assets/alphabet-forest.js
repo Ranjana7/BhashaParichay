@@ -575,7 +575,9 @@
       return;
     }
     const rect = section.getBoundingClientRect();
-    const targetTop = Math.max(92, Math.min(window.innerHeight - 238, rect.top + rect.height * 0.2));
+    const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
+    const maxTop = Math.max(92, window.innerHeight - mascotHeight - 12);
+    const targetTop = Math.max(92, Math.min(maxTop, rect.top + rect.height * 0.2));
     ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
     ui.lessonMascot.style.transform = "translateZ(0)";
   }

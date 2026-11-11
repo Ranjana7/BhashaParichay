@@ -529,8 +529,10 @@
         return;
       }
       const rect = findActiveSectionRect();
+      const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
+      const maxTop = Math.max(92, window.innerHeight - mascotHeight - 12);
       const targetTop = rect
-        ? Math.max(92, Math.min(window.innerHeight - 238, rect.top + rect.height * 0.18))
+        ? Math.max(92, Math.min(maxTop, rect.top + rect.height * 0.18))
         : 120;
       ui.lessonMascot.style.top = targetTop.toFixed(0) + "px";
       ui.lessonMascot.style.transform = "translateZ(0)";
