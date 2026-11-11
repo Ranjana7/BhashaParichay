@@ -32,7 +32,7 @@
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
   const ACTIVITY_SPEECH = {
-    "magical-tree": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["magical-tree"]) || "Look! Magical letters are hiding in the tree! Let's discover them together!",
+    "magical-tree": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["magical-tree"]) || "Let's discover some beautiful Sanskrit letters!",
     "letter-garden": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["letter-garden"]) || "Every letter has a story! Tap one and let's explore!",
     "hear-and-pick": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["hear-and-pick"]) || "Listen closely! Which letter did you hear?",
     "picture-match": (MESSAGE_SET.activityIntro && MESSAGE_SET.activityIntro["picture-match"]) || "Look carefully! Which picture matches our Sanskrit word?",
@@ -44,14 +44,14 @@
   };
   const CORRECT_SPEECH = Array.isArray(MESSAGE_SET.correct) && MESSAGE_SET.correct.length
     ? MESSAGE_SET.correct.slice()
-    : ["Wonderful! You got it!", "Fantastic! Keep going!", "Brilliant! Another one!", "Yay! You found it!", "Excellent work!"];
+    : ["Wonderful! You're doing great!", "Fantastic! Keep going!", "Brilliant! Another one!", "Yay! You found it!", "Excellent work!"];
   const INCORRECT_SPEECH = Array.isArray(MESSAGE_SET.incorrect) && MESSAGE_SET.incorrect.length
     ? MESSAGE_SET.incorrect.slice()
-    : ["Almost! Let's try again!", "Take another look!", "You're getting closer!", "Let's give it another go!"];
+    : ["Good try! Let's give it another go!", "Take another look!", "You're getting closer!", "Let's try this together!"];
   const COMPLETE_SPEECH = Array.isArray(MESSAGE_SET.completed) && MESSAGE_SET.completed.length
     ? MESSAGE_SET.completed.slice()
-    : ["Hooray! You finished this adventure!", "Wonderful! Ready for more?", "Look how much you've learned!"];
-  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! Your next adventure is ready!";
+    : ["Fantastic! You've completed this activity!", "Wonderful! Ready for more?", "Look how much you've learned!"];
+  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! Another magical adventure completed!";
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -236,6 +236,14 @@
     autoAdvance: {},
     treeGroupAdvanceTimer: null,
     messageLast: {},
+    mascotSpeechHoldUntil: 0,
+    mascotSpeechPriority: 0,
+    mascotSpeechText: "",
+    mascotMotion: {
+      currentY: 0,
+      targetY: 0,
+      rafId: null
+    },
     tracing: {
       drawing: false,
       points: [],
@@ -475,8 +483,22 @@
     }, durationMs);
   }
 
-  function setMascotSpeech(text) {
-    if (ui.lessonMascotSpeech) ui.lessonMascotSpeech.textContent = text;
+  function setMascotSpeech(text, options) {
+    if (!ui.lessonMascotSpeech || !text) return false;
+    const opts = options || {};
+    const now = Date.now();
+    const priority = Number.isFinite(opts.priority) ? opts.priority : 2;
+    const holdMs = Number.isFinite(opts.holdMs) ? Math.max(0, opts.holdMs) : 2400;
+    const force = Boolean(opts.force);
+    const holdUntil = runtime.mascotSpeechHoldUntil || 0;
+    const activePriority = runtime.mascotSpeechPriority || 0;
+    if (!force && now < holdUntil && priority < activePriority) return false;
+    if (!force && text === runtime.mascotSpeechText && now < holdUntil) return false;
+    ui.lessonMascotSpeech.textContent = text;
+    runtime.mascotSpeechText = text;
+    runtime.mascotSpeechPriority = priority;
+    runtime.mascotSpeechHoldUntil = now + holdMs;
+    return true;
   }
 
   function pickSpeech(pool, bucket) {
@@ -490,13 +512,13 @@
   }
 
   function updateMascotSpeechForActivity(activityId) {
-    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Let's keep learning together!");
+    setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Ready? Let's try this together!", { priority: 1, holdMs: 2200 });
   }
 
   function initMascotCompanion() {
     if (!ui.lessonMascot) return;
     setMascotState("idle");
-    setMascotSpeech(MESSAGE_SET.welcome || "Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?");
+    setMascotSpeech(MESSAGE_SET.welcome || "Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?", { priority: 2, holdMs: 2800, force: true });
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
     const pageWrap = document.querySelector(".page-wrap");
@@ -527,6 +549,9 @@
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
       ui.lessonMascot.classList.add("is-journey-guide");
+      if (!Number.isFinite(Number(ui.lessonMascot.dataset.railY))) {
+        ui.lessonMascot.dataset.railY = "0";
+      }
     }
 
     function placeMascotCompact() {
@@ -544,12 +569,54 @@
       ui.lessonMascot.style.top = "";
       ui.lessonMascot.style.right = "";
       ui.lessonMascot.style.transform = "";
+      ui.lessonMascot.dataset.railY = "0";
     }
 
     function syncLayoutClass() {
       const compact = window.matchMedia("(max-width: 980px)").matches;
       if (compact) placeMascotCompact();
-      else placeMascotDesktop();
+      else {
+        placeMascotDesktop();
+        updateMascotTargetFromScroll();
+      }
+    }
+
+    function updateMascotTargetFromScroll() {
+      if (!ui.lessonMascot || window.matchMedia("(max-width: 980px)").matches) return;
+      const rail = getMascotRail();
+      if (!rail) return;
+      const pageHeight = Math.max(
+        document.documentElement.scrollHeight,
+        document.body ? document.body.scrollHeight : 0,
+        pageWrap ? pageWrap.scrollHeight : 0
+      );
+      const maxScroll = Math.max(1, pageHeight - window.innerHeight);
+      const progress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+      const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
+      const railHeight = Math.max(rail.offsetHeight || 0, pageWrap ? pageWrap.scrollHeight : 0);
+      const maxTop = Math.max(0, railHeight - mascotHeight - 8);
+      runtime.mascotMotion.targetY = maxTop * progress;
+    }
+
+    function runMascotMotionFrame(timestamp) {
+      if (!ui.lessonMascot) {
+        runtime.mascotMotion.rafId = null;
+        return;
+      }
+      if (window.matchMedia("(max-width: 980px)").matches) {
+        runtime.mascotMotion.currentY = 0;
+        runtime.mascotMotion.targetY = 0;
+        runtime.mascotMotion.rafId = window.requestAnimationFrame(runMascotMotionFrame);
+        return;
+      }
+      const current = Number.isFinite(runtime.mascotMotion.currentY) ? runtime.mascotMotion.currentY : 0;
+      const target = Number.isFinite(runtime.mascotMotion.targetY) ? runtime.mascotMotion.targetY : 0;
+      const eased = current + (target - current) * 0.13;
+      runtime.mascotMotion.currentY = eased;
+      ui.lessonMascot.dataset.railY = String(Math.round(eased));
+      const floatOffset = REDUCED_MOTION ? 0 : Math.sin((timestamp || 0) / 520) * 1.8;
+      ui.lessonMascot.style.transform = "translate3d(0," + (eased + floatOffset).toFixed(2) + "px,0)";
+      runtime.mascotMotion.rafId = window.requestAnimationFrame(runMascotMotionFrame);
     }
     function applyActiveSection(section) {
       const activity = ACTIVITIES.find(function (item) { return item.sectionId === section.id; });
@@ -587,6 +654,7 @@
       });
       if (!best) return;
       applyActiveSection(best);
+      updateMascotTargetFromScroll();
     }
     if (typeof IntersectionObserver === "function") {
       const observer = new IntersectionObserver(function () {
@@ -598,6 +666,7 @@
       if (scrollTicking) return;
       scrollTicking = true;
       window.requestAnimationFrame(function () {
+        updateMascotTargetFromScroll();
         updateActiveSection();
         scrollTicking = false;
       });
@@ -608,7 +677,9 @@
       const sectionId = ACTIVITY_META[runtime.mascotActiveSection].sectionId;
       const section = document.getElementById(sectionId);
       if (section) moveMascotNearSection(section);
+      updateMascotTargetFromScroll();
     });
+    runtime.mascotMotion.rafId = window.requestAnimationFrame(runMascotMotionFrame);
     syncLayoutClass();
     updateActiveSection();
   }
@@ -621,27 +692,6 @@
     if (compact) {
       ui.lessonMascot.style.transform = "";
       return;
-    }
-    const pageWrap = document.querySelector(".page-wrap");
-    const rail = pageWrap ? pageWrap.querySelector(".mascot-rail") : null;
-    if (!pageWrap || !rail) return;
-    let sectionTop = 0;
-    let node = section;
-    while (node && node !== pageWrap) {
-      sectionTop += node.offsetTop || 0;
-      node = node.offsetParent;
-    }
-    const sectionHeight = Math.max(section.offsetHeight || 0, section.getBoundingClientRect().height || 0);
-    const mascotHeight = Math.ceil(ui.lessonMascot.getBoundingClientRect().height || 220);
-    const railHeight = Math.max(rail.offsetHeight || 0, pageWrap.scrollHeight || 0);
-    const targetTop = sectionTop + sectionHeight * 0.18;
-    const maxTop = Math.max(0, railHeight - mascotHeight - 8);
-    const clampedTop = Math.max(0, Math.min(maxTop, targetTop));
-    const nextY = Math.round(clampedTop);
-    const currentY = Number(ui.lessonMascot.dataset.railY || "0");
-    if (Math.abs(nextY - currentY) > 1) {
-      ui.lessonMascot.dataset.railY = String(nextY);
-      ui.lessonMascot.style.transform = "translate3d(0," + nextY + "px,0)";
     }
   }
 
@@ -743,7 +793,7 @@
           incrementAttempt(activityId);
           if (ui.arrangeStatus) ui.arrangeStatus.textContent = pickSpeech(INCORRECT_SPEECH, "arrange-wrong");
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"));
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"), { priority: 3, holdMs: 3000 });
         }
       });
     }
@@ -823,7 +873,7 @@
         }
         openTraceSelfCheck();
         setMascotState("pointing");
-        setMascotSpeech("Does your writing look like this?");
+        setMascotSpeech("Does your writing look like this?", { priority: 2, holdMs: 2600 });
         if (ui.traceStatus) ui.traceStatus.textContent = "";
       });
     }
@@ -848,7 +898,7 @@
         closeTraceSelfCheck();
         clearTraceBoard();
         setMascotState("encouraging");
-        setMascotSpeech("Nice try! Let's write it once more.");
+        setMascotSpeech("Good try! Let's give it another go!", { priority: 3, holdMs: 3000 });
         if (ui.traceStatus) ui.traceStatus.textContent = "Great effort! Try this same letter again.";
       });
     }
@@ -1130,14 +1180,14 @@
       if (activity.isComplete) {
         if (activityId === "letter-garden") {
           setActivityStatus(activityId, "Wonderful! You learned all the letters!");
-          setMascotSpeech("Wonderful! You learned all the letters!");
+          setMascotSpeech("Fantastic! You've completed this activity!", { priority: 4, holdMs: 4200, force: true });
         } else {
-          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"));
+          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"), { priority: 4, holdMs: 4200, force: true });
         }
         setMascotStateForDuration("dancing", 950);
         fireConfetti(true);
       } else {
-        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"));
+        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"), { priority: 3, holdMs: 3000 });
         setMascotStateForDuration("celebrating", 650);
         if (!wasResolved && (ACTIVITY_META[activityId].type === "quiz" || ACTIVITY_META[activityId].type === "letter")) {
           scheduleAutoAdvance(activityId, sourceIndex, 900);
@@ -1191,11 +1241,11 @@
       setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "finish-status"));
       fireConfetti(false);
       setMascotStateForDuration("dancing", 900);
-      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"));
+      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"), { priority: 4, holdMs: 4200, force: true });
       const global = CORE.computeGlobalProgress(forestState);
       if (global.completedActivityCount === global.totalActivities) {
         fireConfetti(true);
-        setMascotSpeech("Amazing! You completed the whole Alphabet Forest!");
+        setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
       }
       saveAndRender();
       const completeNote = document.getElementById("complete-" + activityId);
@@ -1330,7 +1380,7 @@
 
     ui.treeLetters.innerHTML = "";
     const slots = [
-      { x: 30, y: 35 }, { x: 43, y: 24 }, { x: 56, y: 30 }, { x: 68, y: 24 }, { x: 74, y: 37 }
+      { x: 25, y: 38 }, { x: 40, y: 26 }, { x: 55, y: 31 }, { x: 69, y: 25 }, { x: 79, y: 39 }
     ];
     groupLetters.forEach(function (letter, offset) {
       const letterIndex = groupStart + offset;
@@ -1339,18 +1389,27 @@
       button.className = "tree-letter-btn";
       button.style.left = slots[offset].x + "%";
       button.style.top = slots[offset].y + "%";
-      button.innerHTML = '<span class="tree-dev">' + letter.symbol + "</span>";
+      button.innerHTML =
+        '<span class="tree-ornament">' +
+        '<span class="tree-petal-ring" aria-hidden="true"></span>' +
+        '<span class="tree-fruit-body" aria-hidden="true"></span>' +
+        '<span class="tree-dev">' + letter.symbol + "</span>" +
+        "</span>";
       if (activity.completedItems.includes(letterIndex)) button.classList.add("discovered");
       if (activity.currentIndex === letterIndex) button.classList.add("tree-active");
       button.addEventListener("click", function () {
         activity.currentIndex = letterIndex;
         setMascotState("pointing");
+        setMascotSpeech("Ready? Let's try this together!", { priority: 2, holdMs: 2200 });
         playLetterAudio(letter, 1, ui.treeStatus);
+        button.classList.add("just-picked");
+        window.setTimeout(function () { button.classList.remove("just-picked"); }, 650);
         if (!activity.completedItems.includes(letterIndex)) {
           CORE.markCurrentItemCompleted(forestState, activityId, 1);
-          growTreeBloom();
+          growTreeBloom(slots[offset]);
           playLottie("treeSparkle");
           setActivityStatus(activityId, "Wonderful! Letter discovered!");
+          setMascotSpeech("Wonderful! You're doing great!", { priority: 3, holdMs: 3000 });
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
             return activity.completedItems.includes(groupStart + innerOffset);
           });
@@ -1372,6 +1431,7 @@
               setMascotState("dancing");
               fireConfetti(true);
               playLottie("treeCelebrate");
+              setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
               setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "tree-complete"));
             }
           }
@@ -1391,13 +1451,15 @@
     }
   }
 
-  function growTreeBloom() {
+  function growTreeBloom(slot) {
     const bloomContainer = document.getElementById("treeProgressBlooms");
     if (!bloomContainer) return;
     const bloom = document.createElement("span");
     bloom.className = "group-bloom";
-    bloom.style.left = (20 + Math.random() * 60).toFixed(1) + "%";
-    bloom.style.top = (18 + Math.random() * 58).toFixed(1) + "%";
+    const baseX = slot && Number.isFinite(slot.x) ? slot.x : (20 + Math.random() * 60);
+    const baseY = slot && Number.isFinite(slot.y) ? slot.y : (18 + Math.random() * 58);
+    bloom.style.left = Math.max(12, Math.min(88, baseX + (Math.random() * 8 - 4))).toFixed(1) + "%";
+    bloom.style.top = Math.max(14, Math.min(84, baseY + (Math.random() * 8 - 4))).toFixed(1) + "%";
     bloomContainer.appendChild(bloom);
     setTimeout(function () { bloom.remove(); }, 1600);
   }
@@ -1586,7 +1648,7 @@
           incrementAttempt(activityId);
           ui.hearStatus.textContent = pickSpeech(INCORRECT_SPEECH, "hear-wrong");
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"));
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"), { priority: 3, holdMs: 3000 });
         }
       });
       ui.hearChoices.appendChild(btn);
@@ -1654,7 +1716,7 @@
           incrementAttempt(activityId);
           ui.pictureStatus.textContent = "Good try. Hint: match the word with the correct picture.";
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"));
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"), { priority: 3, holdMs: 3000 });
           window.setTimeout(function () {
             btn.classList.remove("wrong");
           }, 420);
@@ -1755,7 +1817,7 @@
           incrementAttempt(activityId);
           ui.feedStatus.textContent = "Try a different fruit.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"));
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"), { priority: 3, holdMs: 3000 });
         }
       });
       ui.feedChoices.appendChild(btn);
@@ -1829,7 +1891,7 @@
           incrementAttempt(activityId);
           ui.huntStatus.textContent = "Keep searching.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"));
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"), { priority: 3, holdMs: 3000 });
         }
       });
       ui.huntGrid.appendChild(btn);
@@ -1896,7 +1958,7 @@
       forestState.worldCompleted = true;
       stateApi.saveState(forestState);
       setMascotStateForDuration("dancing", 1250);
-      setMascotSpeech("Hooray! Your next adventure is ready!");
+      setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true });
       fireConfetti(true);
       fireSectionConfetti("completionScreen", true);
       playLottie("treeCelebrate");
