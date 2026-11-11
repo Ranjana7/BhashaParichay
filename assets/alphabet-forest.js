@@ -885,14 +885,26 @@
       const width = Math.max(280, Math.floor(rect.width || 420));
       const height = Math.max(160, Math.floor(rect.height || 220));
       if (ui.traceCanvas.width === width && ui.traceCanvas.height === height) return;
+      let snapshot = null;
+      if (ui.traceCanvas.width > 0 && ui.traceCanvas.height > 0) {
+        snapshot = document.createElement("canvas");
+        snapshot.width = ui.traceCanvas.width;
+        snapshot.height = ui.traceCanvas.height;
+        const snapshotCtx = snapshot.getContext("2d");
+        if (snapshotCtx) snapshotCtx.drawImage(ui.traceCanvas, 0, 0);
+      }
       ui.traceCanvas.width = width;
       ui.traceCanvas.height = height;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.lineWidth = 8;
       ctx.strokeStyle = "#4b63cf";
-      runtime.tracing.points = [];
-      runtime.tracing.reviewed = false;
+      if (snapshot) {
+        ctx.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, width, height);
+      } else {
+        runtime.tracing.points = [];
+        runtime.tracing.reviewed = false;
+      }
     }
 
     function getPoint(event) {
@@ -906,7 +918,6 @@
 
     function startDraw(event) {
       if (event.button !== undefined && event.button !== 0) return;
-      syncCanvasSize();
       runtime.tracing.drawing = true;
       runtime.tracing.reviewed = false;
       if (event.pointerId !== undefined && ui.traceCanvas.setPointerCapture) {
