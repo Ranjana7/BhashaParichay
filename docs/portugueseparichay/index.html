@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BhashaParichay | PortugueseParichay</title>
   <meta name="description" content="PortugueseParichay beginner learning worlds for children (Brazilian Portuguese).">
-  <link rel="stylesheet" href="../assets/styles.css?v=20261112u4">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u5">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
-      <a href="index.html" aria-current="page">Home</a>
-      <a href="../index.html">Language Chooser</a>
-      <a href="../sanskritparichay/">Sanskrit</a>
+      <a href="index.html" aria-current="page" data-seamless-nav>Home</a>
+      <a href="../index.html" data-seamless-nav>Language Chooser</a>
+      <a href="../sanskritparichay/" data-seamless-nav>Sanskrit</a>
     </nav>
   </header>
 
   <main id="main-content" class="page-wrap">
     <section class="panel language-hero" id="languageHome" data-language="portuguese">
       <div class="language-hero-layout">
-        <div class="language-hero-mithu" aria-hidden="true">
+        <div class="language-hero-mithu state-idle" aria-hidden="true">
           <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
             <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
             <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
@@ -55,7 +55,9 @@
     </section>
   </main>
 
-  <script src="../assets/multilingual-data.js?v=20261112u1"></script>
-  <script src="../assets/multilingual-home.js?v=20261112u1"></script>
+  <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/multilingual-data.js?v=20261112u2"></script>
+  <script src="../assets/seamless-experience.js?v=20261112u1"></script>
+  <script src="../assets/multilingual-home.js?v=20261112u2"></script>
 </body>
 </html>

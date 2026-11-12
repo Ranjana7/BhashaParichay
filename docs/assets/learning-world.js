@@ -58,6 +58,10 @@
   const motion = window.Motion || {};
   const animate = motion.animate || function () {};
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const scriptSrc = document.currentScript && document.currentScript.src ? document.currentScript.src : "";
+  const sparkleLottiePath = scriptSrc
+    ? scriptSrc.replace(/learning-world\.js(?:\?.*)?$/i, "lottie/sparkle.json")
+    : "assets/lottie/sparkle.json";
   const messages = window.SP_MESSAGES || {};
   const vocabMap = window.SP_VOCABULARY_MAP && window.SP_VOCABULARY_MAP.words ? window.SP_VOCABULARY_MAP.words : {};
   const vocabFallback = window.SP_VOCABULARY_MAP && window.SP_VOCABULARY_MAP.fallback
@@ -72,6 +76,10 @@
     holdUntil: 0,
     priority: 0,
     text: ""
+  };
+  const numberGalaxyState = {
+    layer: null,
+    badges: []
   };
   const inviteRuntime = {
     targetWorld: "",
@@ -333,6 +341,11 @@
 
   function initWorldIllustration() {
     if (!ui.worldIllustration) return;
+    ui.worldIllustration.classList.add("world-illustration--" + worldKey);
+    if (worldKey === "numbers") {
+      ensureNumberGalaxyLayer();
+      updateNumberGalaxyBadges();
+    }
     if (!prefersReducedMotion) {
       animate(
         ui.worldIllustration.querySelectorAll(".world-clouds ellipse"),
@@ -351,9 +364,60 @@
         renderer: "svg",
         loop: true,
         autoplay: true,
-        path: "assets/lottie/sparkle.json"
+        path: sparkleLottiePath
       });
     }
+  }
+
+  function ensureNumberGalaxyLayer() {
+    if (!ui.worldIllustration || worldKey !== "numbers") return;
+    if (numberGalaxyState.layer && numberGalaxyState.layer.isConnected) return;
+    const layer = document.createElement("div");
+    layer.className = "number-galaxy-layer";
+    layer.innerHTML =
+      '<div class="number-galaxy-stars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>' +
+      '<div class="number-galaxy-planet planet-a"></div>' +
+      '<div class="number-galaxy-planet planet-b"></div>' +
+      '<div class="number-galaxy-planet planet-c"></div>' +
+      '<div class="number-galaxy-badges"></div>';
+    ui.worldIllustration.appendChild(layer);
+    numberGalaxyState.layer = layer;
+  }
+
+  function updateNumberGalaxyBadges() {
+    if (worldKey !== "numbers") return;
+    ensureNumberGalaxyLayer();
+    if (!numberGalaxyState.layer) return;
+    const holder = numberGalaxyState.layer.querySelector(".number-galaxy-badges");
+    if (!holder) return;
+    const focus = currentLesson().focus || [];
+    holder.innerHTML = "";
+    numberGalaxyState.badges = [];
+    focus.slice(0, 3).forEach(function (item) {
+      const badge = document.createElement("span");
+      badge.className = "number-galaxy-badge";
+      badge.setAttribute("data-number-word", item.dev);
+      badge.textContent = item.dev;
+      holder.appendChild(badge);
+      numberGalaxyState.badges.push(badge);
+    });
+  }
+
+  function celebrateNumberGalaxy(word) {
+    if (worldKey !== "numbers" || !numberGalaxyState.layer) return;
+    numberGalaxyState.layer.classList.add("celebrate");
+    const active = numberGalaxyState.badges.find(function (badge) {
+      return badge.getAttribute("data-number-word") === word;
+    });
+    if (active) {
+      active.classList.add("active");
+      window.setTimeout(function () {
+        active.classList.remove("active");
+      }, 900);
+    }
+    window.setTimeout(function () {
+      if (numberGalaxyState.layer) numberGalaxyState.layer.classList.remove("celebrate");
+    }, 1000);
   }
 
   function pulseWorldIllustration() {
@@ -551,6 +615,7 @@
     if (ui.worldGems) ui.worldGems.textContent = String(state.progress.gems);
     ui.worldDone.textContent = String(doneCount());
     ui.worldProgressFill.style.width = Math.round((doneCount() / TOTAL) * 100) + "%";
+    updateNumberGalaxyBadges();
 
     const lessonDone = doneCount() >= TOTAL;
     const isLast = state.progress.lessonIndex >= world.lessons.length - 1;
@@ -666,6 +731,7 @@
           confetti();
           if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.matchStatus.closest("section"), { density: 20, durationMs: 2300 });
           pulseWorldIllustration();
+          celebrateNumberGalaxy(lesson.match.answer);
           renderMatch();
         } else {
           btn.classList.add("wrong");
@@ -707,6 +773,7 @@
           confetti();
           if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.listenStatus.closest("section"), { density: 20, durationMs: 2300 });
           pulseWorldIllustration();
+          celebrateNumberGalaxy(lesson.listen.answer);
           renderListen();
         } else {
           btn.classList.add("wrong");
@@ -766,6 +833,7 @@
       confetti();
       if (typeof window.spFlowerRain === "function") window.spFlowerRain(ui.buildStatus.closest("section"), { density: 20, durationMs: 2300 });
       pulseWorldIllustration();
+      celebrateNumberGalaxy(lesson.build.answer);
       renderBuild();
     } else {
       ui.buildStatus.textContent = "Almost there! Try the tile order again.";
