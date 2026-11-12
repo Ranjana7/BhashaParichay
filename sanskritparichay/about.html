@@ -3,47 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BhashaParichay | About SanskritParichay</title>
-  <meta name="description" content="About this free Sanskrit learning project for children.">
-  <link rel="stylesheet" href="../assets/styles.css?v=20261112u1">
+  <title>BhashaParichay | About</title>
+  <meta name="description" content="About BhashaParichay, the multilingual learning universe with Sanskrit, Spanish, and Portuguese adventures.">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u5">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
-
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
-      <a href="index.html">Home</a>
-      <a href="alphabet-forest.html" data-current-world>Alphabet Forest</a>
+      <a href="index.html" data-seamless-nav>Home</a>
+      <a href="../index.html" data-seamless-nav>Language Chooser</a>
       <a href="about.html" aria-current="page">About</a>
     </nav>
-    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
   </header>
 
   <main id="main-content" class="page-wrap">
-    <section class="panel">
-      <h1>About SanskritParichay</h1>
-      <p>
-        SanskritParichay is a playful Sanskrit adventure for children and families.
-        Mithu guides learners through magical worlds, mini-games, stars, and joyful practice.
-      </p>
-      <p>
-        This site does not collect child names, emails, or analytics. It stores
-        progress in your browser only, so progress does not sync across devices.
-      </p>
-      <p class="footer-note">
-        Built as a cheerful, privacy-first learning space for kids.
-      </p>
+    <section class="panel language-hero">
+      <div class="language-hero-layout">
+        <div class="language-hero-mithu state-idle" aria-hidden="true">
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
+            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+          </svg>
+        </div>
+        <div class="language-hero-copy">
+          <p class="hero-badge">BhashaParichay</p>
+          <h1>Mithu's Learning Universe</h1>
+          <p class="mascot-speech">BhashaParichay is one magical learning world where children can explore Sanskrit, Spanish, and Portuguese adventures.</p>
+        </div>
+      </div>
     </section>
 
     <section class="panel">
-      <h2>How this helps children learn</h2>
-      <p>
-        The activities are designed to be simple, playful, and repeatable, so children can
-        build confidence with Sanskrit sounds step by step.
-      </p>
-      <p>
-        Parents and teachers can use it as a friendly practice companion at home.
-      </p>
+      <h2>How children explore</h2>
+      <p>Choose a language, open themed worlds, and play short activities that build listening, reading, speaking, and word-building confidence.</p>
+      <p>Children can replay activities for extra practice, and each language keeps its own progress journey.</p>
     </section>
 
     <section class="panel about-mithu-guide">
@@ -63,22 +66,20 @@
         </svg>
       </div>
       <div>
-        <h2>Mithu's How-to-Play Guide</h2>
+        <h2>Mithu's Reward Guide</h2>
         <ul class="about-mithu-guide-list">
-          <li><strong>⭐ Stars:</strong> Earn stars by answering questions and completing groups.</li>
-          <li><strong>💎 Gems:</strong> Earn gems by completing activities. Today's Challenge awards 2 gems.</li>
-          <li><strong>🌈 Unlock Worlds:</strong> Collect 50 available stars and 1 available gem to unlock the next world.</li>
-          <li><strong>✨ Spending Rewards:</strong> Unlocking uses 50 stars and 1 gem from your available balance.</li>
-          <li><strong>🎨 Practise Again:</strong> Restart activities to practise and earn rewards again.</li>
+          <li><strong>⭐ Stars:</strong> 1 star for each correct question, plus 5 bonus stars for each completed question group.</li>
+          <li><strong>💎 Gems:</strong> 1 gem per completed activity. Challenge of the Day gives 2 gems once per day when available.</li>
+          <li><strong>🌈 Unlock Worlds:</strong> Spend 50 available stars and 1 available gem to unlock the next world in order.</li>
+          <li><strong>🔁 Practice Again:</strong> Restart activities to try again and earn rewards on new successful attempts.</li>
+          <li><strong>🏅 Medals:</strong> Home medals celebrate real language-level completion, not just visiting or unlocking.</li>
         </ul>
       </div>
     </section>
   </main>
 
-  <script>window.SP_LANGUAGE_HOME_URL="index.html";window.SP_LANGUAGE_CHOOSER_URL="../index.html";</script>
-  <script src="../assets/site-config.js?v=20261112u3"></script>
-  <script src="../assets/messages.js?v=20261111u4"></script>
-  <script src="../assets/common.js?v=20261112u3"></script>
+  <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/mithu-follower.js?v=20261112u1"></script>
+  <script src="../assets/seamless-experience.js?v=20261112u1"></script>
 </body>
 </html>
-

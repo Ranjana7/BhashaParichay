@@ -70,7 +70,7 @@
     const rewards = rewardsFromProgress();
     let availableStars = Math.max(0, rewards.stars - state.spentStars);
     let availableGems = Math.max(0, rewards.gems - state.spentGems);
-    const unlockStars = 20;
+    const unlockStars = 50;
     const unlockGems = 1;
 
     for (let i = 1; i < language.worlds.length; i += 1) {
@@ -133,7 +133,7 @@
         art +
         '<span class="world-title">' + world.title + "</span>" +
         '<span class="world-text">' + world.subtitle + "</span>" +
-        '<span class="world-text">' + (unlocked ? "Let's Explore!" : "Collect 20 stars + 1 gem to unlock") + "</span>";
+        '<span class="world-text">' + (unlocked ? "Let's Explore!" : "Collect 50 stars + 1 gem to unlock") + "</span>";
       card.disabled = !unlocked;
       card.addEventListener("click", function () {
         goToWorld(world.key);
