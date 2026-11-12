@@ -9,7 +9,7 @@
   }
 
   const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
-  const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskrit-home.html";
+  const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskritparichay/";
   function storageKey(suffix) {
     return STORAGE_PREFIX + "." + suffix;
   }
