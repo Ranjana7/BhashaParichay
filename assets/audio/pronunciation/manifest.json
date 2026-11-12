@@ -1,5 +1,5 @@
 {
-  "status": "draft",
+  "status": "in_progress",
   "policy": {
     "browserSpeechFallbackEnabled": false,
     "missingClipMessage": "Pronunciation not available yet."
@@ -8,7 +8,7 @@
     "auditFile": "assets/audio/pronunciation/alphabet-forest-audio-audit.csv",
     "audioManifestFile": "assets/audio/pronunciation/audio-manifest.csv",
     "totalItems": 116,
-    "nonZeroPronunciationFiles": 48
+    "nonZeroPronunciationFiles": 64
   },
   "sourceModelEvaluation": {
     "model": "ai4bharat/indic-parler-tts",
@@ -34,6 +34,6 @@
   },
   "review": {
     "sanskritSpeakerReview": "pending",
-    "notes": "No pronunciation clip is marked verified until Sanskrit speaker review is completed."
+    "notes": "Local WAV library is active for playback. Letter clips are source clips and missing vocabulary clips were synthesized from local Sanskrit letter segments; final Sanskrit-speaker review is still required."
   }
 }

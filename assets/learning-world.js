@@ -274,12 +274,15 @@
   }
 
   function getSanskritAudioPath(devanagariText) {
+    if (typeof window.spResolveSanskritAudioPath === "function") {
+      return window.spResolveSanskritAudioPath(devanagariText);
+    }
     const text = String(devanagariText || "").trim();
     if (!text) return "";
     const vocabEntry = vocabMap[text];
     if (vocabEntry && vocabEntry.transliteration) {
       const stem = transliterationToAudioStem(vocabEntry.transliteration);
-      if (stem) return "assets/audio/pronunciation/" + stem + ".mp3";
+      if (stem) return "assets/audio/pronunciation/" + stem + ".wav";
     }
     const inventory = window.SP_PDF_LETTER_INVENTORY && Array.isArray(window.SP_PDF_LETTER_INVENTORY.items)
       ? window.SP_PDF_LETTER_INVENTORY.items
@@ -300,12 +303,16 @@
   function playSanskritAudio(text, statusEl) {
     if (!text) return;
     if (window.SP_STATE && window.SP_STATE.muted) return;
+    if (typeof window.spSpeak === "function") {
+      window.spSpeak(text, "sa-IN", statusEl, text);
+      return;
+    }
     const path = getSanskritAudioPath(text);
     if (!path) {
       if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet for this word.";
       return;
     }
-    const audio = new Audio(path + "?v=20261112a");
+    const audio = new Audio(path + "?v=20261112u02");
     audio.preload = "none";
     audio.addEventListener("error", function () {
       if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet for this word.";

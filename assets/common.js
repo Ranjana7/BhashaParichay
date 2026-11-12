@@ -50,47 +50,86 @@
     }
   }
 
-  function hasSpeechSupport() {
-    return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  function transliterationToAudioStem(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "");
   }
 
-  function getBestVoice(preferredLang) {
-    if (!hasSpeechSupport()) return null;
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices || voices.length === 0) return null;
-
-    const normalized = (preferredLang || "").toLowerCase();
-    const preferredNameMatch = voices.find(function (v) {
-      const name = (v.name || "").toLowerCase();
-      return name.includes("swara") || name.includes("hindi") || name.includes("devanagari");
+  function resolveInventorySymbolAudioPath(text) {
+    const normalized = String(text || "").trim();
+    if (!normalized) return "";
+    const inventory = window.SP_PDF_LETTER_INVENTORY && Array.isArray(window.SP_PDF_LETTER_INVENTORY.items)
+      ? window.SP_PDF_LETTER_INVENTORY.items
+      : [];
+    const direct = inventory.find(function (item) {
+      return item && item.symbol === normalized && item.pronunciation && item.pronunciation.localPath;
     });
-    if (preferredNameMatch) return preferredNameMatch;
-
-    const candidates = voices.filter(function (v) {
-      return v.lang && v.lang.toLowerCase().startsWith(normalized);
-    });
-    if (candidates.length > 0) return candidates[0];
-
-    const hiVoice = voices.find(function (v) {
-      return v.lang && v.lang.toLowerCase().startsWith("hi");
-    });
-    if (hiVoice) return hiVoice;
-
-    const enVoice = voices.find(function (v) {
-      return v.lang && v.lang.toLowerCase().startsWith("en");
-    });
-    return enVoice || voices[0];
+    if (direct) return String(direct.pronunciation.localPath).replace(/\.mp3$/i, ".wav");
+    return "";
   }
 
-  function isIndicVoice(voice) {
-    if (!voice || !voice.lang) return false;
-    const v = voice.lang.toLowerCase();
-    return v.startsWith("sa") || v.startsWith("hi") || v.startsWith("mr") || v.startsWith("ne");
+  function resolveInventoryExampleAudioPath(text) {
+    const normalized = String(text || "").trim();
+    if (!normalized) return "";
+    const inventory = window.SP_PDF_LETTER_INVENTORY && Array.isArray(window.SP_PDF_LETTER_INVENTORY.items)
+      ? window.SP_PDF_LETTER_INVENTORY.items
+      : [];
+    const byExample = inventory.find(function (item) {
+      return item
+        && item.example
+        && item.example.sanskrit === normalized
+        && item.pronunciation
+        && item.pronunciation.localPath;
+    });
+    if (byExample) return String(byExample.pronunciation.localPath).replace(/\.mp3$/i, ".wav");
+    return "";
   }
 
-  function getVoiceCount() {
-    if (!hasSpeechSupport()) return 0;
-    return window.speechSynthesis.getVoices().length;
+  function resolveLeadingSymbol(text) {
+    const normalized = String(text || "").trim();
+    if (!normalized) return "";
+    const inventory = window.SP_PDF_LETTER_INVENTORY && Array.isArray(window.SP_PDF_LETTER_INVENTORY.items)
+      ? window.SP_PDF_LETTER_INVENTORY.items
+      : [];
+    const symbols = inventory
+      .map(function (item) { return item && item.symbol ? item.symbol : ""; })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    const exact = symbols.find(function (symbol) { return normalized.startsWith(symbol); });
+    if (exact) return exact;
+    return normalized.charAt(0);
+  }
+
+  function resolveSanskritAudioPath(text) {
+    const normalized = String(text || "").trim();
+    if (!normalized) return "";
+    const vocabMap = window.SP_VOCABULARY_MAP && window.SP_VOCABULARY_MAP.words
+      ? window.SP_VOCABULARY_MAP.words
+      : {};
+    const vocabEntry = vocabMap[normalized];
+    if (vocabEntry && vocabEntry.transliteration) {
+      const stem = transliterationToAudioStem(vocabEntry.transliteration);
+      if (stem) return "assets/audio/pronunciation/" + stem + ".wav";
+    }
+    const symbolPath = resolveInventorySymbolAudioPath(normalized);
+    if (symbolPath) return symbolPath;
+    const examplePath = resolveInventoryExampleAudioPath(normalized);
+    if (examplePath) return examplePath;
+    return "";
+  }
+
+  function playAudioPath(path, feedbackEl, onError) {
+    const audio = new Audio(path + "?v=20261112u02");
+    audio.preload = "none";
+    audio.addEventListener("error", function () {
+      onError();
+    }, { once: true });
+    audio.play().catch(function () {
+      onError();
+    });
+    if (feedbackEl) feedbackEl.textContent = "";
+    return audio;
   }
 
   function readJson(key, fallback) {
@@ -435,43 +474,31 @@
     document.body.appendChild(badge);
   }
 
+  window.spResolveSanskritAudioPath = resolveSanskritAudioPath;
   window.spSpeak = function spSpeak(text, lang, fallbackEl, transliteration) {
     if (window.SP_STATE.muted) {
       if (fallbackEl) fallbackEl.textContent = "Sound is muted. Tap Sound: Off to unmute.";
       return false;
     }
-
-    if (!hasSpeechSupport()) {
-      if (fallbackEl) fallbackEl.textContent = "Audio unavailable on this browser/device.";
+    const normalized = String(text || "").trim();
+    const requestedPath = resolveSanskritAudioPath(normalized);
+    if (!requestedPath) {
+      if (fallbackEl) fallbackEl.textContent = "Pronunciation clip is not ready yet for this word.";
       return false;
     }
-
-    if (fallbackEl) fallbackEl.textContent = "";
-    window.speechSynthesis.getVoices();
-    const bestVoice = getBestVoice(lang || "sa-IN");
-    const speechText = text;
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.lang = (bestVoice && bestVoice.lang) || "hi-IN";
-    utterance.rate = 0.75;
-    utterance.pitch = 1;
-    if (bestVoice) utterance.voice = bestVoice;
-
-    let started = false;
-    utterance.onstart = function onSpeechStart() {
-      started = true;
-    };
-    utterance.onerror = function onSpeechError() {
-      if (fallbackEl) fallbackEl.textContent = "Audio blocked here. Please tap once on page and try again.";
-    };
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.resume();
-    window.speechSynthesis.speak(utterance);
-    setTimeout(function checkSpeechStarted() {
-      if (!started && fallbackEl) {
-        fallbackEl.textContent = "No speech voice started. Please use Test Sound after page load or check browser voice settings.";
+    const fallbackSymbol = resolveLeadingSymbol(normalized);
+    const fallbackSymbolPath = resolveInventorySymbolAudioPath(fallbackSymbol);
+    let didFallback = false;
+    playAudioPath(requestedPath, fallbackEl, function () {
+      if (!didFallback && fallbackSymbolPath && fallbackSymbolPath !== requestedPath) {
+        didFallback = true;
+        playAudioPath(fallbackSymbolPath, fallbackEl, function () {
+          if (fallbackEl) fallbackEl.textContent = "Pronunciation clip is not ready yet for this word.";
+        });
+        return;
       }
-    }, 1200);
+      if (fallbackEl) fallbackEl.textContent = "Pronunciation clip is not ready yet for this word.";
+    });
     return true;
   };
 
@@ -601,19 +628,10 @@
     }, durationMs);
   };
 
-  if (hasSpeechSupport()) {
-    window.speechSynthesis.onvoiceschanged = function onVoicesChanged() {
-      renderMute();
-    };
-  }
-
   window.spGetAudioDebug = function spGetAudioDebug() {
-    const best = getBestVoice("sa-IN");
     return {
       muted: window.SP_STATE.muted,
-      speechSupported: hasSpeechSupport(),
-      voiceCount: getVoiceCount(),
-      bestVoice: best ? ((best.name || "voice") + " (" + (best.lang || "unknown") + ")") : "none"
+      mode: "local-clips-only"
     };
   };
 

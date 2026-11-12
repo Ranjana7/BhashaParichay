@@ -546,7 +546,7 @@
 
   function playChallengePrompt(step) {
     if (!step.playText) return;
-    window.spSpeak(step.playText, "hi-IN", ui.status, step.playText);
+    window.spSpeak(step.playText, "sa-IN", ui.status, step.playText);
   }
 
   function completeChallengeStep() {
