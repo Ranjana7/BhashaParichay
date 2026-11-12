@@ -523,7 +523,7 @@
     if (!ui.worldUnlockInviteBtn) return;
     const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldValue] ? window.SP_WORLD_META[worldValue] : null;
     const label = meta && meta.title ? meta.title : "Next World";
-    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together!";
+    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go to " + label + " \u2192";
     ui.worldUnlockInviteBtn.setAttribute("aria-label", "Go to " + label);
   }
 
@@ -561,7 +561,7 @@
 
   function updateUnlockInvitation() {
     const nextWorldKey = getNextWorldKey();
-    if (!nextWorldKey) {
+    if (!nextWorldKey || nextWorldKey === worldKey) {
       inviteRuntime.targetWorld = "";
       inviteRuntime.unlockNonce = 0;
       inviteRuntime.eventKey = "";
@@ -589,8 +589,10 @@
     const unlockNonceKey = String(inviteRuntime.unlockNonce || 0);
     if (unlockInfo.world === nextWorldKey && localStorage.getItem(inviteRuntime.eventKey) !== unlockNonceKey) {
       localStorage.setItem(inviteRuntime.eventKey, unlockNonceKey);
+      const meta = window.SP_WORLD_META && window.SP_WORLD_META[nextWorldKey] ? window.SP_WORLD_META[nextWorldKey] : null;
+      const nextTitle = meta && meta.title ? meta.title : "the next world";
       setMascot("dance");
-      setSpeech("Hooray! A new world is ready. Let's explore!", "world", { category: "world", holdMs: 6000, force: true });
+      setSpeech("Hooray! " + nextTitle + " is ready. Let's explore!", "world", { category: "world", holdMs: 6000, force: true });
       confetti();
       if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
     }
@@ -980,7 +982,7 @@
       moveMascotToSection(section, compact);
       if (nextId && nextId !== activeSectionId) {
         activeSectionId = nextId;
-        setSpeech(sectionMessage(section), "instruction", { category: "guidance", holdMs: 2200 });
+        setSpeech(sectionMessage(section), "instruction", { category: "guidance", holdMs: 2200, force: true });
         if (!prefersReducedMotion) {
           setMascot("flying");
           window.setTimeout(function () { setMascot("idle"); }, 260);

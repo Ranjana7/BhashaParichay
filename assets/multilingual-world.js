@@ -285,6 +285,11 @@
     return language.worlds[index + 1].key;
   }
 
+  function getWorldTitle(worldKeyValue) {
+    const target = language.worlds.find(function (item) { return item.key === worldKeyValue; });
+    return target && target.title ? target.title : "Next World";
+  }
+
   function goToWorld(targetWorld) {
     if (!targetWorld) return;
     localStorage.setItem(LAST_WORLD_KEY, targetWorld);
@@ -294,6 +299,10 @@
   function showUnlockInvite() {
     if (ui.worldUnlockInvite) ui.worldUnlockInvite.hidden = false;
     runtime.unlockInviteVisible = true;
+    if (ui.worldUnlockInviteBtn) {
+      ui.worldUnlockInviteBtn.textContent = "✨ Let's Go to " + getWorldTitle(runtime.unlockTargetWorld) + " \u2192";
+      ui.worldUnlockInviteBtn.setAttribute("aria-label", "Go to " + getWorldTitle(runtime.unlockTargetWorld));
+    }
   }
 
   function hideUnlockInvite() {
@@ -304,7 +313,7 @@
 
   function updateUnlockInvitation() {
     const nextWorldKey = getNextWorldKey();
-    if (!nextWorldKey) {
+    if (!nextWorldKey || nextWorldKey === world.key) {
       hideUnlockInvite();
       return;
     }
@@ -319,7 +328,7 @@
     }
     runtime.unlockTargetWorld = nextWorldKey;
     showUnlockInvite();
-    setMascotSpeech("Hooray! A new world is ready. Let's explore!", "state-dancing");
+    setMascotSpeech("Hooray! " + getWorldTitle(nextWorldKey) + " is ready. Let's explore!", "state-dancing");
   }
 
   function reward(eventKey, stars, gems) {

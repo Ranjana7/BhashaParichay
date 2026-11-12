@@ -13,7 +13,7 @@
     worldWelcome: {
       alphabet: "Look! Magical letters are hiding in the tree! Let's discover them together!",
       animals: "Roar! Welcome to Animal Jungle! Let's meet some amazing animals!",
-      numbers: "Zoom! We're off to Number Galaxy! Let's count the stars in Sanskrit!",
+      numbers: "Welcome to Number Galaxy! Let's count the stars in Sanskrit together!",
       colours: "Wow! Look at all these colours! Let's discover their Sanskrit names!",
       words: "Every new word is a little treasure! Let's collect some together!",
       sentences: "Welcome to Sentence Castle! Let's build something wonderful!",
