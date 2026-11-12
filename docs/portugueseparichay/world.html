@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BhashaParichay | PortugueseParichay World</title>
+  <meta name="description" content="Play PortugueseParichay beginner activities with Mithu.">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u4">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="../index.html">Language Chooser</a>
+      <a href="../sanskritparichay/">Sanskrit</a>
+    </nav>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel" id="languageWorldPage" data-language="portuguese">
+      <h1 id="mwTitle">World</h1>
+      <p id="mwSubtitle"></p>
+      <p><strong id="mwLessonName"></strong></p>
+      <p id="mwLessonObjective"></p>
+      <div class="hero-actions">
+        <div class="star-box">⭐ Stars: <span id="mwWorldStars">0</span></div>
+        <div class="star-box">💎 Gems: <span id="mwWorldGems">0</span></div>
+        <div class="star-box">✅ Lessons: <span id="mwLessonCount">0/1 completed</span></div>
+      </div>
+      <div class="hero-actions">
+        <a class="button ghost" href="index.html">Back to Portuguese Home</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 1: Match</h2>
+      <p id="mwMatchPrompt"></p>
+      <div id="mwMatchChoices" class="choices"></div>
+      <p id="mwMatchStatus" class="status"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 2: Listen</h2>
+      <p id="mwListenPrompt"></p>
+      <button id="mwListenPlay" class="button secondary" type="button">▶ Play</button>
+      <div id="mwListenChoices" class="choices"></div>
+      <p id="mwListenStatus" class="status"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 3: Build</h2>
+      <p id="mwBuildPrompt"></p>
+      <div id="mwBuildTiles" class="tiles"></div>
+      <p><strong>Your answer:</strong> <span id="mwBuildAnswer"></span></p>
+      <div class="hero-actions">
+        <button id="mwBuildCheck" class="button secondary" type="button">Check</button>
+        <button id="mwBuildReset" class="button ghost" type="button">Retry</button>
+      </div>
+      <p id="mwBuildStatus" class="status"></p>
+      <div class="hero-actions">
+        <button id="mwCompleteLesson" class="button primary" type="button">Complete Lesson</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="../assets/multilingual-data.js?v=20261112u1"></script>
+  <script src="../assets/multilingual-world.js?v=20261112u1"></script>
+</body>
+</html>

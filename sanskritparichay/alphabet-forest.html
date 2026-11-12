@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BhashaParichay | SanskritParichay Alphabet Forest</title>
+  <meta name="description" content="Play Alphabet Forest and learn Sanskrit letters through games.">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u2">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="alphabet-forest.html" data-current-world aria-current="page">Alphabet Forest</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel" id="lessonProgressPanel">
+      <h1>Alphabet Forest</h1>
+      <p>Choose letters, listen, play games, and earn stars.</p>
+      <p class="footer-note">Tap any activity below to start, then return anytime to continue where you left off.</p>
+      <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
+        <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+          <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+          <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+          <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+          <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+        </svg>
+        <p id="lessonMascotSpeech" class="mascot-speech">Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?</p>
+        <div id="worldUnlockInvite" class="mascot-invite" hidden>
+          <button id="worldUnlockInviteBtn" class="button primary tiny" type="button">✨ Let's Go Together! →</button>
+          <button id="worldUnlockDismissBtn" class="button ghost tiny" type="button">Maybe later</button>
+        </div>
+      </div>
+      <p class="privacy-note">
+        Privacy: No account, no ads, no analytics, no trackers. Progress is stored only on this device/browser and does not sync.
+      </p>
+      <nav class="activity-jump-nav compact-activity-nav" id="activityJumpNav" aria-label="Alphabet Forest activities">
+        <a class="button ghost jump-link" href="#forestScene">Magical Tree</a>
+        <a class="button ghost jump-link" href="#letterGardenSection">Letter Garden</a>
+        <a class="button ghost jump-link" href="#activityHearGamePanel">Hear and Pick</a>
+        <a class="button ghost jump-link" href="#activityPictureGamePanel">Picture Match</a>
+        <a class="button ghost jump-link" href="#activityArrangeGamePanel">Arrange the Word</a>
+        <a class="button ghost jump-link" href="#activityFlashGamePanel">Flashcard Flip</a>
+        <a class="button ghost jump-link" href="#activityFeedGamePanel">Feed Mithu</a>
+        <a class="button ghost jump-link" href="#activityTraceGamePanel">Write It Yourself</a>
+        <a class="button ghost jump-link" href="#activityHuntGamePanel">Hidden Letter Hunt</a>
+      </nav>
+    </section>
+
+    <section class="panel" id="activityNavigator">
+      <h2>Alphabet Forest Progress</h2>
+      <p id="globalProgressSummary" class="footer-note">Follow the journey and unlock your next adventure.</p>
+      <div class="progress-compact">
+        <p><strong>LEARNING:</strong> <span id="learningProgressText">0 of 2 completed</span></p>
+        <div class="progress-meter" aria-hidden="true"><div id="learningProgressFill" class="progress-fill"></div></div>
+        <p><strong>PRACTICE:</strong> <span id="practiceProgressText">0 practice games completed</span></p>
+        <div class="progress-meter" aria-hidden="true"><div id="practiceProgressFill" class="progress-fill"></div></div>
+      </div>
+    </section>
+
+    <section class="panel forest-scene" id="forestScene" data-activity-id="magical-tree">
+      <h2>Magical Letter Tree</h2>
+      <p id="treeInstruction" class="tree-instruction">Tap a glowing letter to discover its sound!</p>
+      <div id="magicalTreeStage" class="magical-tree-stage">
+        <svg class="magical-tree-art" viewBox="0 0 1200 520" role="img" aria-label="Illustrated magical Sanskrit tree">
+          <defs>
+            <linearGradient id="treeSky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#d9fff3"/>
+              <stop offset="58%" stop-color="#f4fffb"/>
+              <stop offset="100%" stop-color="#fffde9"/>
+            </linearGradient>
+            <linearGradient id="treeTrunk" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#7a4f2e"/>
+              <stop offset="100%" stop-color="#4c2f16"/>
+            </linearGradient>
+            <radialGradient id="treeGlow" cx="50%" cy="42%" r="52%">
+              <stop offset="0%" stop-color="#deffe9" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#82d8a6" stop-opacity="0.24"/>
+            </radialGradient>
+          </defs>
+          <rect class="tree-sky" x="0" y="0" width="1200" height="520" fill="url(#treeSky)"></rect>
+          <ellipse class="tree-ground" cx="600" cy="472" rx="560" ry="72"></ellipse>
+          <ellipse class="tree-canopy-glow" cx="600" cy="182" rx="330" ry="190" fill="url(#treeGlow)"></ellipse>
+          <g class="tree-canopy cluster-a">
+            <circle cx="505" cy="150" r="92"></circle>
+            <circle cx="620" cy="125" r="112"></circle>
+            <circle cx="730" cy="164" r="90"></circle>
+            <circle cx="578" cy="215" r="112"></circle>
+          </g>
+          <g class="tree-trunk-group">
+            <path class="tree-trunk" d="M535 460 C530 372, 540 284, 566 212 C577 180, 575 152, 564 120 C596 143, 618 173, 632 210 C662 282, 676 360, 666 460 Z" fill="url(#treeTrunk)"></path>
+            <path class="tree-trunk-shade" d="M595 460 C593 360, 606 265, 633 198 C646 232, 656 322, 651 460 Z"></path>
+          </g>
+          <g class="tree-branches">
+            <path class="branch b1" d="M594 232 C525 216, 480 198, 430 160"></path>
+            <path class="branch b2" d="M612 216 C685 192, 758 175, 824 128"></path>
+            <path class="branch b3" d="M598 265 C512 278, 446 310, 390 344"></path>
+            <path class="branch b4" d="M635 272 C705 300, 774 334, 844 360"></path>
+            <path class="branch b5" d="M620 246 C655 236, 692 218, 726 188"></path>
+          </g>
+          <g class="tree-ornament-guides" aria-hidden="true">
+            <circle class="ornament-guide" cx="300" cy="198" r="11"></circle>
+            <circle class="ornament-guide" cx="480" cy="136" r="11"></circle>
+            <circle class="ornament-guide" cx="660" cy="160" r="11"></circle>
+            <circle class="ornament-guide" cx="826" cy="134" r="11"></circle>
+            <circle class="ornament-guide" cx="948" cy="202" r="11"></circle>
+          </g>
+          <g class="tree-perch">
+            <path d="M732 304 C772 300, 816 304, 858 320"></path>
+            <circle cx="852" cy="322" r="6"></circle>
+          </g>
+        </svg>
+        <div id="treeSparkleLottie" class="tree-lottie tree-lottie-sparkle" aria-hidden="true"></div>
+        <div id="treeCelebrationLottie" class="tree-lottie tree-lottie-celebration" aria-hidden="true"></div>
+        <div id="treeParticles" class="tree-particles" aria-hidden="true"></div>
+        <div id="treeProgressBlooms" class="tree-progress-blooms" aria-hidden="true"></div>
+        <div id="magicalTreeLetters" class="magical-tree-grid" role="group" aria-label="Magical Letter Tree"></div>
+        <div id="treeMithu" class="tree-mithu" aria-hidden="true">
+          <svg viewBox="0 0 120 120" class="tree-mithu-svg" role="presentation" focusable="false">
+            <ellipse class="mithu-shadow" cx="60" cy="102" rx="24" ry="7"></ellipse>
+            <path class="mithu-tail" d="M91 71 L112 88 L90 91 Z"></path>
+            <ellipse class="mithu-body" cx="60" cy="58" rx="30" ry="36"></ellipse>
+            <ellipse class="mithu-belly" cx="60" cy="66" rx="18" ry="22"></ellipse>
+            <path class="mithu-wing-left" d="M41 54 C23 58, 21 80, 37 86 C39 74, 44 62, 49 57 Z"></path>
+            <path class="mithu-wing-right" d="M79 54 C97 58, 99 80, 83 86 C81 74, 76 62, 71 57 Z"></path>
+            <circle class="mithu-eye-left" cx="50" cy="46" r="3.8"></circle>
+            <circle class="mithu-eye-right" cx="69" cy="46" r="3.8"></circle>
+            <path class="mithu-beak-top" d="M54 53 L66 53 L60 61 Z"></path>
+            <path class="mithu-beak-bottom" d="M55 60 L65 60 L60 67 Z"></path>
+            <path class="mithu-crest" d="M53 20 L58 11 L62 20 L66 10 L71 20"></path>
+          </svg>
+        </div>
+        <div id="letterSpotlight" class="letter-spotlight" aria-live="polite">
+          <p id="spotlightLetterDev" class="spotlight-letter-dev">अ</p>
+          <p id="spotlightLetterTran" class="spotlight-letter-tran">a</p>
+          <p id="spotlightLetterExample" class="spotlight-letter-example">अग्निः · fire</p>
+        </div>
+      </div>
+      <div class="hero-actions tree-actions">
+        <button id="prevTreeGroupBtn" class="button ghost" type="button">Previous Group</button>
+        <p id="treeCounter" class="footer-note" aria-live="polite">Keep discovering glowing letters.</p>
+        <button id="nextTreeGroupBtn" class="button secondary" type="button">Next Group</button>
+      </div>
+      <p id="treeStatus" class="status" aria-live="polite"></p>
+      <div class="hero-actions" id="treeCompletionActions">
+        <button id="playTreeAgainBtn" class="button ghost" type="button" hidden>Play Magical Tree Again</button>
+        <button id="continueAfterTreeBtn" class="button primary" type="button" hidden>Continue to Next Activity</button>
+      </div>
+      <div id="controls-magical-tree"></div>
+    </section>
+
+    <section class="forest-layout" id="letterGardenSection" data-activity-id="letter-garden">
+      <aside class="panel">
+        <h2>Letter Garden</h2>
+        <div class="hero-actions" id="letterCategoryTabs" aria-label="Letter categories">
+          <button class="button ghost category-tab active" data-category="vowels" type="button">स्वर</button>
+          <button class="button ghost category-tab" data-category="vargiya" type="button">वर्गीय व्यञ्जन</button>
+          <button class="button ghost category-tab" data-category="avargiya" type="button">अवर्गीय व्यञ्जन</button>
+        </div>
+        <div class="hero-actions" id="consonantSubgroupTabs" aria-label="Consonant groups"></div>
+        <p id="gardenCoverage" class="footer-note">Browse and revise letters in the grid.</p>
+        <div id="letterGrid" class="letter-grid" aria-label="Sanskrit letters"></div>
+      </aside>
+
+      <section class="panel" id="activityHearPanel">
+        <h2>Shared Learning Panel</h2>
+        <div class="letter-detail">
+          <p id="selectedDev" class="big-dev tap-audio" title="Tap to hear pronunciation">अ</p>
+          <p class="selected-meta">
+            <span id="selectedPosition">Letter 1 of 1</span>
+            <span id="selectedLearned" class="learned-badge">☆ Not learned yet</span>
+          </p>
+          <p><strong>Transliteration:</strong> <span id="selectedTran">a</span></p>
+          <p class="example-line"><strong>Example:</strong> <span id="selectedExample" class="tap-audio" title="Tap to hear example pronunciation">अग्निः</span> (<span id="selectedMeaning">fire</span>)</p>
+          <div class="hero-actions">
+            <button id="prevLetterBtn" class="button ghost" type="button">◀ Previous</button>
+            <button id="nextLetterBtn" class="button ghost" type="button">Next ▶</button>
+            <button id="replayLetterBtn" class="button secondary audio-control" type="button">🔊 Replay</button>
+            <button id="slowLetterBtn" class="button ghost audio-control" type="button">🐢 Slow</button>
+            <button id="panelMuteBtn" class="button ghost audio-control" type="button">🔇 Mute</button>
+          </div>
+          <p id="audioFallback" class="fallback" aria-live="polite"></p>
+          <p id="letterGardenStatus" class="status" aria-live="polite"></p>
+          <div id="letterGardenCompletionActions" class="hero-actions" hidden>
+            <button id="playLetterGardenAgainBtn" class="button ghost" type="button">Play Letter Garden Again</button>
+            <button id="continueToPracticeBtn" class="button primary" type="button">Continue to Practice</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+
+    <section class="panel category-banner practice-banner" id="practiceCategoryStart">
+      <h2>Play &amp; Practise</h2>
+      <p>Pick any practice game in any order. Keep playing even after unlock!</p>
+    </section>
+
+    <section class="panel" id="activityHearGamePanel" data-activity-id="hear-and-pick">
+      <h2>Activity 1: Hear and Pick</h2>
+      <div class="activity">
+        <p>Listen to the sound and pick the matching Devanagari letter.</p>
+        <button id="playHearPrompt" class="button secondary audio-control" type="button">▶ Play sound</button>
+        <div id="hearChoices" class="choices" style="margin-top:10px;"></div>
+        <p id="hearStatus" class="status" aria-live="polite"></p>
+        <div id="controls-hear-and-pick"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityPictureGamePanel" data-activity-id="picture-match">
+      <h2>Activity 2: Picture Match</h2>
+      <div class="activity">
+        <p id="picturePrompt">Match prompt</p>
+        <div id="pictureMatchLottie" class="picture-match-lottie" aria-hidden="true"></div>
+        <div id="pictureChoices" class="choices"></div>
+        <p id="pictureStatus" class="status" aria-live="polite"></p>
+        <div id="controls-picture-match"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityArrangeGamePanel" data-activity-id="arrange-word">
+      <h2>Activity 3: Arrange the Word</h2>
+      <div class="activity">
+        <p id="arrangePrompt">Arrange prompt</p>
+        <div id="arrangeTiles" class="tiles"></div>
+        <p><strong>Your answer:</strong> <span id="arrangeAnswer"></span></p>
+        <div class="hero-actions">
+          <button id="checkArrange" class="button secondary" type="button">Check</button>
+          <button id="resetArrange" class="button ghost" type="button">Retry</button>
+        </div>
+        <p id="arrangeStatus" class="status" aria-live="polite"></p>
+        <div id="controls-arrange-word"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityFlashGamePanel" data-activity-id="flashcard-flip">
+      <h2>Activity 4: Flashcard Flip</h2>
+      <div class="activity">
+        <p>Tap or press Enter on the flashcard to flip it and reveal the meaning.</p>
+        <div id="flashcard" class="flashcard" role="button" tabindex="0" aria-live="polite" aria-label="Flashcard. Tap to flip."></div>
+        <div id="flashChoices" class="hero-actions"></div>
+        <p id="flashStatus" class="status" aria-live="polite"></p>
+        <div id="controls-flashcard-flip"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityFeedGamePanel" data-activity-id="feed-mithu">
+      <h2>Activity 5: Feed Mithu</h2>
+      <div class="activity">
+        <p id="feedPrompt">Choose the correct Sanskrit fruit for Mithu.</p>
+        <div id="feedChoices" class="choices"></div>
+        <p id="feedStatus" class="status" aria-live="polite"></p>
+        <div id="controls-feed-mithu"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityTraceGamePanel" data-activity-id="letter-tracing">
+      <h2>Activity 6: Write It Yourself!</h2>
+      <div class="activity">
+        <div class="writing-card">
+          <div class="trace-work-area">
+            <div class="trace-target">
+              <span id="traceTargetLetter">अ</span>
+            </div>
+            <div class="trace-canvas-wrap">
+              <canvas id="traceCanvas" width="420" height="220" aria-label="Letter writing board"></canvas>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button id="checkTraceBtn" class="button ghost" type="button">Check My Writing</button>
+          </div>
+          <p id="traceStatus" class="status" aria-live="polite"></p>
+        </div>
+        <div id="controls-letter-tracing"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="activityHuntGamePanel" data-activity-id="hidden-letter-hunt">
+      <h2>Activity 7: Hidden Letter Hunt</h2>
+      <div class="activity">
+        <p id="huntPrompt">Hunt prompt</p>
+        <div id="huntGrid" class="tiles"></div>
+        <p id="huntStatus" class="status" aria-live="polite"></p>
+        <div id="controls-hidden-letter-hunt"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <canvas id="celebration-canvas" aria-hidden="true"></canvas>
+
+  <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/vendor/lottie.min.js"></script>
+  <script src="../assets/vendor/canvas-confetti.min.js"></script>
+  <script>window.SP_LANGUAGE_HOME_URL="index.html";window.SP_LANGUAGE_CHOOSER_URL="../index.html";</script>
+  <script src="../assets/site-config.js?v=20261112u3"></script>
+  <script src="../assets/messages.js?v=20261111u4"></script>
+  <script src="../assets/progress-store.js?v=20261112u3"></script>
+  <script src="../assets/common.js?v=20261112u3"></script>
+  <script src="../assets/pdf-letter-inventory.js?v=20261112u3"></script>
+  <script src="../assets/lesson-data.js?v=20261111u1"></script>
+  <script src="../assets/vocabulary-map.js?v=20261112u2"></script>
+  <script src="../assets/alphabet-forest-core.js?v=20261111u14"></script>
+  <script src="../assets/alphabet-forest.js?v=20261112u04"></script>
+</body>
+</html>

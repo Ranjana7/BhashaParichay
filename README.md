@@ -4,13 +4,12 @@ Free, static, kid-friendly multilingual learning website for ages 5–12.
 
 ## What is included
 
-- Language chooser home (`index.html`)
-- Sanskrit child home (`sanskrit-home.html`)
-- Spanish section placeholder (`spanish-home.html`)
-- Portuguese section placeholder (`portuguese-home.html`)
-- Alphabet Forest playable lesson (`alphabet-forest.html`) with eight scrollable activity sections
-- Multi-world lesson engine (`learning-world.html` + `assets/learning-world.js`)
-- About page (`about.html`)
+- Language chooser home (`/BhashaParichay/`)
+- Sanskrit child home and worlds (`/BhashaParichay/sanskritparichay/`)
+- Spanish child home and playable worlds (`/BhashaParichay/spanishparichay/`)
+- Portuguese child home and playable worlds (`/BhashaParichay/portugueseparichay/`)
+- Sanskrit Alphabet Forest playable lesson with eight activity sections
+- Multi-world lesson engines for Sanskrit, Spanish, and Portuguese
 - Local progress saving with `localStorage` (device/browser only)
 - No account, no analytics, no ads, no trackers
 - Reduced-motion support
@@ -23,7 +22,7 @@ Free, static, kid-friendly multilingual learning website for ages 5–12.
   - Flashcard Flip
   - Feed Mithu
   - Hidden Letter Hunt
-- Additional full worlds with lesson progression:
+- Sanskrit full worlds with lesson progression:
   - Word Wonderland
   - Animal Jungle
   - Number Galaxy
@@ -31,6 +30,12 @@ Free, static, kid-friendly multilingual learning website for ages 5–12.
   - Sentence Castle
   - Story Island
   - Sanskrit and Culture
+
+## Language model notes
+
+- Portuguese content is Brazilian Portuguese.
+- Rewards are language-scoped (`bhashaParichay.sanskrit.*`, `bhashaParichay.spanish.*`, `bhashaParichay.portuguese.*`).
+- Root medals reflect true level completion only (not simple unlock/visit).
 
 ## Run locally
 
@@ -73,8 +78,8 @@ git push -u origin main
 
 ## Content quality notes
 
-- Alphabet Forest audio can be temporarily disabled via a page feature flag during UX stabilization.
-- Pronunciation assets are preserved in `assets/audio/pronunciation/` for later restoration.
+- Sanskrit pronunciation uses local clip assets under `assets/audio/pronunciation/`.
+- Spanish and Portuguese listen activities currently use browser speech synthesis and still require educator pronunciation review before broad release.
 - Lesson mappings and pronunciation should be reviewed by a Sanskrit educator before wide release.
 - Curriculum progression is informed by the user's authorized Sanskrit From Home course structure, while all game content here is original.
 
@@ -82,11 +87,10 @@ git push -u origin main
 
 - Code/CSS/illustrations in this repository: Original work for this project.
 - Fonts/images/audio: No paid runtime services are required.
-- Browser Speech Synthesis API: built-in browser feature (no subscription).
+- Browser Speech Synthesis API is used for non-Sanskrit listen prompts.
 - Animation libraries stored locally in `assets/vendor/`:
   - Motion (`motion.min.js`)
   - canvas-confetti (`canvas-confetti.min.js`)
   - lottie-web (`lottie.min.js`)
 - Lottie JSON animation assets stored locally in `assets/lottie/`.
 - Pronunciation asset manifest: `assets/audio/pronunciation/manifest.json`.
-- Reference pronunciation clips in `assets/audio/reference/` were copied from the local `Stories for Kids/tts-availability-tests` folder.
