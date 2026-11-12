@@ -1,5 +1,5 @@
 {
-  "status": "in_progress",
+  "status": "updated_swaras_from_user_recording",
   "policy": {
     "browserSpeechFallbackEnabled": false,
     "missingClipMessage": "Pronunciation not available yet."
@@ -34,6 +34,6 @@
   },
   "review": {
     "sanskritSpeakerReview": "pending",
-    "notes": "Local WAV library is active for playback. Letter clips are source clips and missing vocabulary clips were synthesized from local Sanskrit letter segments; final Sanskrit-speaker review is still required."
+    "notes": "Swaras were re-cut on 2026-11-12 from Screen Recording 2026-11-12 130030.mp4 using the first clean pass before the repetition. Local WAV clips remain the only runtime pronunciation source."
   }
 }
