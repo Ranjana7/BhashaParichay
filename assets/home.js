@@ -489,6 +489,12 @@
 
   function initHomeLottie() {
     if (!window.lottie) return;
+    const assetBase = /\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(window.location.pathname)
+      ? "../assets/"
+      : "assets/";
+    const assetPath = function (relativePath) {
+      return assetBase + relativePath;
+    };
     const butterflies = [ui.lottieButterflyOne, ui.lottieButterflyTwo, ui.lottieButterflyThree].filter(Boolean);
     butterflies.forEach(function (container, index) {
       window.lottie.loadAnimation({
@@ -496,7 +502,7 @@
         renderer: "svg",
         loop: true,
         autoplay: true,
-        path: "assets/lottie/butterfly.json",
+        path: assetPath("lottie/butterfly.json"),
         rendererSettings: { progressiveLoad: true }
       });
       container.style.opacity = "0.9";
@@ -508,7 +514,7 @@
         renderer: "svg",
         loop: true,
         autoplay: true,
-        path: "assets/lottie/sparkle.json"
+        path: assetPath("lottie/sparkle.json")
       });
     });
   }

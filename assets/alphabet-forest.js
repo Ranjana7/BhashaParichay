@@ -1320,6 +1320,12 @@
 
   function initLottieAnimations() {
     if (!window.lottie || typeof window.lottie.loadAnimation !== "function") return;
+    const assetBase = /\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(window.location.pathname)
+      ? "../assets/"
+      : "assets/";
+    const assetPath = function (relativePath) {
+      return assetBase + relativePath;
+    };
     const build = function (container, path, loop) {
       if (!container) return null;
       return window.lottie.loadAnimation({
@@ -1330,9 +1336,9 @@
         path: path
       });
     };
-    runtime.lottie.treeSparkle = build(ui.treeSparkleLottie, "assets/lottie/sparkle.json", false);
-    runtime.lottie.treeCelebrate = build(ui.treeCelebrationLottie, "assets/lottie/celebration.json", false);
-    runtime.lottie.pictureGuide = build(ui.pictureLottie, "assets/lottie/butterfly.json", true);
+    runtime.lottie.treeSparkle = build(ui.treeSparkleLottie, assetPath("lottie/sparkle.json"), false);
+    runtime.lottie.treeCelebrate = build(ui.treeCelebrationLottie, assetPath("lottie/celebration.json"), false);
+    runtime.lottie.pictureGuide = build(ui.pictureLottie, assetPath("lottie/butterfly.json"), true);
     if (runtime.lottie.pictureGuide && !REDUCED_MOTION) {
       runtime.lottie.pictureGuide.play();
     }
