@@ -3,25 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BhashaParichay | PortugueseParichay</title>
-  <meta name="description" content="PortugueseParichay beginner learning worlds for children (Brazilian Portuguese).">
-  <link rel="stylesheet" href="../assets/styles.css?v=20261112u5">
+  <title>BhashaParichay | PortugueseParichay Home</title>
+  <meta name="description" content="A magical Portuguese learning adventure for children (Brazilian Portuguese).">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u6">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
+
   <header class="site-header">
     <nav class="main-nav" aria-label="Main">
-      <a href="index.html" aria-current="page" data-seamless-nav>Home</a>
-      <a href="../index.html" data-seamless-nav>Language Chooser</a>
-      <a href="../about.html" data-seamless-nav>About</a>
+      <a href="../index.html">Bhasha Home</a>
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="../about.html">About</a>
     </nav>
   </header>
 
-  <main id="main-content" class="page-wrap">
-    <section class="panel language-hero" id="languageHome" data-language="portuguese">
-      <div class="language-hero-layout">
-        <div class="language-hero-mithu state-idle" aria-hidden="true">
-          <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
+  <main id="main-content" class="page-wrap home-adventure">
+    <section class="magic-hero panel" id="languageHome" data-language="portuguese">
+      <div class="sky-decor" aria-hidden="true">
+        <span class="cloud cloud-a"></span>
+        <span class="cloud cloud-b"></span>
+        <span class="rainbow"></span>
+        <div id="lottieButterflyOne" class="lottie-butterfly b-one"></div>
+        <div id="lottieButterflyTwo" class="lottie-butterfly b-two"></div>
+        <div id="lottieButterflyThree" class="lottie-butterfly b-three"></div>
+        <div id="lottieSparkleOne" class="lottie-spark s1"></div>
+        <div id="lottieSparkleTwo" class="lottie-spark s2"></div>
+      </div>
+
+      <div class="hero-layout">
+        <div id="mascot" class="parrot-mascot state-wave" aria-live="polite">
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
             <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
             <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
             <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
@@ -32,33 +44,62 @@
             <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
             <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
             <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
             <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
           </svg>
+          <p id="mascotSpeech" class="mascot-speech">Olá! I'm Mithu! Let's discover Portuguese through exciting games and adventures!</p>
         </div>
-        <div>
-          <p class="hero-badge">PortugueseParichay</p>
-          <h1 id="languageTitle">PortugueseParichay</h1>
-          <p id="languageSubtitle" class="mascot-speech"></p>
+
+        <div class="hero-copy">
+          <p class="hero-badge">PortugueseParichay Learning Adventure</p>
+          <h1 id="languageGreeting">Olá, pequeno explorador!</h1>
+          <p id="languageSubtitle">Olá! Explore Brazilian Portuguese worlds with Mithu.</p>
           <p class="footer-note">Variant: Brazilian Portuguese.</p>
+          <div class="hero-actions">
+            <a class="button primary big-action" href="world.html?world=greetings" id="playNowBtn">Let's Start Our Adventure!</a>
+            <button class="button ghost big-action" id="continueBtn" type="button">Continue My Adventure</button>
+            <button class="button challenge big-action" id="challengeBtn" type="button">Challenge of the Day</button>
+          </div>
+          <p id="challengeSubtitle" class="footer-note">Play a little extra and collect more stars and gems!</p>
+          <p id="languageMedalStatus" class="footer-note"></p>
+
+          <div class="hero-actions">
+            <div class="star-box">⭐ Stars: <span id="languageStars">0</span></div>
+            <div class="star-box">💎 Gems: <span id="languageGems">0</span></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="panel">
-      <h2>World Journey</h2>
-      <div class="hero-actions">
-        <div class="star-box">⭐ Stars: <span id="languageStars">0</span></div>
-        <div class="star-box">💎 Gems: <span id="languageGems">0</span></div>
-      </div>
-      <p id="languageMedalStatus" class="footer-note"></p>
+    <section id="worlds" class="panel">
+      <h2>Choose a Learning World</h2>
+      <p>Follow your magical world map, one adventure at a time.</p>
       <div id="languageWorldGrid" class="world-grid"></div>
+    </section>
+
+    <section id="previewPanel" class="panel preview-panel" aria-live="polite">
+      <h2 id="previewTitle">Challenge of the Day</h2>
+      <p id="previewText">Tap “Challenge of the Day” to play your five-step daily quest.</p>
+      <p id="challengeMeta" class="footer-note">Finish the challenge to earn 2 gems once per day on this device.</p>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="challengeProgressFill" class="progress-fill"></div>
+      </div>
+      <p id="challengeProgressText" class="footer-note">Progress: 0/5</p>
+      <div id="previewChoices" class="choices"></div>
+      <p id="previewStatus" class="status"></p>
+      <div class="hero-actions">
+        <button id="challengeActionBtn" class="button ghost" type="button" style="display:none;">Next challenge</button>
+      </div>
     </section>
   </main>
 
   <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/vendor/lottie.min.js"></script>
   <script src="../assets/multilingual-data.js?v=20261112u2"></script>
   <script src="../assets/mithu-follower.js?v=20261112u1"></script>
+  <script src="../assets/shared-nav.js?v=20261112u1"></script>
   <script src="../assets/seamless-experience.js?v=20261112u1"></script>
-  <script src="../assets/multilingual-home.js?v=20261112u3"></script>
+  <script src="../assets/multilingual-home.js?v=20261112u4"></script>
 </body>
 </html>
