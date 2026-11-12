@@ -990,17 +990,26 @@
           window.clearTimeout(runtime.treeGroupAdvanceTimer);
           runtime.treeGroupAdvanceTimer = null;
         }
-        if (!forestState.activities["magical-tree"].isComplete) return;
+        CORE.resetActivity(forestState, "magical-tree");
         const treeState = forestState.activities["magical-tree"];
         treeState.currentIndex = 0;
         treeState.completedItems = [];
         treeState.answers = {};
         treeState.attempts = {};
-        treeState.isComplete = false;
+        forestState.activities["magical-tree"].isComplete = false;
+        const firstGroup = TREE_LEARNING_GROUPS[0];
+        treeState.currentIndex = firstGroup && firstGroup.indices && firstGroup.indices.length ? firstGroup.indices[0] : 0;
+        runtime.byActivity["magical-tree"].selected = "";
+        runtime.byActivity["magical-tree"].tempAnswer = "";
+        runtime.byActivity["magical-tree"].flipped = false;
         const bloomContainer = document.getElementById("treeProgressBlooms");
         if (bloomContainer) bloomContainer.innerHTML = "";
         setActivityStatus("magical-tree", "");
+        setMascotSpeech("Let's begin again from the first swara group!", { category: "guidance", holdMs: 2400, force: true, tone: "instruction" });
+        setMascotStateForDuration("encouraging", 460);
         saveAndRender();
+        const treeSection = document.getElementById("forestScene");
+        if (treeSection) scrollToActivity(treeSection);
       });
     }
     if (ui.continueAfterTreeBtn) {
@@ -1079,7 +1088,7 @@
     if (!ui.worldUnlockInviteBtn) return;
     const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldKey] ? window.SP_WORLD_META[worldKey] : null;
     const label = meta && meta.title ? meta.title : "Next World";
-    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together!";
+    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go to " + label + " \u2192";
     ui.worldUnlockInviteBtn.setAttribute("aria-label", "Go to " + label);
   }
 
@@ -1817,7 +1826,7 @@
     if (ui.prevTreeGroupBtn) ui.prevTreeGroupBtn.disabled = groupIndex === 0;
     if (ui.nextTreeGroupBtn) ui.nextTreeGroupBtn.disabled = !groupComplete || groupIndex >= maxGroup;
 
-    if (ui.playTreeAgainBtn) ui.playTreeAgainBtn.hidden = !activity.isComplete;
+    if (ui.playTreeAgainBtn) ui.playTreeAgainBtn.hidden = false;
     if (ui.continueAfterTreeBtn) ui.continueAfterTreeBtn.hidden = !activity.isComplete;
 
     ui.treeLetters.innerHTML = "";

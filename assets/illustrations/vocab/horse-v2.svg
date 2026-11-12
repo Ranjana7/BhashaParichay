@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" role="img" aria-labelledby="horseTitle horseDesc">
+  <title id="horseTitle">Friendly cartoon horse</title>
+  <desc id="horseDesc">A friendly brown horse with gentle walking, tail swish, head nod, and blink animations.</desc>
+  <style>
+    .bg { fill: #fff6ea; }
+    .ground { fill: #efd9bc; }
+    .body { fill: #a66b44; }
+    .belly { fill: #b87b50; }
+    .neck { fill: #a0623f; }
+    .head { fill: #b9784e; }
+    .muzzle { fill: #d99e73; }
+    .mane { fill: #6a3f27; }
+    .tail { fill: #6a3f27; transform-origin: 186px 95px; animation: tailSwish 2.8s ease-in-out infinite; }
+    .leg-front-a, .leg-back-a { animation: legStepA 1.8s ease-in-out infinite; transform-origin: center top; }
+    .leg-front-b, .leg-back-b { animation: legStepB 1.8s ease-in-out infinite; transform-origin: center top; }
+    .hoof { fill: #4a2c1a; }
+    .eye-open { fill: #23140d; animation: blinkOpen 4.2s linear infinite; transform-origin: 0 0; }
+    .eye-closed { stroke: #23140d; stroke-width: 2.2; stroke-linecap: round; fill: none; opacity: 0; animation: blinkClosed 4.2s linear infinite; }
+    .horse {
+      transform-origin: 120px 95px;
+      animation: horseBob 2.4s ease-in-out infinite;
+    }
+    .head-group {
+      transform-origin: 110px 78px;
+      animation: headNod 2.6s ease-in-out infinite;
+    }
+    @keyframes horseBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-1.8px); }
+    }
+    @keyframes headNod {
+      0%, 100% { transform: rotate(0deg) translateY(0px); }
+      50% { transform: rotate(1.8deg) translateY(0.8px); }
+    }
+    @keyframes tailSwish {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(9deg); }
+    }
+    @keyframes legStepA {
+      0%, 100% { transform: rotate(2deg) translateY(0px); }
+      50% { transform: rotate(-5deg) translateY(1.8px); }
+    }
+    @keyframes legStepB {
+      0%, 100% { transform: rotate(-4deg) translateY(1.8px); }
+      50% { transform: rotate(2deg) translateY(0px); }
+    }
+    @keyframes blinkOpen {
+      0%, 92%, 100% { opacity: 1; }
+      93.5%, 96.5% { opacity: 0; }
+    }
+    @keyframes blinkClosed {
+      0%, 92%, 100% { opacity: 0; }
+      93.5%, 96.5% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .horse, .head-group, .tail, .leg-front-a, .leg-back-a, .leg-front-b, .leg-back-b, .eye-open, .eye-closed {
+        animation: none !important;
+      }
+    }
+  </style>
+  <rect class="bg" width="240" height="160" rx="16"/>
+  <ellipse class="ground" cx="121" cy="139" rx="92" ry="13"/>
+  <g class="horse">
+    <g class="tail">
+      <path d="M182 95 C201 88, 214 100, 214 114 C212 126, 201 132, 190 132" fill="none" stroke="#6a3f27" stroke-width="8" stroke-linecap="round"/>
+      <path d="M199 128 C208 129, 214 136, 212 144" fill="none" stroke="#5d351f" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <ellipse class="body" cx="126" cy="98" rx="68" ry="36"/>
+    <ellipse class="belly" cx="118" cy="108" rx="49" ry="22"/>
+    <path class="neck" d="M88 92 C84 79, 87 65, 97 56 C106 48, 120 48, 126 60 C131 69, 129 84, 117 92 Z"/>
+    <g class="head-group">
+      <path class="head" d="M84 88 C75 82, 71 68, 77 56 C84 43, 100 40, 114 45 C126 49, 133 61, 130 73 C127 85, 114 92, 100 93 C95 94, 89 92, 84 88 Z"/>
+      <ellipse class="muzzle" cx="119" cy="74" rx="15" ry="11"/>
+      <path class="mane" d="M90 50 C97 41, 108 37, 118 38 C110 46, 104 56, 102 69 C97 64, 93 57, 90 50 Z"/>
+      <path class="mane" d="M98 46 L92 31 L104 35 Z"/>
+      <path class="mane" d="M112 43 L116 27 L124 37 Z"/>
+      <circle class="eye-open" cx="101" cy="66" r="3.2"/>
+      <path class="eye-closed" d="M97 66 C99.5 68, 102.5 68, 105 66"/>
+      <path d="M111 83 C116 86, 123 86, 127 82" fill="none" stroke="#865534" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="126" cy="74" r="1.2" fill="#8b5a36"/>
+    </g>
+    <g class="leg-back-a">
+      <rect x="152" y="112" width="16" height="36" rx="8" fill="#8d5636"/>
+      <rect class="hoof" x="151" y="146" width="18" height="5" rx="2.5"/>
+    </g>
+    <g class="leg-back-b">
+      <rect x="172" y="110" width="16" height="38" rx="8" fill="#8d5636"/>
+      <rect class="hoof" x="171" y="146" width="18" height="5" rx="2.5"/>
+    </g>
+    <g class="leg-front-a">
+      <rect x="86" y="114" width="16" height="34" rx="8" fill="#8d5636"/>
+      <rect class="hoof" x="85" y="146" width="18" height="5" rx="2.5"/>
+    </g>
+    <g class="leg-front-b">
+      <rect x="108" y="113" width="16" height="35" rx="8" fill="#8d5636"/>
+      <rect class="hoof" x="107" y="146" width="18" height="5" rx="2.5"/>
+    </g>
+  </g>
+</svg>
