@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BhashaParichay | SanskritParichay Learning World</title>
+  <meta name="description" content="Interactive Sanskrit learning world with lessons, audio and games.">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u2">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="alphabet-forest.html" data-current-world>Alphabet Forest</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel">
+      <h1 id="worldTitle">Learning World</h1>
+      <p id="worldSubtitle">Play lesson by lesson with Mithu.</p>
+      <div class="lesson-strip">
+        <p><strong id="worldLessonName">Lesson</strong> · <span id="worldLessonIndex">1 / 3</span></p>
+        <p id="worldLessonObjective">Objective</p>
+        <div class="hero-actions">
+          <button id="worldPrevLessonBtn" class="button ghost" type="button">Previous Lesson</button>
+          <button id="worldNextLessonBtn" class="button secondary" type="button" disabled>Next Lesson (complete all activities)</button>
+          <button id="worldBackBtn" class="button ghost" type="button">Back to Home</button>
+        </div>
+      </div>
+      <div id="worldIllustration" class="world-illustration" aria-hidden="true">
+        <svg class="world-illustration-svg" viewBox="0 0 960 280">
+          <defs>
+            <linearGradient id="worldSky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#deebff"/>
+              <stop offset="100%" stop-color="#f7fbff"/>
+            </linearGradient>
+            <linearGradient id="worldHill" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#9de3b6"/>
+              <stop offset="100%" stop-color="#71c996"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="960" height="280" fill="url(#worldSky)"></rect>
+          <ellipse cx="460" cy="236" rx="440" ry="58" fill="url(#worldHill)"></ellipse>
+          <g class="world-clouds">
+            <ellipse cx="180" cy="74" rx="64" ry="24"></ellipse>
+            <ellipse cx="252" cy="78" rx="44" ry="20"></ellipse>
+            <ellipse cx="658" cy="58" rx="62" ry="22"></ellipse>
+            <ellipse cx="716" cy="64" rx="36" ry="16"></ellipse>
+          </g>
+          <g class="world-castle">
+            <rect x="406" y="118" width="160" height="94" rx="18"></rect>
+            <rect x="430" y="88" width="28" height="42" rx="8"></rect>
+            <rect x="514" y="88" width="28" height="42" rx="8"></rect>
+            <path d="M452 212 C466 188, 502 188, 520 212 Z"></path>
+          </g>
+          <g class="world-sparkles">
+            <circle cx="328" cy="146" r="6"></circle>
+            <circle cx="598" cy="128" r="5"></circle>
+            <circle cx="676" cy="170" r="4"></circle>
+            <circle cx="258" cy="174" r="5"></circle>
+          </g>
+        </svg>
+        <div id="worldIllustrationSparkle" class="world-illustration-sparkle"></div>
+      </div>
+      <div id="lessonMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
+        <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+          <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+          <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+          <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+          <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+        </svg>
+        <p id="worldMascotSpeech" class="mascot-speech">Namaste! Ready for your next magical Sanskrit step?</p>
+        <div id="worldUnlockInvite" class="mascot-invite" hidden>
+          <button id="worldUnlockInviteBtn" class="button primary tiny" type="button">✨ Let's Go Together! →</button>
+          <button id="worldUnlockDismissBtn" class="button ghost tiny" type="button">Maybe later</button>
+        </div>
+      </div>
+      <p class="privacy-note">
+        Privacy: no account, no ads, no trackers. Progress is saved only on this browser.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Lesson Path</h2>
+      <div id="worldLessonPath" class="learning-path"></div>
+      <div class="hero-actions">
+        <div class="star-box">⭐ Stars: <span id="worldStars">0</span></div>
+        <div class="star-box">💎 Gems: <span id="worldGems">0</span></div>
+        <div class="star-box">✅ Done: <span id="worldDone">0</span>/3</div>
+      </div>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="worldProgressFill" class="progress-fill"></div>
+      </div>
+      <p id="worldProgressText" class="footer-note">Finish all activities in this lesson.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Focus Cards</h2>
+      <div id="focusCards" class="choices"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 1: Match Meaning</h2>
+      <div class="activity">
+        <p id="matchPrompt">Prompt</p>
+        <div class="hero-actions"><button id="restartMatchActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
+        <div id="matchChoices" class="choices"></div>
+        <p id="matchStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 2: Listen and Choose</h2>
+      <div class="activity">
+        <p id="listenPrompt">Prompt</p>
+        <button id="playListenBtn" class="button secondary" type="button">▶ Play word</button>
+        <div class="hero-actions"><button id="restartListenActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
+        <div id="listenChoices" class="choices"></div>
+        <p id="listenStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Activity 3: Build the Phrase</h2>
+      <div class="activity">
+        <p id="buildPrompt">Prompt</p>
+        <div class="hero-actions"><button id="restartBuildActivityBtn" class="button ghost tiny" type="button">🔄 Restart Activity</button></div>
+        <div id="buildTiles" class="tiles"></div>
+        <p><strong>Your answer:</strong> <span id="buildAnswer"></span></p>
+        <div class="hero-actions">
+          <button id="checkBuildBtn" class="button secondary" type="button">Check</button>
+          <button id="resetBuildBtn" class="button ghost" type="button">Retry</button>
+        </div>
+        <p id="buildStatus" class="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Adventure Notes</h2>
+      <ul id="worldReviewList" class="review-list"></ul>
+    </section>
+  </main>
+
+  <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/vendor/lottie.min.js"></script>
+  <script src="../assets/vendor/canvas-confetti.min.js"></script>
+  <script>window.SP_LANGUAGE_HOME_URL="index.html";window.SP_LANGUAGE_CHOOSER_URL="../index.html";</script>
+  <script src="../assets/site-config.js?v=20261112u3"></script>
+  <script src="../assets/messages.js?v=20261111u4"></script>
+  <script src="../assets/progress-store.js?v=20261112u3"></script>
+  <script src="../assets/common.js?v=20261112u3"></script>
+  <script src="../assets/worlds-data.js?v=20261111u1"></script>
+  <script src="../assets/vocabulary-map.js?v=20261112u2"></script>
+  <script src="../assets/learning-world.js?v=20261112u04"></script>
+</body>
+</html>

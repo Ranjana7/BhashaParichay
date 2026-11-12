@@ -23,6 +23,26 @@
     return activities.length > 0 && activities.every(function (activity) { return Boolean(activity && activity.isComplete); });
   }
 
+  function getLanguageLevelOneComplete(languageConfig) {
+    if (!languageConfig || !Array.isArray(languageConfig.worlds) || !languageConfig.worlds.length) return false;
+    const levelOneKey = languageConfig.levelOneWorld || languageConfig.worlds[0].key;
+    const levelOne = languageConfig.worlds.find(function (world) { return world.key === levelOneKey; });
+    if (!levelOne) return false;
+    const key = languageConfig.storagePrefix + ".world." + levelOne.key + ".progress";
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return false;
+      const progress = JSON.parse(raw);
+      return Array.isArray(progress.completedLessons) && progress.completedLessons.length >= levelOne.lessons.length;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  const langData = window.BHASHA_LANGUAGES || {};
+  const spanish = langData.spanish || null;
+  const portuguese = langData.portuguese || null;
+
   const medals = [
     {
       id: "sanskrit-level-1",
@@ -33,14 +53,14 @@
     {
       id: "spanish-level-1",
       title: "Spanish Level 1 Complete",
-      description: "Coming soon: medal will unlock when Spanish Level 1 exists.",
-      earned: false
+      description: "Complete Greeting Garden in SpanishParichay.",
+      earned: getLanguageLevelOneComplete(spanish)
     },
     {
       id: "portuguese-level-1",
       title: "Portuguese Level 1 Complete",
-      description: "Coming soon: medal will unlock when Portuguese Level 1 exists.",
-      earned: false
+      description: "Complete Greeting Grove in PortugueseParichay.",
+      earned: getLanguageLevelOneComplete(portuguese)
     }
   ];
 
