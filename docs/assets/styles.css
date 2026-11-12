@@ -347,6 +347,10 @@ p {
   align-items: center;
 }
 
+.compact-activity-nav {
+  margin-top: 10px;
+}
+
 .activity-jump-nav .jump-link {
   flex: 0 0 auto;
 }
@@ -1967,6 +1971,25 @@ th {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
+.world-icon.world-photo {
+  background: #ffffff;
+  border: 1px solid #cfe0ff;
+  box-shadow: 0 6px 12px rgba(88, 111, 198, 0.18);
+}
+
+.world-icon.world-photo::before,
+.world-icon.world-photo::after {
+  display: none;
+}
+
+.world-icon.world-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
 .world-icon::before {
   content: "";
   position: absolute;
@@ -2059,6 +2082,16 @@ th {
 
 .home-celebration-lottie.show {
   opacity: 1;
+}
+
+.letter-btn.learned {
+  background: linear-gradient(180deg, #f1fff5, #fffdf4);
+  border-color: #8fd0a9;
+  box-shadow: 0 6px 12px rgba(83, 178, 118, 0.2);
+}
+
+.letter-btn.just-learned {
+  animation: letterBloom 0.62s ease-out 1;
 }
 
 .world-title {
@@ -2463,6 +2496,12 @@ th {
 @keyframes treeMithuHover {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+
+@keyframes letterBloom {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 @keyframes bloomPop {

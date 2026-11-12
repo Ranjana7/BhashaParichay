@@ -71,15 +71,16 @@ test("global panel keeps compact learning and practice summary only", () => {
   assert.equal(html.includes("Activity 3 of 6"), false);
 });
 
-test("page includes two learning category sections", () => {
-  assert.ok(html.includes(">Learn Sanskrit Letters<"));
+test("page keeps a single practice category section", () => {
+  assert.equal(html.includes(">Learn Sanskrit Letters<"), false);
   assert.ok(html.includes(">Play &amp; Practise<"));
 });
 
 test("audio uses local clips without browser speech fallback", () => {
   assert.ok(js.includes("const AUDIO_ENABLED = true;"));
   assert.equal(js.includes("speechSynthesis"), false);
-  assert.ok(js.includes("Tap Sanskrit letters or words to hear reviewed local pronunciation clips."));
+  assert.equal(html.includes('id="testSoundBtn"'), false);
+  assert.equal(html.includes('id="audioDisclaimer"'), false);
   assert.equal(html.includes('id="audioDebug"'), false);
 });
 

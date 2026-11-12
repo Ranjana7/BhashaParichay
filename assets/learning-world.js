@@ -68,6 +68,10 @@
     priority: 0,
     text: ""
   };
+  const inviteRuntime = {
+    targetWorld: "",
+    unlockNonce: 0
+  };
 
   const ui = {
     worldTitle: document.getElementById("worldTitle"),
@@ -414,6 +418,36 @@
     return "learning-world.html?world=" + nextWorld;
   }
 
+  function getWorldUrl(worldValue) {
+    if (!worldValue) return "index.html#worlds";
+    if (worldValue === "alphabet") return "alphabet-forest.html";
+    return "learning-world.html?world=" + worldValue;
+  }
+
+  function getLatestUnlockInfo() {
+    if (typeof window.spGetProgressSnapshot !== "function") {
+      return { world: "", nonce: 0 };
+    }
+    const snapshot = window.spGetProgressSnapshot(WORLD_ORDER, WORLD_TOTALS);
+    const rewards = snapshot && snapshot.rewards && typeof snapshot.rewards === "object" ? snapshot.rewards : {};
+    const unlockedWorld = typeof rewards.lastUnlockedWorld === "string" ? rewards.lastUnlockedWorld : "";
+    const unlockNonce = Math.max(0, Math.floor(Number(rewards.unlockNonce || 0)));
+    if (!unlockedWorld || !WORLD_ORDER.includes(unlockedWorld) || unlockedWorld === "alphabet") {
+      return { world: "", nonce: unlockNonce };
+    }
+    if (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(unlockedWorld, WORLD_ORDER)) {
+      return { world: "", nonce: unlockNonce };
+    }
+    return { world: unlockedWorld, nonce: unlockNonce };
+  }
+
+  function syncUnlockInviteButtonLabel(worldValue) {
+    if (!ui.worldUnlockInviteBtn) return;
+    const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldValue] ? window.SP_WORLD_META[worldValue] : null;
+    const label = meta && meta.title ? meta.title : "Next World";
+    ui.worldUnlockInviteBtn.textContent = "✨ Go to " + label + " →";
+  }
+
   function restartActivity(activityId) {
     state.progress.done[activityId] = false;
     state.progress.practiceCompleted[activityId] = false;
@@ -445,29 +479,33 @@
   function updateUnlockInvitation() {
     const nextWorldKey = getNextWorldKey();
     if (!nextWorldKey) {
+      inviteRuntime.targetWorld = "";
+      inviteRuntime.unlockNonce = 0;
       hideUnlockInvite();
       return;
     }
-    const rewards = typeof window.spGetRewards === "function"
-      ? window.spGetRewards(WORLD_ORDER, WORLD_TOTALS)
-      : { stars: 0, gems: 0 };
-    const meetsThreshold = Number(rewards.stars || 0) >= UNLOCK_STAR_TARGET && Number(rewards.gems || 0) >= UNLOCK_GEM_TARGET;
+    const unlockInfo = getLatestUnlockInfo();
     const unlocked = typeof window.spIsWorldUnlocked === "function"
       ? window.spIsWorldUnlocked(nextWorldKey, WORLD_ORDER)
-      : meetsThreshold;
-    if (!unlocked || !meetsThreshold) {
+      : false;
+    if (!unlocked || unlockInfo.world !== nextWorldKey) {
+      inviteRuntime.targetWorld = "";
+      inviteRuntime.unlockNonce = 0;
       hideUnlockInvite();
       return;
     }
-    localStorage.setItem(UNLOCK_INVITE_KEY, "visible");
-    if (localStorage.getItem(UNLOCK_EVENT_KEY) !== "true") {
-      localStorage.setItem(UNLOCK_EVENT_KEY, "true");
+    inviteRuntime.targetWorld = nextWorldKey;
+    inviteRuntime.unlockNonce = unlockInfo.nonce;
+    syncUnlockInviteButtonLabel(nextWorldKey);
+    const unlockNonceKey = String(unlockInfo.nonce || 0);
+    if (localStorage.getItem(UNLOCK_EVENT_KEY) !== unlockNonceKey) {
+      localStorage.setItem(UNLOCK_EVENT_KEY, unlockNonceKey);
       setMascot("dance");
       setSpeech("Hooray! New world unlocked. Tap Let's Go Together!", "world", { category: "world", holdMs: 6000, force: true });
       confetti();
       if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
     }
-    if (localStorage.getItem(UNLOCK_INVITE_KEY) === "dismissed") {
+    if (localStorage.getItem(UNLOCK_INVITE_KEY) === ("dismissed:" + unlockNonceKey)) {
       hideUnlockInvite();
       return;
     }
@@ -936,16 +974,19 @@
     }
     if (ui.worldUnlockInviteBtn) {
       ui.worldUnlockInviteBtn.addEventListener("click", function () {
-        const nextWorld = getNextWorldKey();
-        if (!nextWorld) return;
+        const nextWorld = inviteRuntime.targetWorld || getNextWorldKey();
+        if (!nextWorld || (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(nextWorld, WORLD_ORDER))) {
+          hideUnlockInvite();
+          return;
+        }
         localStorage.setItem(LAST_WORLD_KEY, nextWorld);
         localStorage.removeItem(UNLOCK_INVITE_KEY);
-        window.location.href = getNextWorldUrl();
+        window.location.href = getWorldUrl(nextWorld);
       });
     }
     if (ui.worldUnlockDismissBtn) {
       ui.worldUnlockDismissBtn.addEventListener("click", function () {
-        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed");
+        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed:" + String(inviteRuntime.unlockNonce || 0));
         hideUnlockInvite();
       });
     }

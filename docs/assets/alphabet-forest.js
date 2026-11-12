@@ -268,6 +268,8 @@
       targetX: 0,
       targetY: 0
     },
+    unlockInviteTarget: "",
+    unlockInviteNonce: 0,
     byActivity: {}
   };
   ACTIVITY_IDS.forEach(function setupActivityRuntime(activityId) {
@@ -488,19 +490,8 @@
   }
 
   function initAudioControls() {
-    if (ui.audioDisclaimer) {
-      ui.audioDisclaimer.textContent = AUDIO_ENABLED
-        ? "Tap Sanskrit letters or words to hear reviewed local pronunciation clips."
-        : "Pronunciation is unavailable until verified Sanskrit audio is approved.";
-    }
     if (ui.muteToggle) ui.muteToggle.addEventListener("click", function () { setMuted(!runtime.muted); });
     if (ui.panelMuteBtn) ui.panelMuteBtn.addEventListener("click", function () { setMuted(!runtime.muted); });
-    if (ui.testSoundBtn) {
-      ui.testSoundBtn.addEventListener("click", function () {
-        playLetterAudio(getCurrentLetter("letter-garden"), 1, ui.audioFallback);
-      });
-      ui.testSoundBtn.disabled = !AUDIO_ENABLED;
-    }
     if (ui.replayLetterBtn) ui.replayLetterBtn.addEventListener("click", function () {
       playLetterAudio(getCurrentLetter("letter-garden"), 1, ui.audioFallback);
     });
@@ -933,6 +924,36 @@
     return WORLD_ORDER.length > 1 ? WORLD_ORDER[1] : null;
   }
 
+  function getLatestUnlockInfo() {
+    if (typeof window.spGetProgressSnapshot !== "function") {
+      return { world: "", nonce: 0 };
+    }
+    const snapshot = window.spGetProgressSnapshot(WORLD_ORDER, window.SP_WORLD_TOTALS || {});
+    const rewards = snapshot && snapshot.rewards && typeof snapshot.rewards === "object" ? snapshot.rewards : {};
+    const world = typeof rewards.lastUnlockedWorld === "string" ? rewards.lastUnlockedWorld : "";
+    const nonce = Math.max(0, Math.floor(Number(rewards.unlockNonce || 0)));
+    if (!world || !WORLD_ORDER.includes(world) || world === "alphabet") {
+      return { world: "", nonce: nonce };
+    }
+    if (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(world, WORLD_ORDER)) {
+      return { world: "", nonce: nonce };
+    }
+    return { world: world, nonce: nonce };
+  }
+
+  function getWorldUrl(worldKey) {
+    if (!worldKey) return "index.html#worlds";
+    if (worldKey === "alphabet") return "alphabet-forest.html";
+    return "learning-world.html?world=" + worldKey;
+  }
+
+  function syncUnlockInviteButtonLabel(worldKey) {
+    if (!ui.worldUnlockInviteBtn) return;
+    const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldKey] ? window.SP_WORLD_META[worldKey] : null;
+    const label = meta && meta.title ? meta.title : "Next World";
+    ui.worldUnlockInviteBtn.textContent = "✨ Go to " + label + " →";
+  }
+
   function showUnlockInvite() {
     if (!ui.worldUnlockInvite) return;
     ui.worldUnlockInvite.hidden = false;
@@ -947,17 +968,19 @@
     hideUnlockInvite();
     if (ui.worldUnlockInviteBtn) {
       ui.worldUnlockInviteBtn.addEventListener("click", function () {
-        const nextWorld = getNextWorldFromOrder();
-        if (!nextWorld) return;
+        const nextWorld = runtime.unlockInviteTarget || getNextWorldFromOrder();
+        if (!nextWorld || (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(nextWorld, WORLD_ORDER))) {
+          hideUnlockInvite();
+          return;
+        }
         localStorage.setItem("sanskritParichay.lastWorld", nextWorld);
         localStorage.removeItem(UNLOCK_INVITE_KEY);
-        const target = nextWorld === "alphabet" ? "alphabet-forest.html" : ("learning-world.html?world=" + nextWorld);
-        window.location.href = target;
+        window.location.href = getWorldUrl(nextWorld);
       });
     }
     if (ui.worldUnlockDismissBtn) {
       ui.worldUnlockDismissBtn.addEventListener("click", function () {
-        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed");
+        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed:" + String(runtime.unlockInviteNonce || 0));
         hideUnlockInvite();
       });
     }
@@ -1842,9 +1865,9 @@
           setMascotState("pointing");
           playLetterAudio(letter, 1, ui.audioFallback);
           if (!activity.completedItems.includes(letterIndex)) {
-            markCurrentComplete(activityId, "");
+            markCurrentComplete(activityId, "Great! Letter discovered. Tap Next or choose another flower-letter.");
           } else {
-            setActivityStatus(activityId, "");
+            setActivityStatus(activityId, "Already discovered. Tap Next or choose another flower-letter.");
             saveAndRender();
           }
         });
@@ -1862,7 +1885,10 @@
       ui.selectedLearned.textContent = learned ? "⭐ Learned" : "☆ Not learned yet";
       ui.selectedLearned.classList.toggle("learned", learned);
     }
-    if (ui.gardenCoverage) ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised.";
+    if (ui.gardenCoverage) {
+      const remaining = Math.max(0, 48 - activity.completedItems.length);
+      ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised. " + (remaining > 0 ? (remaining + " more to go!") : "All letters discovered!");
+    }
     if (ui.letterGardenStatus) {
       ui.letterGardenStatus.textContent = runtime.byActivity[activityId].status || "";
     }
@@ -2282,13 +2308,18 @@
   function updateWorldCompletionPanels() {
     const unlocked = isNextWorldUnlocked();
     const wasCompleted = Boolean(forestState.worldCompleted);
+    const unlockInfo = getLatestUnlockInfo();
+    const nextWorld = getNextWorldFromOrder();
+    const hasFreshUnlockInvite = Boolean(unlockInfo.world) && unlockInfo.world === nextWorld;
     forestState.worldCompleted = unlocked;
-    if (unlocked && !wasCompleted) {
+    runtime.unlockInviteTarget = hasFreshUnlockInvite ? unlockInfo.world : "";
+    runtime.unlockInviteNonce = hasFreshUnlockInvite ? unlockInfo.nonce : 0;
+    if (unlocked && !wasCompleted && hasFreshUnlockInvite) {
       stateApi.saveState(forestState);
-      const hasCelebrated = localStorage.getItem(UNLOCK_EVENT_KEY) === "true";
-      localStorage.setItem(UNLOCK_INVITE_KEY, "visible");
+      const unlockNonceKey = String(unlockInfo.nonce || 0);
+      const hasCelebrated = localStorage.getItem(UNLOCK_EVENT_KEY) === unlockNonceKey;
       if (!hasCelebrated) {
-        localStorage.setItem(UNLOCK_EVENT_KEY, "true");
+        localStorage.setItem(UNLOCK_EVENT_KEY, unlockNonceKey);
         setMascotStateForDuration("dancing", 1250);
         setMascotSpeech("Hooray! New world unlocked. Tap Let's Go Together!", { category: "world", holdMs: 6500, force: true, tone: "world" });
         fireConfetti(true);
@@ -2297,7 +2328,9 @@
         playLottie("treeCelebrate");
       }
     }
-    if (unlocked && localStorage.getItem(UNLOCK_INVITE_KEY) !== "dismissed") showUnlockInvite();
+    syncUnlockInviteButtonLabel(runtime.unlockInviteTarget);
+    const dismissedForNonce = localStorage.getItem(UNLOCK_INVITE_KEY) === ("dismissed:" + String(runtime.unlockInviteNonce || 0));
+    if (hasFreshUnlockInvite && !dismissedForNonce) showUnlockInvite();
     else hideUnlockInvite();
   }
 })();
