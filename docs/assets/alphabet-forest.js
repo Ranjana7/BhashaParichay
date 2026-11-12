@@ -133,7 +133,7 @@
         sanskrit: letter.exampleText,
         transliteration: vocab.transliteration || letter.transliteration,
         meaning: vocab.meaning || letter.meaning,
-        image: vocab.image,
+        image: (typeof window.spResolveAssetPath === "function" ? window.spResolveAssetPath(vocab.image) : vocab.image),
         alt: vocab.alt || (vocab.meaning || letter.meaning)
       };
     });
@@ -158,6 +158,11 @@
     { sanskrit: "आडुफलम्", transliteration: "aadu-phalam", meaning: "peach", image: "assets/illustrations/fruits/peach.svg", alt: "Peach fruit illustration" },
     { sanskrit: "आलूबुखारफलम्", transliteration: "aalubukhaara-phalam", meaning: "plum", image: "assets/illustrations/fruits/plum.svg", alt: "Plum fruit illustration" }
   ];
+  feedMithuQuestions.forEach(function (entry) {
+    if (entry && entry.image && typeof window.spResolveAssetPath === "function") {
+      entry.image = window.spResolveAssetPath(entry.image);
+    }
+  });
 
   const ui = {
     jumpNav: document.getElementById("activityJumpNav"),
@@ -544,8 +549,10 @@
   }
 
   function safeStopAudio() {
+    if (typeof window.spStopAudioClip === "function") window.spStopAudioClip();
     if (!runtime.currentAudio) return;
     runtime.currentAudio.pause();
+    runtime.currentAudio.currentTime = 0;
     runtime.currentAudio = null;
   }
 
@@ -560,7 +567,19 @@
       return;
     }
     safeStopAudio();
-    const audio = new Audio(letter.audioPath + "?v=20261110n");
+    const resolvedPath = typeof window.spResolveAssetPath === "function"
+      ? window.spResolveAssetPath(letter.audioPath)
+      : letter.audioPath;
+    const onPlayError = function () {
+      if (feedbackEl) feedbackEl.textContent = "Could not play pronunciation clip.";
+    };
+    const audio = typeof window.spPlayAudioClip === "function"
+      ? window.spPlayAudioClip(resolvedPath, feedbackEl, onPlayError)
+      : new Audio(resolvedPath + "?v=20261112u03");
+    if (!audio) {
+      onPlayError();
+      return;
+    }
     audio.preload = "none";
     audio.playbackRate = playbackRate || 1;
     runtime.currentAudio = audio;
@@ -569,12 +588,10 @@
       setMascotState("idle");
       updateMascotSpeechForActivity(runtime.mascotActiveSection);
     }, { once: true });
-    audio.addEventListener("error", function () {
-      if (feedbackEl) feedbackEl.textContent = "Could not play pronunciation clip.";
-    }, { once: true });
-    audio.play().catch(function () {
-      if (feedbackEl) feedbackEl.textContent = "Could not play pronunciation clip.";
-    });
+    if (typeof window.spPlayAudioClip !== "function") {
+      audio.addEventListener("error", onPlayError, { once: true });
+      audio.play().catch(onPlayError);
+    }
   }
 
   function initJumpNavigation() {
@@ -2156,7 +2173,7 @@
     const cardClass = localState.flipped ? "flashcard flip is-flipped" : "flashcard flip";
     ui.flashcard.className = cardClass;
     ui.flashcard.innerHTML = localState.flipped
-      ? '<div class="flash-face flash-back"><p><strong>' + item.meaning + "</strong></p><img class=\"picture-illustration\" src=\"" + item.image + "\" alt=\"" + item.alt + "\"><p class=\"flash-tran\">" + item.transliteration + "</p></div>"
+      ? '<div class="flash-face flash-back"><p><strong>' + item.meaning + "</strong></p><img class=\"picture-illustration\" src=\"" + (typeof window.spResolveAssetPath === "function" ? window.spResolveAssetPath(item.image) : item.image) + "\" alt=\"" + item.alt + "\"><p class=\"flash-tran\">" + item.transliteration + "</p></div>"
       : '<div class="flash-face flash-front"><p class="flash-dev">' + item.sanskrit + "</p><p class=\"flash-tran\">" + item.transliteration + "</p></div>";
     ui.flashStatus.textContent = localState.flipped ? "Now mark this card as learned." : "Flip the card to reveal the meaning.";
     ui.flashChoices.innerHTML = "";
@@ -2232,7 +2249,11 @@
     const sourceImage = sourceButton.querySelector("img");
     const fruit = document.createElement("img");
     fruit.className = "flying-fruit";
-    fruit.src = sourceImage ? sourceImage.src : "assets/illustrations/fruits/apple.svg";
+    fruit.src = sourceImage
+      ? sourceImage.src
+      : (typeof window.spResolveAssetPath === "function"
+        ? window.spResolveAssetPath("assets/illustrations/fruits/apple.svg")
+        : "assets/illustrations/fruits/apple.svg");
     fruit.alt = "";
     fruit.style.left = source.left + source.width / 2 + "px";
     fruit.style.top = source.top + source.height / 2 + "px";

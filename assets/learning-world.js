@@ -216,8 +216,11 @@
   function renderPromptWithImage(node, promptText, word) {
     if (!node) return;
     const art = getIllustrationForWord(word);
-    const img = art && art.image
-      ? '<img class="picture-illustration" src="' + art.image + '" alt="' + (art.alt || "Learning illustration") + '">'
+    const imagePath = art && art.image && typeof window.spResolveAssetPath === "function"
+      ? window.spResolveAssetPath(art.image)
+      : (art && art.image ? art.image : "");
+    const img = imagePath
+      ? '<img class="picture-illustration" src="' + imagePath + '" alt="' + (art.alt || "Learning illustration") + '">'
       : "";
     node.innerHTML = '<span>' + promptText + '</span>' + (img ? ('<span class="prompt-illustration">' + img + "</span>") : "");
   }
@@ -325,16 +328,11 @@
       return;
     }
     const path = getSanskritAudioPath(text);
-    if (!path) {
+    if (!path || typeof window.spPlayAudioClip !== "function") {
       if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet for this word.";
       return;
     }
-    const audio = new Audio(path + "?v=20261112u02");
-    audio.preload = "none";
-    audio.addEventListener("error", function () {
-      if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet for this word.";
-    }, { once: true });
-    audio.play().catch(function () {
+    window.spPlayAudioClip(path, statusEl, function () {
       if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet for this word.";
     });
   }

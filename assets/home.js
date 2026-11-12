@@ -651,7 +651,9 @@
       if (vocab && vocab.image) {
         const picture = document.createElement("img");
         picture.className = "picture-illustration";
-        picture.src = vocab.image;
+        picture.src = typeof window.spResolveAssetPath === "function"
+          ? window.spResolveAssetPath(vocab.image)
+          : vocab.image;
         picture.alt = vocab.alt || (vocab.meaning || pictureWord);
         ui.choices.appendChild(picture);
       }
