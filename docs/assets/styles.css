@@ -1795,11 +1795,11 @@ th {
   border: 2px solid #d8e5ff;
   border-radius: 16px;
   margin: 10px 0 0;
-  padding: 10px 12px;
+  padding: 12px 12px 10px;
   font-weight: 700;
-  min-height: 64px;
-  line-height: 1.45;
-  font-size: 1rem;
+  min-height: 56px;
+  line-height: 1.38;
+  font-size: 0.95rem;
   max-width: 100%;
   overflow-wrap: anywhere;
   box-shadow: 0 10px 20px rgba(84, 103, 181, 0.18);
@@ -1808,23 +1808,30 @@ th {
 }
 
 .mascot-speech::before {
-  content: "✦";
+  content: "";
   position: absolute;
-  top: -8px;
-  left: 14px;
-  font-size: 0.9rem;
-  color: #8f7bff;
-  text-shadow: 0 0 8px rgba(143, 123, 255, 0.4);
+}
+
+.mascot-speech[data-label]:not([data-label=""])::before {
+  content: attr(data-label);
+  top: -10px;
+  left: 12px;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #3c4b87;
+  background: #f0f5ff;
+  border: 1px solid #ccdafb;
+  text-transform: uppercase;
 }
 
 .mascot-speech::after {
-  content: "❀";
+  content: "";
   position: absolute;
-  right: 10px;
-  bottom: -9px;
-  font-size: 0.82rem;
-  color: #ff8bb8;
-  text-shadow: 0 0 8px rgba(255, 139, 184, 0.35);
+  right: auto;
+  bottom: auto;
 }
 
 .mascot-speech.tone-instruction {
@@ -1850,6 +1857,13 @@ th {
 .mascot-speech.tone-world {
   background: linear-gradient(145deg, #f6edff, #e7eeff 52%, #e7fff5);
   border-color: #c9b8ff;
+}
+
+.mascot-invite {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 @keyframes flowerRainFall {

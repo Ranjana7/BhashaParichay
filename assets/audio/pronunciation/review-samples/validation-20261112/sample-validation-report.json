@@ -1,0 +1,316 @@
+{
+  "generatedAt": "2026-11-12T10:59:39.088559+00:00",
+  "model": "pending-selection",
+  "samples": [
+    {
+      "text": "अ",
+      "file": "a.wav",
+      "exists": true,
+      "bytes": 39588,
+      "durationSec": 0.8238,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 8653,
+      "status": "available"
+    },
+    {
+      "text": "आ",
+      "file": "aa.wav",
+      "exists": true,
+      "bytes": 48952,
+      "durationSec": 1.0189,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 12253,
+      "status": "available"
+    },
+    {
+      "text": "इ",
+      "file": "i.wav",
+      "exists": true,
+      "bytes": 59610,
+      "durationSec": 1.241,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 11790,
+      "status": "available"
+    },
+    {
+      "text": "ई",
+      "file": "ii.wav",
+      "exists": true,
+      "bytes": 58030,
+      "durationSec": 1.208,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 11809,
+      "status": "available"
+    },
+    {
+      "text": "उ",
+      "file": "u.wav",
+      "exists": true,
+      "bytes": 46348,
+      "durationSec": 0.9647,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 9108,
+      "status": "available"
+    },
+    {
+      "text": "ऊ",
+      "file": "uu.wav",
+      "exists": true,
+      "bytes": 46522,
+      "durationSec": 0.9683,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 9060,
+      "status": "available"
+    },
+    {
+      "text": "क",
+      "file": "ka.wav",
+      "exists": true,
+      "bytes": 42094,
+      "durationSec": 0.876,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 9664,
+      "status": "available"
+    },
+    {
+      "text": "ख",
+      "file": "kha.wav",
+      "exists": true,
+      "bytes": 55270,
+      "durationSec": 1.1505,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 10083,
+      "status": "available"
+    },
+    {
+      "text": "ग",
+      "file": "ga.wav",
+      "exists": true,
+      "bytes": 50166,
+      "durationSec": 1.0442,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 9441,
+      "status": "available"
+    },
+    {
+      "text": "त",
+      "file": "ta.wav",
+      "exists": true,
+      "bytes": 45700,
+      "durationSec": 0.9512,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 11289,
+      "status": "available"
+    },
+    {
+      "text": "ट",
+      "file": "tta.wav",
+      "exists": true,
+      "bytes": 41124,
+      "durationSec": 0.8558,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 9851,
+      "status": "available"
+    },
+    {
+      "text": "द",
+      "file": "da.wav",
+      "exists": true,
+      "bytes": 46264,
+      "durationSec": 0.9629,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 10881,
+      "status": "available"
+    },
+    {
+      "text": "ड",
+      "file": "dda.wav",
+      "exists": true,
+      "bytes": 44172,
+      "durationSec": 0.9193,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 8148,
+      "status": "available"
+    },
+    {
+      "text": "श",
+      "file": "sha.wav",
+      "exists": true,
+      "bytes": 44948,
+      "durationSec": 0.9355,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 5341,
+      "status": "available"
+    },
+    {
+      "text": "ष",
+      "file": "ssa.wav",
+      "exists": true,
+      "bytes": 42074,
+      "durationSec": 0.8756,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 8479,
+      "status": "available"
+    },
+    {
+      "text": "स",
+      "file": "sa.wav",
+      "exists": true,
+      "bytes": 45568,
+      "durationSec": 0.9484,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 5655,
+      "status": "available"
+    },
+    {
+      "text": "अं",
+      "file": "am.wav",
+      "exists": true,
+      "bytes": 42604,
+      "durationSec": 0.8867,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 6586,
+      "status": "available"
+    },
+    {
+      "text": "अः",
+      "file": "ah.wav",
+      "exists": true,
+      "bytes": 44794,
+      "durationSec": 0.9323,
+      "sampleRate": 24000,
+      "channels": 1,
+      "rms": 13680,
+      "status": "available"
+    }
+  ],
+  "words": [
+    {
+      "text": "गजः",
+      "file": "gajah.mp3",
+      "exists": true,
+      "bytes": 0,
+      "status": "missing"
+    },
+    {
+      "text": "कमलम्",
+      "file": "kamalam.mp3",
+      "exists": true,
+      "bytes": 0,
+      "status": "missing"
+    },
+    {
+      "text": "नदी",
+      "file": "nadee.mp3",
+      "exists": true,
+      "bytes": 0,
+      "status": "missing"
+    },
+    {
+      "text": "माता",
+      "file": "maataa.mp3",
+      "exists": true,
+      "bytes": 0,
+      "status": "missing"
+    },
+    {
+      "text": "नमस्ते",
+      "file": "namaste.mp3",
+      "exists": true,
+      "bytes": 0,
+      "status": "missing"
+    }
+  ],
+  "checks": {
+    "short-vs-long-a": {
+      "name": "short-vs-long-a",
+      "result": "distinct",
+      "metric": "durationSec",
+      "a": "अ",
+      "b": "आ",
+      "delta": 0.1951
+    },
+    "short-vs-long-i": {
+      "name": "short-vs-long-i",
+      "result": "uncertain",
+      "metric": "durationSec",
+      "a": "इ",
+      "b": "ई",
+      "delta": 0.033
+    },
+    "short-vs-long-u": {
+      "name": "short-vs-long-u",
+      "result": "uncertain",
+      "metric": "durationSec",
+      "a": "उ",
+      "b": "ऊ",
+      "delta": 0.0036
+    },
+    "dental-vs-retroflex-t": {
+      "name": "dental-vs-retroflex-t",
+      "result": "distinct",
+      "metric": "rms",
+      "a": "त",
+      "b": "ट",
+      "delta": 1438.0
+    },
+    "dental-vs-retroflex-d": {
+      "name": "dental-vs-retroflex-d",
+      "result": "distinct",
+      "metric": "rms",
+      "a": "द",
+      "b": "ड",
+      "delta": 2733.0
+    },
+    "sha-vs-ssa": {
+      "name": "sha-vs-ssa",
+      "result": "distinct",
+      "metric": "rms",
+      "a": "श",
+      "b": "ष",
+      "delta": 3138.0
+    },
+    "ssa-vs-sa": {
+      "name": "ssa-vs-sa",
+      "result": "distinct",
+      "metric": "rms",
+      "a": "ष",
+      "b": "स",
+      "delta": 2824.0
+    },
+    "anusvara-vs-visarga": {
+      "name": "anusvara-vs-visarga",
+      "result": "distinct",
+      "metric": "durationSec",
+      "a": "अं",
+      "b": "अः",
+      "delta": 0.0456
+    }
+  },
+  "unresolved": [
+    "word गजः: missing",
+    "word कमलम्: missing",
+    "word नदी: missing",
+    "word माता: missing",
+    "word नमस्ते: missing",
+    "short-vs-long-i: durationSec delta 0.0330",
+    "short-vs-long-u: durationSec delta 0.0036"
+  ]
+}

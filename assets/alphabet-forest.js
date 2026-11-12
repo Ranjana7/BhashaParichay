@@ -10,6 +10,20 @@
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const UNLOCK_EVENT_KEY = "sanskritParichay.unlock.event.alphabet";
   const UNLOCK_INVITE_KEY = "sanskritParichay.unlock.invite.alphabet";
+  const SPEECH_PRIORITY = {
+    welcome: 1,
+    guidance: 2,
+    feedback: 3,
+    completion: 4,
+    world: 5
+  };
+  const SPEECH_LABEL = {
+    welcome: "Welcome",
+    guidance: "Activity",
+    feedback: "Try Again",
+    completion: "Great Job",
+    world: "World Unlocked"
+  };
   const CORE = window.SPAlphabetForestCore;
   const MESSAGE_SET = (window.SP_MESSAGES && window.SP_MESSAGES.alphabetForest) || {};
   const VOCAB = window.SP_VOCABULARY_MAP || { words: {}, fallback: { image: "", alt: "" } };
@@ -56,7 +70,7 @@
   const COMPLETE_SPEECH = Array.isArray(MESSAGE_SET.completed) && MESSAGE_SET.completed.length
     ? MESSAGE_SET.completed.slice()
     : ["Fantastic! You've completed this activity!", "Wonderful! Ready for more?", "Look how much you've learned!"];
-  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! Another magical adventure completed!";
+  const WORLD_UNLOCKED_SPEECH = MESSAGE_SET.worldUnlocked || "Hooray! New world unlocked!";
   const LETTER_ACTIVITY_IDS = new Set([
     "magical-tree",
     "letter-garden",
@@ -210,11 +224,7 @@
     huntPrompt: document.getElementById("huntPrompt"),
     huntGrid: document.getElementById("huntGrid"),
     huntStatus: document.getElementById("huntStatus"),
-    completionCanvas: document.getElementById("celebration-canvas"),
-    completionScreen: document.getElementById("completionScreen"),
-    completionStars: document.getElementById("completionStars"),
-    completionTitle: document.getElementById("completionTitle"),
-    completionMessage: document.getElementById("completionMessage")
+    completionCanvas: document.getElementById("celebration-canvas")
   };
 
   const stateApi = CORE.createStateApi(window.localStorage, letters.length);
@@ -605,7 +615,10 @@
     if (!ui.lessonMascotSpeech || !text) return false;
     const opts = options || {};
     const now = Date.now();
-    const priority = Number.isFinite(opts.priority) ? opts.priority : 2;
+    const category = opts.category || "guidance";
+    const priority = Number.isFinite(opts.priority)
+      ? opts.priority
+      : (SPEECH_PRIORITY[category] || SPEECH_PRIORITY.guidance);
     const holdMs = Number.isFinite(opts.holdMs) ? Math.max(0, opts.holdMs) : 2400;
     const force = Boolean(opts.force);
     const holdUntil = runtime.mascotSpeechHoldUntil || 0;
@@ -614,6 +627,7 @@
     if (!force && text === runtime.mascotSpeechText && now < holdUntil) return false;
     const tone = opts.tone || "instruction";
     ui.lessonMascotSpeech.textContent = text;
+    ui.lessonMascotSpeech.setAttribute("data-label", SPEECH_LABEL[category] || SPEECH_LABEL.guidance);
     ui.lessonMascotSpeech.classList.remove("tone-instruction", "tone-encourage", "tone-correct", "tone-complete", "tone-world");
     ui.lessonMascotSpeech.classList.add("tone-" + tone);
     runtime.mascotSpeechText = text;
@@ -642,8 +656,8 @@
 
   function updateMascotSpeechForActivity(activityId) {
     setMascotSpeech(ACTIVITY_SPEECH[activityId] || "Ready? Let's try this together!", {
-      priority: 1,
-      holdMs: 2200,
+      category: "guidance",
+      holdMs: 2400,
       tone: "instruction"
     });
   }
@@ -651,7 +665,11 @@
   function initMascotCompanion() {
     if (!ui.lessonMascot) return;
     setMascotState("idle");
-    setMascotSpeech(MESSAGE_SET.welcome || "Namaste, little explorer! I'm Mithu! Ready for a magical Sanskrit adventure?", { priority: 2, holdMs: 2800, force: true });
+    setMascotSpeech(MESSAGE_SET.welcome || "Namaste! Let's start our Sanskrit adventure!", {
+      category: "welcome",
+      holdMs: 2800,
+      force: true
+    });
     const sections = ACTIVITIES.map(function (a) { return document.getElementById(a.sectionId); }).filter(Boolean);
     let scrollTicking = false;
     const pageWrap = document.querySelector(".page-wrap");
@@ -958,7 +976,7 @@
           incrementAttempt(activityId);
           if (ui.arrangeStatus) ui.arrangeStatus.textContent = pickSpeech(INCORRECT_SPEECH, "arrange-wrong");
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"), { priority: 3, holdMs: 3000, tone: "encourage" });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "arrange-wrong-speech"), { category: "feedback", holdMs: 3000, tone: "encourage" });
         }
       });
     }
@@ -1352,22 +1370,6 @@
     });
   }
 
-  function initCompletionActions() {
-    if (!ui.completionNextBtn) return;
-    ui.completionNextBtn.addEventListener("click", function () {
-      if (!isNextWorldUnlocked()) {
-        window.location.href = "index.html#worlds";
-        return;
-      }
-      const worldOrder = Array.isArray(window.SP_WORLD_ORDER) && window.SP_WORLD_ORDER.length
-        ? window.SP_WORLD_ORDER
-        : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
-      const nextWorld = worldOrder[1];
-      if (nextWorld) localStorage.setItem("sanskritParichay.lastWorld", nextWorld);
-      window.location.href = nextWorld === "alphabet" ? "alphabet-forest.html" : "learning-world.html?world=" + nextWorld;
-    });
-  }
-
   function setActivityStatus(activityId, text) {
     runtime.byActivity[activityId].status = text;
   }
@@ -1448,15 +1450,15 @@
       if (activity.isComplete) {
         if (activityId === "letter-garden") {
           setActivityStatus(activityId, "Wonderful! You learned all the letters!");
-          setMascotSpeech("Fantastic! You've completed this activity!", { priority: 4, holdMs: 4200, force: true, tone: "complete" });
+          setMascotSpeech("Fantastic! You've completed this activity!", { category: "completion", holdMs: 4200, force: true, tone: "complete" });
         } else {
-          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"), { priority: 4, holdMs: 4200, force: true, tone: "complete" });
+          setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "activity-complete"), { category: "completion", holdMs: 4200, force: true, tone: "complete" });
         }
         setMascotStateForDuration("dancing", 950);
         fireConfetti(true);
         triggerFlowerRain(ACTIVITY_META[activityId].sectionId, { density: 28, durationMs: 3000 });
       } else {
-        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"), { priority: 3, holdMs: 3000, tone: "correct" });
+        setMascotSpeech(pickSpeech(CORRECT_SPEECH, "activity-correct"), { category: "feedback", holdMs: 3000, tone: "correct" });
         setMascotStateForDuration("celebrating", 650);
         if (!wasResolved && (ACTIVITY_META[activityId].type === "quiz" || ACTIVITY_META[activityId].type === "letter")) {
           scheduleAutoAdvance(activityId, sourceIndex, 900);
@@ -1523,11 +1525,11 @@
       fireConfetti(false);
       triggerFlowerRain(ACTIVITY_META[activityId].sectionId, { density: 26, durationMs: 2800 });
       setMascotStateForDuration("dancing", 900);
-      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"), { priority: 4, holdMs: 4200, force: true, tone: "complete" });
+      setMascotSpeech(pickSpeech(COMPLETE_SPEECH, "finish-speech"), { category: "completion", holdMs: 4200, force: true, tone: "complete" });
       const global = CORE.computeGlobalProgress(forestState);
       if (global.completedActivityCount === global.totalActivities) {
         fireConfetti(true);
-        setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
+        setMascotSpeech(WORLD_UNLOCKED_SPEECH, { category: "world", holdMs: 5000, force: true, tone: "world" });
       }
       saveAndRender();
       const completeNote = document.getElementById("complete-" + activityId);
@@ -1556,7 +1558,7 @@
       const nextActivity = currentIndex >= 0 && currentIndex < ACTIVITIES.length - 1
         ? ACTIVITIES[currentIndex + 1]
         : null;
-      const targetId = nextActivity ? nextActivity.sectionId : "completionScreen";
+      const targetId = nextActivity ? nextActivity.sectionId : "lessonProgressPanel";
       const target = document.getElementById(targetId);
       if (target) scrollToActivity(target);
     }
@@ -1629,27 +1631,6 @@
     updateWorldCompletionPanels();
   }
 
-  function getUnlockHintText(unlocked, journey) {
-    if (unlocked) return "Hooray! Your next adventure is ready!";
-    const rewards = typeof window.spGetRewards === "function"
-      ? window.spGetRewards(WORLD_ORDER, window.SP_WORLD_TOTALS || {})
-      : { stars: 0, gems: 0 };
-    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
-    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
-    const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
-    const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
-    if (starsRemaining > 0 && gemsRemaining > 0) {
-      return "Unlock progress: " + stars + "/" + UNLOCK_STAR_TARGET + " stars and " + gems + "/" + UNLOCK_GEM_TARGET + " gems.";
-    }
-    if (starsRemaining > 0) {
-      return "Unlock progress: " + stars + "/" + UNLOCK_STAR_TARGET + " stars. Just " + starsRemaining + " more!";
-    }
-    if (gemsRemaining > 0) {
-      return "Unlock progress: " + gems + "/" + UNLOCK_GEM_TARGET + " gems. Just " + gemsRemaining + " more!";
-    }
-    return "Hooray! Your next adventure is ready!";
-  }
-
   function renderGlobalProgress() {
     const journey = computeJourneyProgress();
     const rewards = getCurrentForestRewards();
@@ -1709,7 +1690,7 @@
       button.addEventListener("click", function () {
         activity.currentIndex = letterIndex;
         setMascotState("pointing");
-        setMascotSpeech("Ready? Let's try this together!", { priority: 2, holdMs: 2200, tone: "instruction" });
+        setMascotSpeech("Tap a glowing letter to hear it.", { category: "guidance", holdMs: 2200, tone: "instruction" });
         playLetterAudio(letter, 1, ui.treeStatus);
         moveTreeMithuTowardPercent(slot.x, slot.y);
         celebrateTreeMithu();
@@ -1720,7 +1701,7 @@
           growTreeBloom(slot);
           playLottie("treeSparkle");
           setActivityStatus(activityId, "Wonderful! Letter discovered!");
-          setMascotSpeech("Wonderful! You're doing great!", { priority: 3, holdMs: 3000, tone: "correct" });
+          setMascotSpeech("Wonderful! You found one!", { category: "feedback", holdMs: 3000, tone: "correct" });
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
             return activity.completedItems.includes(groupStart + innerOffset);
           });
@@ -1744,7 +1725,7 @@
               fireConfetti(true);
               triggerFlowerRain("forestScene", { density: 30, durationMs: 3200 });
               playLottie("treeCelebrate");
-              setMascotSpeech(WORLD_UNLOCKED_SPEECH, { priority: 5, holdMs: 5000, force: true, tone: "world" });
+              setMascotSpeech(WORLD_UNLOCKED_SPEECH, { category: "world", holdMs: 5000, force: true, tone: "world" });
               setActivityStatus(activityId, pickSpeech(COMPLETE_SPEECH, "tree-complete"));
             }
           }
@@ -1973,7 +1954,7 @@
           incrementAttempt(activityId);
           ui.hearStatus.textContent = pickSpeech(INCORRECT_SPEECH, "hear-wrong");
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"), { priority: 3, holdMs: 3000, tone: "encourage" });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hear-wrong-speech"), { category: "feedback", holdMs: 3000, tone: "encourage" });
         }
       });
       ui.hearChoices.appendChild(btn);
@@ -2045,7 +2026,7 @@
           incrementAttempt(activityId);
           ui.pictureStatus.textContent = "Good try. Hint: match the word with the correct picture.";
           setMascotState("thinking");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "picture-wrong"), { category: "feedback", holdMs: 3000, tone: "encourage" });
           window.setTimeout(function () {
             btn.classList.remove("wrong");
           }, 420);
@@ -2148,7 +2129,7 @@
           incrementAttempt(activityId);
           ui.feedStatus.textContent = "Try a different fruit.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "feed-wrong"), { category: "feedback", holdMs: 3000, tone: "encourage" });
         }
       });
       ui.feedChoices.appendChild(btn);
@@ -2221,7 +2202,7 @@
           incrementAttempt(activityId);
           ui.huntStatus.textContent = "Keep searching.";
           setMascotState("encouraging");
-          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"), { priority: 3, holdMs: 3000, tone: "encourage" });
+          setMascotSpeech(pickSpeech(INCORRECT_SPEECH, "hunt-wrong"), { category: "feedback", holdMs: 3000, tone: "encourage" });
         }
       });
       ui.huntGrid.appendChild(btn);
@@ -2299,10 +2280,6 @@
   }
 
   function updateWorldCompletionPanels() {
-    const journey = computeJourneyProgress();
-    const rewards = getCurrentForestRewards();
-    journey.currentStars = rewards.currentStars;
-    journey.currentGems = rewards.currentGems;
     const unlocked = isNextWorldUnlocked();
     const wasCompleted = Boolean(forestState.worldCompleted);
     forestState.worldCompleted = unlocked;
@@ -2313,22 +2290,14 @@
       if (!hasCelebrated) {
         localStorage.setItem(UNLOCK_EVENT_KEY, "true");
         setMascotStateForDuration("dancing", 1250);
-        setMascotSpeech("🌟 Hooray! You earned 50 stars and 1 gem! A magical new world is unlocked! Shall we explore it together? 🎉", { priority: 6, holdMs: 6500, force: true, tone: "world" });
+        setMascotSpeech("Hooray! New world unlocked. Tap Let's Go Together!", { category: "world", holdMs: 6500, force: true, tone: "world" });
         fireConfetti(true);
-        fireSectionConfetti("completionScreen", true);
+        fireSectionConfetti("main-content", true);
         triggerFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
         playLottie("treeCelebrate");
       }
     }
     if (unlocked && localStorage.getItem(UNLOCK_INVITE_KEY) !== "dismissed") showUnlockInvite();
     else hideUnlockInvite();
-    if (ui.completionScreen) ui.completionScreen.classList.toggle("show", unlocked);
-    if (ui.completionTitle) ui.completionTitle.textContent = unlocked ? "Next World Unlocked!" : "Keep Going!";
-    if (ui.completionMessage) {
-      ui.completionMessage.textContent = unlocked
-        ? "Mithu has unlocked your next world invitation."
-        : getUnlockHintText(false, journey);
-    }
-    if (ui.completionStars) ui.completionStars.textContent = String(forestState.xp);
   }
 })();
