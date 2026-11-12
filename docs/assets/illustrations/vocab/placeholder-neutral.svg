@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160">
-  <rect width="240" height="160" rx="18" fill="#f4f7ff"/>
-  <circle cx="120" cy="66" r="34" fill="#d6e3ff"/>
-  <rect x="58" y="112" width="124" height="18" rx="9" fill="#c2d2f5"/>
-  <text x="120" y="71" text-anchor="middle" font-size="20" fill="#42578a" font-family="Segoe UI, Arial">?</text>
+  <rect width="240" height="160" rx="18" fill="#eff7ff"/>
+  <ellipse cx="120" cy="136" rx="96" ry="14" fill="#cfe0f8"/>
+  <circle cx="66" cy="52" r="16" fill="#fff4b8"/>
+  <path d="M28 110 C54 84, 83 80, 109 105 C126 90, 148 88, 170 104 C186 90, 204 92, 222 110 L222 136 L28 136 Z" fill="#b8d1f5"/>
+  <path d="M120 86 C124 74, 138 74, 142 86 C146 98, 139 106, 130 111 C121 106, 116 98, 120 86 Z" fill="#6ea0df"/>
+  <circle cx="130" cy="90" r="3.2" fill="#eaf4ff"/>
 </svg>

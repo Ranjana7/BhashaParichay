@@ -11,15 +11,15 @@
     : ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const worldMeta = window.SP_WORLD_META && typeof window.SP_WORLD_META === "object" ? window.SP_WORLD_META : {};
   const worldTotalsConfig = window.SP_WORLD_TOTALS && typeof window.SP_WORLD_TOTALS === "object" ? window.SP_WORLD_TOTALS : {};
-  const iconClassByWorld = {
-    alphabet: "forest",
-    animals: "jungle",
-    numbers: "galaxy",
-    colours: "colour",
-    words: "word",
-    sentences: "sentence",
-    stories: "story",
-    culture: "culture"
+  const iconImageByWorld = {
+    alphabet: { src: "assets/illustrations/vocab/forest.svg", alt: "Alphabet Forest illustration" },
+    animals: { src: "assets/illustrations/vocab/elephant.svg", alt: "Animal Jungle illustration" },
+    numbers: { src: "assets/illustrations/vocab/moon.svg", alt: "Number Galaxy illustration" },
+    colours: { src: "assets/illustrations/vocab/lotus.svg", alt: "Colour Kingdom illustration" },
+    words: { src: "assets/illustrations/vocab/family.svg", alt: "Word Wonderland illustration" },
+    sentences: { src: "assets/illustrations/vocab/chariot.svg", alt: "Sentence Castle illustration" },
+    stories: { src: "assets/illustrations/vocab/river.svg", alt: "Story Island illustration" },
+    culture: { src: "assets/illustrations/vocab/yoga.svg", alt: "Sanskrit and Culture illustration" }
   };
   const cardClassByWorld = {
     alphabet: "world-alphabet",
@@ -39,7 +39,7 @@
       title: meta.title || (worldDef && worldDef.title) || key,
       subtitle: (worldDef && worldDef.subtitle) || "Let's explore together!",
       lessons: Number(worldTotalsConfig[key] || (worldDef && Array.isArray(worldDef.lessons) ? worldDef.lessons.length : 3)),
-      iconClass: iconClassByWorld[key] || "forest",
+      iconImage: iconImageByWorld[key] || iconImageByWorld.alphabet,
       cardClass: cardClassByWorld[key] || "world-alphabet",
       link: meta.url || (key === "alphabet" ? "alphabet-forest.html" : ("learning-world.html?world=" + key))
     };
@@ -101,7 +101,7 @@
     const card = document.createElement("article");
     card.className = "world-card " + world.cardClass + (unlocked ? "" : " locked");
     card.innerHTML =
-      '<span class="world-icon ' + world.iconClass + '"><i></i><i></i><i></i></span>' +
+      '<span class="world-icon world-photo"><img src="' + world.iconImage.src + '" alt="' + world.iconImage.alt + '"></span>' +
       '<span class="world-title">' + world.title + "</span>" +
       '<span class="world-text">' + world.subtitle + "</span>" +
       '<span class="world-text">' + (progress.completed > 0 ? "Continue Learning" : "Start Adventure") + "</span>" +
@@ -117,8 +117,6 @@
     });
     grid.appendChild(card);
     animate(card, { opacity: [0, 1], transform: ["translateY(18px)", "translateY(0px)"] }, { duration: 0.45, easing: "ease-out", delay: worldOrder.indexOf(world) * 0.05 });
-    const iconLeaves = card.querySelectorAll(".world-icon i");
-    animate(iconLeaves, { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)"] }, { duration: 2.6, repeat: Infinity, easing: "ease-in-out", delay: function (i) { return i * 0.2; } });
   });
 
   if (status) {
