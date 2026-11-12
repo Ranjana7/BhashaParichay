@@ -557,9 +557,10 @@
     }
     const fallbackSymbol = resolveLeadingSymbol(normalized);
     const fallbackSymbolPath = resolveInventorySymbolAudioPath(fallbackSymbol);
+    const allowSymbolFallback = normalized === fallbackSymbol;
     let didFallback = false;
     playAudioPath(requestedPath, fallbackEl, function () {
-      if (!didFallback && fallbackSymbolPath && fallbackSymbolPath !== requestedPath) {
+      if (allowSymbolFallback && !didFallback && fallbackSymbolPath && fallbackSymbolPath !== requestedPath) {
         didFallback = true;
         playAudioPath(fallbackSymbolPath, fallbackEl, function () {
           if (fallbackEl) fallbackEl.textContent = "Pronunciation clip is not ready yet for this word.";
