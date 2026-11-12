@@ -5,6 +5,8 @@
   const languages = window.BHASHA_LANGUAGES || {};
   const language = languages[languageKey];
   if (!language) return;
+  const IS_NESTED_LANGUAGE_ROUTE = /\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(window.location.pathname);
+  const ASSET_BASE = IS_NESTED_LANGUAGE_ROUTE ? "../assets/" : "assets/";
 
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const motion = window.Motion || {};
@@ -52,6 +54,8 @@
 
   const lesson = world.lessons[0];
   const WORLD_KEY = STORAGE_PREFIX + ".world." + world.key + ".progress";
+  const pronunciationMap = window.SP_MULTILINGUAL_PRONUNCIATION_MAP || {};
+  const languagePronunciationMap = pronunciationMap[language.key] || {};
 
   function readJson(key, fallback) {
     try {
@@ -86,8 +90,31 @@
     listenDone: false,
     buildDone: false,
     buildAnswer: [],
-    activePanel: "match"
+    activePanel: "match",
+    activeAudio: null
   };
+
+  function resolveAssetPath(pathValue) {
+    const value = String(pathValue || "").trim();
+    if (!value) return "";
+    if (/^(https?:|data:|blob:|file:|\/)/i.test(value)) return value;
+    if (value.startsWith("assets/")) return ASSET_BASE + value.slice("assets/".length);
+    if (value.startsWith("./assets/")) return ASSET_BASE + value.slice("./assets/".length);
+    if (value.startsWith("../assets/")) return IS_NESTED_LANGUAGE_ROUTE ? value : "assets/" + value.slice("../assets/".length);
+    return value;
+  }
+
+  function stopActiveAudio() {
+    if (typeof window.spStopAudioClip === "function") window.spStopAudioClip();
+    if (!runtime.activeAudio) return;
+    try {
+      runtime.activeAudio.pause();
+      runtime.activeAudio.currentTime = 0;
+    } catch (_error) {
+      // best effort
+    }
+    runtime.activeAudio = null;
+  }
 
   const guideText = (function createGuideText() {
     if (language.key === "spanish") {
@@ -175,26 +202,26 @@
       const done = Array.isArray(progress.completedLessons) && progress.completedLessons.length > 0;
       ui.lessonCount.textContent = done ? "1/1 completed" : "0/1 completed";
     }
+  }
 
-    function initGuideFlow() {
-      setMascotSpeech(guideText.intro, "state-wave");
-      const panelPairs = [
-        { key: "match", node: ui.matchPanel },
-        { key: "listen", node: ui.listenPanel },
-        { key: "build", node: ui.buildPanel }
-      ].filter(function (item) { return Boolean(item.node); });
-      if (!panelPairs.length || typeof IntersectionObserver !== "function") return;
-      const observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          const found = panelPairs.find(function (item) { return item.node === entry.target; });
-          if (!found) return;
-          if (found.key === runtime.activePanel) return;
-          activatePanelGuide(found.key);
-        });
-      }, { threshold: 0.5 });
-      panelPairs.forEach(function (item) { observer.observe(item.node); });
-    }
+  function initGuideFlow() {
+    setMascotSpeech(guideText.intro, "state-wave");
+    const panelPairs = [
+      { key: "match", node: ui.matchPanel },
+      { key: "listen", node: ui.listenPanel },
+      { key: "build", node: ui.buildPanel }
+    ].filter(function (item) { return Boolean(item.node); });
+    if (!panelPairs.length || typeof IntersectionObserver !== "function") return;
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        const found = panelPairs.find(function (item) { return item.node === entry.target; });
+        if (!found) return;
+        if (found.key === runtime.activePanel) return;
+        activatePanelGuide(found.key);
+      });
+    }, { threshold: 0.5 });
+    panelPairs.forEach(function (item) { observer.observe(item.node); });
   }
 
   function renderMatch() {
@@ -223,13 +250,33 @@
     });
   }
 
-  function speak(text) {
-    if (!window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language.key === "spanish" ? "es-ES" : "pt-BR";
-    utterance.rate = 0.85;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+  function resolvePronunciationPath(text) {
+    const direct = languagePronunciationMap[text];
+    if (!direct) return "";
+    if (typeof window.spResolveAssetPath === "function") return window.spResolveAssetPath(direct);
+    return resolveAssetPath(direct);
+  }
+
+  function playPronunciation(text, statusEl) {
+    const path = resolvePronunciationPath(text);
+    if (!path) {
+      if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet.";
+      return;
+    }
+    if (typeof window.spPlayAudioClip === "function") {
+      stopActiveAudio();
+      runtime.activeAudio = window.spPlayAudioClip(path, statusEl, function () {
+        if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet.";
+      });
+      return;
+    }
+    stopActiveAudio();
+    const audio = new Audio(path);
+    audio.preload = "none";
+    runtime.activeAudio = audio;
+    audio.play().catch(function () {
+      if (statusEl) statusEl.textContent = "Pronunciation clip is not ready yet.";
+    });
   }
 
   function renderListen() {
@@ -237,7 +284,7 @@
     ui.listenPrompt.textContent = lesson.listen.prompt;
     if (ui.listenPlay) {
       ui.listenPlay.onclick = function () {
-        speak(lesson.listen.text);
+        playPronunciation(lesson.listen.text, ui.listenStatus);
       };
     }
     ui.listenChoices.innerHTML = "";
@@ -311,7 +358,7 @@
     runtime.listenDone = false;
     ui.listenStatus.textContent = "New attempt started.";
     activatePanelGuide("listen");
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopActiveAudio();
     bumpAttemptCycle("listen");
     renderListen();
   }

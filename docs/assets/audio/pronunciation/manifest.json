@@ -1,39 +1,33 @@
 {
-  "status": "updated_swaras_and_vyanjanas_from_user_recording",
+  "status": "model_generated_repository_audio",
   "policy": {
     "browserSpeechFallbackEnabled": false,
     "missingClipMessage": "Pronunciation not available yet."
   },
-  "inventory": {
-    "auditFile": "assets/audio/pronunciation/alphabet-forest-audio-audit.csv",
-    "audioManifestFile": "assets/audio/pronunciation/audio-manifest.csv",
-    "totalItems": 116,
-    "nonZeroPronunciationFiles": 64
-  },
-  "sourceModelEvaluation": {
-    "model": "ai4bharat/indic-parler-tts",
-    "license": "apache-2.0",
-    "access": "gated",
-    "accessRequirement": "Hugging Face account authentication and explicit model access approval are required before download/inference."
-  },
-  "comparisonSampleSet": {
-    "file": "assets/audio/pronunciation/review-samples/first-pass-letters-20261110",
-    "status": "ready_for_user_review",
-    "letters": [
-      "अ",
-      "आ",
-      "इ",
-      "ई",
-      "ऋ",
-      "क",
-      "ख",
-      "ट",
-      "त",
-      "ष"
-    ]
+  "runtimeSources": {
+    "sanskrit": {
+      "format": "wav",
+      "folder": "assets/audio/pronunciation/",
+      "notes": "Sanskrit playback uses repository WAV clips only."
+    },
+    "spanish": {
+      "format": "wav",
+      "folder": "assets/audio/pronunciation/spanish/",
+      "model": "facebook/mms-tts-spa",
+      "license": "cc-by-nc-4.0",
+      "variety": "Spanish (Castilian-style model output)"
+    },
+    "portuguese": {
+      "format": "wav",
+      "folder": "assets/audio/pronunciation/portuguese/",
+      "model": "facebook/mms-tts-por",
+      "license": "cc-by-nc-4.0",
+      "variety": "Portuguese (model-provided variety)"
+    }
   },
   "review": {
     "sanskritSpeakerReview": "pending",
-    "notes": "Swaras were re-cut on 2026-11-12 from Screen Recording 2026-11-12 130030.mp4. Vyanjanas were re-cut on 2026-11-12 from Screen Recording 2026-11-12 140055.mp4; the unstable third-varga attempt segment was skipped and clips were taken from the cleaner restart pass. Local WAV clips remain the only runtime pronunciation source."
+    "spanishSpeakerReview": "pending",
+    "portugueseSpeakerReview": "pending"
   }
 }

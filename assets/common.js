@@ -2,6 +2,10 @@
   const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
   const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskritparichay/";
   const LANGUAGE_CHOOSER_URL = window.SP_LANGUAGE_CHOOSER_URL || "index.html";
+  const NESTED_LANGUAGE_ROUTE_RE = /\/(sanskritparichay|spanishparichay|portugueseparichay)\//i;
+  const IS_NESTED_LANGUAGE_ROUTE = NESTED_LANGUAGE_ROUTE_RE.test(window.location.pathname);
+  const ASSET_BASE = IS_NESTED_LANGUAGE_ROUTE ? "../assets/" : "assets/";
+  const AUDIO_CACHE_BUSTER = "20261112u03";
   function storageKey(suffix) {
     return STORAGE_PREFIX + "." + suffix;
   }
@@ -60,6 +64,36 @@
     return String(value || "")
       .toLowerCase()
       .replace(/[^a-z]/g, "");
+  }
+
+  function resolveAssetPath(rawPath) {
+    const value = String(rawPath || "").trim();
+    if (!value) return "";
+    if (/^(https?:|data:|blob:|file:|\/)/i.test(value)) return value;
+    if (value.startsWith("assets/")) return ASSET_BASE + value.slice("assets/".length);
+    if (value.startsWith("./assets/")) return ASSET_BASE + value.slice("./assets/".length);
+    if (value.startsWith("../assets/")) {
+      return IS_NESTED_LANGUAGE_ROUTE ? value : "assets/" + value.slice("../assets/".length);
+    }
+    return value;
+  }
+
+  function withAudioVersion(pathValue) {
+    if (!pathValue) return "";
+    const joiner = pathValue.indexOf("?") >= 0 ? "&" : "?";
+    return pathValue + joiner + "v=" + AUDIO_CACHE_BUSTER;
+  }
+
+  function stopActiveAudio() {
+    const current = window.SP_STATE && window.SP_STATE.activeAudioClip;
+    if (!current) return;
+    try {
+      current.pause();
+      current.currentTime = 0;
+    } catch (_error) {
+      // no-op: best effort stop
+    }
+    window.SP_STATE.activeAudioClip = null;
   }
 
   function resolveInventorySymbolAudioPath(text) {
@@ -126,12 +160,25 @@
   }
 
   function playAudioPath(path, feedbackEl, onError) {
-    const audio = new Audio(path + "?v=20261112u02");
+    const resolvedPath = resolveAssetPath(path);
+    if (!resolvedPath) {
+      onError();
+      return null;
+    }
+    stopActiveAudio();
+    const audio = new Audio(withAudioVersion(resolvedPath));
     audio.preload = "none";
+    window.SP_STATE.activeAudioClip = audio;
+    const clearIfCurrent = function () {
+      if (window.SP_STATE.activeAudioClip === audio) window.SP_STATE.activeAudioClip = null;
+    };
+    audio.addEventListener("ended", clearIfCurrent, { once: true });
     audio.addEventListener("error", function () {
+      clearIfCurrent();
       onError();
     }, { once: true });
     audio.play().catch(function () {
+      clearIfCurrent();
       onError();
     });
     if (feedbackEl) feedbackEl.textContent = "";
@@ -492,6 +539,11 @@
   }
 
   window.spResolveSanskritAudioPath = resolveSanskritAudioPath;
+  window.spResolveAssetPath = resolveAssetPath;
+  window.spStopAudioClip = stopActiveAudio;
+  window.spPlayAudioClip = function spPlayAudioClip(path, feedbackEl, onError) {
+    return playAudioPath(path, feedbackEl, typeof onError === "function" ? onError : function () {});
+  };
   window.spSpeak = function spSpeak(text, lang, fallbackEl, transliteration) {
     if (window.SP_STATE.muted) {
       if (fallbackEl) fallbackEl.textContent = "Sound is muted. Tap Sound: Off to unmute.";
