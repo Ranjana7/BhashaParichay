@@ -237,7 +237,6 @@
     lessonMascotSpeech: document.getElementById("lessonMascotSpeech"),
     worldUnlockInvite: document.getElementById("worldUnlockInvite"),
     worldUnlockInviteBtn: document.getElementById("worldUnlockInviteBtn"),
-    worldUnlockDismissBtn: document.getElementById("worldUnlockDismissBtn"),
     globalSummary: document.getElementById("globalProgressSummary"),
     learningProgressText: document.getElementById("learningProgressText"),
     practiceProgressText: document.getElementById("practiceProgressText"),
@@ -350,7 +349,6 @@
     },
     unlockInviteTarget: "",
     unlockInviteNonce: 0,
-    unlockInviteKey: "",
     unlockEventKey: "",
     byActivity: {}
   };
@@ -1073,10 +1071,6 @@
     return "learning-world.html?world=" + worldKey;
   }
 
-  function getUnlockInviteKey(targetWorld) {
-    return storageKey("unlock.invite." + String(targetWorld || "alphabet"));
-  }
-
   function getUnlockEventKey(targetWorld) {
     return storageKey("unlock.event." + String(targetWorld || "alphabet"));
   }
@@ -1085,7 +1079,8 @@
     if (!ui.worldUnlockInviteBtn) return;
     const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldKey] ? window.SP_WORLD_META[worldKey] : null;
     const label = meta && meta.title ? meta.title : "Next World";
-    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together → " + label;
+    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together!";
+    ui.worldUnlockInviteBtn.setAttribute("aria-label", "Go to " + label);
   }
 
   function showUnlockInvite() {
@@ -1108,23 +1103,10 @@
           return;
         }
         localStorage.setItem(storageKey("lastWorld"), nextWorld);
-        if (runtime.unlockInviteKey) {
-          localStorage.setItem(runtime.unlockInviteKey, "followed:" + String(runtime.unlockInviteNonce || 0));
-        }
         runtime.unlockInviteTarget = "";
         runtime.unlockInviteNonce = 0;
         hideUnlockInvite();
         window.location.href = getWorldUrl(nextWorld);
-      });
-    }
-    if (ui.worldUnlockDismissBtn) {
-      ui.worldUnlockDismissBtn.addEventListener("click", function () {
-        if (runtime.unlockInviteKey) {
-          localStorage.setItem(runtime.unlockInviteKey, "dismissed:" + String(runtime.unlockInviteNonce || 0));
-        }
-        hideUnlockInvite();
-        setMascotState("idle");
-        updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");
       });
     }
   }
@@ -2487,7 +2469,6 @@
     forestState.worldCompleted = unlocked;
     runtime.unlockInviteTarget = hasFreshUnlockInvite ? nextWorld : "";
     runtime.unlockInviteNonce = hasFreshUnlockInvite && unlockInfo.world === nextWorld ? unlockInfo.nonce : 0;
-    runtime.unlockInviteKey = hasFreshUnlockInvite ? getUnlockInviteKey(nextWorld) : "";
     runtime.unlockEventKey = hasFreshUnlockInvite ? getUnlockEventKey(nextWorld) : "";
     if (unlocked && !wasCompleted && hasFreshUnlockInvite && unlockInfo.world === nextWorld) {
       stateApi.saveState(forestState);
@@ -2504,17 +2485,7 @@
       }
     }
     syncUnlockInviteButtonLabel(runtime.unlockInviteTarget);
-    const inviteState = runtime.unlockInviteKey ? String(localStorage.getItem(runtime.unlockInviteKey) || "") : "";
-    const inviteNonceToken = ":" + String(runtime.unlockInviteNonce || 0);
-    const inviteHandled = inviteState === ("dismissed" + inviteNonceToken) || inviteState === ("followed" + inviteNonceToken);
     if (!hasFreshUnlockInvite || !runtime.unlockInviteTarget) {
-      hideUnlockInvite();
-      if (runtime.mascotSpeechCategory === "world") {
-        updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");
-      }
-      return;
-    }
-    if (inviteHandled) {
       hideUnlockInvite();
       if (runtime.mascotSpeechCategory === "world") {
         updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");

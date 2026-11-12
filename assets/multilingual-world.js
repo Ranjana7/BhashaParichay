@@ -13,6 +13,10 @@
   const animate = motion.animate || function () {};
   const STORAGE_PREFIX = language.storagePrefix;
   const LAST_WORLD_KEY = STORAGE_PREFIX + ".lastWorld";
+  const WORLD_UNLOCKS_KEY = STORAGE_PREFIX + ".worldUnlocks.v1";
+  const BONUS_REWARDS_KEY = STORAGE_PREFIX + ".homeBonus.v1";
+  const UNLOCK_STAR_TARGET = 50;
+  const UNLOCK_GEM_TARGET = 1;
   const params = new URLSearchParams(window.location.search);
   const worldKey = params.get("world") || localStorage.getItem(LAST_WORLD_KEY) || language.worlds[0].key;
   const world = language.worlds.find(function (item) { return item.key === worldKey; }) || language.worlds[0];
@@ -30,6 +34,8 @@
     lessonCount: document.getElementById("mwLessonCount"),
     mascot: document.getElementById("mwMascot"),
     mascotSpeech: document.getElementById("mwMascotSpeech"),
+    worldUnlockInvite: document.getElementById("mwWorldUnlockInvite"),
+    worldUnlockInviteBtn: document.getElementById("mwWorldUnlockInviteBtn"),
     matchPanel: document.getElementById("mwMatchPanel"),
     matchPrompt: document.getElementById("mwMatchPrompt"),
     matchChoices: document.getElementById("mwMatchChoices"),
@@ -121,7 +127,9 @@
     observer: null,
     mascotRafId: null,
     mascotCurrentY: 0,
-    mascotTargetY: 0
+    mascotTargetY: 0,
+    unlockInviteVisible: false,
+    unlockTargetWorld: ""
   };
 
   activeActivities.forEach(function (key) {
@@ -139,6 +147,67 @@
 
   function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function getBonusRewards() {
+    const bonus = readJson(BONUS_REWARDS_KEY, { stars: 0, gems: 0 });
+    return {
+      stars: Math.max(0, Math.floor(Number(bonus.stars || 0))),
+      gems: Math.max(0, Math.floor(Number(bonus.gems || 0)))
+    };
+  }
+
+  function rewardsFromProgress() {
+    const totals = language.worlds.reduce(function (acc, item) {
+      const itemProgress = readJson(STORAGE_PREFIX + ".world." + item.key + ".progress", { stars: 0, gems: 0 });
+      acc.stars += Math.max(0, Number(itemProgress.stars || 0));
+      acc.gems += Math.max(0, Number(itemProgress.gems || 0));
+      return acc;
+    }, { stars: 0, gems: 0 });
+    const bonus = getBonusRewards();
+    return {
+      stars: totals.stars + bonus.stars,
+      gems: totals.gems + bonus.gems
+    };
+  }
+
+  function getUnlockState() {
+    const initial = { unlocked: [language.worlds[0].key], spentStars: 0, spentGems: 0 };
+    const raw = readJson(WORLD_UNLOCKS_KEY, initial);
+    const unlocked = Array.isArray(raw.unlocked) && raw.unlocked.length ? raw.unlocked : [language.worlds[0].key];
+    return {
+      unlocked: unlocked,
+      spentStars: Math.max(0, Math.floor(Number(raw.spentStars || 0))),
+      spentGems: Math.max(0, Math.floor(Number(raw.spentGems || 0)))
+    };
+  }
+
+  function saveUnlockState(state) {
+    writeJson(WORLD_UNLOCKS_KEY, state);
+  }
+
+  function syncUnlocks() {
+    const state = getUnlockState();
+    const rewards = rewardsFromProgress();
+    let availableStars = Math.max(0, rewards.stars - state.spentStars);
+    let availableGems = Math.max(0, rewards.gems - state.spentGems);
+
+    for (let index = 1; index < language.worlds.length; index += 1) {
+      const previousWorld = language.worlds[index - 1].key;
+      const currentWorld = language.worlds[index].key;
+      if (!state.unlocked.includes(previousWorld)) break;
+      if (state.unlocked.includes(currentWorld)) continue;
+      if (availableStars < UNLOCK_STAR_TARGET || availableGems < UNLOCK_GEM_TARGET) break;
+      state.unlocked.push(currentWorld);
+      state.spentStars += UNLOCK_STAR_TARGET;
+      state.spentGems += UNLOCK_GEM_TARGET;
+      availableStars -= UNLOCK_STAR_TARGET;
+      availableGems -= UNLOCK_GEM_TARGET;
+      break;
+    }
+
+    saveUnlockState(state);
+    return state.unlocked.slice();
   }
 
   function resolveAssetPath(pathValue) {
@@ -210,6 +279,49 @@
     setMascotSpeech(messageForPanel(panelKey), "state-wave");
   }
 
+  function getNextWorldKey() {
+    const index = language.worlds.findIndex(function (item) { return item.key === world.key; });
+    if (index < 0 || index >= language.worlds.length - 1) return "";
+    return language.worlds[index + 1].key;
+  }
+
+  function goToWorld(targetWorld) {
+    if (!targetWorld) return;
+    localStorage.setItem(LAST_WORLD_KEY, targetWorld);
+    window.location.href = "world.html?world=" + encodeURIComponent(targetWorld);
+  }
+
+  function showUnlockInvite() {
+    if (ui.worldUnlockInvite) ui.worldUnlockInvite.hidden = false;
+    runtime.unlockInviteVisible = true;
+  }
+
+  function hideUnlockInvite() {
+    if (ui.worldUnlockInvite) ui.worldUnlockInvite.hidden = true;
+    runtime.unlockInviteVisible = false;
+    runtime.unlockTargetWorld = "";
+  }
+
+  function updateUnlockInvitation() {
+    const nextWorldKey = getNextWorldKey();
+    if (!nextWorldKey) {
+      hideUnlockInvite();
+      return;
+    }
+    const unlocked = new Set(syncUnlocks());
+    if (!unlocked.has(nextWorldKey)) {
+      const wasVisible = runtime.unlockInviteVisible;
+      hideUnlockInvite();
+      if (wasVisible) {
+        setMascotSpeech(messageForPanel(runtime.activePanel), "state-wave");
+      }
+      return;
+    }
+    runtime.unlockTargetWorld = nextWorldKey;
+    showUnlockInvite();
+    setMascotSpeech("Hooray! A new world is ready. Let's explore!", "state-dancing");
+  }
+
   function reward(eventKey, stars, gems) {
     if (progress.rewardedEvents[eventKey]) return;
     progress.rewardedEvents[eventKey] = true;
@@ -217,6 +329,7 @@
     progress.gems = Math.max(0, Number(progress.gems || 0) + gems);
     persist();
     renderHeader();
+    updateUnlockInvitation();
   }
 
   function eventKeyFor(activity) {
@@ -614,6 +727,7 @@
       .join("|");
     reward(bonusKey, 5, 0);
     renderHeader();
+    updateUnlockInvitation();
     if (ui.buildStatus) ui.buildStatus.textContent = "Lesson complete! You earned bonus stars.";
     setMascotSpeech(guideText.complete, "state-dancing");
     if (window.confetti && !prefersReducedMotion) {
@@ -631,6 +745,12 @@
     if (ui.conversationARestart) ui.conversationARestart.addEventListener("click", function () { restartActivity("conversationA"); });
     if (ui.conversationBRestart) ui.conversationBRestart.addEventListener("click", function () { restartActivity("conversationB"); });
     if (ui.completeLesson) ui.completeLesson.addEventListener("click", completeLesson);
+    if (ui.worldUnlockInviteBtn) {
+      ui.worldUnlockInviteBtn.addEventListener("click", function () {
+        if (!runtime.unlockTargetWorld) return;
+        goToWorld(runtime.unlockTargetWorld);
+      });
+    }
     window.addEventListener("pagehide", function () {
       stopActiveAudio();
       if (runtime.observer) runtime.observer.disconnect();
@@ -663,4 +783,5 @@
   initGuideFlow();
   setupMascotFollowOnScroll();
   wire();
+  updateUnlockInvitation();
 })();
