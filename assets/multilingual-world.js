@@ -29,16 +29,19 @@
     matchPrompt: document.getElementById("mwMatchPrompt"),
     matchChoices: document.getElementById("mwMatchChoices"),
     matchStatus: document.getElementById("mwMatchStatus"),
+    matchRestart: document.getElementById("mwMatchRestart"),
     listenPrompt: document.getElementById("mwListenPrompt"),
     listenPlay: document.getElementById("mwListenPlay"),
     listenChoices: document.getElementById("mwListenChoices"),
     listenStatus: document.getElementById("mwListenStatus"),
+    listenRestart: document.getElementById("mwListenRestart"),
     buildPrompt: document.getElementById("mwBuildPrompt"),
     buildTiles: document.getElementById("mwBuildTiles"),
     buildAnswer: document.getElementById("mwBuildAnswer"),
     buildStatus: document.getElementById("mwBuildStatus"),
     buildCheck: document.getElementById("mwBuildCheck"),
     buildReset: document.getElementById("mwBuildReset"),
+    buildRestart: document.getElementById("mwBuildRestart"),
     completeLesson: document.getElementById("mwCompleteLesson")
   };
 
@@ -63,8 +66,15 @@
     gems: 0,
     completedLessons: [],
     attempts: 0,
-    rewardedEvents: {}
+    rewardedEvents: {},
+    attemptCycles: { match: 0, listen: 0, build: 0 }
   });
+  if (!progress.attemptCycles || typeof progress.attemptCycles !== "object") {
+    progress.attemptCycles = { match: 0, listen: 0, build: 0 };
+  }
+  progress.attemptCycles.match = Math.max(0, Math.floor(Number(progress.attemptCycles.match || 0)));
+  progress.attemptCycles.listen = Math.max(0, Math.floor(Number(progress.attemptCycles.listen || 0)));
+  progress.attemptCycles.build = Math.max(0, Math.floor(Number(progress.attemptCycles.build || 0)));
 
   const runtime = {
     matchDone: false,
@@ -93,6 +103,16 @@
     renderHeader();
   }
 
+  function eventKeyFor(activity) {
+    const cycle = Math.max(0, Math.floor(Number(progress.attemptCycles[activity] || 0)));
+    return world.key + "." + activity + ".c" + cycle;
+  }
+
+  function bumpAttemptCycle(activity) {
+    progress.attemptCycles[activity] = Math.max(0, Math.floor(Number(progress.attemptCycles[activity] || 0))) + 1;
+    persist();
+  }
+
   function renderHeader() {
     if (ui.title) ui.title.textContent = world.title + " · " + language.title;
     if (ui.subtitle) ui.subtitle.textContent = world.subtitle;
@@ -116,9 +136,10 @@
       btn.className = "button ghost";
       btn.textContent = option;
       btn.addEventListener("click", function () {
+        if (runtime.matchDone) return;
         if (option === lesson.match.answer) {
           runtime.matchDone = true;
-          reward(world.key + ".match", 1, 0);
+          reward(eventKeyFor("match"), 1, 1);
           ui.matchStatus.textContent = "Great job!";
           pulsePanels();
         } else {
@@ -142,9 +163,9 @@
     if (!ui.listenPrompt || !ui.listenChoices) return;
     ui.listenPrompt.textContent = lesson.listen.prompt;
     if (ui.listenPlay) {
-      ui.listenPlay.addEventListener("click", function () {
+      ui.listenPlay.onclick = function () {
         speak(lesson.listen.text);
-      });
+      };
     }
     ui.listenChoices.innerHTML = "";
     lesson.listen.options.forEach(function (option) {
@@ -153,9 +174,10 @@
       btn.className = "button ghost";
       btn.textContent = option;
       btn.addEventListener("click", function () {
+        if (runtime.listenDone) return;
         if (option === lesson.listen.answer) {
           runtime.listenDone = true;
-          reward(world.key + ".listen", 1, 0);
+          reward(eventKeyFor("listen"), 1, 1);
           ui.listenStatus.textContent = "You listened carefully!";
           pulsePanels();
         } else {
@@ -182,21 +204,46 @@
       });
       ui.buildTiles.appendChild(btn);
     });
-    ui.buildCheck.addEventListener("click", function () {
+    ui.buildCheck.onclick = function () {
+      if (runtime.buildDone) return;
       if (runtime.buildAnswer.join("").toLowerCase() === lesson.build.answer.toLowerCase()) {
         runtime.buildDone = true;
-        reward(world.key + ".build", 1, 0);
+        reward(eventKeyFor("build"), 1, 1);
         ui.buildStatus.textContent = "Wonderful building!";
         pulsePanels();
       } else {
         ui.buildStatus.textContent = "Try arranging the tiles again.";
       }
-    });
-    ui.buildReset.addEventListener("click", function () {
+    };
+    ui.buildReset.onclick = function () {
       runtime.buildAnswer = [];
       ui.buildAnswer.textContent = "";
       ui.buildStatus.textContent = "";
-    });
+    };
+  }
+
+  function restartMatch() {
+    runtime.matchDone = false;
+    ui.matchStatus.textContent = "New attempt started.";
+    bumpAttemptCycle("match");
+    renderMatch();
+  }
+
+  function restartListen() {
+    runtime.listenDone = false;
+    ui.listenStatus.textContent = "New attempt started.";
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    bumpAttemptCycle("listen");
+    renderListen();
+  }
+
+  function restartBuild() {
+    runtime.buildDone = false;
+    runtime.buildAnswer = [];
+    ui.buildAnswer.textContent = "";
+    ui.buildStatus.textContent = "New attempt started.";
+    bumpAttemptCycle("build");
+    renderBuild();
   }
 
   function completeLesson() {
@@ -208,11 +255,15 @@
     if (!Array.isArray(progress.completedLessons)) progress.completedLessons = [];
     if (!progress.completedLessons.includes(0)) {
       progress.completedLessons.push(0);
-      reward(world.key + ".lessonBonus", 5, 1);
       persist();
     }
+    const bonusKey = world.key + ".lessonBonus.c"
+      + String(progress.attemptCycles.match || 0) + "-"
+      + String(progress.attemptCycles.listen || 0) + "-"
+      + String(progress.attemptCycles.build || 0);
+    reward(bonusKey, 5, 0);
     renderHeader();
-    ui.buildStatus.textContent = "Lesson complete! You earned bonus stars and a gem.";
+    ui.buildStatus.textContent = "Lesson complete! You earned bonus stars.";
     if (window.confetti && !prefersReducedMotion) {
       window.confetti({ particleCount: 46, spread: 58, origin: { y: 0.7 } });
     }
@@ -223,5 +274,8 @@
   renderMatch();
   renderListen();
   renderBuild();
+  if (ui.matchRestart) ui.matchRestart.addEventListener("click", restartMatch);
+  if (ui.listenRestart) ui.listenRestart.addEventListener("click", restartListen);
+  if (ui.buildRestart) ui.buildRestart.addEventListener("click", restartBuild);
   if (ui.completeLesson) ui.completeLesson.addEventListener("click", completeLesson);
 })();

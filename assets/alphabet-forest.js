@@ -310,6 +310,11 @@
   initActivityControls();
   renderAll();
 
+  function setGlobalMiniCursorForTree(isInsideTree) {
+    if (typeof window.spSetMiniCursorMithuEnabled !== "function") return;
+    window.spSetMiniCursorMithuEnabled(!isInsideTree, "magical-tree");
+  }
+
   function getActivityItemCount(activityId) {
     if (activityId === "picture-match") return pictureQuestions.length;
     if (activityId === "flashcard-flip") return flashcardQuestions.length;
@@ -378,10 +383,14 @@
     stage.addEventListener("pointermove", function (event) {
       moveToClientPoint(event.clientX, event.clientY);
     });
+    stage.addEventListener("pointerenter", function () {
+      setGlobalMiniCursorForTree(true);
+    });
     stage.addEventListener("pointerleave", function () {
       syncPerchPosition();
       requestFrame();
       ui.treeMithu.classList.remove("hovering");
+      setGlobalMiniCursorForTree(false);
     });
     stage.addEventListener("pointerdown", function (event) {
       moveToClientPoint(event.clientX, event.clientY);
@@ -390,8 +399,20 @@
       syncPerchPosition();
       requestFrame();
     });
+    if (typeof IntersectionObserver === "function") {
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.target !== stage) return;
+          setGlobalMiniCursorForTree(entry.isIntersecting && entry.intersectionRatio >= 0.45);
+        });
+      }, { threshold: [0, 0.45, 0.75] });
+      observer.observe(stage);
+    }
 
     syncPerchPosition();
+    const initialRect = stage.getBoundingClientRect();
+    const inViewport = initialRect.bottom > 0 && initialRect.top < window.innerHeight;
+    if (inViewport) setGlobalMiniCursorForTree(true);
     requestFrame();
   }
 

@@ -5,7 +5,7 @@
   const speech = document.getElementById("languageChooserSpeech");
   const mithu = document.getElementById("languageHeroMithu");
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const medalSeenKey = "bhashaParichay.medals.seen.v2";
+  const medalSeenKey = "bhashaParichay.medals.seen.v3";
 
   const sanskritOrder = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const sanskritTotals = {
@@ -71,76 +71,28 @@
 
   const medals = [
     {
-      id: "sanskrit-star",
-      family: "sanskrit",
-      title: "Sanskrit Star",
-      description: "Complete Alphabet Forest.",
-      art: "🪔",
-      earned: isSanskritAlphabetComplete(sanskritSnapshot)
-    },
-    {
       id: "akshara-ace",
       family: "sanskrit",
       title: "Akshara Ace",
-      description: "Complete Animal Jungle.",
-      art: "🐘",
-      earned: isSanskritWorldComplete(sanskritSnapshot, "animals")
-    },
-    {
-      id: "sanskrit-champ",
-      family: "sanskrit",
-      title: "Sanskrit Champ",
-      description: "Complete Number Galaxy.",
-      art: "🌟",
-      earned: isSanskritWorldComplete(sanskritSnapshot, "numbers")
+      description: "Complete Sanskrit Level 1 (Alphabet Forest).",
+      art: "🪔",
+      earned: isSanskritAlphabetComplete(sanskritSnapshot)
     },
     {
       id: "hola-hero",
       family: "spanish",
       title: "Hola Hero",
-      description: "Complete Greeting Garden.",
+      description: "Complete Spanish Level 1.",
       art: "🌞",
       earned: isLanguageWorldComplete(spanish, 0)
-    },
-    {
-      id: "fiesta-star",
-      family: "spanish",
-      title: "Fiesta Star",
-      description: "Complete Colour Carnival.",
-      art: "🎉",
-      earned: isLanguageWorldComplete(spanish, 1)
-    },
-    {
-      id: "spanish-champ",
-      family: "spanish",
-      title: "Spanish Champ",
-      description: "Complete Number Rocket.",
-      art: "🚀",
-      earned: isLanguageWorldComplete(spanish, 2)
     },
     {
       id: "ola-hero",
       family: "portuguese",
       title: "Olá Hero",
-      description: "Complete Greeting Grove.",
+      description: "Complete Portuguese Level 1.",
       art: "🌊",
       earned: isLanguageWorldComplete(portuguese, 0)
-    },
-    {
-      id: "palavra-star",
-      family: "portuguese",
-      title: "Palavra Star",
-      description: "Complete Color Parade.",
-      art: "💬",
-      earned: isLanguageWorldComplete(portuguese, 1)
-    },
-    {
-      id: "portuguese-champ",
-      family: "portuguese",
-      title: "Portuguese Champ",
-      description: "Complete Number Ship.",
-      art: "⛵",
-      earned: isLanguageWorldComplete(portuguese, 2)
     }
   ];
 
