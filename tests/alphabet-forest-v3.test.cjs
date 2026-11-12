@@ -94,16 +94,17 @@ test("full-page celebration canvas exists", () => {
 
 test("letter garden uses Devanagari tab labels and subgroup categories", () => {
   assert.ok(html.includes(">स्वर<"));
-  assert.ok(html.includes(">व्यञ्जन<"));
+  assert.ok(html.includes(">वर्गीय व्यञ्जन<"));
+  assert.ok(html.includes(">अवर्गीय व्यञ्जन<"));
   assert.equal(html.includes(">अभ्यास<"), false);
   assert.equal(html.includes(">All<"), false);
-  assert.ok(js.includes("क-वर्ग"));
-  assert.ok(js.includes("च-वर्ग"));
-  assert.ok(js.includes("ट-वर्ग"));
-  assert.ok(js.includes("त-वर्ग"));
-  assert.ok(js.includes("प-वर्ग"));
-  assert.ok(js.includes("अन्तःस्थ"));
-  assert.ok(js.includes("ऊष्म"));
+  assert.ok(js.includes("कवर्गः"));
+  assert.ok(js.includes("चवर्गः"));
+  assert.ok(js.includes("टवर्गः"));
+  assert.ok(js.includes("तवर्गः"));
+  assert.ok(js.includes("पवर्गः"));
+  assert.ok(js.includes("अन्तःस्थाः"));
+  assert.ok(js.includes("ऊष्माणः"));
 });
 
 test("educational images are not cropped by default", () => {
