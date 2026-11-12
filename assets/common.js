@@ -190,6 +190,25 @@
     return null;
   }
 
+  function getMithuSvgMarkup(svgClass) {
+    const klass = svgClass || "mini-cursor-mithu-svg";
+    return (
+      '<svg viewBox="0 0 120 120" class="' + klass + '" role="presentation" focusable="false" aria-hidden="true">' +
+      '<ellipse class="mithu-shadow" cx="60" cy="102" rx="24" ry="7"></ellipse>' +
+      '<path class="mithu-tail" d="M91 71 L112 88 L90 91 Z"></path>' +
+      '<ellipse class="mithu-body" cx="60" cy="58" rx="30" ry="36"></ellipse>' +
+      '<ellipse class="mithu-belly" cx="60" cy="66" rx="18" ry="22"></ellipse>' +
+      '<path class="mithu-wing-left" d="M41 54 C23 58, 21 80, 37 86 C39 74, 44 62, 49 57 Z"></path>' +
+      '<path class="mithu-wing-right" d="M79 54 C97 58, 99 80, 83 86 C81 74, 76 62, 71 57 Z"></path>' +
+      '<circle class="mithu-eye-left" cx="50" cy="46" r="3.8"></circle>' +
+      '<circle class="mithu-eye-right" cx="69" cy="46" r="3.8"></circle>' +
+      '<path class="mithu-beak-top" d="M54 53 L66 53 L60 61 Z"></path>' +
+      '<path class="mithu-beak-bottom" d="M55 60 L65 60 L60 67 Z"></path>' +
+      '<path class="mithu-crest" d="M53 20 L58 11 L62 20 L66 10 L71 20"></path>' +
+      "</svg>"
+    );
+  }
+
   function applyPendingScroll() {
     let pending = null;
     try {
@@ -222,22 +241,54 @@
     }, 220);
   }
 
+  function normalizeMainNavigation() {
+    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    const worldKey = getRouteWorldKey();
+    const worldMeta = worldKey ? (WORLD_META[worldKey] || WORLD_META.alphabet) : null;
+
+    function appendLink(nav, options) {
+      const node = document.createElement("a");
+      node.href = options.href;
+      node.textContent = options.text;
+      if (options.current) node.setAttribute("aria-current", "page");
+      if (options.isWorld) node.setAttribute("data-current-world", "");
+      nav.appendChild(node);
+    }
+
+    document.querySelectorAll(".main-nav").forEach(function (nav) {
+      nav.innerHTML = "";
+      appendLink(nav, {
+        href: "index.html",
+        text: "Home",
+        current: currentPath === "index.html" || currentPath === ""
+      });
+      appendLink(nav, {
+        href: "about.html",
+        text: "About",
+        current: currentPath === "about.html"
+      });
+      if (worldMeta) {
+        appendLink(nav, {
+          href: worldMeta.url,
+          text: worldMeta.title,
+          current: currentPath === "alphabet-forest.html" || currentPath === "learning-world.html",
+          isWorld: true
+        });
+      }
+    });
+  }
+
   function initMiniCursorMithu() {
     const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const finePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
-    const coarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-    if (reducedMotion || !finePointer || coarsePointer) return;
-    if (document.getElementById("treeMithu")) return;
+    const finePointer = window.matchMedia && window.matchMedia("(any-pointer:fine)").matches;
+    if (reducedMotion || !finePointer) return;
     if (document.getElementById("miniCursorMithu")) return;
 
     const node = document.createElement("div");
     node.id = "miniCursorMithu";
     node.className = "mini-cursor-mithu";
     node.setAttribute("aria-hidden", "true");
-    node.innerHTML =
-      '<span class="mini-cursor-mithu-body">🦜</span>' +
-      '<span class="mini-cursor-mithu-wing mini-cursor-mithu-wing-left"></span>' +
-      '<span class="mini-cursor-mithu-wing mini-cursor-mithu-wing-right"></span>';
+    node.innerHTML = getMithuSvgMarkup("mini-cursor-mithu-svg");
     document.body.appendChild(node);
 
     const state = {
@@ -252,16 +303,31 @@
     };
     const OFFSET_X = 16;
     const OFFSET_Y = 14;
+    const EDGE_PAD = 24;
+    const clamp = function (value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    };
+
+    function clampStateToViewport() {
+      const maxX = Math.max(EDGE_PAD, window.innerWidth - EDGE_PAD);
+      const maxY = Math.max(EDGE_PAD, window.innerHeight - EDGE_PAD);
+      state.x = clamp(state.x, EDGE_PAD, maxX);
+      state.y = clamp(state.y, EDGE_PAD, maxY);
+      state.tx = clamp(state.tx, EDGE_PAD, maxX);
+      state.ty = clamp(state.ty, EDGE_PAD, maxY);
+    }
 
     function renderFrame() {
-      state.x += (state.tx - state.x) * 0.22;
-      state.y += (state.ty - state.y) * 0.22;
       const dx = state.tx - state.x;
+      const dy = state.ty - state.y;
+      state.x += dx * 0.22;
+      state.y += dy * 0.22;
       state.vx = state.vx * 0.7 + dx * 0.3;
       const angle = Math.max(-16, Math.min(16, state.vx * 0.12));
       node.style.left = state.x.toFixed(2) + "px";
       node.style.top = state.y.toFixed(2) + "px";
       node.style.transform = "translate(-50%, -50%) rotate(" + angle.toFixed(1) + "deg)";
+      node.classList.toggle("is-moving", Math.abs(dx) + Math.abs(dy) > 1.4);
       state.rafId = window.requestAnimationFrame(renderFrame);
     }
 
@@ -278,8 +344,8 @@
 
     function setTarget(clientX, clientY) {
       if (state.paused) return;
-      state.tx = clientX + OFFSET_X;
-      state.ty = clientY + OFFSET_Y;
+      state.tx = clamp(clientX + OFFSET_X, EDGE_PAD, Math.max(EDGE_PAD, window.innerWidth - EDGE_PAD));
+      state.ty = clamp(clientY + OFFSET_Y, EDGE_PAD, Math.max(EDGE_PAD, window.innerHeight - EDGE_PAD));
       show();
     }
 
@@ -294,6 +360,12 @@
     });
     document.addEventListener("mouseleave", function () {
       hide();
+    });
+    window.addEventListener("resize", function () {
+      clampStateToViewport();
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) hide();
     });
 
     const traceCanvas = document.getElementById("traceCanvas");
@@ -312,6 +384,7 @@
       traceCanvas.addEventListener("pointercancel", resume);
     }
 
+    clampStateToViewport();
     state.rafId = window.requestAnimationFrame(renderFrame);
   }
 
@@ -608,6 +681,7 @@
   window.SP_WORLD_TOTALS = Object.assign({}, WORLD_TOTALS);
   window.spResetWorldProgress = resetWorldProgress;
 
+  normalizeMainNavigation();
   attachCurrentWorldLinks();
   applyPendingScroll();
   initMiniCursorMithu();

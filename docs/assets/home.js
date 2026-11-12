@@ -286,12 +286,26 @@
     if (runtime.topLockGuide) return runtime.topLockGuide;
     const host = document.getElementById("worlds") || document.querySelector(".magic-hero");
     if (!host || !host.parentElement) return null;
+    const lockGuideMithu =
+      '<svg viewBox="0 0 120 120" class="top-lock-guide-mithu-svg" role="presentation" focusable="false" aria-hidden="true">' +
+      '<ellipse class="mithu-shadow" cx="60" cy="102" rx="24" ry="7"></ellipse>' +
+      '<path class="mithu-tail" d="M91 71 L112 88 L90 91 Z"></path>' +
+      '<ellipse class="mithu-body" cx="60" cy="58" rx="30" ry="36"></ellipse>' +
+      '<ellipse class="mithu-belly" cx="60" cy="66" rx="18" ry="22"></ellipse>' +
+      '<path class="mithu-wing-left" d="M41 54 C23 58, 21 80, 37 86 C39 74, 44 62, 49 57 Z"></path>' +
+      '<path class="mithu-wing-right" d="M79 54 C97 58, 99 80, 83 86 C81 74, 76 62, 71 57 Z"></path>' +
+      '<circle class="mithu-eye-left" cx="50" cy="46" r="3.8"></circle>' +
+      '<circle class="mithu-eye-right" cx="69" cy="46" r="3.8"></circle>' +
+      '<path class="mithu-beak-top" d="M54 53 L66 53 L60 61 Z"></path>' +
+      '<path class="mithu-beak-bottom" d="M55 60 L65 60 L60 67 Z"></path>' +
+      '<path class="mithu-crest" d="M53 20 L58 11 L62 20 L66 10 L71 20"></path>' +
+      "</svg>";
     const panel = document.createElement("section");
     panel.className = "panel top-lock-guide";
     panel.hidden = true;
     panel.innerHTML =
       '<div class="top-lock-guide-layout">' +
-      '<div class="top-lock-guide-mithu" aria-hidden="true">🦜</div>' +
+      '<div class="top-lock-guide-mithu" aria-hidden="true">' + lockGuideMithu + "</div>" +
       '<div class="top-lock-guide-content">' +
       '<p class="top-lock-guide-message" id="topLockGuideMessage"></p>' +
       '<div class="hero-actions">' +
