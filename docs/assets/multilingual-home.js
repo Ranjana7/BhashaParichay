@@ -192,8 +192,11 @@
       const card = document.createElement("button");
       card.type = "button";
       card.className = "world-card " + (world.cardClass || "world-alphabet") + (unlocked ? "" : " locked");
+      const illustrationPath = world.illustration
+        ? (typeof window.spResolveAssetPath === "function" ? window.spResolveAssetPath(world.illustration) : world.illustration)
+        : "";
       const art = world.illustration
-        ? '<span class="world-icon world-photo"><img src="' + world.illustration + '" alt="' + world.title + ' illustration"></span>'
+        ? '<span class="world-icon world-photo"><img src="' + illustrationPath + '" alt="' + world.title + ' illustration"></span>'
         : '<span class="world-icon"><i></i><i></i><i></i></span>';
       card.innerHTML =
         art +

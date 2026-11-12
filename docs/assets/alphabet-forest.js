@@ -13,8 +13,6 @@
   const UNLOCK_GEM_TARGET = 1;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
-  const UNLOCK_EVENT_KEY = storageKey("unlock.event.alphabet");
-  const UNLOCK_INVITE_KEY = storageKey("unlock.invite.alphabet");
   const SPEECH_PRIORITY = {
     welcome: 1,
     guidance: 2,
@@ -119,6 +117,72 @@
       };
     })
     .filter(function hasSymbol(letter) { return Boolean(letter.symbol); });
+
+  function chunkIndices(indices, size) {
+    const chunks = [];
+    for (let start = 0; start < indices.length; start += size) {
+      chunks.push(indices.slice(start, start + size));
+    }
+    return chunks;
+  }
+
+  function buildTreeLearningGroups() {
+    const groups = [];
+    const used = new Set();
+    function addGroups(label, indices) {
+      const clean = indices.filter(function (index) {
+        return Number.isInteger(index) && index >= 0 && index < letters.length && !used.has(index);
+      });
+      if (!clean.length) return;
+      chunkIndices(clean, TREE_GROUP_SIZE).forEach(function (chunk, chunkIndex, allChunks) {
+        chunk.forEach(function (idx) { used.add(idx); });
+        const suffix = allChunks.length > 1 ? " (Part " + (chunkIndex + 1) + ")" : "";
+        groups.push({ label: label + suffix, indices: chunk });
+      });
+    }
+
+    addGroups("Swaras", letters.map(function (_letter, index) { return index; }).filter(function (index) {
+      return letters[index].category !== "consonant";
+    }));
+
+    [
+      { id: "ka-varga", label: "Ka-varga" },
+      { id: "ca-varga", label: "Cha-varga" },
+      { id: "tta-varga", label: "Ta-varga (retroflex)" },
+      { id: "ta-varga", label: "Ta-varga (dental)" },
+      { id: "pa-varga", label: "Pa-varga" }
+    ].forEach(function (entry) {
+      addGroups(entry.label, letters.map(function (_letter, index) { return index; }).filter(function (index) {
+        return letters[index].subgroup === entry.id;
+      }));
+    });
+
+    addGroups("Antastha", letters.map(function (_letter, index) { return index; }).filter(function (index) {
+      return letters[index].subgroup === "antastha";
+    }));
+
+    addGroups("Ushmana", letters.map(function (_letter, index) { return index; }).filter(function (index) {
+      return letters[index].subgroup === "ushmana";
+    }));
+
+    addGroups("Remaining Symbols", letters.map(function (_letter, index) { return index; }));
+
+    for (let i = 0; i < groups.length; i += 1) {
+      groups[i].nextLabel = groups[i + 1] ? groups[i + 1].label : "Practice Activities";
+    }
+
+    return groups;
+  }
+
+  const TREE_LEARNING_GROUPS = buildTreeLearningGroups();
+
+  function getTreeGroupIndexByLetterIndex(letterIndex) {
+    const normalized = Math.max(0, Math.min(letters.length - 1, Number(letterIndex || 0)));
+    const found = TREE_LEARNING_GROUPS.findIndex(function (group) {
+      return group.indices.includes(normalized);
+    });
+    return found >= 0 ? found : 0;
+  }
 
   const pictureQuestions = letters
     .filter(function (letter) {
@@ -263,6 +327,7 @@
     mascotSpeechHoldUntil: 0,
     mascotSpeechPriority: 0,
     mascotSpeechText: "",
+    mascotSpeechCategory: "guidance",
     mascotMotion: {
       currentY: 0,
       targetY: 0,
@@ -285,6 +350,8 @@
     },
     unlockInviteTarget: "",
     unlockInviteNonce: 0,
+    unlockInviteKey: "",
+    unlockEventKey: "",
     byActivity: {}
   };
   ACTIVITY_IDS.forEach(function setupActivityRuntime(activityId) {
@@ -672,6 +739,7 @@
     runtime.mascotSpeechText = text;
     runtime.mascotSpeechPriority = priority;
     runtime.mascotSpeechHoldUntil = now + holdMs;
+    runtime.mascotSpeechCategory = category;
     return true;
   }
 
@@ -893,9 +961,11 @@
           runtime.treeGroupAdvanceTimer = null;
         }
         const activity = forestState.activities["magical-tree"];
-        const currentGroup = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
+        const currentGroup = getTreeGroupIndexByLetterIndex(activity.currentIndex);
         if (currentGroup <= 0) return;
-        activity.currentIndex = (currentGroup - 1) * TREE_GROUP_SIZE;
+        const previousGroup = TREE_LEARNING_GROUPS[currentGroup - 1];
+        if (!previousGroup || !previousGroup.indices.length) return;
+        activity.currentIndex = previousGroup.indices[0];
         setActivityStatus("magical-tree", "");
         saveAndRender();
       });
@@ -907,10 +977,11 @@
           runtime.treeGroupAdvanceTimer = null;
         }
         const activity = forestState.activities["magical-tree"];
-        const currentGroup = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
-        const nextStart = (currentGroup + 1) * TREE_GROUP_SIZE;
-        if (nextStart >= letters.length) return;
-        activity.currentIndex = nextStart;
+        const currentGroup = getTreeGroupIndexByLetterIndex(activity.currentIndex);
+        if (currentGroup >= TREE_LEARNING_GROUPS.length - 1) return;
+        const nextGroup = TREE_LEARNING_GROUPS[currentGroup + 1];
+        if (!nextGroup || !nextGroup.indices.length) return;
+        activity.currentIndex = nextGroup.indices[0];
         setActivityStatus("magical-tree", "");
         saveAndRender();
       });
@@ -1002,11 +1073,19 @@
     return "learning-world.html?world=" + worldKey;
   }
 
+  function getUnlockInviteKey(targetWorld) {
+    return storageKey("unlock.invite." + String(targetWorld || "alphabet"));
+  }
+
+  function getUnlockEventKey(targetWorld) {
+    return storageKey("unlock.event." + String(targetWorld || "alphabet"));
+  }
+
   function syncUnlockInviteButtonLabel(worldKey) {
     if (!ui.worldUnlockInviteBtn) return;
     const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldKey] ? window.SP_WORLD_META[worldKey] : null;
     const label = meta && meta.title ? meta.title : "Next World";
-    ui.worldUnlockInviteBtn.textContent = "✨ Go to " + label + " →";
+    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together → " + label;
   }
 
   function showUnlockInvite() {
@@ -1023,13 +1102,15 @@
     hideUnlockInvite();
     if (ui.worldUnlockInviteBtn) {
       ui.worldUnlockInviteBtn.addEventListener("click", function () {
-        const nextWorld = runtime.unlockInviteTarget || getNextWorldFromOrder();
+        const nextWorld = runtime.unlockInviteTarget;
         if (!nextWorld || (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(nextWorld, WORLD_ORDER))) {
           hideUnlockInvite();
           return;
         }
         localStorage.setItem(storageKey("lastWorld"), nextWorld);
-        localStorage.setItem(UNLOCK_INVITE_KEY, "followed:" + String(runtime.unlockInviteNonce || 0));
+        if (runtime.unlockInviteKey) {
+          localStorage.setItem(runtime.unlockInviteKey, "followed:" + String(runtime.unlockInviteNonce || 0));
+        }
         runtime.unlockInviteTarget = "";
         runtime.unlockInviteNonce = 0;
         hideUnlockInvite();
@@ -1038,8 +1119,12 @@
     }
     if (ui.worldUnlockDismissBtn) {
       ui.worldUnlockDismissBtn.addEventListener("click", function () {
-        localStorage.setItem(UNLOCK_INVITE_KEY, "dismissed:" + String(runtime.unlockInviteNonce || 0));
+        if (runtime.unlockInviteKey) {
+          localStorage.setItem(runtime.unlockInviteKey, "dismissed:" + String(runtime.unlockInviteNonce || 0));
+        }
         hideUnlockInvite();
+        setMascotState("idle");
+        updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");
       });
     }
   }
@@ -1337,11 +1422,10 @@
 
   function initLottieAnimations() {
     if (!window.lottie || typeof window.lottie.loadAnimation !== "function") return;
-    const assetBase = /\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(window.location.pathname)
-      ? "../assets/"
-      : "assets/";
     const assetPath = function (relativePath) {
-      return assetBase + relativePath;
+      const source = "assets/" + relativePath.replace(/^assets\//i, "");
+      if (typeof window.spResolveAssetPath === "function") return window.spResolveAssetPath(source);
+      return source;
     };
     const build = function (container, path, loop) {
       if (!container) return null;
@@ -1736,17 +1820,17 @@
     const activity = forestState.activities[activityId];
     if (!ui.treeLetters) return;
     activity.currentIndex = Math.max(0, Math.min(letters.length - 1, Number(activity.currentIndex || 0)));
-    const groupIndex = Math.floor(activity.currentIndex / TREE_GROUP_SIZE);
-    const groupStart = groupIndex * TREE_GROUP_SIZE;
-    const groupEndExclusive = Math.min(groupStart + TREE_GROUP_SIZE, letters.length);
-    const groupLetters = letters.slice(groupStart, groupEndExclusive);
-    const maxGroup = Math.floor((letters.length - 1) / TREE_GROUP_SIZE);
-    const groupComplete = groupLetters.every(function (_letter, offset) {
-      return activity.completedItems.includes(groupStart + offset);
+    const groupIndex = getTreeGroupIndexByLetterIndex(activity.currentIndex);
+    const group = TREE_LEARNING_GROUPS[groupIndex] || TREE_LEARNING_GROUPS[0];
+    const groupIndices = group && Array.isArray(group.indices) && group.indices.length ? group.indices.slice() : [0];
+    const groupLetters = groupIndices.map(function (letterIndex) { return letters[letterIndex]; });
+    const maxGroup = Math.max(0, TREE_LEARNING_GROUPS.length - 1);
+    const groupComplete = groupIndices.every(function (letterIndex) {
+      return activity.completedItems.includes(letterIndex);
     });
 
-    if (ui.treeInstruction) ui.treeInstruction.textContent = "Tap a glowing letter to discover its sound!";
-    if (ui.treeCounter) ui.treeCounter.textContent = "Group " + (groupIndex + 1) + "/" + (maxGroup + 1) + " · " + activity.completedItems.length + "/48";
+    if (ui.treeInstruction) ui.treeInstruction.textContent = "Tap a glowing letter to discover its sound! Next: " + (group.nextLabel || "Practice Activities");
+    if (ui.treeCounter) ui.treeCounter.textContent = (group.label || ("Group " + (groupIndex + 1))) + " · " + (groupIndex + 1) + "/" + (maxGroup + 1) + " · " + activity.completedItems.length + "/48";
     if (ui.treeStatus) ui.treeStatus.textContent = runtime.byActivity[activityId].status || "";
     if (ui.prevTreeGroupBtn) ui.prevTreeGroupBtn.disabled = groupIndex === 0;
     if (ui.nextTreeGroupBtn) ui.nextTreeGroupBtn.disabled = !groupComplete || groupIndex >= maxGroup;
@@ -1759,7 +1843,7 @@
       { x: 25, y: 38 }, { x: 40, y: 26 }, { x: 55, y: 31 }, { x: 69, y: 25 }, { x: 79, y: 39 }
     ];
     groupLetters.forEach(function (letter, offset) {
-      const letterIndex = groupStart + offset;
+      const letterIndex = groupIndices[offset];
       const slot = slots[offset] || { x: 50 + offset * 3, y: 34 + offset * 2 };
       const button = document.createElement("button");
       button.type = "button";
@@ -1790,7 +1874,8 @@
           setActivityStatus(activityId, "Wonderful! Letter discovered!");
           setMascotSpeech("Wonderful! You found one!", { category: "feedback", holdMs: 3000, tone: "correct" });
           const nowComplete = groupLetters.every(function (_inner, innerOffset) {
-            return activity.completedItems.includes(groupStart + innerOffset);
+            const indexValue = groupIndices[innerOffset];
+            return activity.completedItems.includes(indexValue);
           });
           if (nowComplete) {
             setMascotState("celebrating");
@@ -1799,7 +1884,8 @@
             if (groupIndex < maxGroup) {
               runtime.treeGroupAdvanceTimer = window.setTimeout(function () {
                 runtime.treeGroupAdvanceTimer = null;
-                activity.currentIndex = (groupIndex + 1) * TREE_GROUP_SIZE;
+                const nextGroup = TREE_LEARNING_GROUPS[groupIndex + 1];
+                activity.currentIndex = nextGroup && nextGroup.indices && nextGroup.indices.length ? nextGroup.indices[0] : activity.currentIndex;
                 setActivityStatus(activityId, "");
                 saveAndRender();
               }, 500);
@@ -1838,7 +1924,7 @@
       if (ui.spotlightDev) ui.spotlightDev.textContent = currentLetter.symbol;
       if (ui.spotlightTran) ui.spotlightTran.textContent = currentLetter.transliteration;
       if (ui.spotlightExample) ui.spotlightExample.textContent = currentLetter.exampleText + " · " + currentLetter.meaning;
-      const activeOffset = Math.max(0, Math.min(groupLetters.length - 1, activity.currentIndex - groupStart));
+      const activeOffset = Math.max(0, Math.min(groupLetters.length - 1, groupIndices.indexOf(activity.currentIndex)));
       const activeSlot = slots[activeOffset] || slots[0];
       if (activeSlot) moveTreeMithuTowardPercent(activeSlot.x, activeSlot.y);
     }
@@ -2394,16 +2480,21 @@
     const wasCompleted = Boolean(forestState.worldCompleted);
     const unlockInfo = getLatestUnlockInfo();
     const nextWorld = getNextWorldFromOrder();
-    const hasFreshUnlockInvite = Boolean(unlockInfo.world) && unlockInfo.world === nextWorld;
+    const nextWorldUnlocked = Boolean(nextWorld) && (typeof window.spIsWorldUnlocked === "function"
+      ? window.spIsWorldUnlocked(nextWorld, WORLD_ORDER)
+      : false);
+    const hasFreshUnlockInvite = nextWorldUnlocked;
     forestState.worldCompleted = unlocked;
-    runtime.unlockInviteTarget = hasFreshUnlockInvite ? unlockInfo.world : "";
-    runtime.unlockInviteNonce = hasFreshUnlockInvite ? unlockInfo.nonce : 0;
-    if (unlocked && !wasCompleted && hasFreshUnlockInvite) {
+    runtime.unlockInviteTarget = hasFreshUnlockInvite ? nextWorld : "";
+    runtime.unlockInviteNonce = hasFreshUnlockInvite && unlockInfo.world === nextWorld ? unlockInfo.nonce : 0;
+    runtime.unlockInviteKey = hasFreshUnlockInvite ? getUnlockInviteKey(nextWorld) : "";
+    runtime.unlockEventKey = hasFreshUnlockInvite ? getUnlockEventKey(nextWorld) : "";
+    if (unlocked && !wasCompleted && hasFreshUnlockInvite && unlockInfo.world === nextWorld) {
       stateApi.saveState(forestState);
       const unlockNonceKey = String(unlockInfo.nonce || 0);
-      const hasCelebrated = localStorage.getItem(UNLOCK_EVENT_KEY) === unlockNonceKey;
+      const hasCelebrated = runtime.unlockEventKey && localStorage.getItem(runtime.unlockEventKey) === unlockNonceKey;
       if (!hasCelebrated) {
-        localStorage.setItem(UNLOCK_EVENT_KEY, unlockNonceKey);
+        if (runtime.unlockEventKey) localStorage.setItem(runtime.unlockEventKey, unlockNonceKey);
         setMascotStateForDuration("dancing", 1250);
         setMascotSpeech("Hooray! A new world is ready. Let's explore!", { category: "world", holdMs: 6500, force: true, tone: "world" });
         fireConfetti(true);
@@ -2413,15 +2504,21 @@
       }
     }
     syncUnlockInviteButtonLabel(runtime.unlockInviteTarget);
-    const inviteState = String(localStorage.getItem(UNLOCK_INVITE_KEY) || "");
+    const inviteState = runtime.unlockInviteKey ? String(localStorage.getItem(runtime.unlockInviteKey) || "") : "";
     const inviteNonceToken = ":" + String(runtime.unlockInviteNonce || 0);
     const inviteHandled = inviteState === ("dismissed" + inviteNonceToken) || inviteState === ("followed" + inviteNonceToken);
     if (!hasFreshUnlockInvite || !runtime.unlockInviteTarget) {
       hideUnlockInvite();
+      if (runtime.mascotSpeechCategory === "world") {
+        updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");
+      }
       return;
     }
     if (inviteHandled) {
       hideUnlockInvite();
+      if (runtime.mascotSpeechCategory === "world") {
+        updateMascotSpeechForActivity(runtime.mascotActiveSection || "magical-tree");
+      }
       return;
     }
     showUnlockInvite();

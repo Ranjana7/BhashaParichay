@@ -25,7 +25,32 @@ window.BHASHA_LANGUAGES = {
             ],
             match: { prompt: "Pick the Spanish word for hello.", options: ["hola", "adiós", "por favor"], answer: "hola" },
             listen: { prompt: "Listen and choose the spoken greeting.", text: "buenos días", options: ["buenos días", "gracias", "hola"], answer: "buenos días" },
-            build: { prompt: "Build: thank you", tiles: ["gra", "cias"], answer: "gracias" }
+            build: { prompt: "Build: thank you", tiles: ["gra", "cias"], answer: "gracias" },
+            conversationActivities: [
+              {
+                title: "Conversation 1: Name Time",
+                learn: [
+                  "¿Cómo te llamas? — What is your name?",
+                  "Me llamo Ana. — My name is Ana.",
+                  "Mucho gusto. — Nice to meet you."
+                ],
+                quizPrompt: "How do you ask, 'What is your name?'",
+                quizOptions: ["¿Cómo te llamas?", "¿Cómo estás?", "¿De dónde eres?"],
+                quizAnswer: "¿Cómo te llamas?"
+              },
+              {
+                title: "Conversation 2: Place and Feelings",
+                learn: [
+                  "¿De dónde eres? — Where are you from?",
+                  "Soy de Madrid. — I am from Madrid.",
+                  "¿Cómo estás? — How are you?",
+                  "Estoy bien. — I am fine."
+                ],
+                quizPrompt: "How do you say, 'I am fine'?",
+                quizOptions: ["Estoy bien.", "Soy de Madrid.", "Me llamo Ana."],
+                quizAnswer: "Estoy bien."
+              }
+            ]
           }
         ]
       },
@@ -184,7 +209,34 @@ window.BHASHA_LANGUAGES = {
             ],
             match: { prompt: "Pick the Portuguese word for hi.", options: ["oi", "tchau", "por favor"], answer: "oi" },
             listen: { prompt: "Listen and choose the greeting.", text: "bom dia", options: ["bom dia", "oi", "obrigado"], answer: "bom dia" },
-            build: { prompt: "Build: thank you", tiles: ["obri", "ga", "do"], answer: "obrigado" }
+            build: { prompt: "Build: thank you", tiles: ["obri", "ga", "do"], answer: "obrigado" },
+            conversationActivities: [
+              {
+                title: "Conversation 1: Nome",
+                learn: [
+                  "Como você se chama? — What is your name?",
+                  "Eu me chamo Ana. — My name is Ana.",
+                  "Prazer em conhecer você. — Nice to meet you."
+                ],
+                quizPrompt: "How do you ask, 'What is your name?'",
+                quizOptions: ["Como você se chama?", "Como você está?", "De onde você é?"],
+                quizAnswer: "Como você se chama?"
+              },
+              {
+                title: "Conversation 2: Lugar e Sentimentos",
+                learn: [
+                  "De onde você é? — Where are you from?",
+                  "Eu sou do Brasil. — I am from Brazil.",
+                  "Onde você mora? — Where do you live?",
+                  "Eu moro em Lisboa. — I live in Lisbon.",
+                  "Como você está? — How are you?",
+                  "Estou bem. — I am fine."
+                ],
+                quizPrompt: "How do you say, 'I am fine'?",
+                quizOptions: ["Estou bem.", "Eu sou do Brasil.", "Eu me chamo Ana."],
+                quizAnswer: "Estou bem."
+              }
+            ]
           }
         ]
       },
