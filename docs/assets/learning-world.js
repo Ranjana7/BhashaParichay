@@ -86,7 +86,6 @@
   const inviteRuntime = {
     targetWorld: "",
     unlockNonce: 0,
-    inviteKey: "",
     eventKey: ""
   };
 
@@ -126,7 +125,6 @@
     worldMascotSpeech: document.getElementById("worldMascotSpeech"),
     worldUnlockInvite: document.getElementById("worldUnlockInvite"),
     worldUnlockInviteBtn: document.getElementById("worldUnlockInviteBtn"),
-    worldUnlockDismissBtn: document.getElementById("worldUnlockDismissBtn"),
     restartMatchActivityBtn: document.getElementById("restartMatchActivityBtn"),
     restartListenActivityBtn: document.getElementById("restartListenActivityBtn"),
     restartBuildActivityBtn: document.getElementById("restartBuildActivityBtn")
@@ -525,7 +523,8 @@
     if (!ui.worldUnlockInviteBtn) return;
     const meta = window.SP_WORLD_META && window.SP_WORLD_META[worldValue] ? window.SP_WORLD_META[worldValue] : null;
     const label = meta && meta.title ? meta.title : "Next World";
-    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together → " + label;
+    ui.worldUnlockInviteBtn.textContent = "✨ Let's Go Together!";
+    ui.worldUnlockInviteBtn.setAttribute("aria-label", "Go to " + label);
   }
 
   function restartActivity(activityId) {
@@ -556,10 +555,6 @@
     ui.worldUnlockInvite.hidden = true;
   }
 
-  function getUnlockInviteKey(targetWorld) {
-    return storageKey("unlock.invite." + String(targetWorld || worldKey));
-  }
-
   function getUnlockEventKey(targetWorld) {
     return storageKey("unlock.event." + String(targetWorld || worldKey));
   }
@@ -569,7 +564,6 @@
     if (!nextWorldKey) {
       inviteRuntime.targetWorld = "";
       inviteRuntime.unlockNonce = 0;
-      inviteRuntime.inviteKey = "";
       inviteRuntime.eventKey = "";
       hideUnlockInvite();
       return;
@@ -581,7 +575,6 @@
     if (!unlocked) {
       inviteRuntime.targetWorld = "";
       inviteRuntime.unlockNonce = 0;
-      inviteRuntime.inviteKey = "";
       inviteRuntime.eventKey = "";
       hideUnlockInvite();
       if (speechRuntime.category === "world") {
@@ -591,7 +584,6 @@
     }
     inviteRuntime.targetWorld = nextWorldKey;
     inviteRuntime.unlockNonce = unlockInfo.world === nextWorldKey ? unlockInfo.nonce : 0;
-    inviteRuntime.inviteKey = getUnlockInviteKey(nextWorldKey);
     inviteRuntime.eventKey = getUnlockEventKey(nextWorldKey);
     syncUnlockInviteButtonLabel(nextWorldKey);
     const unlockNonceKey = String(inviteRuntime.unlockNonce || 0);
@@ -601,16 +593,6 @@
       setSpeech("Hooray! A new world is ready. Let's explore!", "world", { category: "world", holdMs: 6000, force: true });
       confetti();
       if (typeof window.spFlowerRain === "function") window.spFlowerRain(document.getElementById("main-content"), { density: 24, durationMs: 2600 });
-    }
-    const inviteState = String(localStorage.getItem(inviteRuntime.inviteKey) || "");
-    const nonceToken = ":" + unlockNonceKey;
-    const inviteHandled = inviteState === ("dismissed" + nonceToken) || inviteState === ("followed" + nonceToken);
-    if (inviteHandled) {
-      hideUnlockInvite();
-      if (speechRuntime.category === "world") {
-        setSpeech(currentGuidanceText(), "instruction", { category: "guidance", holdMs: 2600, force: true });
-      }
-      return;
     }
     showUnlockInvite();
   }
@@ -1087,20 +1069,7 @@
           return;
         }
         localStorage.setItem(LAST_WORLD_KEY, nextWorld);
-        if (inviteRuntime.inviteKey) {
-          localStorage.setItem(inviteRuntime.inviteKey, "followed:" + String(inviteRuntime.unlockNonce || 0));
-        }
         window.location.href = getWorldUrl(nextWorld);
-      });
-    }
-    if (ui.worldUnlockDismissBtn) {
-      ui.worldUnlockDismissBtn.addEventListener("click", function () {
-        if (inviteRuntime.inviteKey) {
-          localStorage.setItem(inviteRuntime.inviteKey, "dismissed:" + String(inviteRuntime.unlockNonce || 0));
-        }
-        hideUnlockInvite();
-        setMascot("idle");
-        setSpeech(currentGuidanceText(), "instruction", { category: "guidance", holdMs: 2600, force: true });
       });
     }
     if (ui.worldBackBtn) {
