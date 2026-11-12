@@ -79,15 +79,20 @@
     "hidden-letter-hunt",
     "letter-tracing"
   ]);
-  const LETTER_GARDEN_SUBGROUPS = [
-    { id: "ka-varga", label: "क-वर्ग" },
-    { id: "ca-varga", label: "च-वर्ग" },
-    { id: "tta-varga", label: "ट-वर्ग" },
-    { id: "ta-varga", label: "त-वर्ग" },
-    { id: "pa-varga", label: "प-वर्ग" },
-    { id: "antastha", label: "अन्तःस्थ" },
-    { id: "ushmana", label: "ऊष्म" }
-  ];
+  const VARGIYA_SUBGROUP_IDS = new Set(["ka-varga", "ca-varga", "tta-varga", "ta-varga", "pa-varga"]);
+  const LETTER_GARDEN_SUBGROUPS = {
+    vargiya: [
+      { id: "ka-varga", label: "कवर्गः" },
+      { id: "ca-varga", label: "चवर्गः" },
+      { id: "tta-varga", label: "टवर्गः" },
+      { id: "ta-varga", label: "तवर्गः" },
+      { id: "pa-varga", label: "पवर्गः" }
+    ],
+    avargiya: [
+      { id: "antastha", label: "अन्तःस्थाः" },
+      { id: "ushmana", label: "ऊष्माणः" }
+    ]
+  };
 
   const letters = window.SP_PDF_LETTER_INVENTORY.items
     .slice(0, LETTER_COUNT)
@@ -137,11 +142,11 @@
     { sanskrit: "द्राक्षा", transliteration: "draakshaa", meaning: "grapes", image: "assets/illustrations/fruits/grapes.svg", alt: "Grapes illustration" },
     { sanskrit: "नारङ्गफलम्", transliteration: "naaranga-phalam", meaning: "orange", image: "assets/illustrations/fruits/orange.svg", alt: "Orange fruit illustration" },
     { sanskrit: "दाडिमम्", transliteration: "daadimam", meaning: "pomegranate", image: "assets/illustrations/fruits/pomegranate.svg", alt: "Pomegranate fruit illustration" },
-    { sanskrit: "अननसम्", transliteration: "ananasam", meaning: "pineapple", image: "assets/illustrations/fruits/pineapple.svg", alt: "Pineapple fruit illustration" },
+    { sanskrit: "अनानासम्", transliteration: "ananasam", meaning: "pineapple", image: "assets/illustrations/fruits/pineapple.svg", alt: "Pineapple fruit illustration" },
     { sanskrit: "नारिकेलम्", transliteration: "naarikelam", meaning: "coconut", image: "assets/illustrations/fruits/coconut.svg", alt: "Coconut fruit illustration" },
-    { sanskrit: "कलिङ्गम्", transliteration: "kalingam", meaning: "watermelon", image: "assets/illustrations/fruits/watermelon.svg", alt: "Watermelon illustration" },
+    { sanskrit: "कालिङ्गम्", transliteration: "kaalingam", meaning: "watermelon", image: "assets/illustrations/fruits/watermelon.svg", alt: "Watermelon illustration" },
     { sanskrit: "खर्जूरम्", transliteration: "kharjooram", meaning: "date fruit", image: "assets/illustrations/fruits/date.svg", alt: "Date fruit illustration" },
-    { sanskrit: "जाम्बूफलम्", transliteration: "jaamboo-phalam", meaning: "guava", image: "assets/illustrations/fruits/guava.svg", alt: "Guava fruit illustration" },
+    { sanskrit: "जम्बूफलम्", transliteration: "jamboo-phalam", meaning: "jambu fruit (rose apple)", image: "assets/illustrations/fruits/guava.svg", alt: "Jambu fruit illustration" },
     { sanskrit: "कपित्थम्", transliteration: "kapittham", meaning: "wood apple", image: "assets/illustrations/fruits/wood-apple.svg", alt: "Wood apple illustration" },
     { sanskrit: "पपीतकम्", transliteration: "papeetakam", meaning: "papaya", image: "assets/illustrations/fruits/papaya.svg", alt: "Papaya fruit illustration" },
     { sanskrit: "नाशपाती", transliteration: "naashapaatee", meaning: "pear", image: "assets/illustrations/fruits/pear.svg", alt: "Pear fruit illustration" },
@@ -902,9 +907,16 @@
           state.currentIndex = findFirstLetterIndex(function (letter) { return letter.category !== "consonant"; });
         } else {
           const currentView = getLetterGardenViewForIndex(state.currentIndex);
-          const subgroup = currentView.category === "consonants" ? currentView.subgroup : "ka-varga";
+          const subgroup = currentView.category === category
+            ? currentView.subgroup
+            : (category === "vargiya" ? "ka-varga" : "antastha");
           state.currentIndex = findFirstLetterIndex(function (letter) {
-            return letter.category === "consonant" && (letter.subgroup || "other") === subgroup;
+            if (letter.category !== "consonant") return false;
+            const letterSubgroup = letter.subgroup || "other";
+            const matchesCategory = category === "vargiya"
+              ? VARGIYA_SUBGROUP_IDS.has(letterSubgroup)
+              : !VARGIYA_SUBGROUP_IDS.has(letterSubgroup);
+            return matchesCategory && letterSubgroup === subgroup;
           });
         }
         saveAndRender();
@@ -1801,9 +1813,13 @@
   function getLetterGardenViewForIndex(index) {
     const letter = letters[Math.max(0, Math.min(letters.length - 1, index))];
     if (!letter || letter.category !== "consonant") {
-      return { category: "vowels", subgroup: "ka-varga" };
+      return { category: "vowels", subgroup: "" };
     }
-    return { category: "consonants", subgroup: letter.subgroup || "ka-varga" };
+    const subgroup = letter.subgroup || "ka-varga";
+    if (VARGIYA_SUBGROUP_IDS.has(subgroup)) {
+      return { category: "vargiya", subgroup: subgroup };
+    }
+    return { category: "avargiya", subgroup: subgroup === "ushmana" ? "ushmana" : "antastha" };
   }
 
   function syncLetterGardenCategoryFromCurrent() {
@@ -1819,11 +1835,17 @@
     const activity = forestState.activities[activityId];
     const selectedLetter = getCurrentLetter(activityId);
     syncLetterGardenCategoryFromCurrent();
-    const rawCategory = activity.answers.category || "vowels";
-    const selectedCategory = (rawCategory === "consonants" || rawCategory === "vowels") ? rawCategory : "vowels";
+    const inferredView = getLetterGardenViewForIndex(activity.currentIndex);
+    const rawCategory = activity.answers.category || inferredView.category || "vowels";
+    const selectedCategory = (rawCategory === "vowels" || rawCategory === "vargiya" || rawCategory === "avargiya")
+      ? rawCategory
+      : inferredView.category;
     if (selectedCategory !== rawCategory) activity.answers.category = selectedCategory;
-    const selectedSubgroup = (!activity.answers.subgroup || activity.answers.subgroup === "all") ? "ka-varga" : activity.answers.subgroup;
-    if (selectedCategory === "consonants" && activity.answers.subgroup !== selectedSubgroup) {
+    const defaultSubgroup = selectedCategory === "vargiya" ? "ka-varga" : "antastha";
+    const selectedSubgroup = (!activity.answers.subgroup || activity.answers.subgroup === "all")
+      ? defaultSubgroup
+      : activity.answers.subgroup;
+    if ((selectedCategory === "vargiya" || selectedCategory === "avargiya") && activity.answers.subgroup !== selectedSubgroup) {
       activity.answers.subgroup = selectedSubgroup;
     }
     ui.letterCategoryTabs.forEach(function (tab) {
@@ -1834,12 +1856,15 @@
     renderSubgroupButtons(selectedCategory, selectedSubgroup);
 
     const filtered = letters.filter(function (letter) {
-      if (selectedCategory === "vowels") return letter.category !== "consonant";
-      if (selectedCategory === "consonants") {
-        if (letter.category !== "consonant") return false;
-        return (letter.subgroup || "other") === selectedSubgroup;
+      if (selectedCategory === "vowels") {
+        return letter.category !== "consonant";
       }
-      return true;
+      if (letter.category !== "consonant") return false;
+      const letterSubgroup = letter.subgroup || "other";
+      if (selectedCategory === "vargiya") {
+        return VARGIYA_SUBGROUP_IDS.has(letterSubgroup) && letterSubgroup === selectedSubgroup;
+      }
+      return !VARGIYA_SUBGROUP_IDS.has(letterSubgroup) && letterSubgroup === selectedSubgroup;
     });
     if (!filtered.length) {
       if (ui.letterGrid) ui.letterGrid.innerHTML = '<p class="section-warning">This letter group could not be loaded.</p>';
@@ -1879,7 +1904,7 @@
     if (ui.selectedTran) ui.selectedTran.textContent = selectedLetter.transliteration;
     if (ui.selectedExample) ui.selectedExample.textContent = selectedLetter.exampleText;
     if (ui.selectedMeaning) ui.selectedMeaning.textContent = selectedLetter.meaning;
-    if (ui.selectedPosition) ui.selectedPosition.textContent = "Letter " + (activity.currentIndex + 1) + " of 48";
+    if (ui.selectedPosition) ui.selectedPosition.textContent = "Symbol " + (activity.currentIndex + 1) + " of 48";
     if (ui.selectedLearned) {
       const learned = activity.completedItems.includes(activity.currentIndex);
       ui.selectedLearned.textContent = learned ? "⭐ Learned" : "☆ Not learned yet";
@@ -1887,7 +1912,7 @@
     }
     if (ui.gardenCoverage) {
       const remaining = Math.max(0, 48 - activity.completedItems.length);
-      ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 letters practised. " + (remaining > 0 ? (remaining + " more to go!") : "All letters discovered!");
+      ui.gardenCoverage.textContent = activity.completedItems.length + " of 48 Sanskrit symbols practised. " + (remaining > 0 ? (remaining + " more to go!") : "All symbols discovered!");
     }
     if (ui.letterGardenStatus) {
       ui.letterGardenStatus.textContent = runtime.byActivity[activityId].status || "";
@@ -1902,13 +1927,14 @@
 
   function renderSubgroupButtons(category, activeSubgroup) {
     if (!ui.subgroupTabs) return;
-    if (category !== "consonants") {
+    const subgroupList = LETTER_GARDEN_SUBGROUPS[category];
+    if (!Array.isArray(subgroupList) || !subgroupList.length) {
       ui.subgroupTabs.innerHTML = "";
       return;
     }
     const state = forestState.activities["letter-garden"];
     ui.subgroupTabs.innerHTML = "";
-    LETTER_GARDEN_SUBGROUPS.forEach(function (subgroup) {
+    subgroupList.forEach(function (subgroup) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "button ghost";
@@ -1916,7 +1942,9 @@
       btn.classList.toggle("active", activeSubgroup === subgroup.id);
       btn.addEventListener("click", function () {
         state.currentIndex = findFirstLetterIndex(function (letter) {
-          return letter.category === "consonant" && (letter.subgroup || "other") === subgroup.id;
+          if (letter.category !== "consonant") return false;
+          const letterSubgroup = letter.subgroup || "other";
+          return letterSubgroup === subgroup.id;
         });
         saveAndRender();
       });
