@@ -67,6 +67,7 @@
   margin: 10px 0;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   pointer-events: none;
+  max-width: 360px;
 }
 
 * {
@@ -314,6 +315,14 @@ body.lang-theme-portuguese .panel {
   overflow: hidden;
 }
 
+.medal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 16% 15%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
 .medal-card.pending {
   opacity: 0.86;
   filter: saturate(0.88);
@@ -332,16 +341,38 @@ body.lang-theme-portuguese .panel {
 }
 
 .medal-art {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.9);
   display: grid;
   place-items: center;
   margin-bottom: 8px;
-  box-shadow: 0 8px 14px rgba(66, 79, 146, 0.2);
+  box-shadow: 0 10px 18px rgba(66, 79, 146, 0.24);
   background: linear-gradient(150deg, #ffe78c, #ffa955);
   font-size: 1.5rem;
+  position: relative;
+}
+
+.medal-art::before,
+.medal-art::after {
+  content: "";
+  position: absolute;
+  bottom: -11px;
+  width: 12px;
+  height: 16px;
+  border-radius: 0 0 4px 4px;
+  z-index: -1;
+}
+
+.medal-art::before {
+  left: 11px;
+  background: linear-gradient(180deg, #7fa2ff, #3d5fc2);
+}
+
+.medal-art::after {
+  right: 11px;
+  background: linear-gradient(180deg, #9de8ff, #4e96cf);
 }
 
 .medal-card.medal-sanskrit .medal-art {
@@ -2458,6 +2489,40 @@ th {
   inset: 0;
 }
 
+.number-galaxy-rocket {
+  position: absolute;
+  left: 10%;
+  bottom: 14%;
+  width: 88px;
+  height: 34px;
+  border-radius: 24px 10px 10px 24px;
+  background: linear-gradient(135deg, #f7fbff 0%, #bdd0ff 55%, #7f99f6 100%);
+  box-shadow: 0 8px 20px rgba(12, 26, 76, 0.4);
+  transform: rotate(-15deg);
+  animation: rocketFloat 4.8s ease-in-out infinite;
+}
+
+.number-galaxy-rocket::before {
+  content: "";
+  position: absolute;
+  right: -16px;
+  top: 8px;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 17px solid #c2d4ff;
+}
+
+.number-galaxy-rocket::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 11px;
+  width: 14px;
+  height: 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffe39b, #ff8d43);
+}
+
 .number-galaxy-badge {
   position: absolute;
   min-width: 72px;
@@ -2759,6 +2824,11 @@ th {
 @keyframes badgeFloat {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-7px); }
+}
+
+@keyframes rocketFloat {
+  0%, 100% { transform: rotate(-15deg) translateY(0); }
+  50% { transform: rotate(-12deg) translateY(-6px); }
 }
 
 body.page-transitioning main,

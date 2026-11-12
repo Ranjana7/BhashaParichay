@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BhashaParichay | PortugueseParichay World</title>
   <meta name="description" content="Play PortugueseParichay beginner activities with Mithu.">
-  <link rel="stylesheet" href="../assets/styles.css?v=20261112u6">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261112u7">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -23,6 +23,24 @@
       <p id="mwSubtitle"></p>
       <p><strong id="mwLessonName"></strong></p>
       <p id="mwLessonObjective"></p>
+      <div id="mwMascot" class="parrot-mascot state-wave lesson-mascot" aria-live="polite">
+        <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+          <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+          <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+          <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+          <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+        </svg>
+        <p id="mwMascotSpeech" class="mascot-speech">Ola! I'm Mithu. Vamos aprender juntos.</p>
+      </div>
       <div class="hero-actions">
         <div class="star-box">⭐ Stars: <span id="mwWorldStars">0</span></div>
         <div class="star-box">💎 Gems: <span id="mwWorldGems">0</span></div>
@@ -33,7 +51,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="mwMatchPanel">
       <h2>Activity 1: Match</h2>
       <p id="mwMatchPrompt"></p>
       <div id="mwMatchChoices" class="choices"></div>
@@ -43,7 +61,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="mwListenPanel">
       <h2>Activity 2: Listen</h2>
       <p id="mwListenPrompt"></p>
       <button id="mwListenPlay" class="button secondary" type="button">▶ Play</button>
@@ -54,7 +72,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="mwBuildPanel">
       <h2>Activity 3: Build</h2>
       <p id="mwBuildPrompt"></p>
       <div id="mwBuildTiles" class="tiles"></div>
@@ -77,6 +95,6 @@
   <script src="../assets/mithu-follower.js?v=20261112u1"></script>
   <script src="../assets/shared-nav.js?v=20261112u1"></script>
   <script src="../assets/seamless-experience.js?v=20261112u1"></script>
-  <script src="../assets/multilingual-world.js?v=20261112u3"></script>
+  <script src="../assets/multilingual-world.js?v=20261112u4"></script>
 </body>
 </html>

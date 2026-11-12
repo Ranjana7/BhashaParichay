@@ -379,6 +379,7 @@
       '<div class="number-galaxy-planet planet-a"></div>' +
       '<div class="number-galaxy-planet planet-b"></div>' +
       '<div class="number-galaxy-planet planet-c"></div>' +
+      '<div class="number-galaxy-rocket" aria-hidden="true"></div>' +
       '<div class="number-galaxy-badges"></div>';
     ui.worldIllustration.appendChild(layer);
     numberGalaxyState.layer = layer;
@@ -627,7 +628,7 @@
     } else if (lessonDone && isLast) {
       ui.worldNextLessonBtn.disabled = true;
       ui.worldNextLessonBtn.textContent = "World Completed";
-      ui.worldProgressText.textContent = "Great job! Keep building 50 stars + 1 gem in this world to unlock the next one.";
+      ui.worldProgressText.textContent = "Hooray! A new world is ready. Let's explore!";
       updateHomeCompletion();
       setMascot("dance");
       setSpeech("Hooray! Another magical adventure completed!", "world", { category: "completion", holdMs: 4200 });
@@ -643,7 +644,7 @@
     const availableStars = Math.max(0, Math.floor(Number(unlockRewards.stars || 0)));
     const availableGems = Math.max(0, Math.floor(Number(unlockRewards.gems || 0)));
     if (availableStars < UNLOCK_STAR_TARGET || availableGems < UNLOCK_GEM_TARGET) {
-      ui.worldProgressText.textContent += " Available unlock balance: " + availableStars + " stars, " + availableGems + " gems.";
+      ui.worldProgressText.textContent = "Keep playing! Our next world is getting closer.";
     }
     updateUnlockInvitation();
   }

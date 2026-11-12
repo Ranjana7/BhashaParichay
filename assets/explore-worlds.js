@@ -79,20 +79,8 @@
 
   function unlockHint(worldKey) {
     if (worldKey === "alphabet") return "";
-    if (isUnlocked(worldKey)) return "Hooray! Your next adventure is ready!";
-    const rewards = typeof window.spGetRewards === "function"
-      ? window.spGetRewards(orderKeys, worldTotals)
-      : { stars: 0, gems: 0 };
-    const stars = Math.max(0, Math.floor(Number(rewards.stars || 0)));
-    const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
-    const starsRemaining = Math.max(0, 50 - stars);
-    const gemsRemaining = Math.max(0, 1 - gems);
-    if (starsRemaining > 0 && gemsRemaining > 0) {
-      return starsRemaining + " stars and " + gemsRemaining + " gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
-    }
-    if (starsRemaining > 0) return starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + " needed";
-    if (gemsRemaining > 0) return gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
-    return "Ready to unlock!";
+    if (isUnlocked(worldKey)) return "Hooray! A new world is ready. Let's explore!";
+    return "Keep playing! Our next world is getting closer.";
   }
 
   grid.innerHTML = "";
