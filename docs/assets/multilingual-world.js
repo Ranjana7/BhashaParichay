@@ -6,12 +6,17 @@
   const language = languages[languageKey];
   if (!language) return;
 
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = window.Motion || {};
+  const animate = motion.animate || function () {};
   const STORAGE_PREFIX = language.storagePrefix;
   const LAST_WORLD_KEY = STORAGE_PREFIX + ".lastWorld";
   const params = new URLSearchParams(window.location.search);
   const worldKey = params.get("world") || localStorage.getItem(LAST_WORLD_KEY) || language.worlds[0].key;
   const world = language.worlds.find(function (item) { return item.key === worldKey; }) || language.worlds[0];
   localStorage.setItem(LAST_WORLD_KEY, world.key);
+  document.body.classList.add("lang-theme-" + (language.languageTheme || language.key));
+  document.body.classList.add("lang-world-" + world.key);
 
   const ui = {
     title: document.getElementById("mwTitle"),
@@ -72,6 +77,13 @@
     writeJson(WORLD_KEY, progress);
   }
 
+  function pulsePanels() {
+    if (prefersReducedMotion) return;
+    const panels = Array.prototype.slice.call(document.querySelectorAll(".panel"));
+    if (!panels.length) return;
+    animate(panels, { opacity: [0.95, 1], transform: ["translateY(0px)", "translateY(-2px)", "translateY(0px)"] }, { duration: 0.32, easing: "ease-in-out" });
+  }
+
   function reward(eventKey, stars, gems) {
     if (progress.rewardedEvents[eventKey]) return;
     progress.rewardedEvents[eventKey] = true;
@@ -108,6 +120,7 @@
           runtime.matchDone = true;
           reward(world.key + ".match", 1, 0);
           ui.matchStatus.textContent = "Great job!";
+          pulsePanels();
         } else {
           ui.matchStatus.textContent = "Try again!";
         }
@@ -144,6 +157,7 @@
           runtime.listenDone = true;
           reward(world.key + ".listen", 1, 0);
           ui.listenStatus.textContent = "You listened carefully!";
+          pulsePanels();
         } else {
           ui.listenStatus.textContent = "Listen once more and try again.";
         }
@@ -173,6 +187,7 @@
         runtime.buildDone = true;
         reward(world.key + ".build", 1, 0);
         ui.buildStatus.textContent = "Wonderful building!";
+        pulsePanels();
       } else {
         ui.buildStatus.textContent = "Try arranging the tiles again.";
       }
@@ -198,6 +213,10 @@
     }
     renderHeader();
     ui.buildStatus.textContent = "Lesson complete! You earned bonus stars and a gem.";
+    if (window.confetti && !prefersReducedMotion) {
+      window.confetti({ particleCount: 46, spread: 58, origin: { y: 0.7 } });
+    }
+    pulsePanels();
   }
 
   renderHeader();

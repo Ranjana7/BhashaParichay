@@ -6,9 +6,13 @@
   const language = languages[languageKey];
   if (!language) return;
 
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = window.Motion || {};
+  const animate = motion.animate || function () {};
   const STORAGE_PREFIX = language.storagePrefix;
   const WORLD_UNLOCKS_KEY = STORAGE_PREFIX + ".worldUnlocks.v1";
   const LAST_WORLD_KEY = STORAGE_PREFIX + ".lastWorld";
+  const WORLD_URL_KEY = "bhashaParichay.ui.lastLanguage";
 
   const ui = {
     title: document.getElementById("languageTitle"),
@@ -19,8 +23,10 @@
     medals: document.getElementById("languageMedalStatus")
   };
 
+  document.body.classList.add("lang-theme-" + (language.languageTheme || language.key));
+  localStorage.setItem(WORLD_URL_KEY, language.key);
   if (ui.title) ui.title.textContent = language.title;
-  if (ui.subtitle) ui.subtitle.textContent = "Choose a world and start your " + language.languageName + " adventure.";
+  if (ui.subtitle) ui.subtitle.textContent = language.welcomeLine || ("Choose a world and start your " + language.languageName + " adventure.");
 
   function readJson(key, fallback) {
     try {
@@ -99,6 +105,19 @@
     return Array.isArray(progress.completedLessons) && progress.completedLessons.length >= world.lessons.length;
   }
 
+  function goToWorld(worldKey) {
+    localStorage.setItem(LAST_WORLD_KEY, worldKey);
+    const target = "world.html?world=" + encodeURIComponent(worldKey);
+    if (prefersReducedMotion) {
+      window.location.href = target;
+      return;
+    }
+    document.body.classList.add("page-transitioning");
+    setTimeout(function () {
+      window.location.href = target;
+    }, 220);
+  }
+
   function renderWorldCards(rewards, unlockedSet) {
     if (!ui.worldGrid) return;
     ui.worldGrid.innerHTML = "";
@@ -106,16 +125,18 @@
       const unlocked = unlockedSet.has(world.key);
       const card = document.createElement("button");
       card.type = "button";
-      card.className = "world-card " + (unlocked ? "world-alphabet" : "locked");
+      card.className = "world-card " + (world.cardClass || "world-alphabet") + (unlocked ? "" : " locked");
+      const art = world.illustration
+        ? '<span class="world-icon world-photo"><img src="' + world.illustration + '" alt="' + world.title + ' illustration"></span>'
+        : '<span class="world-icon"><i></i><i></i><i></i></span>';
       card.innerHTML =
-        '<span class="world-icon">' + world.icon + "</span>" +
+        art +
         '<span class="world-title">' + world.title + "</span>" +
         '<span class="world-text">' + world.subtitle + "</span>" +
         '<span class="world-text">' + (unlocked ? "Let's Explore!" : "Collect 20 stars + 1 gem to unlock") + "</span>";
       card.disabled = !unlocked;
       card.addEventListener("click", function () {
-        localStorage.setItem(LAST_WORLD_KEY, world.key);
-        window.location.href = "world.html?world=" + encodeURIComponent(world.key);
+        goToWorld(world.key);
       });
       ui.worldGrid.appendChild(card);
     });
@@ -130,4 +151,15 @@
       : language.languageName + " Level 1 medal: keep learning!";
   }
   renderWorldCards(synced, new Set(synced.unlocked));
+
+  if (!prefersReducedMotion) {
+    const cards = Array.prototype.slice.call(document.querySelectorAll(".world-card"));
+    if (cards.length) {
+      animate(
+        cards,
+        { opacity: [0, 1], transform: ["translateY(9px)", "translateY(0px)"] },
+        { duration: 0.36, easing: "ease-out", delay: function (i) { return Math.min(0.25, i * 0.035); } }
+      );
+    }
+  }
 })();

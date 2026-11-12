@@ -3,6 +3,8 @@ window.BHASHA_LANGUAGES = {
     key: "spanish",
     title: "SpanishParichay",
     languageName: "Spanish",
+    languageTheme: "spanish",
+    welcomeLine: "Hola! Explore Spanish worlds with Mithu.",
     storagePrefix: "bhashaParichay.spanish",
     levelOneWorld: "greetings",
     worlds: [
@@ -10,7 +12,8 @@ window.BHASHA_LANGUAGES = {
         key: "greetings",
         title: "Greeting Garden",
         subtitle: "Hello words and polite phrases",
-        icon: "👋",
+        cardClass: "world-alphabet",
+        illustration: "../assets/illustrations/vocab/family.svg",
         lessons: [
           {
             title: "Say Hello",
@@ -30,7 +33,8 @@ window.BHASHA_LANGUAGES = {
         key: "colours",
         title: "Colour Carnival",
         subtitle: "Bright colour words",
-        icon: "🎨",
+        cardClass: "world-colour",
+        illustration: "../assets/illustrations/vocab/lotus.svg",
         lessons: [
           {
             title: "Rainbow Colours",
@@ -50,7 +54,8 @@ window.BHASHA_LANGUAGES = {
         key: "numbers",
         title: "Number Rocket",
         subtitle: "Count from one to ten",
-        icon: "🚀",
+        cardClass: "world-galaxy",
+        illustration: "../assets/illustrations/vocab/moon.svg",
         lessons: [
           {
             title: "First Numbers",
@@ -70,7 +75,8 @@ window.BHASHA_LANGUAGES = {
         key: "animals",
         title: "Animal Amigos",
         subtitle: "Friendly animal names",
-        icon: "🦁",
+        cardClass: "world-jungle",
+        illustration: "../assets/illustrations/vocab/elephant.svg",
         lessons: [
           {
             title: "Jungle Friends",
@@ -90,7 +96,8 @@ window.BHASHA_LANGUAGES = {
         key: "food",
         title: "Food Fiesta",
         subtitle: "Tasty everyday food words",
-        icon: "🍎",
+        cardClass: "world-word",
+        illustration: "../assets/illustrations/vocab/fruit.svg",
         lessons: [
           {
             title: "Snack Time",
@@ -110,7 +117,8 @@ window.BHASHA_LANGUAGES = {
         key: "family",
         title: "Family Fiesta",
         subtitle: "People at home",
-        icon: "👨‍👩‍👧",
+        cardClass: "world-story",
+        illustration: "../assets/illustrations/vocab/family.svg",
         lessons: [
           {
             title: "My Family",
@@ -130,7 +138,8 @@ window.BHASHA_LANGUAGES = {
         key: "objects",
         title: "Object Orchard",
         subtitle: "Useful classroom objects",
-        icon: "📚",
+        cardClass: "world-sentence",
+        illustration: "../assets/illustrations/vocab/chariot.svg",
         lessons: [
           {
             title: "Classroom Basics",
@@ -152,6 +161,8 @@ window.BHASHA_LANGUAGES = {
     key: "portuguese",
     title: "PortugueseParichay",
     languageName: "Portuguese",
+    languageTheme: "portuguese",
+    welcomeLine: "Olá! Explore Brazilian Portuguese worlds with Mithu.",
     variantLabel: "Brazilian Portuguese",
     storagePrefix: "bhashaParichay.portuguese",
     levelOneWorld: "greetings",
@@ -160,7 +171,8 @@ window.BHASHA_LANGUAGES = {
         key: "greetings",
         title: "Greeting Grove",
         subtitle: "Hello phrases in Brazilian Portuguese",
-        icon: "👋",
+        cardClass: "world-alphabet",
+        illustration: "../assets/illustrations/vocab/family.svg",
         lessons: [
           {
             title: "Oi and Friends",
@@ -180,7 +192,8 @@ window.BHASHA_LANGUAGES = {
         key: "colours",
         title: "Color Parade",
         subtitle: "Bright colour words",
-        icon: "🎨",
+        cardClass: "world-colour",
+        illustration: "../assets/illustrations/vocab/lotus.svg",
         lessons: [
           {
             title: "Color Splash",
@@ -200,7 +213,8 @@ window.BHASHA_LANGUAGES = {
         key: "numbers",
         title: "Number Ship",
         subtitle: "Count from one to ten",
-        icon: "🚢",
+        cardClass: "world-galaxy",
+        illustration: "../assets/illustrations/vocab/moon.svg",
         lessons: [
           {
             title: "Counting Time",
@@ -220,7 +234,8 @@ window.BHASHA_LANGUAGES = {
         key: "animals",
         title: "Animal Amigos",
         subtitle: "Friendly animal names",
-        icon: "🐒",
+        cardClass: "world-jungle",
+        illustration: "../assets/illustrations/vocab/elephant.svg",
         lessons: [
           {
             title: "Animal Friends",
@@ -240,7 +255,8 @@ window.BHASHA_LANGUAGES = {
         key: "food",
         title: "Food Festival",
         subtitle: "Simple food words",
-        icon: "🍌",
+        cardClass: "world-word",
+        illustration: "../assets/illustrations/vocab/fruit.svg",
         lessons: [
           {
             title: "Meal Words",
@@ -260,7 +276,8 @@ window.BHASHA_LANGUAGES = {
         key: "family",
         title: "Family Forest",
         subtitle: "Family words for children",
-        icon: "👨‍👩‍👦",
+        cardClass: "world-story",
+        illustration: "../assets/illustrations/vocab/family.svg",
         lessons: [
           {
             title: "My Family",
@@ -280,7 +297,8 @@ window.BHASHA_LANGUAGES = {
         key: "objects",
         title: "Object Oasis",
         subtitle: "Classroom and home objects",
-        icon: "🧸",
+        cardClass: "world-sentence",
+        illustration: "../assets/illustrations/vocab/chariot.svg",
         lessons: [
           {
             title: "Object Words",
