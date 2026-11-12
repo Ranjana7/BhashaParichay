@@ -1,10 +1,16 @@
 (function initCommon() {
-  const MUTE_KEY = "sanskritParichay.muted";
-  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
-  const HOME_KEY = "sanskritParichay.home.progress";
-  const PENDING_SCROLL_KEY = "sanskritParichay.pendingScroll";
-  const FOREST_STATE_KEY = "sanskritParichay.alphabetForest.v3";
-  const LEGACY_FOREST_KEY = "sanskritParichay.alphabetForest.progress";
+  const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
+  const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskrit-home.html";
+  const LANGUAGE_CHOOSER_URL = window.SP_LANGUAGE_CHOOSER_URL || "index.html";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
+  const MUTE_KEY = storageKey("muted");
+  const LAST_WORLD_KEY = storageKey("lastWorld");
+  const HOME_KEY = storageKey("home.progress");
+  const PENDING_SCROLL_KEY = storageKey("pendingScroll");
+  const FOREST_STATE_KEY = storageKey("alphabetForest.v3");
+  const LEGACY_FOREST_KEY = storageKey("alphabetForest.progress");
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const WORLD_TOTALS = {
     alphabet: 9,
@@ -281,7 +287,8 @@
   }
 
   function normalizeMainNavigation() {
-    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    const currentPath = window.location.pathname.split("/").pop() || LANGUAGE_HOME_URL;
+    const languageHomePath = (LANGUAGE_HOME_URL || "sanskrit-home.html").split("/").pop();
     const worldKey = getRouteWorldKey();
     const worldMeta = worldKey ? (WORLD_META[worldKey] || WORLD_META.alphabet) : null;
 
@@ -297,9 +304,9 @@
     document.querySelectorAll(".main-nav").forEach(function (nav) {
       nav.innerHTML = "";
       appendLink(nav, {
-        href: "index.html",
+        href: LANGUAGE_HOME_URL,
         text: "Home",
-        current: currentPath === "index.html" || currentPath === ""
+        current: currentPath === languageHomePath || currentPath === ""
       });
       appendLink(nav, {
         href: "about.html",
@@ -313,6 +320,16 @@
           current: currentPath === "alphabet-forest.html" || currentPath === "learning-world.html",
           isWorld: true
         });
+      }
+
+      function ensureLanguageChooserLink() {
+        const header = document.querySelector(".site-header");
+        if (!header || header.querySelector(".language-chooser-link")) return;
+        const link = document.createElement("a");
+        link.className = "button ghost tiny language-chooser-link";
+        link.href = LANGUAGE_CHOOSER_URL;
+        link.textContent = "🌍 Languages";
+        header.appendChild(link);
       }
     });
   }
@@ -429,7 +446,7 @@
 
   function attachCurrentWorldLinks() {
     const current = getCurrentWorldMeta();
-    const currentPath = window.location.pathname.split("/").pop() || "index.html";
+    const currentPath = window.location.pathname.split("/").pop() || LANGUAGE_HOME_URL;
     const currentHref = current.url.split("?")[0];
     document.querySelectorAll("[data-current-world]").forEach(function (node) {
       node.textContent = current.title;
@@ -700,6 +717,7 @@
   window.spResetWorldProgress = resetWorldProgress;
 
   normalizeMainNavigation();
+  ensureLanguageChooserLink();
   attachCurrentWorldLinks();
   applyPendingScroll();
   initMiniCursorMithu();

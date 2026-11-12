@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BhashaParichay | SanskritParichay Home</title>
+  <meta name="description" content="A magical Sanskrit learning adventure for children aged 5–12.">
+  <link rel="stylesheet" href="assets/styles.css?v=20261112u2">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="sanskrit-home.html" aria-current="page">Home</a>
+      <a href="alphabet-forest.html" data-current-world>Alphabet Forest</a>
+      <a href="about.html">About</a>
+    </nav>
+    <button id="muteToggle" class="mute-btn" aria-pressed="false">🔊 Sound: On</button>
+  </header>
+
+  <main id="main-content" class="page-wrap home-adventure">
+    <section class="magic-hero panel">
+      <div class="sky-decor" aria-hidden="true">
+        <span class="cloud cloud-a"></span>
+        <span class="cloud cloud-b"></span>
+        <span class="rainbow"></span>
+        <div id="lottieButterflyOne" class="lottie-butterfly b-one"></div>
+        <div id="lottieButterflyTwo" class="lottie-butterfly b-two"></div>
+        <div id="lottieButterflyThree" class="lottie-butterfly b-three"></div>
+        <div id="lottieSparkleOne" class="lottie-spark s1"></div>
+        <div id="lottieSparkleTwo" class="lottie-spark s2"></div>
+      </div>
+
+      <div class="hero-layout">
+        <div id="mascot" class="parrot-mascot state-wave" aria-live="polite">
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="img" aria-label="Mithu parrot mascot">
+            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+          </svg>
+          <p id="mascotSpeech" class="mascot-speech">Hi! I'm Mithu, your learning buddy! Come explore magical forests, meet friendly animals, discover beautiful Sanskrit words and collect stars along the way! Ready? Let's play!</p>
+        </div>
+
+        <div class="hero-copy">
+          <p class="hero-badge">SanskritParichay Learning Adventure</p>
+          <h1>Namaste, Little Explorer!</h1>
+          <p id="homeHeroSubtitle">Welcome to SanskritParichay, where Sanskrit comes alive through magical adventures, playful games, wonderful stories and exciting discoveries!</p>
+          <p id="homeReturningMessage" class="footer-note" hidden>Welcome back, superstar! Ready to continue your adventure?</p>
+          <div class="hero-actions">
+            <a class="button primary big-action" href="alphabet-forest.html" id="playNowBtn">Let's Start Our Adventure!</a>
+            <button class="button ghost big-action" id="continueBtn" type="button">Continue My Adventure</button>
+            <button class="button challenge big-action" id="challengeBtn" type="button">Challenge of the Day</button>
+            <a class="button ghost big-action" href="index.html">🌍 Choose Another Language</a>
+          </div>
+          <p id="challengeSubtitle" class="footer-note">Play a little extra and collect more stars and gems!</p>
+
+          <div class="hero-actions">
+            <div class="star-box">⭐ Stars: <span id="homeStars">0</span></div>
+            <div class="star-box">💎 Gems: <span id="homeGems">0</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section id="worlds" class="panel">
+      <h2>Choose a Learning World</h2>
+      <p>Follow your magical world map, one adventure at a time.</p>
+      <div class="world-grid">
+        <button class="world-card world-alphabet" data-world="alphabet" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/forest.svg" alt="Alphabet Forest illustration">
+          </span>
+          <span class="world-title">Alphabet Forest</span>
+          <span class="world-text">Start Adventure</span>
+        </button>
+        <button class="world-card world-jungle" data-world="animals" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/elephant.svg" alt="Animal Jungle illustration">
+          </span>
+          <span class="world-title">Animal Jungle</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-galaxy" data-world="numbers" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/moon.svg" alt="Number Galaxy illustration">
+          </span>
+          <span class="world-title">Number Galaxy</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-colour" data-world="colours" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/lotus.svg" alt="Colour Kingdom illustration">
+          </span>
+          <span class="world-title">Colour Kingdom</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-word" data-world="words" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/family.svg" alt="Word Wonderland illustration">
+          </span>
+          <span class="world-title">Word Wonderland</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-sentence" data-world="sentences" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/chariot.svg" alt="Sentence Castle illustration">
+          </span>
+          <span class="world-title">Sentence Castle</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-story" data-world="stories" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/river.svg" alt="Story Island illustration">
+          </span>
+          <span class="world-title">Story Island</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+        <button class="world-card world-culture" data-world="culture" type="button">
+          <span class="world-icon world-photo">
+            <img src="assets/illustrations/vocab/yoga.svg" alt="Sanskrit and Culture illustration">
+          </span>
+          <span class="world-title">Sanskrit and Culture</span>
+          <span class="world-text">Let's Explore!</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="previewPanel" class="panel preview-panel" aria-live="polite">
+      <h2 id="previewTitle">Challenge of the Day</h2>
+      <p id="previewText">Tap “Challenge of the Day” to play your five-step daily quest.</p>
+      <p id="challengeMeta" class="footer-note">Finish the challenge to earn 2 Gems once per day on this device.</p>
+      <div class="progress-meter" aria-hidden="true">
+        <div id="challengeProgressFill" class="progress-fill"></div>
+      </div>
+      <p id="challengeProgressText" class="footer-note">Progress: 0/5</p>
+      <div id="previewChoices" class="choices"></div>
+      <p id="previewStatus" class="status"></p>
+      <div class="hero-actions">
+        <button id="challengeActionBtn" class="button ghost" type="button" style="display:none;">Next challenge</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/vendor/motion.min.js"></script>
+  <script src="assets/vendor/lottie.min.js"></script>
+  <script src="assets/vendor/canvas-confetti.min.js"></script>
+  <script src="assets/site-config.js?v=20261112u3"></script>
+  <script src="assets/messages.js?v=20261111u4"></script>
+  <script src="assets/progress-store.js?v=20261112u3"></script>
+  <script src="assets/common.js?v=20261112u3"></script>
+  <script src="assets/vocabulary-map.js?v=20261112u2"></script>
+  <script src="assets/home.js?v=20261112u3"></script>
+</body>
+</html>

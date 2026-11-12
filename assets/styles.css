@@ -127,6 +127,85 @@ body {
   border-radius: 12px;
 }
 
+.language-chooser-link {
+  text-decoration: none;
+}
+
+.language-hero-layout {
+  display: grid;
+  grid-template-columns: minmax(120px, 220px) 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.language-hero-mithu {
+  display: grid;
+  place-items: center;
+}
+
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.language-card {
+  display: grid;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  border: 2px solid #dbe6ff;
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 8px 18px rgba(44, 62, 120, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.language-card:hover,
+.language-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px rgba(44, 62, 120, 0.16);
+}
+
+.language-illustration {
+  font-size: 2rem;
+}
+
+.medal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.medal-card {
+  border-radius: 14px;
+  border: 2px solid #dbe6ff;
+  padding: 12px;
+  background: #fff;
+}
+
+.medal-card.pending {
+  opacity: 0.75;
+  filter: saturate(0.85);
+}
+
+.medal-card.earned {
+  border-color: #ffd464;
+  background: linear-gradient(180deg, #fffdf2, #fff8dd);
+}
+
+.medal-icon {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+}
+
+@media (max-width: 780px) {
+  .language-hero-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .main-nav a[aria-current="page"] {
   color: #fff;
   background: linear-gradient(120deg, var(--primary), var(--primary-2));

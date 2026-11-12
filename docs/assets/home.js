@@ -1,9 +1,13 @@
 (function initHomeAdventure() {
-  const HOME_KEY = "sanskritParichay.home.progress";
-  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
-  const MUTE_KEY = "sanskritParichay.muted";
-  const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
-  const PENDING_SCROLL_KEY = "sanskritParichay.pendingScroll";
+  const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
+  const HOME_KEY = storageKey("home.progress");
+  const LAST_WORLD_KEY = storageKey("lastWorld");
+  const MUTE_KEY = storageKey("muted");
+  const CHALLENGE_KEY = storageKey("dailyChallenge.progress");
+  const PENDING_SCROLL_KEY = storageKey("pendingScroll");
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
   const panel = document.getElementById("previewPanel");

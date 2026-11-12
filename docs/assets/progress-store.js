@@ -1,13 +1,17 @@
 (function initProgressStore(globalScope) {
-  const FOREST_V3_KEY = "sanskritParichay.alphabetForest.v3";
-  const FOREST_LEGACY_KEY = "sanskritParichay.alphabetForest.progress";
-  const FOREST_LEGACY_V1_KEY = "sanskritParichay.alphabetForest.progression.v1";
-  const FOREST_LEGACY_TREE_KEY = "sanskritParichay.alphabetForest.tree.progress";
-  const FOREST_LEGACY_GARDEN_KEY = "sanskritParichay.alphabetForest.garden.learned";
-  const HOME_KEY = "sanskritParichay.home.progress";
-  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
-  const CHALLENGE_KEY = "sanskritParichay.dailyChallenge.progress";
-  const WORLD_UNLOCKS_KEY = "sanskritParichay.world.unlocks.v1";
+  const STORAGE_PREFIX = globalScope.SP_STORAGE_PREFIX || "sanskritParichay";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
+  const FOREST_V3_KEY = storageKey("alphabetForest.v3");
+  const FOREST_LEGACY_KEY = storageKey("alphabetForest.progress");
+  const FOREST_LEGACY_V1_KEY = storageKey("alphabetForest.progression.v1");
+  const FOREST_LEGACY_TREE_KEY = storageKey("alphabetForest.tree.progress");
+  const FOREST_LEGACY_GARDEN_KEY = storageKey("alphabetForest.garden.learned");
+  const HOME_KEY = storageKey("home.progress");
+  const LAST_WORLD_KEY = storageKey("lastWorld");
+  const CHALLENGE_KEY = storageKey("dailyChallenge.progress");
+  const WORLD_UNLOCKS_KEY = storageKey("world.unlocks.v1");
   const LETTER_COUNT = 48;
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
@@ -297,7 +301,7 @@
       rewardedGroupBonuses: {},
       rewardedActivityGems: {}
     };
-    const raw = readJson("sanskritParichay.world." + worldKey + ".progress", fallback) || fallback;
+    const raw = readJson(storageKey("world." + worldKey + ".progress"), fallback) || fallback;
     const completedLessons = Array.isArray(raw.completedLessons)
       ? raw.completedLessons.filter(function (value, index, arr) {
           return Number.isInteger(value) && value >= 0 && value < totalLessons && arr.indexOf(value) === index;
@@ -692,7 +696,7 @@
     localStorage.removeItem(HOME_KEY);
     localStorage.removeItem(CHALLENGE_KEY);
     order.forEach(function (worldKey) {
-      localStorage.removeItem("sanskritParichay.world." + worldKey + ".progress");
+      localStorage.removeItem(storageKey("world." + worldKey + ".progress"));
     });
     saveUnlockState({
       unlocked: ["alphabet"],
@@ -726,7 +730,7 @@
     } else {
       const totalLessons = Number(totals[worldKey] || 3);
       const progress = loadWorldProgress(worldKey, totalLessons);
-      writeJson("sanskritParichay.world." + worldKey + ".progress", {
+      writeJson(storageKey("world." + worldKey + ".progress"), {
         lessonIndex: 0,
         stars: Number(progress.stars || 0),
         gems: Number(progress.gems || 0),

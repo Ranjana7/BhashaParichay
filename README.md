@@ -1,10 +1,13 @@
-# SanskritParichay (GitHub Pages)
+# BhashaParichay (GitHub Pages)
 
-Free, static, kid-friendly Sanskrit learning website for ages 5–12.
+Free, static, kid-friendly multilingual learning website for ages 5–12.
 
 ## What is included
 
-- Home page (`index.html`)
+- Language chooser home (`index.html`)
+- Sanskrit child home (`sanskrit-home.html`)
+- Spanish section placeholder (`spanish-home.html`)
+- Portuguese section placeholder (`portuguese-home.html`)
 - Alphabet Forest playable lesson (`alphabet-forest.html`) with eight scrollable activity sections
 - Multi-world lesson engine (`learning-world.html` + `assets/learning-world.js`)
 - About page (`about.html`)
@@ -32,17 +35,17 @@ Free, static, kid-friendly Sanskrit learning website for ages 5–12.
 ## Run locally
 
 1. Open `index.html` in your browser.
-2. Click **Start Playing** to open Alphabet Forest.
+2. Choose a language card.
 
 ## Publish on GitHub Pages (project URL style)
 
-1. Create a new repository in your GitHub account (example: `sanskritparichay`).
+1. Create a new repository in your GitHub account (example: `BhashaParichay`).
 2. In this folder (`C:\Users\ranjasharma\Downloads\SanskritParichay`), run:
 
 ```powershell
 git init
 git add .
-git commit -m "Initial SanskritParichay website"
+git commit -m "Initial BhashaParichay website"
 git branch -M main
 git remote add origin https://github.com/USERNAME/REPOSITORY.git
 git push -u origin main

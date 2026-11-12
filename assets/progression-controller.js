@@ -7,7 +7,7 @@
     window.SPProgressionController = rootFactory();
   }
 })(function progressionControllerFactory() {
-  const DEFAULT_STORAGE_KEY = "sanskritParichay.alphabetForest.progression.v1";
+  const DEFAULT_STORAGE_KEY = ((typeof window !== "undefined" && window.SP_STORAGE_PREFIX) || "sanskritParichay") + ".alphabetForest.progression.v1";
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));

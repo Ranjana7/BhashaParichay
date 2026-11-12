@@ -1,10 +1,14 @@
 (function alphabetForestCoreModule(globalScope) {
-  const STORAGE_KEY = "sanskritParichay.alphabetForest.v3";
+  const STORAGE_PREFIX = globalScope.SP_STORAGE_PREFIX || "sanskritParichay";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
+  const STORAGE_KEY = storageKey("alphabetForest.v3");
   const LEGACY_KEYS = [
-    "sanskritParichay.alphabetForest.progression.v1",
-    "sanskritParichay.alphabetForest.progress",
-    "sanskritParichay.alphabetForest.tree.progress",
-    "sanskritParichay.alphabetForest.garden.learned"
+    storageKey("alphabetForest.progression.v1"),
+    storageKey("alphabetForest.progress"),
+    storageKey("alphabetForest.tree.progress"),
+    storageKey("alphabetForest.garden.learned")
   ];
   const ACTIVITY_IDS = [
     "magical-tree",
