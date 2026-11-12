@@ -4,12 +4,17 @@
   const TREE_MITHU_OFFSET_Y = -18;
   const LETTER_COUNT = 48;
   const TREE_GROUP_SIZE = 5;
+  const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
+  const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskrit-home.html";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
   const REDUCED_MOTION = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const WORLD_ORDER = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
-  const UNLOCK_EVENT_KEY = "sanskritParichay.unlock.event.alphabet";
-  const UNLOCK_INVITE_KEY = "sanskritParichay.unlock.invite.alphabet";
+  const UNLOCK_EVENT_KEY = storageKey("unlock.event.alphabet");
+  const UNLOCK_INVITE_KEY = storageKey("unlock.invite.alphabet");
   const SPEECH_PRIORITY = {
     welcome: 1,
     guidance: 2,
@@ -47,7 +52,7 @@
   const PRACTICE_ACTIVITY_IDS = ACTIVITIES
     .map(function (activity) { return activity.id; })
     .filter(function (activityId) { return !LEARNING_ACTIVITY_IDS.includes(activityId); });
-  const HOME_KEY = "sanskritParichay.home.progress";
+  const HOME_KEY = storageKey("home.progress");
   const ACTIVITY_IDS = ACTIVITIES.map(function mapId(activity) { return activity.id; });
   const ACTIVITY_META = Object.fromEntries(ACTIVITIES.map(function mapMeta(activity) { return [activity.id, activity]; }));
   const ACTIVITY_SPEECH = {
@@ -471,7 +476,7 @@
   }
 
   function initMuteState() {
-    const fromStorage = localStorage.getItem("sanskritParichay.muted");
+    const fromStorage = localStorage.getItem(storageKey("muted"));
     runtime.muted = fromStorage === "true";
     renderMuteButtons();
   }
@@ -490,7 +495,7 @@
 
   function setMuted(value) {
     runtime.muted = value;
-    localStorage.setItem("sanskritParichay.muted", String(value));
+    localStorage.setItem(storageKey("muted"), String(value));
     renderMuteButtons();
   }
 
@@ -954,7 +959,7 @@
   }
 
   function getWorldUrl(worldKey) {
-    if (!worldKey) return "index.html#worlds";
+    if (!worldKey) return LANGUAGE_HOME_URL + "#worlds";
     if (worldKey === "alphabet") return "alphabet-forest.html";
     return "learning-world.html?world=" + worldKey;
   }
@@ -985,7 +990,7 @@
           hideUnlockInvite();
           return;
         }
-        localStorage.setItem("sanskritParichay.lastWorld", nextWorld);
+        localStorage.setItem(storageKey("lastWorld"), nextWorld);
         localStorage.removeItem(UNLOCK_INVITE_KEY);
         window.location.href = getWorldUrl(nextWorld);
       });

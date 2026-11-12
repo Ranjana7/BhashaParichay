@@ -1,5 +1,6 @@
 (function initMyProgress() {
-  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
+  const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
+  const LAST_WORLD_KEY = STORAGE_PREFIX + ".lastWorld";
   const worldList = document.getElementById("progressWorldList");
   if (!worldList) return;
 

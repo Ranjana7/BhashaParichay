@@ -8,13 +8,18 @@
     return;
   }
 
-  const HOME_KEY = "sanskritParichay.home.progress";
-  const WORLD_KEY = "sanskritParichay.world." + worldKey + ".progress";
-  const LAST_WORLD_KEY = "sanskritParichay.lastWorld";
+  const STORAGE_PREFIX = window.SP_STORAGE_PREFIX || "sanskritParichay";
+  const LANGUAGE_HOME_URL = window.SP_LANGUAGE_HOME_URL || "sanskrit-home.html";
+  function storageKey(suffix) {
+    return STORAGE_PREFIX + "." + suffix;
+  }
+  const HOME_KEY = storageKey("home.progress");
+  const WORLD_KEY = storageKey("world." + worldKey + ".progress");
+  const LAST_WORLD_KEY = storageKey("lastWorld");
   const UNLOCK_STAR_TARGET = 50;
   const UNLOCK_GEM_TARGET = 1;
-  const UNLOCK_EVENT_KEY = "sanskritParichay.unlock.event." + worldKey;
-  const UNLOCK_INVITE_KEY = "sanskritParichay.unlock.invite." + worldKey;
+  const UNLOCK_EVENT_KEY = storageKey("unlock.event." + worldKey);
+  const UNLOCK_INVITE_KEY = storageKey("unlock.invite." + worldKey);
   const SPEECH_PRIORITY = {
     welcome: 1,
     guidance: 2,
@@ -47,7 +52,7 @@
         culture: 3
       };
   if (typeof window.spIsWorldUnlocked === "function" && !window.spIsWorldUnlocked(worldKey, WORLD_ORDER)) {
-    window.location.href = "index.html#worlds";
+    window.location.href = LANGUAGE_HOME_URL + "#worlds";
     return;
   }
   const motion = window.Motion || {};
@@ -413,13 +418,13 @@
 
   function getNextWorldUrl() {
     const nextWorld = getNextWorldKey();
-    if (!nextWorld) return "index.html#worlds";
+    if (!nextWorld) return LANGUAGE_HOME_URL + "#worlds";
     if (nextWorld === "alphabet") return "alphabet-forest.html";
     return "learning-world.html?world=" + nextWorld;
   }
 
   function getWorldUrl(worldValue) {
-    if (!worldValue) return "index.html#worlds";
+    if (!worldValue) return LANGUAGE_HOME_URL + "#worlds";
     if (worldValue === "alphabet") return "alphabet-forest.html";
     return "learning-world.html?world=" + worldValue;
   }
@@ -992,7 +997,7 @@
     }
     if (ui.worldBackBtn) {
       ui.worldBackBtn.addEventListener("click", function () {
-        window.location.href = "index.html#worlds";
+        window.location.href = LANGUAGE_HOME_URL + "#worlds";
       });
     }
   }
