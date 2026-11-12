@@ -55,7 +55,7 @@ window.BHASHA_LANGUAGES = {
         title: "Number Rocket",
         subtitle: "Count from one to ten",
         cardClass: "world-galaxy",
-        illustration: "../assets/illustrations/vocab/moon.svg",
+        illustration: "../assets/illustrations/vocab/rocket.svg",
         lessons: [
           {
             title: "First Numbers",
@@ -214,7 +214,7 @@ window.BHASHA_LANGUAGES = {
         title: "Number Ship",
         subtitle: "Count from one to ten",
         cardClass: "world-galaxy",
-        illustration: "../assets/illustrations/vocab/moon.svg",
+        illustration: "../assets/illustrations/vocab/ship.svg",
         lessons: [
           {
             title: "Counting Time",

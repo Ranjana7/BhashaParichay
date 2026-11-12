@@ -42,7 +42,12 @@
     buildCheck: document.getElementById("mwBuildCheck"),
     buildReset: document.getElementById("mwBuildReset"),
     buildRestart: document.getElementById("mwBuildRestart"),
-    completeLesson: document.getElementById("mwCompleteLesson")
+    completeLesson: document.getElementById("mwCompleteLesson"),
+    mascot: document.getElementById("mwMascot"),
+    mascotSpeech: document.getElementById("mwMascotSpeech"),
+    matchPanel: document.getElementById("mwMatchPanel"),
+    listenPanel: document.getElementById("mwListenPanel"),
+    buildPanel: document.getElementById("mwBuildPanel")
   };
 
   const lesson = world.lessons[0];
@@ -80,8 +85,32 @@
     matchDone: false,
     listenDone: false,
     buildDone: false,
-    buildAnswer: []
+    buildAnswer: [],
+    activePanel: "match"
   };
+
+  const guideText = (function createGuideText() {
+    if (language.key === "spanish") {
+      return {
+        intro: "Hola! I'm Mithu. Let's explore " + world.title + " together.",
+        match: "Match time! Tap the best answer.",
+        listen: "Now listen carefully and choose the sound you hear.",
+        build: "Great! Build the word with the tiles.",
+        correct: "Brilliant! You got it right.",
+        retry: "Nice try. Let's try that one more time.",
+        complete: "Hooray! You completed this lesson."
+      };
+    }
+    return {
+      intro: "Ola! I'm Mithu. Vamos explorar " + world.title + " juntos.",
+      match: "Hora de combinar! Escolha a resposta certa.",
+      listen: "Agora escute com atencao e escolha o som correto.",
+      build: "Excelente! Monte a palavra com as pecas.",
+      correct: "Perfeito! Voce acertou.",
+      retry: "Boa tentativa. Vamos tentar mais uma vez.",
+      complete: "Viva! Voce concluiu esta licao."
+    };
+  })();
 
   function persist() {
     writeJson(WORLD_KEY, progress);
@@ -92,6 +121,28 @@
     const panels = Array.prototype.slice.call(document.querySelectorAll(".panel"));
     if (!panels.length) return;
     animate(panels, { opacity: [0.95, 1], transform: ["translateY(0px)", "translateY(-2px)", "translateY(0px)"] }, { duration: 0.32, easing: "ease-in-out" });
+  }
+
+  function setMascotState(state) {
+    if (!ui.mascot) return;
+    ui.mascot.classList.remove("state-wave", "state-dancing");
+    ui.mascot.classList.add(state || "state-wave");
+  }
+
+  function setMascotSpeech(message, state) {
+    if (ui.mascotSpeech && message) ui.mascotSpeech.textContent = message;
+    setMascotState(state);
+  }
+
+  function messageForPanel(panelKey) {
+    if (panelKey === "listen") return guideText.listen;
+    if (panelKey === "build") return guideText.build;
+    return guideText.match;
+  }
+
+  function activatePanelGuide(panelKey) {
+    runtime.activePanel = panelKey;
+    setMascotSpeech(messageForPanel(panelKey), "state-wave");
   }
 
   function reward(eventKey, stars, gems) {
@@ -124,6 +175,26 @@
       const done = Array.isArray(progress.completedLessons) && progress.completedLessons.length > 0;
       ui.lessonCount.textContent = done ? "1/1 completed" : "0/1 completed";
     }
+
+    function initGuideFlow() {
+      setMascotSpeech(guideText.intro, "state-wave");
+      const panelPairs = [
+        { key: "match", node: ui.matchPanel },
+        { key: "listen", node: ui.listenPanel },
+        { key: "build", node: ui.buildPanel }
+      ].filter(function (item) { return Boolean(item.node); });
+      if (!panelPairs.length || typeof IntersectionObserver !== "function") return;
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          const found = panelPairs.find(function (item) { return item.node === entry.target; });
+          if (!found) return;
+          if (found.key === runtime.activePanel) return;
+          activatePanelGuide(found.key);
+        });
+      }, { threshold: 0.5 });
+      panelPairs.forEach(function (item) { observer.observe(item.node); });
+    }
   }
 
   function renderMatch() {
@@ -141,9 +212,11 @@
           runtime.matchDone = true;
           reward(eventKeyFor("match"), 1, 1);
           ui.matchStatus.textContent = "Great job!";
+          setMascotSpeech(guideText.correct, "state-dancing");
           pulsePanels();
         } else {
           ui.matchStatus.textContent = "Try again!";
+          setMascotSpeech(guideText.retry, "state-wave");
         }
       });
       ui.matchChoices.appendChild(btn);
@@ -179,9 +252,11 @@
           runtime.listenDone = true;
           reward(eventKeyFor("listen"), 1, 1);
           ui.listenStatus.textContent = "You listened carefully!";
+          setMascotSpeech(guideText.correct, "state-dancing");
           pulsePanels();
         } else {
           ui.listenStatus.textContent = "Listen once more and try again.";
+          setMascotSpeech(guideText.retry, "state-wave");
         }
       });
       ui.listenChoices.appendChild(btn);
@@ -210,9 +285,11 @@
         runtime.buildDone = true;
         reward(eventKeyFor("build"), 1, 1);
         ui.buildStatus.textContent = "Wonderful building!";
+        setMascotSpeech(guideText.correct, "state-dancing");
         pulsePanels();
       } else {
         ui.buildStatus.textContent = "Try arranging the tiles again.";
+        setMascotSpeech(guideText.retry, "state-wave");
       }
     };
     ui.buildReset.onclick = function () {
@@ -225,6 +302,7 @@
   function restartMatch() {
     runtime.matchDone = false;
     ui.matchStatus.textContent = "New attempt started.";
+    activatePanelGuide("match");
     bumpAttemptCycle("match");
     renderMatch();
   }
@@ -232,6 +310,7 @@
   function restartListen() {
     runtime.listenDone = false;
     ui.listenStatus.textContent = "New attempt started.";
+    activatePanelGuide("listen");
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     bumpAttemptCycle("listen");
     renderListen();
@@ -242,6 +321,7 @@
     runtime.buildAnswer = [];
     ui.buildAnswer.textContent = "";
     ui.buildStatus.textContent = "New attempt started.";
+    activatePanelGuide("build");
     bumpAttemptCycle("build");
     renderBuild();
   }
@@ -250,6 +330,7 @@
     const done = runtime.matchDone && runtime.listenDone && runtime.buildDone;
     if (!done) {
       ui.buildStatus.textContent = "Complete all three activities first.";
+      setMascotSpeech(messageForPanel(runtime.activePanel), "state-wave");
       return;
     }
     if (!Array.isArray(progress.completedLessons)) progress.completedLessons = [];
@@ -264,6 +345,7 @@
     reward(bonusKey, 5, 0);
     renderHeader();
     ui.buildStatus.textContent = "Lesson complete! You earned bonus stars.";
+    setMascotSpeech(guideText.complete, "state-dancing");
     if (window.confetti && !prefersReducedMotion) {
       window.confetti({ particleCount: 46, spread: 58, origin: { y: 0.7 } });
     }
@@ -271,6 +353,7 @@
   }
 
   renderHeader();
+  initGuideFlow();
   renderMatch();
   renderListen();
   renderBuild();

@@ -243,12 +243,8 @@
     const gems = Math.max(0, Math.floor(Number(rewards.gems || 0)));
     const starsRemaining = Math.max(0, UNLOCK_STAR_TARGET - stars);
     const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
-    if (starsRemaining <= 0 && gemsRemaining <= 0) return "Ready to unlock!";
-    if (starsRemaining > 0 && gemsRemaining > 0) {
-      return starsRemaining + " stars and " + gemsRemaining + " gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
-    }
-    if (starsRemaining > 0) return starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s") + " needed";
-    return gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s") + " needed";
+    if (starsRemaining <= 0 && gemsRemaining <= 0) return "Hooray! A new world is ready. Let's explore!";
+    return "Keep playing! Our next world is getting closer.";
   }
 
   function getPracticeAnchor(world) {
@@ -276,10 +272,8 @@
     const gemsRemaining = Math.max(0, UNLOCK_GEM_TARGET - gems);
     const sourceWorld = getBestEarnWorld(world);
     const message = (starsRemaining <= 0 && gemsRemaining <= 0)
-      ? "🌟 Amazing! You've earned enough rewards. Let's open your next world together."
-      : "🌟 Nearly there! Earn " + starsRemaining + " more star" + (starsRemaining === 1 ? "" : "s")
-        + (gemsRemaining > 0 ? (" and " + gemsRemaining + " more gem" + (gemsRemaining === 1 ? "" : "s")) : "")
-        + " and we can explore the next world together.";
+      ? "Hooray! A new world is ready. Let's explore!"
+      : "Keep playing! Our next world is getting closer.";
     return {
       sourceWorld: sourceWorld,
       message: message
