@@ -220,6 +220,10 @@ body {
   letter-spacing: 0.01em;
 }
 
+.language-lock-badge[hidden] {
+  display: none !important;
+}
+
 .language-portal {
   position: relative;
   width: 100%;
