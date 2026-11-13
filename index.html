@@ -374,7 +374,8 @@
       <section class="play-zone" aria-label="Mini game">
         <div class="play-head">
           <h2>Star Pop with Mithu</h2>
-          <div class="play-score" id="starScore">Score: 10</div>
+          <div class="play-score" id="totalScore">Total Score: 0</div>
+          <div class="play-score" id="currentLevelScore">Current Level Score: 0</div>
         </div>
         <div class="play-tools">
           <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
@@ -419,7 +420,8 @@
   <script>
     (function initHomePlayZone() {
       const field = document.getElementById("starField");
-      const scoreNode = document.getElementById("starScore");
+      const totalScoreNode = document.getElementById("totalScore");
+      const currentLevelScoreNode = document.getElementById("currentLevelScore");
       const msg = document.getElementById("gameMessage");
       const startBtn = document.getElementById("startStarGame");
       const retryBtn = document.getElementById("retryStarGame");
@@ -434,7 +436,7 @@
       const motionApi = window.Motion || {};
       const animate = motionApi.animate;
 
-      const GAME_STATE_KEY = "klww.home.starQuest.v3";
+      const GAME_STATE_KEY = "klww.home.starQuest.v4";
       const TOTAL_LEVELS = 20;
       const ORBS = [
         { icon: "⭐", name: "Stars", cssClass: "orb-star" },
@@ -444,7 +446,8 @@
         { icon: "🫧", name: "Bubbles", cssClass: "orb-moon" }
       ];
 
-      let score = 0;
+      let currentLevelScore = 0;
+      let totalScore = 0;
       let remaining = 0;
       let running = false;
       let timerId = null;
@@ -452,7 +455,8 @@
         currentLevel: 1,
         gateLevel: null,
         gate: { bhasha: false, youtube: false },
-        playedCurrentLevel: false
+        playedCurrentLevel: false,
+        perLevelScores: {}
       };
 
       function readJson(key, fallback) {
@@ -493,6 +497,16 @@
           youtube: Boolean(gate.youtube)
         };
         state.playedCurrentLevel = Boolean(loaded.playedCurrentLevel);
+        const loadedPerLevelScores = loaded.perLevelScores && typeof loaded.perLevelScores === "object" ? loaded.perLevelScores : {};
+        state.perLevelScores = {};
+        Object.keys(loadedPerLevelScores).forEach(function (key) {
+          const level = normalizeLevel(key);
+          const value = Math.max(0, Math.floor(Number(loadedPerLevelScores[key]) || 0));
+          state.perLevelScores[level] = value;
+        });
+        totalScore = Object.keys(state.perLevelScores).reduce(function (sum, key) {
+          return sum + Math.max(0, Math.floor(Number(state.perLevelScores[key]) || 0));
+        }, 0);
       }
 
       function levelConfig(levelNumber) {
@@ -515,9 +529,14 @@
         return !state.gateLevel || (state.gate.bhasha && state.gate.youtube);
       }
 
-      function setScore(next) {
-        score = next;
-        scoreNode.textContent = "Score: " + score;
+      function setCurrentLevelScore(next) {
+        currentLevelScore = Math.max(0, Math.floor(Number(next) || 0));
+        currentLevelScoreNode.textContent = "Current Level Score: " + currentLevelScore;
+      }
+
+      function setTotalScore(next) {
+        totalScore = Math.max(0, Math.floor(Number(next) || 0));
+        totalScoreNode.textContent = "Total Score: " + totalScore;
       }
 
       function clearField() {
@@ -558,15 +577,22 @@
         const level = levelConfig(state.currentLevel);
         running = false;
         clearTimeout(timerId);
-        updateMessage("Nice try! You saved " + score + " out of " + level.target + " " + level.name.toLowerCase() + ".");
-        setGuide("dancing", "Great effort! You scored " + score + ". Retry this level or unlock the next level with both destination buttons.", "Ready for retry or unlock mission");
+        state.perLevelScores[level.level] = currentLevelScore;
+        setTotalScore(Object.keys(state.perLevelScores).reduce(function (sum, key) {
+          return sum + Math.max(0, Math.floor(Number(state.perLevelScores[key]) || 0));
+        }, 0));
+        updateMessage("Nice try! You scored " + currentLevelScore + " on Level " + level.level + ".");
+        setGuide("dancing", "Great effort! You scored " + currentLevelScore + ". Retry this level or unlock the next level with both destination buttons.", "Ready for retry or unlock mission");
         if (state.currentLevel >= TOTAL_LEVELS) {
           state = {
             currentLevel: 1,
             gateLevel: null,
             gate: { bhasha: false, youtube: false },
-            playedCurrentLevel: false
+            playedCurrentLevel: false,
+            perLevelScores: {}
           };
+          setCurrentLevelScore(0);
+          setTotalScore(0);
           saveState();
           startBtn.textContent = "Start Level 1";
           if (typeof confetti === "function") confetti({ particleCount: 150, spread: 95, scalar: 0.9 });
@@ -580,9 +606,8 @@
         syncGateUi();
       }
 
-      function resetScoreForLevel(levelNumber) {
-        const cfg = levelConfig(levelNumber);
-        setScore(cfg.target);
+      function resetScoreForLevel() {
+        setCurrentLevelScore(0);
       }
 
       function celebrate(button) {
@@ -623,6 +648,7 @@
         }
 
         orb.addEventListener("click", function () {
+          setCurrentLevelScore(currentLevelScore + 1);
           remaining -= 1;
           celebrate(orb);
           if (typeof animate === "function") {
@@ -641,7 +667,7 @@
         timerId = setTimeout(function () {
           if (orb.isConnected && running) {
             orb.remove();
-            setScore(Math.max(0, score - 1));
+            setCurrentLevelScore(Math.max(0, currentLevelScore - 1));
             remaining -= 1;
             if (remaining <= 0) {
               finishRound();
@@ -667,7 +693,7 @@
         running = true;
         clearField();
         remaining = level.target;
-        resetScoreForLevel(state.currentLevel);
+        resetScoreForLevel();
         updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
         setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
         createBubbles();
@@ -680,7 +706,7 @@
         clearField();
         running = true;
         remaining = level.target;
-        resetScoreForLevel(state.currentLevel);
+        resetScoreForLevel();
         updateMessage("Retry Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
         setGuide("idle", "Retry time! Let's beat your score on Level " + level.level + ".", "Retry in progress");
         createBubbles();
@@ -712,7 +738,6 @@
         if (action === "bhasha") state.gate.bhasha = true;
         if (action === "youtube") state.gate.youtube = true;
         if (isGateOpen()) {
-          resetScoreForLevel(state.gateLevel);
           setGuide("dancing", "Great! Level " + state.gateLevel + " is now unlocked. Tap Play to continue!", "Unlocked");
           if (typeof confetti === "function") confetti({ particleCount: 70, spread: 68, scalar: 0.8 });
         }
@@ -753,6 +778,8 @@
           const stored = readJson(GAME_STATE_KEY, null);
           if (stored) {
             loadState();
+            setTotalScore(totalScore);
+            if (!running) setCurrentLevelScore(0);
             syncGateUi();
           }
           updateGuideByScroll();
@@ -761,8 +788,8 @@
       window.addEventListener("scroll", updateGuideByScroll, { passive: true });
 
       loadState();
-      const initial = levelConfig(state.currentLevel);
-      setScore(initial.target);
+      setCurrentLevelScore(0);
+      setTotalScore(totalScore);
       createBubbles();
       syncGateUi();
       animateParrot();
