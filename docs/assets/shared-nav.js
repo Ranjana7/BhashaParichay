@@ -33,7 +33,8 @@
 
   function getPageContext() {
     const path = normalizePath(window.location.pathname);
-    const isRootHome = path === "/" || /\/index\.html$/i.test(path) && !/\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(path);
+    const isBhashaHubHome = /\/bhashaparichay(?:\/|\/index\.html)$/i.test(path);
+    const isRootHome = path === "/" || isBhashaHubHome || /\/index\.html$/i.test(path) && !/\/(sanskritparichay|spanishparichay|portugueseparichay)\//i.test(path);
     const isRootAbout = /\/about\.html$/i.test(path) && !/\/sanskritparichay\//i.test(path);
 
     const languageMatch = path.match(/\/(sanskritparichay|spanishparichay|portugueseparichay)(?:\/|$)/i);
@@ -44,6 +45,7 @@
       path: path,
       languagePath: languagePath,
       isRootHome: isRootHome,
+      isBhashaHubHome: isBhashaHubHome,
       isRootAbout: isRootAbout,
       isLanguageHome: isLanguageHome,
       isLanguageWorld: isLanguageWorld
@@ -91,16 +93,17 @@
   }
 
   const context = getPageContext();
-  const rootPathPrefix = context.languagePath ? "../" : "";
-  const bhashaHomeHref = rootPathPrefix + "index.html";
-  const aboutHref = rootPathPrefix + "about.html";
+  const bhashaHomeHref = "/bhashaparichay/";
+  const aboutHref = "/about.html";
+  const siteHomeHref = "/";
   const languageHomeHref = "index.html";
 
   nav.innerHTML = "";
 
   if (context.isRootHome || context.isRootAbout) {
-    nav.appendChild(createLink("index.html", "Bhasha Home", context.isRootHome));
-    nav.appendChild(createLink("about.html", "About", context.isRootAbout));
+    nav.appendChild(createLink(siteHomeHref, "Home", context.path === "/"));
+    nav.appendChild(createLink(bhashaHomeHref, "Bhasha Home", context.isBhashaHubHome));
+    nav.appendChild(createLink(aboutHref, "About", context.isRootAbout));
     return;
   }
 
