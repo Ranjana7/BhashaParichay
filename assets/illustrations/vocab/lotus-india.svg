@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" role="img" aria-label="Lotus flower symbol">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6fdff"/>
+      <stop offset="1" stop-color="#e8f7ff"/>
+    </linearGradient>
+    <linearGradient id="petalOuter" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb2dc"/>
+      <stop offset="1" stop-color="#ff66b7"/>
+    </linearGradient>
+    <linearGradient id="petalInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8ecf"/>
+      <stop offset="1" stop-color="#ff3ea3"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#83d08a"/>
+      <stop offset="1" stop-color="#4eaa66"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="224" height="144" rx="24" fill="url(#bg)"/>
+  <ellipse cx="120" cy="124" rx="86" ry="15" fill="#8fd8d6" opacity="0.7"/>
+
+  <ellipse cx="120" cy="112" rx="44" ry="12" fill="url(#leaf)"/>
+
+  <path d="M120 60 C130 72, 134 88, 120 102 C106 88, 110 72, 120 60 Z" fill="url(#petalInner)"/>
+  <path d="M94 72 C106 80, 112 92, 102 104 C88 96, 84 84, 94 72 Z" fill="url(#petalOuter)"/>
+  <path d="M146 72 C156 84, 152 96, 138 104 C128 92, 134 80, 146 72 Z" fill="url(#petalOuter)"/>
+  <path d="M78 84 C92 88, 100 98, 90 110 C74 106, 68 94, 78 84 Z" fill="#ffc1e4"/>
+  <path d="M162 84 C172 94, 166 106, 150 110 C140 98, 148 88, 162 84 Z" fill="#ffc1e4"/>
+  <path d="M120 74 C126 82, 128 92, 120 100 C112 92, 114 82, 120 74 Z" fill="#ff2f99" opacity="0.9"/>
+</svg>
