@@ -294,8 +294,8 @@
       '<path class="mithu-wing-right" d="M79 54 C97 58, 99 80, 83 86 C81 74, 76 62, 71 57 Z"></path>' +
       '<circle class="mithu-eye-left" cx="50" cy="46" r="3.8"></circle>' +
       '<circle class="mithu-eye-right" cx="69" cy="46" r="3.8"></circle>' +
-      '<path class="mithu-beak-top" d="M54 53 L66 53 L60 61 Z"></path>' +
-      '<path class="mithu-beak-bottom" d="M55 60 L65 60 L60 67 Z"></path>' +
+      '<path class="mithu-beak-top" d="M53 52 C57 48, 63 48, 67 52 C64 57, 59 59, 53 57 Z"></path>' +
+      '<path class="mithu-beak-bottom" d="M54 57 C58 60, 62 60, 66 57 C63 63, 58 65, 54 62 Z"></path>' +
       '<path class="mithu-crest" d="M53 20 L58 11 L62 20 L66 10 L71 20"></path>' +
       "</svg>";
     const panel = document.createElement("section");
