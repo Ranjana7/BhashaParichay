@@ -312,9 +312,14 @@ body.lang-theme-portuguese .panel {
   animation: mithuDance 1s ease-in-out 3;
 }
 
-.language-hero-mithu.state-dancing .mithu-wing-left,
+.language-hero-mithu.state-dancing .mithu-wing-left {
+  transform-origin: 72% 36%;
+  animation: mithuWingFlapLeft 0.2s ease-in-out 7;
+}
+
 .language-hero-mithu.state-dancing .mithu-wing-right {
-  animation: mithuWingFlap 0.2s ease-in-out 7;
+  transform-origin: 28% 36%;
+  animation: mithuWingFlapRight 0.2s ease-in-out 7;
 }
 
 .medal-celebration {
