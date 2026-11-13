@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to Aricsso</title>
+  <style>
+    :root {
+      --sky-1: #c9f2ff;
+      --sky-2: #f4fbff;
+      --accent-1: #7b61ff;
+      --accent-2: #ff7ac9;
+      --accent-3: #ffb703;
+      --text: #22324a;
+      --card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top right, #fff6be 0%, transparent 40%),
+                  linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 100%);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: min(760px, 100%);
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px 22px;
+      box-shadow: 0 14px 34px rgba(34, 50, 74, 0.16);
+      border: 3px solid #ffffff;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4.8vw, 2.6rem);
+      color: #244168;
+    }
+
+    .sub {
+      margin: 0 auto 24px;
+      max-width: 52ch;
+      font-size: clamp(1rem, 3.3vw, 1.2rem);
+      line-height: 1.45;
+    }
+
+    .links {
+      display: grid;
+      gap: 14px;
+      margin: 14px auto 0;
+      max-width: 620px;
+    }
+
+    .link-card {
+      display: block;
+      text-decoration: none;
+      color: #15233a;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px 14px;
+      border: 2px solid #e5edff;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .link-card:hover,
+    .link-card:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(21, 35, 58, 0.16);
+      border-color: #b8cbff;
+      outline: none;
+    }
+
+    .title {
+      display: block;
+      font-weight: 700;
+      font-size: clamp(1.06rem, 3.2vw, 1.24rem);
+    }
+
+    .url {
+      display: block;
+      margin-top: 6px;
+      font-size: clamp(0.9rem, 2.7vw, 1rem);
+      color: #4b5f80;
+      word-break: break-word;
+    }
+
+    .youtube {
+      border-left: 8px solid var(--accent-2);
+      background: linear-gradient(90deg, #fff6fb 0%, #fff 32%);
+    }
+
+    .bhasha {
+      border-left: 8px solid var(--accent-1);
+      background: linear-gradient(90deg, #f5f3ff 0%, #fff 32%);
+    }
+
+    .sparkles {
+      margin-bottom: 8px;
+      font-size: 1.35rem;
+      letter-spacing: 3px;
+      color: var(--accent-3);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="sparkles">✨ 🌈 🌟</div>
+    <h1>Welcome, Little Learners!</h1>
+    <p class="sub">
+      Pick your magical destination below for stories, songs, and language adventures.
+    </p>
+
+    <section class="links" aria-label="Main links">
+      <a class="link-card youtube" href="https://www.youtube.com/@BhagwadGitaForKids" target="_blank" rel="noopener noreferrer">
+        <span class="title">KidsLearningWorldWisdom on YouTube ▶</span>
+        <span class="url">https://www.youtube.com/@BhagwadGitaForKids</span>
+      </a>
+
+      <a class="link-card bhasha" href="https://ranjana7.github.io/BhashaParichay/" target="_blank" rel="noopener noreferrer">
+        <span class="title">BhashaParichay Learning World 📚</span>
+        <span class="url">https://ranjana7.github.io/BhashaParichay/</span>
+      </a>
+    </section>
+  </main>
+</body>
+</html>
