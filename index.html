@@ -3,130 +3,174 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BhashaParichay | Choose a Language</title>
-  <meta name="description" content="BhashaParichay is a playful multilingual learning space for children. Choose Sanskrit, Spanish, or Portuguese.">
-  <link rel="stylesheet" href="assets/styles.css?v=20261112u8">
+  <title>KidsLearningWorldWisdom | Magical Home</title>
+  <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
+  <style>
+    :root {
+      --bg-start: #c8f0ff;
+      --bg-end: #f9fdff;
+      --card: #ffffff;
+      --ink: #203353;
+      --accent-1: #6d5efc;
+      --accent-2: #ff6bb8;
+      --accent-3: #ffb703;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 85% 10%, #fff0ba 0%, transparent 36%),
+                  linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .home-card {
+      width: min(880px, 100%);
+      background: var(--card);
+      border-radius: 26px;
+      padding: 24px 20px 22px;
+      border: 3px solid #fff;
+      box-shadow: 0 16px 34px rgba(21, 44, 84, 0.16);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(120px, 200px) 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.65rem, 5.2vw, 2.5rem);
+      color: #244574;
+    }
+
+    .speech {
+      margin: 0;
+      font-size: clamp(1rem, 3.4vw, 1.18rem);
+      line-height: 1.45;
+      background: #f4f8ff;
+      border: 2px solid #d8e6ff;
+      border-radius: 14px;
+      padding: 11px 13px;
+    }
+
+    .links {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .cta {
+      display: block;
+      text-decoration: none;
+      color: #16233d;
+      border-radius: 16px;
+      border: 2px solid #dfe9ff;
+      padding: 14px 14px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      background: #fff;
+    }
+
+    .cta:hover,
+    .cta:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(19, 41, 77, 0.16);
+      border-color: #b8ceff;
+      outline: none;
+    }
+
+    .cta-title {
+      display: block;
+      font-size: clamp(1.02rem, 3.3vw, 1.22rem);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .cta-text {
+      display: block;
+      font-size: clamp(0.92rem, 2.8vw, 1rem);
+      color: #465d82;
+    }
+
+    .cta-bhasha {
+      border-left: 8px solid var(--accent-1);
+      background: linear-gradient(90deg, #f5f2ff 0%, #fff 32%);
+    }
+
+    .cta-youtube {
+      border-left: 8px solid var(--accent-2);
+      background: linear-gradient(90deg, #fff2fa 0%, #fff 32%);
+    }
+
+    .sparkle {
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+      color: var(--accent-3);
+      margin-bottom: 6px;
+    }
+
+    .mithu {
+      width: 100%;
+      max-width: 190px;
+      margin-inline: auto;
+      display: block;
+    }
+
+    .mithu .body { fill: #69d28d; }
+    .mithu .belly { fill: #fff8e6; }
+    .mithu .wing { fill: #47b972; }
+    .mithu .beak { fill: #f9a825; }
+    .mithu .eye { fill: #202a46; }
+    .mithu .crest { stroke: #6f4dff; stroke-width: 6; stroke-linecap: round; fill: none; }
+    .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; text-align: center; }
+    }
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
-
-  <header class="site-header">
-    <nav class="main-nav" aria-label="Main">
-      <a href="index.html" aria-current="page">Home</a>
-      <a href="about.html">About BhashaParichay</a>
-    </nav>
-  </header>
-
-  <main id="main-content" class="page-wrap">
-    <section class="panel language-hero">
-      <div class="language-hero-layout">
-        <div class="language-hero-mithu state-idle" id="languageHeroMithu" aria-hidden="true">
-          <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
-            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
-            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
-            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
-            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
-            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
-            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
-            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
-            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
-            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
-            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
-            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
-            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
-            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
-          </svg>
-        </div>
-        <div class="language-hero-copy">
-          <p class="hero-badge">BhashaParichay</p>
-          <h1>Welcome, Little Explorer!</h1>
-          <p id="languageChooserSpeech" class="mascot-speech">Hi! I'm Mithu. Pick a language adventure to start learning!</p>
-        </div>
+  <main class="home-card">
+    <div class="sparkle">✨ 🌈 🌟</div>
+    <section class="hero">
+      <svg class="mithu" viewBox="0 0 240 240" role="img" aria-label="Mithu bird mascot">
+        <ellipse class="shadow" cx="120" cy="208" rx="56" ry="14"></ellipse>
+        <ellipse class="body" cx="120" cy="122" rx="66" ry="80"></ellipse>
+        <ellipse class="belly" cx="120" cy="142" rx="40" ry="48"></ellipse>
+        <path class="wing" d="M76 116 C36 124, 34 172, 75 180 C77 154, 86 132, 98 124 Z"></path>
+        <path class="wing" d="M164 116 C204 124, 206 172, 165 180 C163 154, 154 132, 142 124 Z"></path>
+        <circle class="eye" cx="100" cy="97" r="8"></circle>
+        <circle class="eye" cx="140" cy="97" r="8"></circle>
+        <path class="beak" d="M108 112 L132 112 L120 128 Z"></path>
+        <path class="beak" d="M110 126 L130 126 L120 139 Z"></path>
+        <path class="crest" d="M104 45 L113 26 L121 44 L129 24 L138 45"></path>
+      </svg>
+      <div>
+        <h1>KidsLearningWorldWisdom</h1>
+        <p class="speech">Hi! I’m Mithu. Choose where you want to go: Bhasha learning adventures or fun videos!</p>
       </div>
     </section>
 
-    <section class="panel">
-      <h2>Learning Hub</h2>
-      <div class="language-grid" aria-label="Main learning resources">
-        <a class="language-card portal-sanskrit" href="https://www.youtube.com/@BhagwadGitaForKids" target="_blank" rel="noopener noreferrer">
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/family.svg" alt="">
-            </span>
-            <span class="portal-word">▶</span>
-          </span>
-          <span class="world-title">KidsLearningWorldWisdom</span>
-          <span class="world-text">Open YouTube channel</span>
-        </a>
-        <a class="language-card portal-portuguese" href="#language-worlds">
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/forest.svg" alt="">
-            </span>
-            <span class="portal-word">📚</span>
-          </span>
-          <span class="world-title">BhashaParichay Learning Worlds</span>
-          <span class="world-text">Start language adventures</span>
-        </a>
-      </div>
-    </section>
+    <section class="links" aria-label="Main destinations">
+      <a class="cta cta-bhasha" href="/bhashaparichay/">
+        <span class="cta-title">📚 Go to Bhasha Home</span>
+        <span class="cta-text">Enter BhashaParichay and start language learning worlds.</span>
+      </a>
 
-    <section id="language-worlds" class="panel">
-      <h2>Choose Your Language</h2>
-      <div class="language-grid" aria-label="Language choices">
-        <a class="language-card portal-sanskrit" href="sanskritparichay/" data-language="sanskrit" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/forest.svg" alt="">
-            </span>
-            <span class="portal-word">अ आ इ</span>
-          </span>
-          <span class="world-title">Sanskrit</span>
-          <span class="world-text">Open SanskritParichay</span>
-        </a>
-        <a class="language-card portal-spanish" href="spanishparichay/" data-language="spanish" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/family.svg" alt="">
-            </span>
-            <span class="portal-word">¡Hola!</span>
-          </span>
-          <span class="world-title">Spanish</span>
-          <span class="world-text">Open SpanishParichay</span>
-        </a>
-        <a class="language-card portal-portuguese" href="portugueseparichay/" data-language="portuguese" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/river.svg" alt="">
-            </span>
-            <span class="portal-word">Olá!</span>
-          </span>
-          <span class="world-title">Portuguese</span>
-          <span class="world-text">Open PortugueseParichay</span>
-        </a>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Medals</h2>
-      <p>Collect medals by completing real language levels.</p>
-      <div class="medal-grid" id="languageMedals" aria-live="polite"></div>
+      <a class="cta cta-youtube" href="https://www.youtube.com/@BhagwadGitaForKids" target="_blank" rel="noopener noreferrer">
+        <span class="cta-title">▶ Watch Videos on YouTube</span>
+        <span class="cta-text">Open KidsLearningWorldWisdom videos and stories.</span>
+      </a>
     </section>
   </main>
-
-  <script src="assets/vendor/motion.min.js"></script>
-  <script src="assets/vendor/canvas-confetti.min.js"></script>
-  <script src="assets/mithu-follower.js?v=20261112u1"></script>
-  <script src="assets/shared-nav.js?v=20261112u1"></script>
-  <script src="assets/site-config.js?v=20261112u5"></script>
-  <script src="assets/progress-store.js?v=20261112u4"></script>
-  <script src="assets/multilingual-data.js?v=20261112u2"></script>
-  <script src="assets/seamless-experience.js?v=20261112u1"></script>
-  <script src="assets/language-chooser.js?v=20261112u5"></script>
 </body>
 </html>
