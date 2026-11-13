@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u2">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -14,6 +15,7 @@
       --accent-1: #6d5efc;
       --accent-2: #ff6bb8;
       --accent-3: #ffb703;
+      --mint: #37c98b;
     }
 
     * { box-sizing: border-box; }
@@ -31,7 +33,7 @@
     }
 
     .home-card {
-      width: min(880px, 100%);
+      width: min(920px, 100%);
       background: var(--card);
       border-radius: 26px;
       padding: 24px 20px 22px;
@@ -133,8 +135,109 @@
     .mithu .crest { stroke: #6f4dff; stroke-width: 6; stroke-linecap: round; fill: none; }
     .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
 
+    .play-zone {
+      margin-top: 16px;
+      border-radius: 18px;
+      border: 2px solid #d5e7ff;
+      background: linear-gradient(180deg, #f7fbff, #f0f8ff);
+      padding: 14px;
+    }
+
+    .play-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .play-head h2 {
+      margin: 0;
+      font-size: clamp(1.06rem, 3.2vw, 1.28rem);
+      color: #27426a;
+    }
+
+    .play-score {
+      font-weight: 800;
+      color: #2f4b76;
+      background: #fff;
+      border: 2px solid #d8e6ff;
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+
+    .play-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .play-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(120deg, var(--accent-1), #4a83ff);
+    }
+
+    .play-btn.secondary {
+      background: linear-gradient(120deg, var(--mint), #1ea1b8);
+    }
+
+    .play-message {
+      font-weight: 700;
+      color: #3d5277;
+      min-height: 24px;
+    }
+
+    .star-field {
+      position: relative;
+      height: 210px;
+      border-radius: 14px;
+      border: 2px dashed #bdd6ff;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.95) 0, rgba(255,255,255,0) 50%),
+        linear-gradient(180deg, #e5f3ff 0%, #d8ecff 100%);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    .star {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 6px 8px rgba(52, 88, 138, 0.26));
+      user-select: none;
+    }
+
+    .float-bubble {
+      position: absolute;
+      bottom: -24px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.74);
+      animation: bubbleUp linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes bubbleUp {
+      from { transform: translateY(0) scale(0.7); opacity: 0; }
+      15% { opacity: 0.9; }
+      to { transform: translateY(-250px) scale(1.2); opacity: 0; }
+    }
+
     @media (max-width: 760px) {
       .hero { grid-template-columns: 1fr; text-align: center; }
+      .star-field { height: 190px; }
     }
   </style>
 </head>
@@ -171,6 +274,151 @@
         <span class="cta-text">Open KidsLearningWorldWisdom videos and stories.</span>
       </a>
     </section>
+
+    <section class="play-zone" aria-label="Mini game">
+      <div class="play-head">
+        <h2>Star Pop with Mithu</h2>
+        <div class="play-score" id="starScore">Stars: 0</div>
+      </div>
+      <div class="play-tools">
+        <button class="play-btn" id="startStarGame" type="button">Start Game</button>
+        <button class="play-btn secondary" id="resetStarGame" type="button">Reset</button>
+        <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
+      </div>
+      <div class="star-field" id="starField" aria-live="polite"></div>
+    </section>
   </main>
+
+  <script src="assets/vendor/motion.min.js"></script>
+  <script src="assets/vendor/canvas-confetti.min.js"></script>
+  <script src="assets/mithu-follower.js?v=20261113u2"></script>
+  <script>
+    (function initHomePlayZone() {
+      const field = document.getElementById("starField");
+      const scoreNode = document.getElementById("starScore");
+      const msg = document.getElementById("gameMessage");
+      const startBtn = document.getElementById("startStarGame");
+      const resetBtn = document.getElementById("resetStarGame");
+
+      const motionApi = window.Motion || {};
+      const animate = motionApi.animate;
+
+      let score = 0;
+      let running = false;
+      let timerId = null;
+
+      function setScore(next) {
+        score = next;
+        scoreNode.textContent = "Stars: " + score;
+      }
+
+      function clearField() {
+        field.querySelectorAll(".star").forEach((node) => node.remove());
+      }
+
+      function updateMessage(text) {
+        msg.textContent = text;
+      }
+
+      function createBubbles() {
+        field.querySelectorAll(".float-bubble").forEach((n) => n.remove());
+        for (let i = 0; i < 10; i += 1) {
+          const bubble = document.createElement("span");
+          bubble.className = "float-bubble";
+          bubble.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
+          bubble.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + "s";
+          bubble.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
+          field.appendChild(bubble);
+        }
+      }
+
+      function celebrate(button) {
+        if (typeof confetti === "function") {
+          const rect = button.getBoundingClientRect();
+          const ox = (rect.left + rect.width / 2) / window.innerWidth;
+          const oy = (rect.top + rect.height / 2) / window.innerHeight;
+          confetti({
+            particleCount: 28,
+            spread: 68,
+            origin: { x: ox, y: oy },
+            scalar: 0.8
+          });
+        }
+      }
+
+      function spawnStar() {
+        if (!running) return;
+
+        const star = document.createElement("button");
+        star.type = "button";
+        star.className = "star";
+        star.textContent = "⭐";
+        star.setAttribute("aria-label", "Pop star");
+
+        const x = 10 + Math.random() * 80;
+        const y = 15 + Math.random() * 70;
+        star.style.left = x.toFixed(1) + "%";
+        star.style.top = y.toFixed(1) + "%";
+
+        field.appendChild(star);
+
+        if (typeof animate === "function") {
+          animate(star, { transform: ["translate(-50%, -50%) scale(0.6)", "translate(-50%, -50%) scale(1.05)"] }, { duration: 0.6, easing: "ease-out" });
+          animate(star, { translateY: [0, -6, 0] }, { duration: 1.4, repeat: Infinity, easing: "ease-in-out" });
+        }
+
+        star.addEventListener("click", function () {
+          setScore(score + 1);
+          celebrate(star);
+          if (typeof animate === "function") {
+            animate(star, { opacity: [1, 0], transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.5)"] }, { duration: 0.25 });
+          }
+          star.remove();
+
+          if (score >= 10) {
+            updateMessage("Amazing! Mithu is proud of you! 🌟");
+            if (typeof confetti === "function") {
+              confetti({ particleCount: 120, spread: 90, scalar: 0.9 });
+            }
+            running = false;
+            clearTimeout(timerId);
+            return;
+          }
+
+          timerId = setTimeout(spawnStar, 320 + Math.random() * 420);
+        }, { once: true });
+
+        timerId = setTimeout(function () {
+          if (star.isConnected && running) {
+            star.remove();
+            timerId = setTimeout(spawnStar, 260);
+          }
+        }, 2300);
+      }
+
+      function startGame() {
+        if (running) return;
+        running = true;
+        clearField();
+        setScore(0);
+        updateMessage("Pop 10 stars to win a Mithu celebration!");
+        createBubbles();
+        spawnStar();
+      }
+
+      function resetGame() {
+        running = false;
+        clearTimeout(timerId);
+        clearField();
+        setScore(0);
+        updateMessage("Tap Start, then pop the glowing stars!");
+        createBubbles();
+      }
+
+      startBtn.addEventListener("click", startGame);
+      resetBtn.addEventListener("click", resetGame);
+      createBubbles();
+    })();
+  </script>
 </body>
 </html>
