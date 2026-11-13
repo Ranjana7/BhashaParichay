@@ -72,15 +72,17 @@
     languageCards.forEach(function (card) {
       const languageKey = String(card.getAttribute("data-language") || "").toLowerCase();
       if (!languageKey) return;
+      const forceLocked = languageKey === "spanish" || languageKey === "portuguese";
       const availability = typeof window.spGetLanguageAvailability === "function"
         ? window.spGetLanguageAvailability(languageKey)
         : { enabled: true, comingSoon: false };
+      const isEnabled = availability.enabled && !forceLocked;
       const note = card.querySelector(".world-text");
       const lockBadge = card.querySelector(".language-lock-badge") || document.createElement("span");
       lockBadge.className = "language-lock-badge";
       lockBadge.textContent = "🔒 Coming Soon";
       if (!lockBadge.parentElement) card.appendChild(lockBadge);
-      if (availability.enabled) {
+      if (isEnabled) {
         card.classList.remove("is-language-locked");
         card.removeAttribute("aria-disabled");
         card.removeAttribute("title");
@@ -91,8 +93,14 @@
       card.classList.add("is-language-locked");
       card.setAttribute("aria-disabled", "true");
       card.setAttribute("title", "Coming Soon");
+      card.setAttribute("href", "#");
       lockBadge.hidden = false;
       if (note) note.textContent = "Coming Soon";
+      card.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        if (speech) speech.textContent = lockedMessage;
+      });
       card.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
