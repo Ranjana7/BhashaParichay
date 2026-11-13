@@ -6,6 +6,8 @@
   const mithu = document.getElementById("languageHeroMithu");
   const languageCards = Array.prototype.slice.call(document.querySelectorAll(".language-card[data-language]"));
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionApi = window.Motion || {};
+  const motionAnimate = typeof motionApi.animate === "function" ? motionApi.animate : null;
   const medalSeenKey = "bhashaParichay.medals.seen.v3";
   const lockedMessage = typeof window.spGetLockedLanguageMessage === "function"
     ? window.spGetLockedLanguageMessage()
@@ -66,6 +68,60 @@
 
   function writeSeenMedals(ids) {
     localStorage.setItem(medalSeenKey, JSON.stringify(ids));
+  }
+
+  function safeAnimate(element, keyframes, options) {
+    if (!motionAnimate || !element || prefersReducedMotion) return;
+    try {
+      motionAnimate(element, keyframes, options || {});
+    } catch (_error) {
+      return;
+    }
+  }
+
+  function animateLanguageCards() {
+    languageCards.forEach(function (card, index) {
+      safeAnimate(
+        card,
+        { opacity: [0, 1], transform: ["translateY(14px) scale(0.97)", "translateY(0px) scale(1)"] },
+        { duration: 0.55, delay: index * 0.09, easing: "ease-out" }
+      );
+
+      const portal = card.querySelector(".language-portal");
+      const portalRing = card.querySelector(".portal-ring");
+      const portalCore = card.querySelector(".portal-core");
+      const portalWord = card.querySelector(".portal-word");
+
+      safeAnimate(
+        portal,
+        { transform: ["translateY(0px)", "translateY(-3px)", "translateY(0px)"] },
+        { duration: 3 + index * 0.5, repeat: Infinity, easing: "ease-in-out" }
+      );
+      safeAnimate(
+        portalRing,
+        { rotate: [0, 0.9, 0, -0.9, 0] },
+        { duration: 4.2 + index * 0.4, repeat: Infinity, easing: "ease-in-out" }
+      );
+      safeAnimate(
+        portalCore,
+        { scale: [1, 1.03, 1], rotate: [0, 1.5, 0, -1.5, 0] },
+        { duration: 3.1 + index * 0.35, repeat: Infinity, easing: "ease-in-out" }
+      );
+      safeAnimate(
+        portalWord,
+        { opacity: [0.88, 1, 0.88], translateY: [0, -1.5, 0] },
+        { duration: 2.6 + index * 0.2, repeat: Infinity, easing: "ease-in-out" }
+      );
+
+      card.addEventListener("pointerenter", function () {
+        safeAnimate(card, { transform: ["translateY(0px) scale(1)", "translateY(-6px) scale(1.02)"] }, { duration: 0.2, easing: "ease-out" });
+        safeAnimate(portalCore, { transform: ["scale(1)", "scale(1.08)"] }, { duration: 0.2, easing: "ease-out" });
+      });
+      card.addEventListener("pointerleave", function () {
+        safeAnimate(card, { transform: ["translateY(-6px) scale(1.02)", "translateY(0px) scale(1)"] }, { duration: 0.22, easing: "ease-out" });
+        safeAnimate(portalCore, { transform: ["scale(1.08)", "scale(1)"] }, { duration: 0.22, easing: "ease-out" });
+      });
+    });
   }
 
   function setupLanguageLocks() {
@@ -177,6 +233,27 @@
     medalsHost.appendChild(card);
   });
 
+  const medalCards = Array.prototype.slice.call(medalsHost.querySelectorAll(".medal-card"));
+  medalCards.forEach(function (card, index) {
+    safeAnimate(
+      card,
+      { opacity: [0, 1], transform: ["translateY(16px) scale(0.96)", "translateY(0px) scale(1)"] },
+      { duration: 0.56, delay: index * 0.1, easing: "ease-out" }
+    );
+    const art = card.querySelector(".medal-art");
+    safeAnimate(art, { rotate: [0, 5, 0, -5, 0] }, { duration: 2.9 + index * 0.3, repeat: Infinity, easing: "ease-in-out" });
+    card.addEventListener("pointerenter", function () {
+      safeAnimate(card, { transform: ["translateY(0px) scale(1)", "translateY(-5px) scale(1.02)"] }, { duration: 0.2, easing: "ease-out" });
+      safeAnimate(art, { transform: ["scale(1)", "scale(1.08) rotate(4deg)"] }, { duration: 0.2, easing: "ease-out" });
+    });
+    card.addEventListener("pointerleave", function () {
+      safeAnimate(card, { transform: ["translateY(-5px) scale(1.02)", "translateY(0px) scale(1)"] }, { duration: 0.2, easing: "ease-out" });
+      safeAnimate(art, { transform: ["scale(1.08) rotate(4deg)", "scale(1) rotate(0deg)"] }, { duration: 0.2, easing: "ease-out" });
+    });
+  });
+
+  animateLanguageCards();
+
   const earnedIds = medals.filter(function (medal) { return medal.earned; }).map(function (medal) { return medal.id; });
   const seenIds = readSeenMedals();
   const seenSet = new Set(seenIds);
@@ -186,7 +263,23 @@
   if (!newlyEarned.length) return;
   newlyEarned.forEach(function (id) {
     const card = medalsHost.querySelector('[data-medal-id="' + id + '"]');
-    if (card) card.classList.add("unlocking");
+    if (!card) return;
+    card.classList.add("unlocking");
+    const art = card.querySelector(".medal-art");
+    safeAnimate(card, { transform: ["scale(1)", "scale(1.06)", "scale(1)"] }, { duration: 0.7, easing: "ease-out" });
+    safeAnimate(art, { rotate: [0, -12, 12, -8, 0], scale: [1, 1.12, 1] }, { duration: 0.8, easing: "ease-out" });
+    if (!prefersReducedMotion && typeof window.confetti === "function") {
+      const rect = card.getBoundingClientRect();
+      window.confetti({
+        particleCount: 36,
+        spread: 62,
+        scalar: 0.75,
+        origin: {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight
+        }
+      });
+    }
   });
 
   if (speech) {

@@ -148,6 +148,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
+  perspective: 1000px;
 }
 
 .language-card {
@@ -160,10 +161,21 @@ body {
   background: linear-gradient(180deg, #ffffff, #f7fbff);
   padding: 14px 14px 16px;
   box-shadow: 0 10px 22px rgba(44, 62, 120, 0.14);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, filter 0.24s ease;
   position: relative;
   overflow: hidden;
   animation: languageCardFloat 4.8s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.language-card::before {
+  content: "";
+  position: absolute;
+  inset: -30% -60%;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 34%, rgba(255, 255, 255, 0.46) 50%, rgba(255, 255, 255, 0) 66%);
+  transform: rotate(9deg) translateX(-72%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .language-card::after {
@@ -190,6 +202,13 @@ body {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 14px 26px rgba(44, 62, 120, 0.2);
   border-color: #9fb5ff;
+  filter: saturate(1.05);
+}
+
+.language-card:hover::before,
+.language-card:focus-visible::before {
+  opacity: 1;
+  animation: languageCardShimmer 0.9s ease-out 1;
 }
 
 .language-card.is-language-locked {
@@ -376,6 +395,7 @@ body.lang-theme-portuguese .panel {
   background: #fff;
   position: relative;
   overflow: hidden;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, filter 0.24s ease;
 }
 
 .medal-card::before {
@@ -398,6 +418,23 @@ body.lang-theme-portuguese .panel {
   box-shadow: 0 10px 16px rgba(255, 199, 57, 0.28);
 }
 
+.medal-card:hover,
+.medal-card:focus-within {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 26px rgba(67, 89, 170, 0.22);
+}
+
+.medal-card.pending:hover,
+.medal-card.pending:focus-within {
+  border-color: #c9d6ff;
+}
+
+.medal-card.earned:hover,
+.medal-card.earned:focus-within {
+  border-color: #ffc73a;
+  filter: saturate(1.08);
+}
+
 .medal-icon {
   margin: 0 0 6px;
   font-size: 1.5rem;
@@ -415,6 +452,7 @@ body.lang-theme-portuguese .panel {
   background: linear-gradient(150deg, #ffe78c, #ffa955);
   font-size: 1.5rem;
   position: relative;
+  animation: medalOrbFloat 3.1s ease-in-out infinite;
 }
 
 .medal-art::before,
@@ -467,9 +505,41 @@ body.lang-theme-portuguese .panel {
   animation: medalSparkle 0.9s ease-out 1;
 }
 
+.medal-card.unlocking .medal-art {
+  animation: medalUnlockSpin 0.9s ease-out 1, medalOrbFloat 3.1s ease-in-out infinite;
+}
+
+@keyframes languageCardShimmer {
+  from { transform: rotate(9deg) translateX(-72%); }
+  to { transform: rotate(9deg) translateX(72%); }
+}
+
+@keyframes medalOrbFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes medalUnlockSpin {
+  0% { transform: scale(1) rotate(0deg); }
+  55% { transform: scale(1.14) rotate(16deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
 @media (max-width: 780px) {
   .language-hero-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-card,
+  .language-card::before,
+  .language-portal .portal-ring,
+  .language-portal .portal-core,
+  .language-portal .portal-word,
+  .medal-art,
+  .medal-card.unlocking .medal-art {
+    animation: none !important;
   }
 }
 
