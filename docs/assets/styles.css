@@ -3272,3 +3272,41 @@ body.page-transitioning .site-header {
     scroll-behavior: auto !important;
   }
 }
+
+/* Force bright rainbow Mithu palette on home, even if old cached HTML is served. */
+#homeMithuBodyRainbow stop:nth-of-type(1),
+#guideMithuBodyRainbow stop:nth-of-type(1) { stop-color: #ff3b30 !important; }
+#homeMithuBodyRainbow stop:nth-of-type(2),
+#guideMithuBodyRainbow stop:nth-of-type(2) { stop-color: #ff9500 !important; }
+#homeMithuBodyRainbow stop:nth-of-type(3),
+#guideMithuBodyRainbow stop:nth-of-type(3) { stop-color: #ffcc00 !important; }
+#homeMithuBodyRainbow stop:nth-of-type(4),
+#guideMithuBodyRainbow stop:nth-of-type(4) { stop-color: #34c759 !important; }
+#homeMithuBodyRainbow stop:nth-of-type(5),
+#guideMithuBodyRainbow stop:nth-of-type(5) { stop-color: #00c7ff !important; }
+#homeMithuBodyRainbow stop:nth-of-type(6),
+#guideMithuBodyRainbow stop:nth-of-type(6) { stop-color: #007aff !important; }
+#homeMithuBodyRainbow stop:nth-of-type(7),
+#guideMithuBodyRainbow stop:nth-of-type(7) { stop-color: #af52de !important; }
+
+#homeMithuWingLeft stop:nth-of-type(1),
+#guideMithuWingLeft stop:nth-of-type(1) { stop-color: #ff4d6d !important; }
+#homeMithuWingLeft stop:nth-of-type(2),
+#guideMithuWingLeft stop:nth-of-type(2) { stop-color: #ff8a00 !important; }
+#homeMithuWingLeft stop:nth-of-type(3),
+#guideMithuWingLeft stop:nth-of-type(3) { stop-color: #ffd60a !important; }
+
+#homeMithuWingRight stop:nth-of-type(1),
+#guideMithuWingRight stop:nth-of-type(1) { stop-color: #32d74b !important; }
+#homeMithuWingRight stop:nth-of-type(2),
+#guideMithuWingRight stop:nth-of-type(2) { stop-color: #0abaff !important; }
+#homeMithuWingRight stop:nth-of-type(3),
+#guideMithuWingRight stop:nth-of-type(3) { stop-color: #7c4dff !important; }
+
+#homeMithuTail stop:nth-of-type(1),
+#guideMithuTail stop:nth-of-type(1) { stop-color: #5ac8fa !important; }
+#homeMithuTail stop:nth-of-type(2),
+#guideMithuTail stop:nth-of-type(2) { stop-color: #5856d6 !important; }
+
+.hero .mithu .mithu-crest,
+.journey-guide .mithu-svg .mithu-crest { stroke: #ff2d55 !important; }
