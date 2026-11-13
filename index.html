@@ -6,7 +6,7 @@
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261113u8">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u9">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -135,16 +135,6 @@
       margin-inline: auto;
       display: block;
     }
-
-    .mithu .body { fill: #1f8fff; }
-    .mithu .belly { fill: #d8f2ff; }
-    .mithu .wing { fill: #1273e6; }
-    .mithu .tail { fill: #0b57c8; }
-    .mithu .beak { fill: #f9a825; }
-    .mithu .eye { fill: #202a46; }
-    .mithu .leg { fill: #f4a22d; }
-    .mithu .crest { stroke: #5cb4ff; stroke-width: 6; stroke-linecap: round; fill: none; }
-    .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
 
     .play-zone {
       margin-top: 16px;
@@ -348,19 +338,19 @@
     <main class="home-card">
       <div class="sparkle">✨ 🌈 🌟</div>
       <section class="hero">
-        <svg class="mithu" viewBox="0 0 240 240" role="img" aria-label="Mithu parrot mascot">
-          <ellipse class="shadow" cx="120" cy="208" rx="56" ry="14"></ellipse>
-          <path class="wing" d="M74 114 C28 126, 34 176, 79 182 C80 156, 90 134, 100 126 Z"></path>
-          <path class="wing" d="M166 114 C212 126, 206 176, 161 182 C160 156, 150 134, 140 126 Z"></path>
-          <ellipse class="body" cx="120" cy="122" rx="64" ry="82"></ellipse>
-          <ellipse class="belly" cx="120" cy="146" rx="38" ry="46"></ellipse>
-          <path class="beak" d="M106 112 C118 106, 130 106, 136 112 C130 126, 118 131, 106 126 Z"></path>
-          <path class="beak" d="M108 124 C118 130, 128 130, 134 124 C128 138, 116 140, 108 134 Z"></path>
-          <circle class="eye" cx="102" cy="98" r="7"></circle>
-          <circle class="eye" cx="138" cy="98" r="7"></circle>
-          <rect class="leg" x="104" y="184" width="8" height="20" rx="4"></rect>
-          <rect class="leg" x="128" y="184" width="8" height="20" rx="4"></rect>
-          <path class="crest" d="M102 44 L112 24 L121 42 L130 22 L140 44"></path>
+        <svg class="mithu mithu-svg" viewBox="0 0 240 240" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="mithu-shadow" cx="120" cy="208" rx="56" ry="14"></ellipse>
+          <path class="mithu-wing-left" d="M74 114 C28 126, 34 176, 79 182 C80 156, 90 134, 100 126 Z"></path>
+          <path class="mithu-wing-right" d="M166 114 C212 126, 206 176, 161 182 C160 156, 150 134, 140 126 Z"></path>
+          <ellipse class="mithu-body" cx="120" cy="122" rx="64" ry="82"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="146" rx="38" ry="46"></ellipse>
+          <path class="mithu-beak-top" d="M106 112 C118 106, 130 106, 136 112 C130 126, 118 131, 106 126 Z"></path>
+          <path class="mithu-beak-bottom" d="M108 124 C118 130, 128 130, 134 124 C128 138, 116 140, 108 134 Z"></path>
+          <circle class="mithu-eye-left" cx="102" cy="98" r="7"></circle>
+          <circle class="mithu-eye-right" cx="138" cy="98" r="7"></circle>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="mithu-crest" d="M102 44 L112 24 L121 42 L130 22 L140 44"></path>
         </svg>
         <div>
           <h1>KidsLearningWorldWisdom</h1>
@@ -387,6 +377,7 @@
         </div>
         <div class="play-tools">
           <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
+          <button class="play-btn" id="retryStarGame" type="button" disabled>Retry Level 1</button>
           <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
         </div>
         <div class="star-field" id="starField" aria-live="polite"></div>
@@ -430,6 +421,7 @@
       const scoreNode = document.getElementById("starScore");
       const msg = document.getElementById("gameMessage");
       const startBtn = document.getElementById("startStarGame");
+      const retryBtn = document.getElementById("retryStarGame");
       const bhashaLink = document.getElementById("bhashaHomeLink");
       const youtubeLink = document.getElementById("youtubeChannelLink");
       const guide = document.getElementById("journeyGuide");
@@ -457,7 +449,8 @@
       let state = {
         currentLevel: 1,
         gateLevel: null,
-        gate: { bhasha: false, youtube: false }
+        gate: { bhasha: false, youtube: false },
+        playedCurrentLevel: false
       };
 
       function readJson(key, fallback) {
@@ -497,6 +490,7 @@
           bhasha: Boolean(gate.bhasha),
           youtube: Boolean(gate.youtube)
         };
+        state.playedCurrentLevel = Boolean(loaded.playedCurrentLevel);
       }
 
       function levelConfig(levelNumber) {
@@ -553,31 +547,31 @@
       function animateParrot() {
         if (typeof animate !== "function") return;
 
-        document.querySelectorAll(".mithu, .journey-guide .mithu-svg").forEach(function (bird) {
+        document.querySelectorAll(".mithu-svg, .journey-guide .mithu-svg").forEach(function (bird) {
           animate(bird, { translateY: [0, -5, 0, -2, 0], rotate: [0, -1.8, 0, 1.8, 0] }, { duration: 2.4, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".mithu .wing, .journey-guide .mithu-wing-left").forEach(function (wing) {
+        document.querySelectorAll(".mithu .mithu-wing-left, .journey-guide .mithu-wing-left").forEach(function (wing) {
           animate(wing, { rotate: [0, -22, 0, -8, 0], translateY: [0, -2, 0] }, { duration: 0.78, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".journey-guide .mithu-wing-right").forEach(function (wing) {
+        document.querySelectorAll(".mithu .mithu-wing-right, .journey-guide .mithu-wing-right").forEach(function (wing) {
           animate(wing, { rotate: [0, 22, 0, 8, 0], translateY: [0, -2, 0] }, { duration: 0.78, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".mithu .tail, .journey-guide .mithu-tail").forEach(function (tail) {
+        document.querySelectorAll(".mithu .mithu-tail, .journey-guide .mithu-tail").forEach(function (tail) {
           animate(tail, { rotate: [0, 16, 0, -14, 0] }, { duration: 1.05, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".mithu .eye, .journey-guide .mithu-eye-left, .journey-guide .mithu-eye-right").forEach(function (eye) {
+        document.querySelectorAll(".mithu .mithu-eye-left, .mithu .mithu-eye-right, .journey-guide .mithu-eye-left, .journey-guide .mithu-eye-right").forEach(function (eye) {
           animate(eye, { scaleY: [1, 1, 0.14, 1, 1, 0.14, 1] }, { duration: 3.1, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".mithu .crest, .journey-guide .mithu-crest").forEach(function (crest) {
+        document.querySelectorAll(".mithu .mithu-crest, .journey-guide .mithu-crest").forEach(function (crest) {
           animate(crest, { translateY: [0, -1.6, 0], rotate: [0, 4, 0, -4, 0] }, { duration: 1.2, repeat: Infinity, easing: "ease-in-out" });
         });
 
-        document.querySelectorAll(".mithu .leg, .journey-guide .mithu-leg-left, .journey-guide .mithu-leg-right").forEach(function (leg) {
+        document.querySelectorAll(".mithu .mithu-leg-left, .mithu .mithu-leg-right, .journey-guide .mithu-leg-left, .journey-guide .mithu-leg-right").forEach(function (leg) {
           animate(leg, { translateY: [0, 1.4, 0, 1.1, 0] }, { duration: 0.95, repeat: Infinity, easing: "ease-in-out" });
         });
 
@@ -587,7 +581,7 @@
         document.querySelectorAll(".journey-guide .mithu-beak-bottom").forEach(function (beakBottom) {
           animate(beakBottom, { translateY: [0, 1.1, 0] }, { duration: 1.1, repeat: Infinity, easing: "ease-in-out" });
         });
-        document.querySelectorAll(".mithu .beak").forEach(function (beak) {
+        document.querySelectorAll(".mithu .mithu-beak-top, .mithu .mithu-beak-bottom").forEach(function (beak) {
           animate(beak, { scaleY: [1, 0.94, 1], translateY: [0, 0.8, 0] }, { duration: 1.3, repeat: Infinity, easing: "ease-in-out" });
         });
       }
@@ -602,7 +596,8 @@
           state = {
             currentLevel: 1,
             gateLevel: null,
-            gate: { bhasha: false, youtube: false }
+            gate: { bhasha: false, youtube: false },
+            playedCurrentLevel: false
           };
           saveState();
           startBtn.textContent = "Start Level 1";
@@ -612,6 +607,7 @@
         }
         state.gateLevel = state.currentLevel + 1;
         state.gate = { bhasha: false, youtube: false };
+        state.playedCurrentLevel = true;
         saveState();
         syncGateUi();
       }
@@ -690,14 +686,12 @@
 
       function startGame() {
         if (running) return;
-        if (state.gateLevel && !isGateOpen()) {
-          updateMessage("Next level is locked. Tap both Go to Bhasha Home and Watch YouTube first.");
-          setGuide("idle", "You can retry this level now. Unlock the next one by tapping both destination buttons.", "Waiting for both taps");
-        }
+        if (state.gateLevel && !isGateOpen()) return;
         if (state.gateLevel && isGateOpen()) {
           state.currentLevel = state.gateLevel;
           state.gateLevel = null;
           state.gate = { bhasha: false, youtube: false };
+          state.playedCurrentLevel = false;
           saveState();
           syncGateUi();
         }
@@ -712,16 +706,33 @@
         spawnOrb();
       }
 
+      function retryGame() {
+        if (running || !state.playedCurrentLevel) return;
+        const level = levelConfig(state.currentLevel);
+        clearField();
+        running = true;
+        remaining = level.target;
+        resetScoreForLevel(state.currentLevel);
+        updateMessage("Retry Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
+        setGuide("idle", "Retry time! Let's beat your score on Level " + level.level + ".", "Retry in progress");
+        createBubbles();
+        spawnOrb();
+      }
+
       function syncGateUi() {
         if (!state.gateLevel) {
           startBtn.disabled = false;
           startBtn.textContent = "Play Level " + state.currentLevel;
+          retryBtn.disabled = !state.playedCurrentLevel;
+          retryBtn.textContent = "Retry Level " + state.currentLevel;
           guideStatus.textContent = "Level " + state.currentLevel + " is ready.";
           return;
         }
         const open = isGateOpen();
-        startBtn.disabled = false;
-        startBtn.textContent = open ? "Play Level " + state.gateLevel : "Retry Level " + state.currentLevel;
+        startBtn.disabled = !open;
+        startBtn.textContent = "Start Level " + state.gateLevel;
+        retryBtn.disabled = false;
+        retryBtn.textContent = "Retry Level " + state.currentLevel;
         guideStatus.textContent = "Unlock next level: "
           + (state.gate.bhasha ? "Bhasha Home done" : "Go to Bhasha Home")
           + " + "
@@ -762,6 +773,7 @@
       }
 
       startBtn.addEventListener("click", startGame);
+      retryBtn.addEventListener("click", retryGame);
       bhashaLink.addEventListener("click", function () {
         markGateAction("bhasha");
       });
