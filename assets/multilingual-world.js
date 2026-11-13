@@ -7,6 +7,15 @@
   const languages = window.BHASHA_LANGUAGES || {};
   const language = languages[languageKey];
   if (!language) return;
+  const availability = typeof window.spGetLanguageAvailability === "function"
+    ? window.spGetLanguageAvailability(languageKey)
+    : { enabled: true };
+  if (!availability.enabled) {
+    const chooserPath = /\/(spanishparichay|portugueseparichay)\//i.test(window.location.pathname) ? "../index.html" : "index.html";
+    const target = chooserPath + "?lockedLanguage=" + encodeURIComponent(String(languageKey || "").toLowerCase());
+    window.location.replace(target);
+    return;
+  }
 
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const motion = window.Motion || {};

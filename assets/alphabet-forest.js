@@ -2111,11 +2111,14 @@
     const activityId = "hear-and-pick";
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.hearChoices || !ui.hearStatus) return;
-    ui.hearChoices.innerHTML = "";
-    ui.hearStatus.textContent = AUDIO_ENABLED
-      ? "Tap the matching letter."
-      : "Pronunciation unavailable. Tap the shown letter: " + letter.symbol;
     const activity = forestState.activities[activityId];
+    const isComplete = Boolean(activity && activity.isComplete);
+    ui.hearChoices.innerHTML = "";
+    ui.hearStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : (AUDIO_ENABLED
+        ? "Tap the matching letter."
+        : "Pronunciation unavailable. Tap the shown letter: " + letter.symbol);
     const questionKey = String(activity.currentIndex);
     const targetIndex = activity.order[activity.currentIndex];
     const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
@@ -2127,7 +2130,9 @@
       btn.type = "button";
       btn.className = "choice-btn";
       btn.textContent = option.symbol;
+      btn.disabled = isComplete;
       btn.addEventListener("click", function () {
+        if (isComplete) return;
         cancelAutoAdvance(activityId);
         if (option.id === letter.id) {
           btn.classList.add("correct");
@@ -2143,8 +2148,11 @@
       ui.hearChoices.appendChild(btn);
     });
     if (ui.playHearPrompt) {
-      ui.playHearPrompt.disabled = !AUDIO_ENABLED;
-      ui.playHearPrompt.onclick = function () { playLetterAudio(letter, 1, ui.hearStatus); };
+      ui.playHearPrompt.disabled = isComplete || !AUDIO_ENABLED;
+      ui.playHearPrompt.onclick = function () {
+        if (isComplete) return;
+        playLetterAudio(letter, 1, ui.hearStatus);
+      };
     }
   }
 
@@ -2152,10 +2160,13 @@
     const activityId = "picture-match";
     const item = getCurrentQuestion(activityId);
     if (!item || !ui.pictureChoices || !ui.picturePrompt || !ui.pictureStatus) return;
-    ui.picturePrompt.textContent = "Select the correct picture for: " + item.sanskrit;
-    ui.pictureStatus.textContent = "Choose the matching illustration.";
-    ui.pictureChoices.innerHTML = "";
     const current = forestState.activities[activityId];
+    const isComplete = Boolean(current && current.isComplete);
+    ui.picturePrompt.textContent = "Select the correct picture for: " + item.sanskrit;
+    ui.pictureStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : "Choose the matching illustration.";
+    ui.pictureChoices.innerHTML = "";
     const targetIndex = current.order[current.currentIndex];
     const questionKey = String(current.currentIndex);
     const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
@@ -2180,7 +2191,9 @@
       btn.innerHTML =
         '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
         '<span class="picture-label">' + toTitleCaseLabel(option.meaning || option.alt || option.sanskrit) + "</span>";
+      btn.disabled = isComplete;
       btn.addEventListener("click", function () {
+        if (isComplete) return;
         cancelAutoAdvance(activityId);
         if (btn.disabled) return;
         ui.pictureChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.classList.remove("selected"); });
@@ -2223,9 +2236,13 @@
     const activityId = "arrange-word";
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.arrangePrompt || !ui.arrangeTiles || !ui.arrangeAnswer || !ui.arrangeStatus) return;
+    const activity = forestState.activities[activityId];
+    const isComplete = Boolean(activity && activity.isComplete);
     const localState = runtime.byActivity[activityId];
     ui.arrangePrompt.textContent = "Arrange this Sanskrit word: " + letter.exampleText;
-    ui.arrangeStatus.textContent = "Tap tiles in order.";
+    ui.arrangeStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : "Tap tiles in order.";
     ui.arrangeAnswer.textContent = localState.tempAnswer;
     ui.arrangeTiles.innerHTML = "";
     const parts = Array.from(letter.exampleText).reverse();
@@ -2234,7 +2251,9 @@
       btn.type = "button";
       btn.className = "tile-btn";
       btn.textContent = part;
+      btn.disabled = isComplete;
       btn.addEventListener("click", function () {
+        if (isComplete) return;
         localState.tempAnswer += part;
         ui.arrangeAnswer.textContent = localState.tempAnswer;
       });
@@ -2246,15 +2265,19 @@
     const activityId = "flashcard-flip";
     const item = getCurrentQuestion(activityId);
     if (!item || !ui.flashcard || !ui.flashChoices || !ui.flashStatus) return;
+    const activity = forestState.activities[activityId];
+    const isComplete = Boolean(activity && activity.isComplete);
     const localState = runtime.byActivity[activityId];
     const cardClass = localState.flipped ? "flashcard flip is-flipped" : "flashcard flip";
     ui.flashcard.className = cardClass;
     ui.flashcard.innerHTML = localState.flipped
       ? '<div class="flash-face flash-back"><p><strong>' + item.meaning + "</strong></p><img class=\"picture-illustration\" src=\"" + (typeof window.spResolveAssetPath === "function" ? window.spResolveAssetPath(item.image) : item.image) + "\" alt=\"" + item.alt + "\"><p class=\"flash-tran\">" + item.transliteration + "</p></div>"
       : '<div class="flash-face flash-front"><p class="flash-dev">' + item.sanskrit + "</p><p class=\"flash-tran\">" + item.transliteration + "</p></div>";
-    ui.flashStatus.textContent = localState.flipped ? "Now mark this card as learned." : "Flip the card to reveal the meaning.";
+    ui.flashStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : (localState.flipped ? "Now mark this card as learned." : "Flip the card to reveal the meaning.");
     ui.flashChoices.innerHTML = "";
-    if (!localState.flipped) return;
+    if (!localState.flipped || isComplete) return;
     const learnedBtn = document.createElement("button");
     learnedBtn.type = "button";
     learnedBtn.className = "button secondary";
@@ -2270,10 +2293,13 @@
     const activityId = "feed-mithu";
     const item = getCurrentQuestion(activityId);
     if (!item || !ui.feedPrompt || !ui.feedChoices || !ui.feedStatus || !ui.lessonMascot) return;
-    ui.feedPrompt.textContent = "Feed Mithu: choose " + item.sanskrit;
-    ui.feedStatus.textContent = "Choose one.";
-    ui.feedChoices.innerHTML = "";
     const current = forestState.activities[activityId];
+    const isComplete = Boolean(current && current.isComplete);
+    ui.feedPrompt.textContent = "Feed Mithu: choose " + item.sanskrit;
+    ui.feedStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : "Choose one.";
+    ui.feedChoices.innerHTML = "";
     const targetIndex = current.order[current.currentIndex];
     const questionKey = String(current.currentIndex);
     const optionIndices = getStableOptionOrder(activityId, questionKey, function () {
@@ -2298,7 +2324,9 @@
       btn.innerHTML =
         '<img class="picture-illustration" src="' + option.image + '" alt="' + option.alt + '">' +
         '<span class="picture-label">' + option.sanskrit + "</span>";
+      btn.disabled = isComplete;
       btn.addEventListener("click", function () {
+        if (isComplete) return;
         cancelAutoAdvance(activityId);
         ui.feedChoices.querySelectorAll(".choice-btn").forEach(function (choice) { choice.classList.remove("selected"); });
         btn.classList.add("selected");
@@ -2365,8 +2393,11 @@
     const letter = getCurrentLetter(activityId);
     if (!letter || !ui.huntPrompt || !ui.huntGrid || !ui.huntStatus) return;
     const activity = forestState.activities[activityId];
+    const isComplete = Boolean(activity && activity.isComplete);
     ui.huntPrompt.textContent = "Find letter " + letter.symbol + " in the grid.";
-    ui.huntStatus.textContent = "Tap the target.";
+    ui.huntStatus.textContent = isComplete
+      ? "Activity complete! Choose Next Activity or Restart Activity."
+      : "Tap the target.";
     ui.huntGrid.innerHTML = "";
     const questionKey = String(activity.currentIndex);
     const targetIndex = activity.order[activity.currentIndex];
@@ -2379,7 +2410,9 @@
       btn.type = "button";
       btn.className = "tile-btn";
       btn.textContent = option.symbol;
+      btn.disabled = isComplete;
       btn.addEventListener("click", function () {
+        if (isComplete) return;
         cancelAutoAdvance(activityId);
         if (option.id === letter.id) {
           btn.classList.add("correct");
@@ -2458,11 +2491,29 @@
       if (continueBtn) {
         const nextActivity = ACTIVITIES.find(function (entry) { return entry.id === activity.id; });
         const hasNext = nextActivity ? ACTIVITIES.indexOf(nextActivity) < ACTIVITIES.length - 1 : false;
-        continueBtn.textContent = hasNext ? "Continue to Next Activity" : "Continue Adventure";
+        if (activity.id === "picture-match") {
+          continueBtn.textContent = hasNext ? "✨ Next Activity →" : "✨ Return to World Overview →";
+        } else {
+          continueBtn.textContent = hasNext ? "Continue to Next Activity" : "Continue Adventure";
+        }
         continueBtn.hidden = !state.isComplete;
         continueBtn.disabled = !state.isComplete;
       }
-      if (restart) restart.disabled = false;
+      if (restart) {
+        restart.disabled = false;
+        if (activity.id === "picture-match") {
+          restart.textContent = "🔄 Restart Activity";
+        }
+      }
+      if (activity.id === "picture-match" && state.isComplete) {
+        if (previous) previous.hidden = true;
+        if (retry) retry.hidden = true;
+        if (next) next.hidden = true;
+      } else {
+        if (previous) previous.hidden = false;
+        if (retry) retry.hidden = false;
+        if (next) next.hidden = false;
+      }
     });
   }
 

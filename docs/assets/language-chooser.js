@@ -4,8 +4,12 @@
 
   const speech = document.getElementById("languageChooserSpeech");
   const mithu = document.getElementById("languageHeroMithu");
+  const languageCards = Array.prototype.slice.call(document.querySelectorAll(".language-card[data-language]"));
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const medalSeenKey = "bhashaParichay.medals.seen.v3";
+  const lockedMessage = typeof window.spGetLockedLanguageMessage === "function"
+    ? window.spGetLockedLanguageMessage()
+    : "More magical adventures are coming soon!";
 
   const sanskritOrder = ["alphabet", "animals", "numbers", "colours", "words", "sentences", "stories", "culture"];
   const sanskritTotals = {
@@ -62,6 +66,57 @@
 
   function writeSeenMedals(ids) {
     localStorage.setItem(medalSeenKey, JSON.stringify(ids));
+  }
+
+  function setupLanguageLocks() {
+    languageCards.forEach(function (card) {
+      const languageKey = String(card.getAttribute("data-language") || "").toLowerCase();
+      if (!languageKey) return;
+      const availability = typeof window.spGetLanguageAvailability === "function"
+        ? window.spGetLanguageAvailability(languageKey)
+        : { enabled: true, comingSoon: false };
+      const note = card.querySelector(".world-text");
+      const lockBadge = card.querySelector(".language-lock-badge") || document.createElement("span");
+      lockBadge.className = "language-lock-badge";
+      lockBadge.textContent = "🔒 Coming Soon";
+      if (!lockBadge.parentElement) card.appendChild(lockBadge);
+      if (availability.enabled) {
+        card.classList.remove("is-language-locked");
+        card.removeAttribute("aria-disabled");
+        card.removeAttribute("title");
+        lockBadge.hidden = true;
+        if (note) note.textContent = "Open " + card.querySelector(".world-title").textContent + "Parichay";
+        return;
+      }
+      card.classList.add("is-language-locked");
+      card.setAttribute("aria-disabled", "true");
+      card.setAttribute("title", "Coming Soon");
+      lockBadge.hidden = false;
+      if (note) note.textContent = "Coming Soon";
+      card.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (speech) speech.textContent = lockedMessage;
+        if (mithu) {
+          mithu.classList.remove("state-idle", "state-dancing");
+          mithu.classList.add("state-wave");
+        }
+      });
+    });
+  }
+
+  setupLanguageLocks();
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const lockedLang = String(params.get("lockedLanguage") || "").toLowerCase();
+    if (lockedLang) {
+      const availability = typeof window.spGetLanguageAvailability === "function"
+        ? window.spGetLanguageAvailability(lockedLang)
+        : { enabled: true };
+      if (!availability.enabled && speech) speech.textContent = lockedMessage;
+    }
+  } catch (_error) {
+    // ignore malformed search params
   }
 
   const sanskritSnapshot = getSanskritSnapshot();

@@ -68,6 +68,15 @@
   const vocabFallback = window.SP_VOCABULARY_MAP && window.SP_VOCABULARY_MAP.fallback
     ? window.SP_VOCABULARY_MAP.fallback
     : { image: "", alt: "" };
+  const worldPromptFallback = {
+    animals: { image: "assets/illustrations/vocab/elephant.svg", alt: "Animal Jungle illustration" },
+    numbers: { image: "assets/illustrations/vocab/rocket.svg", alt: "Number Galaxy illustration" },
+    colours: { image: "assets/illustrations/vocab/lotus.svg", alt: "Colour Kingdom illustration" },
+    words: { image: "assets/illustrations/vocab/forest.svg", alt: "Word Wonderland illustration" },
+    sentences: { image: "assets/illustrations/vocab/family.svg", alt: "Sentence Castle illustration" },
+    stories: { image: "assets/illustrations/vocab/moon.svg", alt: "Story Island illustration" },
+    culture: { image: "assets/illustrations/vocab/chariot.svg", alt: "Sanskrit and Culture illustration" }
+  };
   const worldWelcome = (messages.worldWelcome && messages.worldWelcome[worldKey]) || ("Namaste! Let's learn " + world.title + ".");
   const praisePool = (messages.alphabetForest && messages.alphabetForest.correct) || ["Wonderful! Let's keep going!"];
   const retryPool = (messages.alphabetForest && messages.alphabetForest.incorrect) || ["Not quite! Have another look!"];
@@ -212,6 +221,8 @@
   function getIllustrationForWord(word) {
     const entry = vocabMap[word];
     if (entry && entry.image) return entry;
+    const worldEntry = worldPromptFallback[worldKey];
+    if (worldEntry && worldEntry.image) return worldEntry;
     return vocabFallback;
   }
 

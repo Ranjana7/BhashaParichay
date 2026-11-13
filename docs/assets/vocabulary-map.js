@@ -1,7 +1,7 @@
 window.SP_VOCABULARY_MAP = {
   fallback: {
-    image: "assets/illustrations/vocab/placeholder-neutral.svg",
-    alt: "Vocabulary placeholder illustration"
+    image: "assets/illustrations/vocab/forest.svg",
+    alt: "Learning world illustration"
   },
   words: {
     "गजः": { transliteration: "gajah", meaning: "elephant", image: "assets/illustrations/vocab/elephant.svg", alt: "Cartoon elephant" },
@@ -26,6 +26,23 @@ window.SP_VOCABULARY_MAP = {
     "शरः": { transliteration: "sharah", meaning: "arrow", image: "assets/illustrations/vocab/arrow.svg", alt: "Arrow and target" },
     "योगः": { transliteration: "yogah", meaning: "yoga", image: "assets/illustrations/vocab/yoga.svg", alt: "Child doing yoga" },
     "आकाशः": { transliteration: "aakaashah", meaning: "sky", image: "assets/illustrations/vocab/sky.svg", alt: "Blue sky with clouds" },
-    "आपः": { transliteration: "aapah", meaning: "water", image: "assets/illustrations/vocab/water.svg", alt: "Water drop" }
+    "आपः": { transliteration: "aapah", meaning: "water", image: "assets/illustrations/vocab/water.svg", alt: "Water drop" },
+    "एकः": { transliteration: "ekah", meaning: "one", image: "assets/illustrations/vocab/rocket.svg", alt: "Number rocket illustration" },
+    "द्वौ": { transliteration: "dvau", meaning: "two", image: "assets/illustrations/vocab/moon.svg", alt: "Moon and stars illustration" },
+    "त्रयः": { transliteration: "trayah", meaning: "three", image: "assets/illustrations/vocab/sky.svg", alt: "Starry sky illustration" },
+    "षट्": { transliteration: "shat", meaning: "six", image: "assets/illustrations/vocab/rocket.svg", alt: "Number rocket illustration" },
+    "सप्त": { transliteration: "sapta", meaning: "seven", image: "assets/illustrations/vocab/moon.svg", alt: "Moon and stars illustration" },
+    "अष्ट": { transliteration: "ashta", meaning: "eight", image: "assets/illustrations/vocab/sky.svg", alt: "Starry sky illustration" },
+    "नव": { transliteration: "nava", meaning: "nine", image: "assets/illustrations/vocab/rocket.svg", alt: "Number rocket illustration" },
+    "दश": { transliteration: "dasha", meaning: "ten", image: "assets/illustrations/vocab/moon.svg", alt: "Moon and stars illustration" },
+    "पञ्च": { transliteration: "pancha", meaning: "five", image: "assets/illustrations/vocab/sky.svg", alt: "Starry sky illustration" },
+    "रक्तः": { transliteration: "raktah", meaning: "red", image: "assets/illustrations/vocab/lotus.svg", alt: "Red lotus illustration" },
+    "नीलः": { transliteration: "nilah", meaning: "blue", image: "assets/illustrations/vocab/sky.svg", alt: "Blue sky illustration" },
+    "पीतः": { transliteration: "pitah", meaning: "yellow", image: "assets/illustrations/vocab/lotus.svg", alt: "Yellow flower illustration" },
+    "हरितः": { transliteration: "haritah", meaning: "green", image: "assets/illustrations/vocab/forest.svg", alt: "Green forest illustration" },
+    "श्वेतः": { transliteration: "shvetah", meaning: "white", image: "assets/illustrations/vocab/moon.svg", alt: "White moon illustration" },
+    "कृष्णः": { transliteration: "krishnah", meaning: "black", image: "assets/illustrations/vocab/moon.svg", alt: "Night sky illustration" },
+    "अरुणः": { transliteration: "arunah", meaning: "orange/red dawn", image: "assets/illustrations/vocab/sky.svg", alt: "Dawn sky illustration" },
+    "धूम्रः": { transliteration: "dhumrah", meaning: "grey", image: "assets/illustrations/vocab/sky.svg", alt: "Grey sky illustration" }
   }
 };
