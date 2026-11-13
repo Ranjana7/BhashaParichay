@@ -72,11 +72,16 @@
     languageCards.forEach(function (card) {
       const languageKey = String(card.getAttribute("data-language") || "").toLowerCase();
       if (!languageKey) return;
+      if (!card.hasAttribute("data-original-href")) {
+        card.setAttribute("data-original-href", card.getAttribute("href") || "");
+      }
+      const originalHref = card.getAttribute("data-original-href") || "";
+      const forceEnabled = languageKey === "sanskrit";
       const forceLocked = languageKey === "spanish" || languageKey === "portuguese";
       const availability = typeof window.spGetLanguageAvailability === "function"
         ? window.spGetLanguageAvailability(languageKey)
         : { enabled: true, comingSoon: false };
-      const isEnabled = availability.enabled && !forceLocked;
+      const isEnabled = forceEnabled ? true : (availability.enabled && !forceLocked);
       const note = card.querySelector(".world-text");
       const lockBadge = card.querySelector(".language-lock-badge") || document.createElement("span");
       lockBadge.className = "language-lock-badge";
@@ -86,6 +91,7 @@
         card.classList.remove("is-language-locked");
         card.removeAttribute("aria-disabled");
         card.removeAttribute("title");
+        card.setAttribute("href", originalHref);
         lockBadge.hidden = true;
         if (note) note.textContent = "Open " + card.querySelector(".world-title").textContent + "Parichay";
         return;

@@ -163,6 +163,7 @@ body {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   position: relative;
   overflow: hidden;
+  animation: languageCardFloat 4.8s ease-in-out infinite;
 }
 
 .language-card::after {
@@ -174,6 +175,14 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
   pointer-events: none;
+}
+
+.language-card:nth-child(2) {
+  animation-delay: -1.2s;
+}
+
+.language-card:nth-child(3) {
+  animation-delay: -2.4s;
 }
 
 .language-card:hover,
@@ -241,6 +250,7 @@ body {
   border: 3px solid rgba(255, 255, 255, 0.94);
   overflow: hidden;
   box-shadow: 0 10px 16px rgba(67, 89, 170, 0.24);
+  animation: languagePortalBob 2.8s ease-in-out infinite;
 }
 
 .language-portal .portal-core img {
@@ -257,6 +267,7 @@ body {
   font-weight: 800;
   color: #1e2f72;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  animation: languageWordGlow 2.6s ease-in-out infinite;
 }
 
 .portal-sanskrit .language-portal {
@@ -306,6 +317,21 @@ body.lang-theme-portuguese .panel {
 .portal-spanish:focus-visible .portal-ring,
 .portal-portuguese:focus-visible .portal-ring {
   animation-duration: 1.5s;
+}
+
+@keyframes languageCardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes languagePortalBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes languageWordGlow {
+  0%, 100% { opacity: 0.9; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 0 0 rgba(77, 104, 216, 0); }
+  50% { opacity: 1; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 0 10px rgba(77, 104, 216, 0.34); }
 }
 
 .language-hero-mithu.state-dancing .mithu-body {
