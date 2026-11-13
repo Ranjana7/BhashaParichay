@@ -6,7 +6,7 @@
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261113u7">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u8">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -143,7 +143,7 @@
     .mithu .beak { fill: #f9a825; }
     .mithu .eye { fill: #202a46; }
     .mithu .leg { fill: #f4a22d; }
-    .mithu .crest { stroke: #ff3b30; stroke-width: 6; stroke-linecap: round; fill: none; }
+    .mithu .crest { stroke: #5cb4ff; stroke-width: 6; stroke-linecap: round; fill: none; }
     .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
 
     .play-zone {
@@ -272,23 +272,6 @@
       border-radius: 999px;
       padding: 6px 10px;
       text-align: center;
-    }
-
-    .journey-guide-actions {
-      margin-top: 10px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .guide-btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-weight: 800;
-      cursor: pointer;
-      color: #ffffff;
-      background: linear-gradient(120deg, #5f6bff, #2f8bff);
     }
 
     .journey-guide.state-dancing .journey-guide-mithu {
@@ -435,9 +418,6 @@
         </div>
       </div>
       <p class="journey-guide-status" id="journeyGuideStatus">Unlock next level by tapping both Go to Bhasha Home and Watch YouTube after each level.</p>
-      <div class="journey-guide-actions">
-        <button id="rainbowMithuToggle" class="guide-btn" type="button">Preview Rainbow Mithu</button>
-      </div>
     </aside>
   </div>
 
@@ -455,7 +435,6 @@
       const guide = document.getElementById("journeyGuide");
       const guideSpeech = document.getElementById("journeyGuideSpeech");
       const guideStatus = document.getElementById("journeyGuideStatus");
-      const rainbowToggle = document.getElementById("rainbowMithuToggle");
       const sections = Array.from(document.querySelectorAll(".hero, .links, .play-zone"));
 
       const motionApi = window.Motion || {};
@@ -478,8 +457,7 @@
       let state = {
         currentLevel: 1,
         gateLevel: null,
-        gate: { bhasha: false, youtube: false },
-        rainbowPreview: false
+        gate: { bhasha: false, youtube: false }
       };
 
       function readJson(key, fallback) {
@@ -519,7 +497,6 @@
           bhasha: Boolean(gate.bhasha),
           youtube: Boolean(gate.youtube)
         };
-        state.rainbowPreview = Boolean(loaded.rainbowPreview);
       }
 
       function levelConfig(levelNumber) {
@@ -573,15 +550,6 @@
         }
       }
 
-      function applyRainbowPreview() {
-        document.body.classList.toggle("rainbow-mithu", state.rainbowPreview);
-        const action = state.rainbowPreview ? "Classic Mithu" : "Preview Rainbow Mithu";
-        rainbowToggle.textContent = action;
-        if (state.rainbowPreview) {
-          guideSpeech.textContent = "Here is Rainbow Mithu preview! You can switch back anytime.";
-        }
-      }
-
       function animateParrot() {
         if (typeof animate !== "function") return;
 
@@ -612,6 +580,16 @@
         document.querySelectorAll(".mithu .leg, .journey-guide .mithu-leg-left, .journey-guide .mithu-leg-right").forEach(function (leg) {
           animate(leg, { translateY: [0, 1.4, 0, 1.1, 0] }, { duration: 0.95, repeat: Infinity, easing: "ease-in-out" });
         });
+
+        document.querySelectorAll(".journey-guide .mithu-beak-top").forEach(function (beakTop) {
+          animate(beakTop, { translateY: [0, -1.1, 0] }, { duration: 1.1, repeat: Infinity, easing: "ease-in-out" });
+        });
+        document.querySelectorAll(".journey-guide .mithu-beak-bottom").forEach(function (beakBottom) {
+          animate(beakBottom, { translateY: [0, 1.1, 0] }, { duration: 1.1, repeat: Infinity, easing: "ease-in-out" });
+        });
+        document.querySelectorAll(".mithu .beak").forEach(function (beak) {
+          animate(beak, { scaleY: [1, 0.94, 1], translateY: [0, 0.8, 0] }, { duration: 1.3, repeat: Infinity, easing: "ease-in-out" });
+        });
       }
 
       function finishRound() {
@@ -624,8 +602,7 @@
           state = {
             currentLevel: 1,
             gateLevel: null,
-            gate: { bhasha: false, youtube: false },
-            rainbowPreview: state.rainbowPreview
+            gate: { bhasha: false, youtube: false }
           };
           saveState();
           startBtn.textContent = "Start Level 1";
@@ -802,44 +779,15 @@
         }
       });
       window.addEventListener("scroll", updateGuideByScroll, { passive: true });
-      rainbowToggle.addEventListener("click", function () {
-        state.rainbowPreview = !state.rainbowPreview;
-        saveState();
-        applyRainbowPreview();
-      });
 
       loadState();
       const initial = levelConfig(state.currentLevel);
       setScore(initial.target);
       createBubbles();
       syncGateUi();
-      applyRainbowPreview();
       animateParrot();
       updateGuideByScroll();
     })();
   </script>
-  <style>
-    body.rainbow-mithu .mithu .body,
-    body.rainbow-mithu .journey-guide .mithu-body {
-      fill: #ff5ab3;
-    }
-    body.rainbow-mithu .mithu .wing,
-    body.rainbow-mithu .journey-guide .mithu-wing-left,
-    body.rainbow-mithu .journey-guide .mithu-wing-right {
-      fill: #6a67ff;
-    }
-    body.rainbow-mithu .mithu .belly,
-    body.rainbow-mithu .journey-guide .mithu-belly {
-      fill: #7be8ff;
-    }
-    body.rainbow-mithu .journey-guide .mithu-tail,
-    body.rainbow-mithu .mithu .tail {
-      fill: #49d96d;
-    }
-    body.rainbow-mithu .mithu .crest,
-    body.rainbow-mithu .journey-guide .mithu-crest {
-      stroke: #ffcf33;
-    }
-  </style>
 </body>
 </html>
