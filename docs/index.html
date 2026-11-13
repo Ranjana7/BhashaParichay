@@ -704,10 +704,13 @@
       }
 
       function retryGame() {
-        if (!state.playedCurrentLevel) return;
         if (running) {
           clearTimeout(timerId);
           running = false;
+        }
+        if (!state.playedCurrentLevel) {
+          state.playedCurrentLevel = true;
+          saveState();
         }
         const level = levelConfig(state.currentLevel);
         clearField();
@@ -724,7 +727,7 @@
         if (!state.gateLevel) {
           startBtn.disabled = false;
           startBtn.textContent = "Play Level " + state.currentLevel;
-          retryBtn.disabled = !state.playedCurrentLevel;
+          retryBtn.disabled = false;
           retryBtn.textContent = "Retry Level " + state.currentLevel;
           guideStatus.textContent = "Level " + state.currentLevel + " is ready.";
           return;
