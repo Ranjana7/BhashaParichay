@@ -631,6 +631,11 @@
         syncGateUi();
       }
 
+      function resetScoreForLevel(levelNumber) {
+        const cfg = levelConfig(levelNumber);
+        setScore(cfg.target);
+      }
+
       function celebrate(button) {
         if (typeof confetti === "function") {
           const rect = button.getBoundingClientRect();
@@ -715,7 +720,7 @@
         running = true;
         clearField();
         remaining = level.target;
-        setScore(level.target);
+        resetScoreForLevel(state.currentLevel);
         updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
         setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
         createBubbles();
@@ -743,6 +748,7 @@
         if (action === "bhasha") state.gate.bhasha = true;
         if (action === "youtube") state.gate.youtube = true;
         if (isGateOpen()) {
+          resetScoreForLevel(state.gateLevel);
           setGuide("dancing", "Great! Level " + state.gateLevel + " is now unlocked. Tap Play to continue!", "Unlocked");
           if (typeof confetti === "function") confetti({ particleCount: 70, spread: 68, scalar: 0.8 });
         }
