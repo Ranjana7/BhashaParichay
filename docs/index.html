@@ -6,7 +6,7 @@
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261113u4">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u5">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -31,6 +31,14 @@
       display: grid;
       place-items: center;
       padding: 20px;
+    }
+
+    .page-shell {
+      width: min(1180px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
+      align-items: start;
+      gap: 16px;
     }
 
     .home-card {
@@ -204,10 +212,9 @@
     .star.orb-gem { color: #93ffe1; }
 
     .journey-guide {
-      position: fixed;
-      right: 18px;
-      top: 18px;
-      width: min(280px, 32vw);
+      position: sticky;
+      top: 16px;
+      width: 100%;
       background: #ffffff;
       border: 2px solid #d9e8ff;
       border-radius: 16px;
@@ -266,6 +273,23 @@
       text-align: center;
     }
 
+    .journey-guide-actions {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .guide-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #ffffff;
+      background: linear-gradient(120deg, #5f6bff, #2f8bff);
+    }
+
     .journey-guide.state-dancing .journey-guide-mithu {
       animation: mithuGuideDance 0.44s ease-in-out 4;
     }
@@ -318,6 +342,10 @@
     }
 
     @media (max-width: 1060px) {
+      .page-shell {
+        grid-template-columns: 1fr;
+      }
+
       .journey-guide {
         position: static;
         width: 100%;
@@ -332,28 +360,29 @@
   </style>
 </head>
 <body>
-  <main class="home-card">
-    <div class="sparkle">✨ 🌈 🌟</div>
-    <section class="hero">
-      <svg class="mithu" viewBox="0 0 240 240" role="img" aria-label="Mithu bird mascot">
-        <ellipse class="shadow" cx="120" cy="208" rx="56" ry="14"></ellipse>
-        <ellipse class="body" cx="120" cy="122" rx="66" ry="80"></ellipse>
-        <ellipse class="belly" cx="120" cy="142" rx="40" ry="48"></ellipse>
-        <path class="wing" d="M76 116 C36 124, 34 172, 75 180 C77 154, 86 132, 98 124 Z"></path>
-        <path class="wing" d="M164 116 C204 124, 206 172, 165 180 C163 154, 154 132, 142 124 Z"></path>
-        <circle class="eye" cx="100" cy="97" r="8"></circle>
-        <circle class="eye" cx="140" cy="97" r="8"></circle>
-        <path class="beak" d="M108 112 L132 112 L120 128 Z"></path>
-        <path class="beak" d="M110 126 L130 126 L120 139 Z"></path>
-        <rect class="leg" x="104" y="182" width="8" height="20" rx="4"></rect>
-        <rect class="leg" x="128" y="182" width="8" height="20" rx="4"></rect>
-        <path class="crest" d="M104 45 L113 26 L121 44 L129 24 L138 45"></path>
-      </svg>
-      <div>
-        <h1>KidsLearningWorldWisdom</h1>
-        <p class="speech">Hi! I’m Mithu. Choose where you want to go: Bhasha learning adventures or fun videos!</p>
-      </div>
-    </section>
+  <div class="page-shell">
+    <main class="home-card">
+      <div class="sparkle">✨ 🌈 🌟</div>
+      <section class="hero">
+        <svg class="mithu" viewBox="0 0 240 240" role="img" aria-label="Mithu parrot mascot">
+          <ellipse class="shadow" cx="120" cy="208" rx="56" ry="14"></ellipse>
+          <path class="wing" d="M74 114 C28 126, 34 176, 79 182 C80 156, 90 134, 100 126 Z"></path>
+          <path class="wing" d="M166 114 C212 126, 206 176, 161 182 C160 156, 150 134, 140 126 Z"></path>
+          <ellipse class="body" cx="120" cy="122" rx="64" ry="82"></ellipse>
+          <ellipse class="belly" cx="120" cy="146" rx="38" ry="46"></ellipse>
+          <path class="beak" d="M106 112 C118 106, 130 106, 136 112 C130 126, 118 131, 106 126 Z"></path>
+          <path class="beak" d="M108 124 C118 130, 128 130, 134 124 C128 138, 116 140, 108 134 Z"></path>
+          <circle class="eye" cx="102" cy="98" r="7"></circle>
+          <circle class="eye" cx="138" cy="98" r="7"></circle>
+          <rect class="leg" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="leg" x="128" y="184" width="8" height="20" rx="4"></rect>
+          <path class="crest" d="M102 44 L112 24 L121 42 L130 22 L140 44"></path>
+        </svg>
+        <div>
+          <h1>KidsLearningWorldWisdom</h1>
+          <p class="speech">Hi! I’m Mithu. Choose where you want to go: Bhasha learning adventures or fun videos!</p>
+        </div>
+      </section>
 
     <section class="links" aria-label="Main destinations">
       <a class="cta cta-bhasha" href="/bhashaparichay/" id="bhashaHomeLink">
@@ -367,49 +396,53 @@
       </a>
     </section>
 
-    <section class="play-zone" aria-label="Mini game">
-      <div class="play-head">
-        <h2>Star Pop with Mithu</h2>
-        <div class="play-score" id="starScore">Level 1 / 20 · Stars: 0 / 10</div>
-      </div>
-      <div class="play-tools">
-        <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
-        <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
-      </div>
-      <div class="star-field" id="starField" aria-live="polite"></div>
-    </section>
-  </main>
+      <section class="play-zone" aria-label="Mini game">
+        <div class="play-head">
+          <h2>Star Pop with Mithu</h2>
+          <div class="play-score" id="starScore">Score: 10</div>
+        </div>
+        <div class="play-tools">
+          <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
+          <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
+        </div>
+        <div class="star-field" id="starField" aria-live="polite"></div>
+      </section>
+    </main>
 
-  <aside class="journey-guide state-idle" id="journeyGuide" aria-live="polite">
-    <div class="journey-guide-head">
-      <figure class="journey-guide-mithu" aria-hidden="true">
-        <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
-          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
-          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
-          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
-          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
-          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
-          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
-          <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
-          <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
-          <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
-          <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
-          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
-          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
-          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
-        </svg>
-      </figure>
-      <div>
-        <p class="journey-guide-title">Mithu Journey Guide</p>
-        <p class="journey-guide-speech" id="journeyGuideSpeech">Scroll and play! I will guide you.</p>
+    <aside class="journey-guide parrot-mascot state-idle" id="journeyGuide" aria-live="polite">
+      <div class="journey-guide-head">
+        <figure class="journey-guide-mithu" aria-hidden="true">
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
+            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
+            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+          </svg>
+        </figure>
+        <div>
+          <p class="journey-guide-title">Mithu Journey Guide</p>
+          <p class="journey-guide-speech mascot-speech" id="journeyGuideSpeech">Scroll and play! I will guide you.</p>
+        </div>
       </div>
-    </div>
-    <p class="journey-guide-status" id="journeyGuideStatus">Unlock next level by tapping both Go to Bhasha Home and Watch YouTube after each level.</p>
-  </aside>
+      <p class="journey-guide-status" id="journeyGuideStatus">Unlock next level by tapping both Go to Bhasha Home and Watch YouTube after each level.</p>
+      <div class="journey-guide-actions">
+        <button id="rainbowMithuToggle" class="guide-btn" type="button">Preview Rainbow Mithu</button>
+      </div>
+    </aside>
+  </div>
 
   <script src="assets/vendor/motion.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
-  <script src="assets/mithu-follower.js?v=20261113u4"></script>
+  <script src="assets/mithu-follower.js?v=20261113u5"></script>
   <script>
     (function initHomePlayZone() {
       const field = document.getElementById("starField");
@@ -421,6 +454,7 @@
       const guide = document.getElementById("journeyGuide");
       const guideSpeech = document.getElementById("journeyGuideSpeech");
       const guideStatus = document.getElementById("journeyGuideStatus");
+      const rainbowToggle = document.getElementById("rainbowMithuToggle");
       const sections = Array.from(document.querySelectorAll(".hero, .links, .play-zone"));
 
       const motionApi = window.Motion || {};
@@ -437,12 +471,14 @@
       ];
 
       let score = 0;
+      let remaining = 0;
       let running = false;
       let timerId = null;
       let state = {
         currentLevel: 1,
         gateLevel: null,
-        gate: { bhasha: false, youtube: false }
+        gate: { bhasha: false, youtube: false },
+        rainbowPreview: false
       };
 
       function readJson(key, fallback) {
@@ -482,6 +518,7 @@
           bhasha: Boolean(gate.bhasha),
           youtube: Boolean(gate.youtube)
         };
+        state.rainbowPreview = Boolean(loaded.rainbowPreview);
       }
 
       function levelConfig(levelNumber) {
@@ -506,8 +543,7 @@
 
       function setScore(next) {
         score = next;
-        const level = levelConfig(state.currentLevel);
-        scoreNode.textContent = "Level " + level.level + " / " + TOTAL_LEVELS + " · " + level.name + ": " + score + " / " + level.target;
+        scoreNode.textContent = "Score: " + score;
       }
 
       function clearField() {
@@ -534,6 +570,50 @@
           bubble.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
           field.appendChild(bubble);
         }
+      }
+
+      function applyRainbowPreview() {
+        document.body.classList.toggle("rainbow-mithu", state.rainbowPreview);
+        const action = state.rainbowPreview ? "Classic Mithu" : "Preview Rainbow Mithu";
+        rainbowToggle.textContent = action;
+        if (state.rainbowPreview) {
+          guideSpeech.textContent = "Here is Rainbow Mithu preview! You can switch back anytime.";
+        }
+      }
+
+      function animateParrot() {
+        if (typeof animate !== "function") return;
+        document.querySelectorAll(".mithu .wing, .journey-guide .mithu-wing-left, .journey-guide .mithu-wing-right").forEach(function (wing) {
+          animate(wing, { rotate: [0, -8, 0, 8, 0] }, { duration: 1.8, repeat: Infinity, easing: "ease-in-out" });
+        });
+        document.querySelectorAll(".mithu .body, .journey-guide .mithu-body").forEach(function (body) {
+          animate(body, { translateY: [0, -3, 0] }, { duration: 2.3, repeat: Infinity, easing: "ease-in-out" });
+        });
+      }
+
+      function finishRound() {
+        const level = levelConfig(state.currentLevel);
+        running = false;
+        clearTimeout(timerId);
+        updateMessage("Nice try! You saved " + score + " out of " + level.target + " " + level.name.toLowerCase() + ".");
+        setGuide("dancing", "Great effort! You scored " + score + ". Retry this level or unlock the next level with both destination buttons.", "Ready for retry or unlock mission");
+        if (state.currentLevel >= TOTAL_LEVELS) {
+          state = {
+            currentLevel: 1,
+            gateLevel: null,
+            gate: { bhasha: false, youtube: false },
+            rainbowPreview: state.rainbowPreview
+          };
+          saveState();
+          startBtn.textContent = "Start Level 1";
+          if (typeof confetti === "function") confetti({ particleCount: 150, spread: 95, scalar: 0.9 });
+          updateMessage("Amazing journey complete! Mithu restarted the adventure from Level 1.");
+          return;
+        }
+        state.gateLevel = state.currentLevel + 1;
+        state.gate = { bhasha: false, youtube: false };
+        saveState();
+        syncGateUi();
       }
 
       function celebrate(button) {
@@ -574,43 +654,15 @@
         }
 
         orb.addEventListener("click", function () {
-          setScore(score + 1);
+          remaining -= 1;
           celebrate(orb);
           if (typeof animate === "function") {
             animate(orb, { opacity: [1, 0], transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.5)"] }, { duration: 0.25 });
           }
           orb.remove();
 
-          if (score >= level.target) {
-            const completedLevel = state.currentLevel;
-            if (typeof confetti === "function") {
-              confetti({ particleCount: 120, spread: 90, scalar: 0.9 });
-            }
-            running = false;
-            clearTimeout(timerId);
-            if (completedLevel >= TOTAL_LEVELS) {
-              state = {
-                currentLevel: 1,
-                gateLevel: null,
-                gate: { bhasha: false, youtube: false }
-              };
-              saveState();
-              createBubbles();
-              setScore(0);
-              startBtn.disabled = false;
-              startBtn.textContent = "Start Level 1";
-              updateMessage("All 20 levels complete! Journey restarted at Level 1.");
-              setGuide("dancing", "You finished all 20 levels! Mithu restarted the journey for a new adventure!", "Fresh journey started.");
-              if (typeof confetti === "function") confetti({ particleCount: 180, spread: 100, scalar: 0.95 });
-              return;
-            }
-            state.currentLevel = completedLevel + 1;
-            state.gateLevel = state.currentLevel;
-            state.gate = { bhasha: false, youtube: false };
-            saveState();
-            syncGateUi();
-            updateMessage("Level " + completedLevel + " complete! Visit Bhasha Home and YouTube to unlock Level " + state.currentLevel + ".");
-            setGuide("dancing", "Wonderful! Level " + completedLevel + " done. Tap both destination buttons, then come back for Level " + state.currentLevel + ".", "Unlock mission: Bhasha Home + YouTube");
+          if (remaining <= 0) {
+            finishRound();
             return;
           }
 
@@ -620,6 +672,12 @@
         timerId = setTimeout(function () {
           if (orb.isConnected && running) {
             orb.remove();
+            setScore(Math.max(0, score - 1));
+            remaining -= 1;
+            if (remaining <= 0) {
+              finishRound();
+              return;
+            }
             timerId = setTimeout(spawnOrb, Math.max(180, level.minDelay - 40));
           }
         }, level.life);
@@ -627,15 +685,22 @@
 
       function startGame() {
         if (running) return;
-        if (!isGateOpen()) {
-          updateMessage("Level " + state.currentLevel + " is locked. Tap both Go to Bhasha Home and Watch YouTube first.");
-          setGuide("idle", "Level " + state.currentLevel + " unlock mission: tap both destination buttons.", "Waiting for both taps");
-          return;
+        if (state.gateLevel && !isGateOpen()) {
+          updateMessage("Next level is locked. Tap both Go to Bhasha Home and Watch YouTube first.");
+          setGuide("idle", "You can retry this level now. Unlock the next one by tapping both destination buttons.", "Waiting for both taps");
+        }
+        if (state.gateLevel && isGateOpen()) {
+          state.currentLevel = state.gateLevel;
+          state.gateLevel = null;
+          state.gate = { bhasha: false, youtube: false };
+          saveState();
+          syncGateUi();
         }
         const level = levelConfig(state.currentLevel);
         running = true;
         clearField();
-        setScore(0);
+        remaining = level.target;
+        setScore(level.target);
         updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
         setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
         createBubbles();
@@ -650,21 +715,20 @@
           return;
         }
         const open = isGateOpen();
-        startBtn.disabled = !open;
-        startBtn.textContent = open ? "Play Level " + state.currentLevel : "Level " + state.currentLevel + " Locked";
-        guideStatus.textContent = "Unlock Level " + state.currentLevel + ": "
+        startBtn.disabled = false;
+        startBtn.textContent = open ? "Play Level " + state.gateLevel : "Retry Level " + state.currentLevel;
+        guideStatus.textContent = "Unlock next level: "
           + (state.gate.bhasha ? "Bhasha Home done" : "Go to Bhasha Home")
           + " + "
           + (state.gate.youtube ? "YouTube done" : "Watch YouTube");
       }
 
       function markGateAction(action) {
-        if (!state.gateLevel || state.gateLevel !== state.currentLevel) return;
+        if (!state.gateLevel) return;
         if (action === "bhasha") state.gate.bhasha = true;
         if (action === "youtube") state.gate.youtube = true;
         if (isGateOpen()) {
-          state.gateLevel = null;
-          setGuide("dancing", "Great! Level " + state.currentLevel + " is now unlocked. Let's play!", "Unlocked");
+          setGuide("dancing", "Great! Level " + state.gateLevel + " is now unlocked. Tap Play to continue!", "Unlocked");
           if (typeof confetti === "function") confetti({ particleCount: 70, spread: 68, scalar: 0.8 });
         }
         saveState();
@@ -709,13 +773,44 @@
         }
       });
       window.addEventListener("scroll", updateGuideByScroll, { passive: true });
+      rainbowToggle.addEventListener("click", function () {
+        state.rainbowPreview = !state.rainbowPreview;
+        saveState();
+        applyRainbowPreview();
+      });
 
       loadState();
-      setScore(0);
+      const initial = levelConfig(state.currentLevel);
+      setScore(initial.target);
       createBubbles();
       syncGateUi();
+      applyRainbowPreview();
+      animateParrot();
       updateGuideByScroll();
     })();
   </script>
+  <style>
+    body.rainbow-mithu .mithu .body,
+    body.rainbow-mithu .journey-guide .mithu-body {
+      fill: #ff5ab3;
+    }
+    body.rainbow-mithu .mithu .wing,
+    body.rainbow-mithu .journey-guide .mithu-wing-left,
+    body.rainbow-mithu .journey-guide .mithu-wing-right {
+      fill: #6a67ff;
+    }
+    body.rainbow-mithu .mithu .belly,
+    body.rainbow-mithu .journey-guide .mithu-belly {
+      fill: #7be8ff;
+    }
+    body.rainbow-mithu .journey-guide .mithu-tail,
+    body.rainbow-mithu .mithu .tail {
+      fill: #49d96d;
+    }
+    body.rainbow-mithu .mithu .crest,
+    body.rainbow-mithu .journey-guide .mithu-crest {
+      stroke: #ffcf33;
+    }
+  </style>
 </body>
 </html>
