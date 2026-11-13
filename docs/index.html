@@ -6,7 +6,7 @@
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261113u5">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u6">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -136,13 +136,14 @@
       display: block;
     }
 
-    .mithu .body { fill: #1fbe5d; }
-    .mithu .belly { fill: #dff8e8; }
-    .mithu .wing { fill: #0f8f46; }
+    .mithu .body { fill: #1f8fff; }
+    .mithu .belly { fill: #d8f2ff; }
+    .mithu .wing { fill: #1273e6; }
+    .mithu .tail { fill: #0b57c8; }
     .mithu .beak { fill: #f9a825; }
     .mithu .eye { fill: #202a46; }
     .mithu .leg { fill: #f4a22d; }
-    .mithu .crest { stroke: #2f8bff; stroke-width: 6; stroke-linecap: round; fill: none; }
+    .mithu .crest { stroke: #5cb4ff; stroke-width: 6; stroke-linecap: round; fill: none; }
     .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
 
     .play-zone {
@@ -583,11 +584,25 @@
 
       function animateParrot() {
         if (typeof animate !== "function") return;
-        document.querySelectorAll(".mithu .wing, .journey-guide .mithu-wing-left, .journey-guide .mithu-wing-right").forEach(function (wing) {
-          animate(wing, { rotate: [0, -8, 0, 8, 0] }, { duration: 1.8, repeat: Infinity, easing: "ease-in-out" });
+
+        document.querySelectorAll(".mithu, .journey-guide .mithu-svg").forEach(function (bird) {
+          animate(bird, { translateY: [0, -4, 0], rotate: [0, -1.4, 0, 1.4, 0] }, { duration: 2.6, repeat: Infinity, easing: "ease-in-out" });
         });
-        document.querySelectorAll(".mithu .body, .journey-guide .mithu-body").forEach(function (body) {
-          animate(body, { translateY: [0, -3, 0] }, { duration: 2.3, repeat: Infinity, easing: "ease-in-out" });
+
+        document.querySelectorAll(".mithu .wing, .journey-guide .mithu-wing-left").forEach(function (wing) {
+          animate(wing, { rotate: [0, -16, 0, -6, 0], translateY: [0, -1, 0] }, { duration: 0.95, repeat: Infinity, easing: "ease-in-out" });
+        });
+
+        document.querySelectorAll(".journey-guide .mithu-wing-right").forEach(function (wing) {
+          animate(wing, { rotate: [0, 16, 0, 6, 0], translateY: [0, -1, 0] }, { duration: 0.95, repeat: Infinity, easing: "ease-in-out" });
+        });
+
+        document.querySelectorAll(".journey-guide .mithu-tail").forEach(function (tail) {
+          animate(tail, { rotate: [0, 12, 0, -10, 0] }, { duration: 1.3, repeat: Infinity, easing: "ease-in-out" });
+        });
+
+        document.querySelectorAll(".mithu .eye, .journey-guide .mithu-eye-left, .journey-guide .mithu-eye-right").forEach(function (eye) {
+          animate(eye, { scaleY: [1, 1, 0.16, 1, 1] }, { duration: 3.4, repeat: Infinity, easing: "ease-in-out" });
         });
       }
 

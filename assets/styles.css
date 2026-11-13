@@ -2070,20 +2070,20 @@ th {
 }
 
 .mithu-body {
-  fill: #1fbe5d;
+  fill: #1f8fff;
 }
 
 .mithu-belly {
-  fill: #dff8e8;
+  fill: #d8f2ff;
 }
 
 .mithu-tail {
-  fill: #0f8f46;
+  fill: #0b57c8;
 }
 
 .mithu-wing-left,
 .mithu-wing-right {
-  fill: #0f8f46;
+  fill: #1273e6;
 }
 
 .mithu-eye-left,
@@ -2105,7 +2105,7 @@ th {
 }
 
 .mithu-crest {
-  stroke: #2f8bff;
+  stroke: #5cb4ff;
   stroke-width: 7;
   fill: none;
   stroke-linecap: round;
