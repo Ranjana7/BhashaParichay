@@ -104,7 +104,7 @@
       );
       safeAnimate(
         portalCore,
-        { scale: [1, 1.03, 1], rotate: [0, 1.5, 0, -1.5, 0] },
+        { translateY: [0, -3, 0], rotate: [0, 1, 0, -1, 0] },
         { duration: 3.1 + index * 0.35, repeat: Infinity, easing: "ease-in-out" }
       );
       safeAnimate(
@@ -114,12 +114,10 @@
       );
 
       card.addEventListener("pointerenter", function () {
-        safeAnimate(card, { transform: ["translateY(0px) scale(1)", "translateY(-6px) scale(1.02)"] }, { duration: 0.2, easing: "ease-out" });
-        safeAnimate(portalCore, { transform: ["scale(1)", "scale(1.08)"] }, { duration: 0.2, easing: "ease-out" });
+        safeAnimate(card, { transform: ["translateY(0px)", "translateY(-4px)"] }, { duration: 0.18, easing: "ease-out" });
       });
       card.addEventListener("pointerleave", function () {
-        safeAnimate(card, { transform: ["translateY(-6px) scale(1.02)", "translateY(0px) scale(1)"] }, { duration: 0.22, easing: "ease-out" });
-        safeAnimate(portalCore, { transform: ["scale(1.08)", "scale(1)"] }, { duration: 0.22, easing: "ease-out" });
+        safeAnimate(card, { transform: ["translateY(-4px)", "translateY(0px)"] }, { duration: 0.2, easing: "ease-out" });
       });
     });
   }
