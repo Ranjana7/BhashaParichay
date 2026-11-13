@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Spain symbol with sun and landmark">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe6b8"/>
+      <stop offset="1" stop-color="#ffd08a"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd64d"/>
+      <stop offset="1" stop-color="#ffb000"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d44242"/>
+      <stop offset="1" stop-color="#b32028"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="40" fill="url(#bg)"/>
+  <g opacity="0.92">
+    <circle cx="76" cy="76" r="30" fill="url(#sun)"/>
+    <g stroke="#ffbc2f" stroke-linecap="round" stroke-width="6">
+      <line x1="76" y1="28" x2="76" y2="14"/>
+      <line x1="76" y1="138" x2="76" y2="124"/>
+      <line x1="28" y1="76" x2="14" y2="76"/>
+      <line x1="138" y1="76" x2="124" y2="76"/>
+      <line x1="42" y1="42" x2="32" y2="32"/>
+      <line x1="110" y1="110" x2="120" y2="120"/>
+      <line x1="110" y1="42" x2="120" y2="32"/>
+      <line x1="42" y1="110" x2="32" y2="120"/>
+    </g>
+  </g>
+  <g transform="translate(52 104)">
+    <rect x="0" y="86" width="152" height="24" rx="8" fill="#8a1d1d" opacity="0.2"/>
+    <path d="M16 92V42h18V26h16v16h22V22h16v20h22V30h16v12h18v50z" fill="url(#land)"/>
+    <rect x="28" y="54" width="12" height="38" rx="3" fill="#f7d6a0"/>
+    <rect x="62" y="54" width="12" height="38" rx="3" fill="#f7d6a0"/>
+    <rect x="96" y="54" width="12" height="38" rx="3" fill="#f7d6a0"/>
+    <rect x="130" y="54" width="12" height="38" rx="3" fill="#f7d6a0"/>
+    <rect x="14" y="92" width="124" height="10" rx="4" fill="#8f1a26"/>
+  </g>
+</svg>
