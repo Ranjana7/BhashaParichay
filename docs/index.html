@@ -3,102 +3,866 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BhashaParichay | Choose a Language</title>
-  <meta name="description" content="BhashaParichay is a playful multilingual learning space for children. Choose Sanskrit, Spanish, or Portuguese.">
-  <link rel="stylesheet" href="assets/styles.css?v=20261112u5">
+  <title>KidsLearningWorldWisdom | Magical Home</title>
+  <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u12">
+  <style>
+    :root {
+      --bg-start: #c8f0ff;
+      --bg-end: #f9fdff;
+      --card: #ffffff;
+      --ink: #203353;
+      --accent-1: #6d5efc;
+      --accent-2: #ff6bb8;
+      --accent-3: #ffb703;
+      --mint: #37c98b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 85% 10%, #fff0ba 0%, transparent 36%),
+                  linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .page-shell {
+      width: min(1180px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
+      align-items: start;
+      gap: 16px;
+    }
+
+    .home-card {
+      width: min(920px, 100%);
+      background: var(--card);
+      border-radius: 26px;
+      padding: 24px 20px 22px;
+      border: 3px solid #fff;
+      box-shadow: 0 16px 34px rgba(21, 44, 84, 0.16);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(120px, 200px) 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.65rem, 5.2vw, 2.5rem);
+      color: #244574;
+    }
+
+    .speech {
+      margin: 0;
+      font-size: clamp(1rem, 3.4vw, 1.18rem);
+      line-height: 1.45;
+      background: #f4f8ff;
+      border: 2px solid #d8e6ff;
+      border-radius: 14px;
+      padding: 11px 13px;
+    }
+
+    .links {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .cta {
+      display: block;
+      text-decoration: none;
+      color: #16233d;
+      border-radius: 16px;
+      border: 2px solid #dfe9ff;
+      padding: 14px 14px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      background: #fff;
+    }
+
+    .cta:hover,
+    .cta:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(19, 41, 77, 0.16);
+      border-color: #b8ceff;
+      outline: none;
+    }
+
+    .cta-title {
+      display: block;
+      font-size: clamp(1.02rem, 3.3vw, 1.22rem);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .cta-text {
+      display: block;
+      font-size: clamp(0.92rem, 2.8vw, 1rem);
+      color: #465d82;
+    }
+
+    .cta-bhasha {
+      border-left: 8px solid var(--accent-1);
+      background: linear-gradient(90deg, #f5f2ff 0%, #fff 32%);
+    }
+
+    .cta-youtube {
+      border-left: 8px solid var(--accent-2);
+      background: linear-gradient(90deg, #fff2fa 0%, #fff 32%);
+    }
+
+    .sparkle {
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+      color: var(--accent-3);
+      margin-bottom: 6px;
+    }
+
+    .mithu {
+      width: 100%;
+      max-width: 190px;
+      margin-inline: auto;
+      display: block;
+    }
+
+    .play-zone {
+      margin-top: 16px;
+      border-radius: 18px;
+      border: 2px solid #d5e7ff;
+      background: linear-gradient(180deg, #f7fbff, #f0f8ff);
+      padding: 14px;
+    }
+
+    .play-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .play-head h2 {
+      margin: 0;
+      font-size: clamp(1.06rem, 3.2vw, 1.28rem);
+      color: #27426a;
+    }
+
+    .play-score {
+      font-weight: 800;
+      color: #2f4b76;
+      background: #fff;
+      border: 2px solid #d8e6ff;
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+
+    .play-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .play-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(120deg, var(--accent-1), #4a83ff);
+    }
+
+    .play-message {
+      font-weight: 700;
+      color: #3d5277;
+      min-height: 24px;
+    }
+
+    .play-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(0.15);
+    }
+
+    .star.orb-star { color: #ffd33d; }
+    .star.orb-moon { color: #dbf1ff; }
+    .star.orb-gem { color: #93ffe1; }
+
+    .journey-guide {
+      position: sticky;
+      top: 16px;
+      width: 100%;
+      background: #ffffff;
+      border: 2px solid #d9e8ff;
+      border-radius: 16px;
+      box-shadow: 0 14px 28px rgba(24, 41, 76, 0.18);
+      padding: 12px;
+      z-index: 15;
+    }
+
+    .journey-guide-head {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .journey-guide-mithu {
+      margin: 0;
+      width: 70px;
+      height: 70px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #ecfbff, #eaf4ff);
+      padding: 4px;
+      border: 1px solid #c5ddff;
+    }
+
+    .journey-guide .mithu-svg {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .journey-guide-title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #2a4370;
+    }
+
+    .journey-guide-speech {
+      margin: 3px 0 0;
+      font-size: 0.88rem;
+      line-height: 1.35;
+      color: #435a83;
+      font-weight: 700;
+    }
+
+    .journey-guide-status {
+      margin: 10px 0 0;
+      font-size: 0.83rem;
+      font-weight: 800;
+      color: #315488;
+      background: #f2f8ff;
+      border: 1px solid #d4e5ff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+
+    .journey-guide.state-dancing .journey-guide-mithu {
+      animation: mithuGuideDance 0.44s ease-in-out 4;
+    }
+
+    @keyframes mithuGuideDance {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-3px) rotate(-8deg); }
+      50% { transform: translateY(0) rotate(0deg); }
+      75% { transform: translateY(-3px) rotate(8deg); }
+    }
+
+    .star-field {
+      position: relative;
+      height: 210px;
+      border-radius: 14px;
+      border: 2px dashed #bdd6ff;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.95) 0, rgba(255,255,255,0) 50%),
+        linear-gradient(180deg, #e5f3ff 0%, #d8ecff 100%);
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    .star {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 6px 8px rgba(52, 88, 138, 0.26));
+      user-select: none;
+    }
+
+    .float-bubble {
+      position: absolute;
+      bottom: -24px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.74);
+      animation: bubbleUp linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes bubbleUp {
+      from { transform: translateY(0) scale(0.7); opacity: 0; }
+      15% { opacity: 0.9; }
+      to { transform: translateY(-250px) scale(1.2); opacity: 0; }
+    }
+
+    @media (max-width: 1060px) {
+      .page-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .journey-guide {
+        position: static;
+        width: 100%;
+        margin-top: 12px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .star-field { height: 190px; }
+    }
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="page-shell">
+    <main class="home-card">
+      <div class="sparkle">✨ 🌈 🌟</div>
+      <section class="hero">
+        <svg class="mithu mithu-svg state-idle" viewBox="0 0 240 240" role="img" aria-label="Mithu parrot mascot">
+          <defs>
+            <linearGradient id="homeMithuBodyRainbow" x1="74" y1="58" x2="168" y2="206" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#ff3b30"></stop>
+              <stop offset="0.16" stop-color="#ff9500"></stop>
+              <stop offset="0.33" stop-color="#ffcc00"></stop>
+              <stop offset="0.5" stop-color="#34c759"></stop>
+              <stop offset="0.67" stop-color="#00c7ff"></stop>
+              <stop offset="0.84" stop-color="#007aff"></stop>
+              <stop offset="1" stop-color="#af52de"></stop>
+            </linearGradient>
+            <linearGradient id="homeMithuWingLeft" x1="66" y1="116" x2="130" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#ff4d6d"></stop>
+              <stop offset="0.5" stop-color="#ff8a00"></stop>
+              <stop offset="1" stop-color="#ffd60a"></stop>
+            </linearGradient>
+            <linearGradient id="homeMithuWingRight" x1="174" y1="118" x2="214" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#32d74b"></stop>
+              <stop offset="0.5" stop-color="#0abaff"></stop>
+              <stop offset="1" stop-color="#7c4dff"></stop>
+            </linearGradient>
+            <linearGradient id="homeMithuTail" x1="182" y1="150" x2="223" y2="199" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#5ac8fa"></stop>
+              <stop offset="1" stop-color="#5856d6"></stop>
+            </linearGradient>
+          </defs>
+          <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+          <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z" style="fill:url(#homeMithuTail)"></path>
+          <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78" style="fill:url(#homeMithuBodyRainbow)"></ellipse>
+          <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48" style="fill:#f8fbff"></ellipse>
+          <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z" style="fill:url(#homeMithuWingLeft)"></path>
+          <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z" style="fill:url(#homeMithuWingRight)"></path>
+          <circle class="mithu-eye-left" cx="100" cy="96" r="8" style="fill:#24325c"></circle>
+          <circle class="mithu-eye-right" cx="140" cy="96" r="8" style="fill:#24325c"></circle>
+          <path class="mithu-beak-top" d="M106 109 C114 103, 126 103, 134 109 C128 118, 118 122, 106 118 Z" style="fill:#ffbd7f"></path>
+          <path class="mithu-beak-bottom" d="M108 118 C116 122, 124 122, 132 118 C126 128, 116 131, 108 126 Z" style="fill:#f79f56"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4" style="fill:#ffc589"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4" style="fill:#ffc589"></rect>
+          <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45" style="stroke:#ff2d55"></path>
+          <path d="M106 52 L112 41" style="stroke:#ff8a00;stroke-width:6;fill:none;stroke-linecap:round"></path>
+          <path d="M118 47 L123 37" style="stroke:#ffd60a;stroke-width:6;fill:none;stroke-linecap:round"></path>
+          <path d="M130 47 L135 37" style="stroke:#32d74b;stroke-width:6;fill:none;stroke-linecap:round"></path>
+          <path d="M142 53 L148 42" style="stroke:#0abaff;stroke-width:6;fill:none;stroke-linecap:round"></path>
+        </svg>
+        <div>
+          <h1>KidsLearningWorldWisdom</h1>
+          <p class="speech">Hi! I’m Mithu. Choose where you want to go: Bhasha learning adventures or fun videos!</p>
+        </div>
+      </section>
 
-  <header class="site-header">
-    <nav class="main-nav" aria-label="Main">
-      <a href="index.html" aria-current="page">Home</a>
-      <a href="about.html">About BhashaParichay</a>
-    </nav>
-  </header>
+    <section class="links" aria-label="Main destinations">
+      <a class="cta cta-bhasha" href="/bhashaparichay/" id="bhashaHomeLink">
+        <span class="cta-title">📚 Go to Bhasha Home</span>
+        <span class="cta-text">Enter BhashaParichay and start language learning worlds.</span>
+      </a>
 
-  <main id="main-content" class="page-wrap">
-    <section class="panel language-hero">
-      <div class="language-hero-layout">
-        <div class="language-hero-mithu state-idle" id="languageHeroMithu" aria-hidden="true">
+      <a class="cta cta-youtube" href="https://www.youtube.com/@BhagwadGitaForKids" target="_blank" rel="noopener noreferrer" id="youtubeChannelLink">
+        <span class="cta-title">▶ Watch Videos on YouTube</span>
+        <span class="cta-text">Open KidsLearningWorldWisdom videos and stories.</span>
+      </a>
+    </section>
+
+      <section class="play-zone" aria-label="Mini game">
+        <div class="play-head">
+          <h2>Star Pop with Mithu</h2>
+          <div class="play-score" id="totalScore">Total Score: 0</div>
+          <div class="play-score" id="currentLevelScore">Current Level Score: 0</div>
+        </div>
+        <div class="play-tools">
+          <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
+          <button class="play-btn" id="retryStarGame" type="button" disabled>Retry Level 1</button>
+          <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
+        </div>
+        <div class="star-field" id="starField" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <aside class="journey-guide parrot-mascot state-idle" id="journeyGuide" aria-live="polite">
+      <div class="journey-guide-head">
+        <figure class="journey-guide-mithu" aria-hidden="true">
           <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
+            <defs>
+              <linearGradient id="guideMithuBodyRainbow" x1="74" y1="58" x2="168" y2="206" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ff3b30"></stop>
+                <stop offset="0.16" stop-color="#ff9500"></stop>
+                <stop offset="0.33" stop-color="#ffcc00"></stop>
+                <stop offset="0.5" stop-color="#34c759"></stop>
+                <stop offset="0.67" stop-color="#00c7ff"></stop>
+                <stop offset="0.84" stop-color="#007aff"></stop>
+                <stop offset="1" stop-color="#af52de"></stop>
+              </linearGradient>
+              <linearGradient id="guideMithuWingLeft" x1="66" y1="116" x2="130" y2="188" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ff4d6d"></stop>
+                <stop offset="0.5" stop-color="#ff8a00"></stop>
+                <stop offset="1" stop-color="#ffd60a"></stop>
+              </linearGradient>
+              <linearGradient id="guideMithuWingRight" x1="174" y1="118" x2="214" y2="188" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#32d74b"></stop>
+                <stop offset="0.5" stop-color="#0abaff"></stop>
+                <stop offset="1" stop-color="#7c4dff"></stop>
+              </linearGradient>
+              <linearGradient id="guideMithuTail" x1="182" y1="150" x2="223" y2="199" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#5ac8fa"></stop>
+                <stop offset="1" stop-color="#5856d6"></stop>
+              </linearGradient>
+            </defs>
             <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
-            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
-            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
-            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
-            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
-            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
-            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
-            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
-            <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
-            <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
-            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
-            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
-            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z" style="fill:url(#guideMithuTail)"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78" style="fill:url(#guideMithuBodyRainbow)"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48" style="fill:#f8fbff"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z" style="fill:url(#guideMithuWingLeft)"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z" style="fill:url(#guideMithuWingRight)"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8" style="fill:#24325c"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8" style="fill:#24325c"></circle>
+            <path class="mithu-beak-top" d="M106 109 C114 103, 126 103, 134 109 C128 118, 118 122, 106 118 Z" style="fill:#ffbd7f"></path>
+            <path class="mithu-beak-bottom" d="M108 118 C116 122, 124 122, 132 118 C126 128, 116 131, 108 126 Z" style="fill:#f79f56"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4" style="fill:#ffc589"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4" style="fill:#ffc589"></rect>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45" style="stroke:#ff2d55"></path>
+            <path d="M106 52 L112 41" style="stroke:#ff8a00;stroke-width:6;fill:none;stroke-linecap:round"></path>
+            <path d="M118 47 L123 37" style="stroke:#ffd60a;stroke-width:6;fill:none;stroke-linecap:round"></path>
+            <path d="M130 47 L135 37" style="stroke:#32d74b;stroke-width:6;fill:none;stroke-linecap:round"></path>
+            <path d="M142 53 L148 42" style="stroke:#0abaff;stroke-width:6;fill:none;stroke-linecap:round"></path>
           </svg>
-        </div>
-        <div class="language-hero-copy">
-          <p class="hero-badge">BhashaParichay</p>
-          <h1>Welcome, Little Explorer!</h1>
-          <p id="languageChooserSpeech" class="mascot-speech">Hi! I'm Mithu. Pick a language adventure to start learning!</p>
+        </figure>
+        <div>
+          <p class="journey-guide-title">Mithu Journey Guide</p>
+          <p class="journey-guide-speech mascot-speech" id="journeyGuideSpeech">Scroll and play! I will guide you.</p>
         </div>
       </div>
-    </section>
-
-    <section class="panel">
-      <h2>Choose Your Language</h2>
-      <div class="language-grid" aria-label="Language choices">
-        <a class="language-card portal-sanskrit" href="sanskritparichay/" data-language="sanskrit" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/forest.svg" alt="">
-            </span>
-            <span class="portal-word">अ आ इ</span>
-          </span>
-          <span class="world-title">Sanskrit</span>
-          <span class="world-text">Open SanskritParichay</span>
-        </a>
-        <a class="language-card portal-spanish" href="spanishparichay/" data-language="spanish" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/family.svg" alt="">
-            </span>
-            <span class="portal-word">¡Hola!</span>
-          </span>
-          <span class="world-title">Spanish</span>
-          <span class="world-text">Open SpanishParichay</span>
-        </a>
-        <a class="language-card portal-portuguese" href="portugueseparichay/" data-language="portuguese" data-seamless-nav>
-          <span class="language-illustration language-portal" aria-hidden="true">
-            <span class="portal-ring"></span>
-            <span class="portal-core">
-              <img src="assets/illustrations/vocab/river.svg" alt="">
-            </span>
-            <span class="portal-word">Olá!</span>
-          </span>
-          <span class="world-title">Portuguese</span>
-          <span class="world-text">Open PortugueseParichay</span>
-        </a>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Medals</h2>
-      <p>Collect medals by completing real language levels.</p>
-      <div class="medal-grid" id="languageMedals" aria-live="polite"></div>
-    </section>
-  </main>
+      <p class="journey-guide-status" id="journeyGuideStatus">Unlock next level by tapping both Go to Bhasha Home and Watch YouTube after each level.</p>
+    </aside>
+  </div>
 
   <script src="assets/vendor/motion.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
-  <script src="assets/mithu-follower.js?v=20261112u1"></script>
-  <script src="assets/shared-nav.js?v=20261112u1"></script>
-  <script src="assets/site-config.js?v=20261112u4"></script>
-  <script src="assets/progress-store.js?v=20261112u4"></script>
-  <script src="assets/multilingual-data.js?v=20261112u2"></script>
-  <script src="assets/seamless-experience.js?v=20261112u1"></script>
-  <script src="assets/language-chooser.js?v=20261112u4"></script>
+  <script src="assets/mithu-follower.js?v=20261113u5"></script>
+  <script>
+    (function initHomePlayZone() {
+      const field = document.getElementById("starField");
+      const totalScoreNode = document.getElementById("totalScore");
+      const currentLevelScoreNode = document.getElementById("currentLevelScore");
+      const msg = document.getElementById("gameMessage");
+      const startBtn = document.getElementById("startStarGame");
+      const retryBtn = document.getElementById("retryStarGame");
+      const bhashaLink = document.getElementById("bhashaHomeLink");
+      const youtubeLink = document.getElementById("youtubeChannelLink");
+      const guide = document.getElementById("journeyGuide");
+      const guideSpeech = document.getElementById("journeyGuideSpeech");
+      const guideStatus = document.getElementById("journeyGuideStatus");
+      const heroMithu = document.querySelector(".hero .mithu");
+      const sections = Array.from(document.querySelectorAll(".hero, .links, .play-zone"));
+
+      const motionApi = window.Motion || {};
+      const animate = motionApi.animate;
+
+      const GAME_STATE_KEY = "klww.home.starQuest.v4";
+      const TOTAL_LEVELS = 20;
+      const ORBS = [
+        { icon: "⭐", name: "Stars", cssClass: "orb-star" },
+        { icon: "🌙", name: "Moons", cssClass: "orb-moon" },
+        { icon: "💎", name: "Gems", cssClass: "orb-gem" },
+        { icon: "☀️", name: "Suns", cssClass: "orb-star" },
+        { icon: "🫧", name: "Bubbles", cssClass: "orb-moon" }
+      ];
+
+      let currentLevelScore = 0;
+      let totalScore = 0;
+      let remaining = 0;
+      let running = false;
+      let timerId = null;
+      let state = {
+        currentLevel: 1,
+        gateLevel: null,
+        gate: { bhasha: false, youtube: false },
+        playedCurrentLevel: false,
+        perLevelScores: {}
+      };
+
+      function readJson(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          return JSON.parse(raw);
+        } catch (_error) {
+          return fallback;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (_error) {
+          return;
+        }
+      }
+
+      function normalizeLevel(value) {
+        if (!Number.isFinite(Number(value))) return 1;
+        return Math.max(1, Math.min(TOTAL_LEVELS, Math.floor(Number(value))));
+      }
+
+      function saveState() {
+        writeJson(GAME_STATE_KEY, state);
+      }
+
+      function loadState() {
+        const loaded = readJson(GAME_STATE_KEY, null);
+        if (!loaded || typeof loaded !== "object") return;
+        state.currentLevel = normalizeLevel(loaded.currentLevel);
+        state.gateLevel = Number.isFinite(Number(loaded.gateLevel)) ? normalizeLevel(loaded.gateLevel) : null;
+        const gate = loaded.gate && typeof loaded.gate === "object" ? loaded.gate : {};
+        state.gate = {
+          bhasha: Boolean(gate.bhasha),
+          youtube: Boolean(gate.youtube)
+        };
+        state.playedCurrentLevel = Boolean(loaded.playedCurrentLevel);
+        const loadedPerLevelScores = loaded.perLevelScores && typeof loaded.perLevelScores === "object" ? loaded.perLevelScores : {};
+        state.perLevelScores = {};
+        Object.keys(loadedPerLevelScores).forEach(function (key) {
+          const level = normalizeLevel(key);
+          const value = Math.max(0, Math.floor(Number(loadedPerLevelScores[key]) || 0));
+          state.perLevelScores[level] = value;
+        });
+        totalScore = Object.keys(state.perLevelScores).reduce(function (sum, key) {
+          return sum + Math.max(0, Math.floor(Number(state.perLevelScores[key]) || 0));
+        }, 0);
+      }
+
+      function levelConfig(levelNumber) {
+        const level = normalizeLevel(levelNumber);
+        const orb = ORBS[(level - 1) % ORBS.length];
+        return {
+          level: level,
+          target: Math.min(40, 8 + Math.ceil(level * 1.4)),
+          orb: orb.icon,
+          name: orb.name,
+          cssClass: orb.cssClass,
+          minDelay: Math.max(110, 360 - level * 10),
+          randomDelay: Math.max(80, 360 - level * 8),
+          life: Math.max(820, 2300 - level * 70),
+          sizeRem: Math.max(1.2, 1.9 - level * 0.02)
+        };
+      }
+
+      function isGateOpen() {
+        return !state.gateLevel || (state.gate.bhasha && state.gate.youtube);
+      }
+
+      function setCurrentLevelScore(next) {
+        currentLevelScore = Math.max(0, Math.floor(Number(next) || 0));
+        currentLevelScoreNode.textContent = "Current Level Score: " + currentLevelScore;
+      }
+
+      function setTotalScore(next) {
+        totalScore = Math.max(0, Math.floor(Number(next) || 0));
+        totalScoreNode.textContent = "Total Score: " + totalScore;
+      }
+
+      function clearField() {
+        field.querySelectorAll(".star").forEach((node) => node.remove());
+      }
+
+      function updateMessage(text) {
+        msg.textContent = text;
+      }
+
+      function setGuide(state, speech, status) {
+        guide.classList.toggle("state-dancing", state === "dancing");
+        if (heroMithu) {
+          heroMithu.classList.toggle("state-dancing", state === "dancing");
+          heroMithu.classList.toggle("state-idle", state !== "dancing");
+        }
+        if (speech) guideSpeech.textContent = speech;
+        if (status) guideStatus.textContent = status;
+      }
+
+      function createBubbles() {
+        field.querySelectorAll(".float-bubble").forEach((n) => n.remove());
+        for (let i = 0; i < 10; i += 1) {
+          const bubble = document.createElement("span");
+          bubble.className = "float-bubble";
+          bubble.style.left = (8 + Math.random() * 84).toFixed(1) + "%";
+          bubble.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + "s";
+          bubble.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
+          field.appendChild(bubble);
+        }
+      }
+
+      function animateParrot() {
+        // Home now uses the shared CSS mascot states for site-wide consistent Mithu animation.
+      }
+
+      function finishRound() {
+        const level = levelConfig(state.currentLevel);
+        running = false;
+        clearTimeout(timerId);
+        state.perLevelScores[level.level] = currentLevelScore;
+        setTotalScore(Object.keys(state.perLevelScores).reduce(function (sum, key) {
+          return sum + Math.max(0, Math.floor(Number(state.perLevelScores[key]) || 0));
+        }, 0));
+        updateMessage("Nice try! You scored " + currentLevelScore + " on Level " + level.level + ".");
+        setGuide("dancing", "Great effort! You scored " + currentLevelScore + ". Retry this level or unlock the next level with both destination buttons.", "Ready for retry or unlock mission");
+        if (state.currentLevel >= TOTAL_LEVELS) {
+          state = {
+            currentLevel: 1,
+            gateLevel: null,
+            gate: { bhasha: false, youtube: false },
+            playedCurrentLevel: false,
+            perLevelScores: {}
+          };
+          setCurrentLevelScore(0);
+          setTotalScore(0);
+          saveState();
+          startBtn.textContent = "Start Level 1";
+          if (typeof confetti === "function") confetti({ particleCount: 150, spread: 95, scalar: 0.9 });
+          updateMessage("Amazing journey complete! Mithu restarted the adventure from Level 1.");
+          return;
+        }
+        state.gateLevel = state.currentLevel + 1;
+        state.gate = { bhasha: false, youtube: false };
+        state.playedCurrentLevel = true;
+        saveState();
+        syncGateUi();
+      }
+
+      function resetScoreForLevel() {
+        setCurrentLevelScore(0);
+      }
+
+      function celebrate(button) {
+        if (typeof confetti === "function") {
+          const rect = button.getBoundingClientRect();
+          const ox = (rect.left + rect.width / 2) / window.innerWidth;
+          const oy = (rect.top + rect.height / 2) / window.innerHeight;
+          confetti({
+            particleCount: 28,
+            spread: 68,
+            origin: { x: ox, y: oy },
+            scalar: 0.8
+          });
+        }
+      }
+
+      function spawnOrb() {
+        if (!running) return;
+        const level = levelConfig(state.currentLevel);
+
+        const orb = document.createElement("button");
+        orb.type = "button";
+        orb.className = "star " + level.cssClass;
+        orb.textContent = level.orb;
+        orb.setAttribute("aria-label", "Pop " + level.name.toLowerCase());
+        orb.style.fontSize = level.sizeRem.toFixed(2) + "rem";
+
+        const x = 10 + Math.random() * 80;
+        const y = 15 + Math.random() * 70;
+        orb.style.left = x.toFixed(1) + "%";
+        orb.style.top = y.toFixed(1) + "%";
+
+        field.appendChild(orb);
+
+        if (typeof animate === "function") {
+          animate(orb, { transform: ["translate(-50%, -50%) scale(0.6)", "translate(-50%, -50%) scale(1.05)"] }, { duration: 0.6, easing: "ease-out" });
+          animate(orb, { translateY: [0, -6, 0] }, { duration: 1.4, repeat: Infinity, easing: "ease-in-out" });
+        }
+
+        orb.addEventListener("click", function () {
+          setCurrentLevelScore(currentLevelScore + 1);
+          remaining -= 1;
+          celebrate(orb);
+          if (typeof animate === "function") {
+            animate(orb, { opacity: [1, 0], transform: ["translate(-50%, -50%) scale(1)", "translate(-50%, -50%) scale(1.5)"] }, { duration: 0.25 });
+          }
+          orb.remove();
+
+          if (remaining <= 0) {
+            finishRound();
+            return;
+          }
+
+          timerId = setTimeout(spawnOrb, level.minDelay + Math.random() * level.randomDelay);
+        }, { once: true });
+
+        timerId = setTimeout(function () {
+          if (orb.isConnected && running) {
+            orb.remove();
+            setCurrentLevelScore(Math.max(0, currentLevelScore - 1));
+            remaining -= 1;
+            if (remaining <= 0) {
+              finishRound();
+              return;
+            }
+            timerId = setTimeout(spawnOrb, Math.max(180, level.minDelay - 40));
+          }
+        }, level.life);
+      }
+
+      function startGame() {
+        if (running) return;
+        if (state.gateLevel && !isGateOpen()) return;
+        if (state.gateLevel && isGateOpen()) {
+          state.currentLevel = state.gateLevel;
+          state.gateLevel = null;
+          state.gate = { bhasha: false, youtube: false };
+          state.playedCurrentLevel = false;
+          saveState();
+          syncGateUi();
+        }
+        const level = levelConfig(state.currentLevel);
+        running = true;
+        state.playedCurrentLevel = true;
+        saveState();
+        clearField();
+        remaining = level.target;
+        resetScoreForLevel();
+        retryBtn.disabled = false;
+        updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
+        setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
+        createBubbles();
+        spawnOrb();
+      }
+
+      function retryGame() {
+        if (running) {
+          clearTimeout(timerId);
+          running = false;
+        }
+        if (!state.playedCurrentLevel) {
+          state.playedCurrentLevel = true;
+          saveState();
+        }
+        const level = levelConfig(state.currentLevel);
+        clearField();
+        running = true;
+        remaining = level.target;
+        resetScoreForLevel();
+        updateMessage("Retry Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
+        setGuide("idle", "Retry time! Let's beat your score on Level " + level.level + ".", "Retry in progress");
+        createBubbles();
+        spawnOrb();
+      }
+
+      function syncGateUi() {
+        if (!state.gateLevel) {
+          startBtn.disabled = false;
+          startBtn.textContent = "Play Level " + state.currentLevel;
+          retryBtn.disabled = false;
+          retryBtn.textContent = "Retry Level " + state.currentLevel;
+          guideStatus.textContent = "Level " + state.currentLevel + " is ready.";
+          return;
+        }
+        const open = isGateOpen();
+        startBtn.disabled = !open;
+        startBtn.textContent = "Start Level " + state.gateLevel;
+        retryBtn.disabled = false;
+        retryBtn.textContent = "Retry Level " + state.currentLevel;
+        guideStatus.textContent = "Unlock next level: "
+          + (state.gate.bhasha ? "Bhasha Home done" : "Go to Bhasha Home")
+          + " + "
+          + (state.gate.youtube ? "YouTube done" : "Watch YouTube");
+      }
+
+      function markGateAction(action) {
+        if (!state.gateLevel) return;
+        if (action === "bhasha") state.gate.bhasha = true;
+        if (action === "youtube") state.gate.youtube = true;
+        if (isGateOpen()) {
+          setGuide("dancing", "Great! Level " + state.gateLevel + " is now unlocked. Tap Play to continue!", "Unlocked");
+          if (typeof confetti === "function") confetti({ particleCount: 70, spread: 68, scalar: 0.8 });
+        }
+        saveState();
+        syncGateUi();
+      }
+
+      function updateGuideByScroll() {
+        const level = levelConfig(state.currentLevel);
+        const top = window.scrollY + 120;
+        let sectionName = "hero";
+        sections.forEach(function (section) {
+          if (section.offsetTop <= top) {
+            if (section.classList.contains("links")) sectionName = "links";
+            if (section.classList.contains("play-zone")) sectionName = "play";
+          }
+        });
+        if (running) return;
+        if (sectionName === "hero") {
+          setGuide("idle", "Welcome explorer! Scroll down and choose your adventure.", guideStatus.textContent);
+        } else if (sectionName === "links") {
+          setGuide("idle", "After each level, tap both destination buttons to unlock the next level.", guideStatus.textContent);
+        } else {
+          setGuide("idle", "Now play Level " + state.currentLevel + ": pop " + level.target + " " + level.name.toLowerCase() + ".", guideStatus.textContent);
+        }
+      }
+
+      startBtn.addEventListener("click", startGame);
+      retryBtn.addEventListener("click", retryGame);
+      bhashaLink.addEventListener("click", function () {
+        markGateAction("bhasha");
+      });
+      youtubeLink.addEventListener("click", function () {
+        markGateAction("youtube");
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+          const stored = readJson(GAME_STATE_KEY, null);
+          if (stored) {
+            loadState();
+            setTotalScore(totalScore);
+            if (!running) setCurrentLevelScore(0);
+            syncGateUi();
+          }
+          updateGuideByScroll();
+        }
+      });
+      window.addEventListener("scroll", updateGuideByScroll, { passive: true });
+
+      loadState();
+      setCurrentLevelScore(0);
+      setTotalScore(totalScore);
+      createBubbles();
+      syncGateUi();
+      animateParrot();
+      updateGuideByScroll();
+    })();
+  </script>
 </body>
 </html>
