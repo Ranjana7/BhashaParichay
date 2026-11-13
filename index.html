@@ -6,7 +6,7 @@
   <title>KidsLearningWorldWisdom | Magical Home</title>
   <meta name="description" content="KidsLearningWorldWisdom is a colorful home for children to learn with Mithu through BhashaParichay and videos.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' x='8' font-size='44'%3E%F0%9F%8C%9F%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=20261113u3">
+  <link rel="stylesheet" href="assets/styles.css?v=20261113u4">
   <style>
     :root {
       --bg-start: #c8f0ff;
@@ -133,6 +133,7 @@
     .mithu .wing { fill: #0f8f46; }
     .mithu .beak { fill: #f9a825; }
     .mithu .eye { fill: #202a46; }
+    .mithu .leg { fill: #f4a22d; }
     .mithu .crest { stroke: #2f8bff; stroke-width: 6; stroke-linecap: round; fill: none; }
     .mithu .shadow { fill: rgba(41, 56, 92, 0.16); }
 
@@ -184,10 +185,6 @@
       cursor: pointer;
       color: #fff;
       background: linear-gradient(120deg, var(--accent-1), #4a83ff);
-    }
-
-    .play-btn.secondary {
-      background: linear-gradient(120deg, var(--mint), #1ea1b8);
     }
 
     .play-message {
@@ -348,6 +345,8 @@
         <circle class="eye" cx="140" cy="97" r="8"></circle>
         <path class="beak" d="M108 112 L132 112 L120 128 Z"></path>
         <path class="beak" d="M110 126 L130 126 L120 139 Z"></path>
+        <rect class="leg" x="104" y="182" width="8" height="20" rx="4"></rect>
+        <rect class="leg" x="128" y="182" width="8" height="20" rx="4"></rect>
         <path class="crest" d="M104 45 L113 26 L121 44 L129 24 L138 45"></path>
       </svg>
       <div>
@@ -371,11 +370,10 @@
     <section class="play-zone" aria-label="Mini game">
       <div class="play-head">
         <h2>Star Pop with Mithu</h2>
-        <div class="play-score" id="starScore">Level 1 · Stars: 0 / 10</div>
+        <div class="play-score" id="starScore">Level 1 / 20 · Stars: 0 / 10</div>
       </div>
       <div class="play-tools">
         <button class="play-btn" id="startStarGame" type="button">Start Level 1</button>
-        <button class="play-btn secondary" id="resetStarGame" type="button">Reset Journey</button>
         <div class="play-message" id="gameMessage">Tap Start, then pop the glowing stars!</div>
       </div>
       <div class="star-field" id="starField" aria-live="polite"></div>
@@ -396,6 +394,8 @@
           <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
           <path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>
           <path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>
+          <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+          <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
           <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
         </svg>
       </figure>
@@ -404,19 +404,19 @@
         <p class="journey-guide-speech" id="journeyGuideSpeech">Scroll and play! I will guide you.</p>
       </div>
     </div>
-    <p class="journey-guide-status" id="journeyGuideStatus">Reset unlock: complete a lesson in BhashaParichay or watch a YouTube video.</p>
+    <p class="journey-guide-status" id="journeyGuideStatus">Unlock next level by tapping both Go to Bhasha Home and Watch YouTube after each level.</p>
   </aside>
 
   <script src="assets/vendor/motion.min.js"></script>
   <script src="assets/vendor/canvas-confetti.min.js"></script>
-  <script src="assets/mithu-follower.js?v=20261113u3"></script>
+  <script src="assets/mithu-follower.js?v=20261113u4"></script>
   <script>
     (function initHomePlayZone() {
       const field = document.getElementById("starField");
       const scoreNode = document.getElementById("starScore");
       const msg = document.getElementById("gameMessage");
       const startBtn = document.getElementById("startStarGame");
-      const resetBtn = document.getElementById("resetStarGame");
+      const bhashaLink = document.getElementById("bhashaHomeLink");
       const youtubeLink = document.getElementById("youtubeChannelLink");
       const guide = document.getElementById("journeyGuide");
       const guideSpeech = document.getElementById("journeyGuideSpeech");
@@ -426,21 +426,24 @@
       const motionApi = window.Motion || {};
       const animate = motionApi.animate;
 
-      const GAME_STATE_KEY = "klww.home.starQuest.v2";
-      const YT_STARTED_KEY = "klww.home.youtube.startedAt";
-      const YT_WATCHED_KEY = "klww.home.youtube.watchedAt";
-
-      const LEVELS = [
-        { target: 10, orb: "⭐", name: "Stars", cssClass: "orb-star", minDelay: 320, randomDelay: 420, life: 2300 },
-        { target: 12, orb: "🌙", name: "Moons", cssClass: "orb-moon", minDelay: 250, randomDelay: 320, life: 2000 },
-        { target: 14, orb: "💎", name: "Gems", cssClass: "orb-gem", minDelay: 210, randomDelay: 280, life: 1800 }
+      const GAME_STATE_KEY = "klww.home.starQuest.v3";
+      const TOTAL_LEVELS = 20;
+      const ORBS = [
+        { icon: "⭐", name: "Stars", cssClass: "orb-star" },
+        { icon: "🌙", name: "Moons", cssClass: "orb-moon" },
+        { icon: "💎", name: "Gems", cssClass: "orb-gem" },
+        { icon: "☀️", name: "Suns", cssClass: "orb-star" },
+        { icon: "🫧", name: "Bubbles", cssClass: "orb-moon" }
       ];
 
       let score = 0;
       let running = false;
       let timerId = null;
-      let levelIndex = 0;
-      let resetUnlocked = false;
+      let state = {
+        currentLevel: 1,
+        gateLevel: null,
+        gate: { bhasha: false, youtube: false }
+      };
 
       function readJson(key, fallback) {
         try {
@@ -460,24 +463,51 @@
         }
       }
 
-      function loadState() {
-        const state = readJson(GAME_STATE_KEY, { level: 1 }) || { level: 1 };
-        const level = Number.isFinite(Number(state.level)) ? Math.floor(Number(state.level)) : 1;
-        levelIndex = Math.max(0, Math.min(LEVELS.length - 1, level - 1));
+      function normalizeLevel(value) {
+        if (!Number.isFinite(Number(value))) return 1;
+        return Math.max(1, Math.min(TOTAL_LEVELS, Math.floor(Number(value))));
       }
 
       function saveState() {
-        writeJson(GAME_STATE_KEY, { level: levelIndex + 1 });
+        writeJson(GAME_STATE_KEY, state);
       }
 
-      function getActiveLevel() {
-        return LEVELS[levelIndex] || LEVELS[0];
+      function loadState() {
+        const loaded = readJson(GAME_STATE_KEY, null);
+        if (!loaded || typeof loaded !== "object") return;
+        state.currentLevel = normalizeLevel(loaded.currentLevel);
+        state.gateLevel = Number.isFinite(Number(loaded.gateLevel)) ? normalizeLevel(loaded.gateLevel) : null;
+        const gate = loaded.gate && typeof loaded.gate === "object" ? loaded.gate : {};
+        state.gate = {
+          bhasha: Boolean(gate.bhasha),
+          youtube: Boolean(gate.youtube)
+        };
+      }
+
+      function levelConfig(levelNumber) {
+        const level = normalizeLevel(levelNumber);
+        const orb = ORBS[(level - 1) % ORBS.length];
+        return {
+          level: level,
+          target: Math.min(40, 8 + Math.ceil(level * 1.4)),
+          orb: orb.icon,
+          name: orb.name,
+          cssClass: orb.cssClass,
+          minDelay: Math.max(110, 360 - level * 10),
+          randomDelay: Math.max(80, 360 - level * 8),
+          life: Math.max(820, 2300 - level * 70),
+          sizeRem: Math.max(1.2, 1.9 - level * 0.02)
+        };
+      }
+
+      function isGateOpen() {
+        return !state.gateLevel || (state.gate.bhasha && state.gate.youtube);
       }
 
       function setScore(next) {
         score = next;
-        const level = getActiveLevel();
-        scoreNode.textContent = "Level " + (levelIndex + 1) + " · " + level.name + ": " + score + " / " + level.target;
+        const level = levelConfig(state.currentLevel);
+        scoreNode.textContent = "Level " + level.level + " / " + TOTAL_LEVELS + " · " + level.name + ": " + score + " / " + level.target;
       }
 
       function clearField() {
@@ -522,13 +552,14 @@
 
       function spawnOrb() {
         if (!running) return;
-        const level = getActiveLevel();
+        const level = levelConfig(state.currentLevel);
 
         const orb = document.createElement("button");
         orb.type = "button";
         orb.className = "star " + level.cssClass;
         orb.textContent = level.orb;
         orb.setAttribute("aria-label", "Pop " + level.name.toLowerCase());
+        orb.style.fontSize = level.sizeRem.toFixed(2) + "rem";
 
         const x = 10 + Math.random() * 80;
         const y = 15 + Math.random() * 70;
@@ -551,22 +582,35 @@
           orb.remove();
 
           if (score >= level.target) {
-            const completedLevel = levelIndex + 1;
+            const completedLevel = state.currentLevel;
             if (typeof confetti === "function") {
               confetti({ particleCount: 120, spread: 90, scalar: 0.9 });
             }
             running = false;
             clearTimeout(timerId);
-            if (completedLevel < LEVELS.length) {
-              levelIndex = completedLevel;
+            if (completedLevel >= TOTAL_LEVELS) {
+              state = {
+                currentLevel: 1,
+                gateLevel: null,
+                gate: { bhasha: false, youtube: false }
+              };
               saveState();
-              startBtn.textContent = "Play Level " + (levelIndex + 1);
-              updateMessage("Level " + completedLevel + " complete! Next: pop " + getActiveLevel().target + " " + getActiveLevel().name.toLowerCase() + "!");
-              setGuide("dancing", "Yay! You finished Level " + completedLevel + "! Tap Play Level " + (levelIndex + 1) + ".", "Mithu dance party! Keep going.");
-            } else {
-              updateMessage("Superstar! You finished all levels. Replay anytime!");
-              setGuide("dancing", "You finished all levels! Mithu is dancing with joy!", "All levels complete. Reset unlock stays with your journey.");
+              createBubbles();
+              setScore(0);
+              startBtn.disabled = false;
+              startBtn.textContent = "Start Level 1";
+              updateMessage("All 20 levels complete! Journey restarted at Level 1.");
+              setGuide("dancing", "You finished all 20 levels! Mithu restarted the journey for a new adventure!", "Fresh journey started.");
+              if (typeof confetti === "function") confetti({ particleCount: 180, spread: 100, scalar: 0.95 });
+              return;
             }
+            state.currentLevel = completedLevel + 1;
+            state.gateLevel = state.currentLevel;
+            state.gate = { bhasha: false, youtube: false };
+            saveState();
+            syncGateUi();
+            updateMessage("Level " + completedLevel + " complete! Visit Bhasha Home and YouTube to unlock Level " + state.currentLevel + ".");
+            setGuide("dancing", "Wonderful! Level " + completedLevel + " done. Tap both destination buttons, then come back for Level " + state.currentLevel + ".", "Unlock mission: Bhasha Home + YouTube");
             return;
           }
 
@@ -583,80 +627,52 @@
 
       function startGame() {
         if (running) return;
-        const level = getActiveLevel();
+        if (!isGateOpen()) {
+          updateMessage("Level " + state.currentLevel + " is locked. Tap both Go to Bhasha Home and Watch YouTube first.");
+          setGuide("idle", "Level " + state.currentLevel + " unlock mission: tap both destination buttons.", "Waiting for both taps");
+          return;
+        }
+        const level = levelConfig(state.currentLevel);
         running = true;
         clearField();
         setScore(0);
-        updateMessage("Level " + (levelIndex + 1) + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
-        setGuide("idle", "Let's play Level " + (levelIndex + 1) + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
+        updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
+        setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
         createBubbles();
         spawnOrb();
       }
 
-      function hasAnyCompletedLesson() {
-        for (let i = 0; i < localStorage.length; i += 1) {
-          const key = localStorage.key(i) || "";
-          if (!key.includes(".world.") || !key.endsWith(".progress")) continue;
-          try {
-            const raw = localStorage.getItem(key);
-            if (!raw) continue;
-            const parsed = JSON.parse(raw);
-            if (parsed && Array.isArray(parsed.completedLessons) && parsed.completedLessons.length > 0) return true;
-          } catch (_error) {
-            continue;
-          }
-        }
-        return false;
-      }
-
-      function syncYoutubeWatchFlag() {
-        const startedAt = Number(localStorage.getItem(YT_STARTED_KEY) || 0);
-        if (startedAt > 0 && Date.now() - startedAt >= 30000) {
-          localStorage.setItem(YT_WATCHED_KEY, String(Date.now()));
-          localStorage.removeItem(YT_STARTED_KEY);
-        }
-      }
-
-      function hasWatchedYoutube() {
-        return Number(localStorage.getItem(YT_WATCHED_KEY) || 0) > 0;
-      }
-
-      function updateResetAvailability() {
-        syncYoutubeWatchFlag();
-        const wasUnlocked = resetUnlocked;
-        resetUnlocked = hasAnyCompletedLesson() || hasWatchedYoutube();
-        resetBtn.disabled = !resetUnlocked;
-        if (resetUnlocked) {
-          guideStatus.textContent = "Reset unlocked: Great job exploring and learning!";
-          if (!wasUnlocked) {
-            setGuide("dancing", "Welcome back! You completed your mission, so Reset Journey is now unlocked!", "Reset is now available.");
-            if (typeof confetti === "function") confetti({ particleCount: 80, spread: 70, scalar: 0.8 });
-          }
-        } else {
-          guideStatus.textContent = "Reset unlock: complete a lesson in BhashaParichay or watch a YouTube video.";
-        }
-      }
-
-      function resetGame() {
-        if (!resetUnlocked) {
-          updateMessage("Reset unlock: complete one Bhasha lesson or watch a YouTube video first.");
-          setGuide("idle", "First, finish one lesson in BhashaParichay or watch a YouTube video, then return.", "Reset still locked");
+      function syncGateUi() {
+        if (!state.gateLevel) {
+          startBtn.disabled = false;
+          startBtn.textContent = "Play Level " + state.currentLevel;
+          guideStatus.textContent = "Level " + state.currentLevel + " is ready.";
           return;
         }
-        running = false;
-        clearTimeout(timerId);
-        clearField();
-        levelIndex = 0;
+        const open = isGateOpen();
+        startBtn.disabled = !open;
+        startBtn.textContent = open ? "Play Level " + state.currentLevel : "Level " + state.currentLevel + " Locked";
+        guideStatus.textContent = "Unlock Level " + state.currentLevel + ": "
+          + (state.gate.bhasha ? "Bhasha Home done" : "Go to Bhasha Home")
+          + " + "
+          + (state.gate.youtube ? "YouTube done" : "Watch YouTube");
+      }
+
+      function markGateAction(action) {
+        if (!state.gateLevel || state.gateLevel !== state.currentLevel) return;
+        if (action === "bhasha") state.gate.bhasha = true;
+        if (action === "youtube") state.gate.youtube = true;
+        if (isGateOpen()) {
+          state.gateLevel = null;
+          setGuide("dancing", "Great! Level " + state.currentLevel + " is now unlocked. Let's play!", "Unlocked");
+          if (typeof confetti === "function") confetti({ particleCount: 70, spread: 68, scalar: 0.8 });
+        }
         saveState();
-        setScore(0);
-        startBtn.textContent = "Start Level 1";
-        updateMessage("Journey reset! Tap Start Level 1.");
-        setGuide("idle", "Wonderful reset! Start Level 1 whenever you are ready.", "Journey reset complete");
-        createBubbles();
+        syncGateUi();
       }
 
       function updateGuideByScroll() {
-        const level = getActiveLevel();
+        const level = levelConfig(state.currentLevel);
         const top = window.scrollY + 120;
         let sectionName = "hero";
         sections.forEach(function (section) {
@@ -669,30 +685,35 @@
         if (sectionName === "hero") {
           setGuide("idle", "Welcome explorer! Scroll down and choose your adventure.", guideStatus.textContent);
         } else if (sectionName === "links") {
-          setGuide("idle", "Step 1: Visit BhashaParichay or YouTube. Step 2: Come back and play!", guideStatus.textContent);
+          setGuide("idle", "After each level, tap both destination buttons to unlock the next level.", guideStatus.textContent);
         } else {
-          setGuide("idle", "Now play Level " + (levelIndex + 1) + ": pop " + level.target + " " + level.name.toLowerCase() + ".", guideStatus.textContent);
+          setGuide("idle", "Now play Level " + state.currentLevel + ": pop " + level.target + " " + level.name.toLowerCase() + ".", guideStatus.textContent);
         }
       }
 
       startBtn.addEventListener("click", startGame);
-      resetBtn.addEventListener("click", resetGame);
+      bhashaLink.addEventListener("click", function () {
+        markGateAction("bhasha");
+      });
       youtubeLink.addEventListener("click", function () {
-        localStorage.setItem(YT_STARTED_KEY, String(Date.now()));
+        markGateAction("youtube");
       });
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden) {
-          updateResetAvailability();
+          const stored = readJson(GAME_STATE_KEY, null);
+          if (stored) {
+            loadState();
+            syncGateUi();
+          }
           updateGuideByScroll();
         }
       });
       window.addEventListener("scroll", updateGuideByScroll, { passive: true });
 
       loadState();
-      startBtn.textContent = "Play Level " + (levelIndex + 1);
       setScore(0);
       createBubbles();
-      updateResetAvailability();
+      syncGateUi();
       updateGuideByScroll();
     })();
   </script>

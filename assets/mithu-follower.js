@@ -42,6 +42,8 @@
     '<circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>' +
     '<path class="mithu-beak-top" d="M108 110 L132 110 L120 126 Z"></path>' +
     '<path class="mithu-beak-bottom" d="M110 124 L130 124 L120 138 Z"></path>' +
+    '<rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>' +
+    '<rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>' +
     '<path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>' +
     "</svg>";
   document.body.appendChild(node);
