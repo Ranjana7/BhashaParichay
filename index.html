@@ -691,9 +691,12 @@
         }
         const level = levelConfig(state.currentLevel);
         running = true;
+        state.playedCurrentLevel = true;
+        saveState();
         clearField();
         remaining = level.target;
         resetScoreForLevel();
+        retryBtn.disabled = false;
         updateMessage("Level " + level.level + ": pop " + level.target + " " + level.name.toLowerCase() + "!");
         setGuide("idle", "Let's play Level " + level.level + "! Tap each glowing " + level.name.toLowerCase().slice(0, -1) + ".", "Journey mode: active");
         createBubbles();
@@ -701,7 +704,11 @@
       }
 
       function retryGame() {
-        if (running || !state.playedCurrentLevel) return;
+        if (!state.playedCurrentLevel) return;
+        if (running) {
+          clearTimeout(timerId);
+          running = false;
+        }
         const level = levelConfig(state.currentLevel);
         clearField();
         running = true;
