@@ -567,6 +567,34 @@
         }, 0);
       }
 
+      function resetGameProgressFromUrl() {
+        let shouldReset = false;
+        try {
+          const params = new URLSearchParams(window.location.search || "");
+          shouldReset = params.get("resetHomeGame") === "1";
+          if (shouldReset) {
+            localStorage.removeItem(GAME_STATE_KEY);
+            localStorage.removeItem("klww.home.starQuest.v3");
+            localStorage.removeItem("klww.home.starQuest");
+            state = {
+              currentLevel: 1,
+              gateLevel: null,
+              gate: { bhasha: false, youtube: false },
+              playedCurrentLevel: false,
+              perLevelScores: {}
+            };
+            totalScore = 0;
+            const cleanUrl = window.location.pathname + (params.toString() ? "?" + params.toString().replace(/(^|&)resetHomeGame=1(&|$)/, "$1").replace(/^&|&$/g, "").replace(/&&+/g, "&") : "");
+            if (window.history && typeof window.history.replaceState === "function") {
+              window.history.replaceState(null, "", cleanUrl === window.location.pathname + "?" ? window.location.pathname : cleanUrl);
+            }
+          }
+        } catch (_error) {
+          return false;
+        }
+        return shouldReset;
+      }
+
       function levelConfig(levelNumber) {
         const level = normalizeLevel(levelNumber);
         const orb = ORBS[(level - 1) % ORBS.length];
@@ -855,13 +883,17 @@
       });
       window.addEventListener("scroll", updateGuideByScroll, { passive: true });
 
-      loadState();
+      const resetByUrl = resetGameProgressFromUrl();
+      if (!resetByUrl) loadState();
       setCurrentLevelScore(0);
       setTotalScore(totalScore);
       createBubbles();
       syncGateUi();
       animateParrot();
       updateGuideByScroll();
+      if (resetByUrl) {
+        updateMessage("Progress reset. Welcome back to Level 1!");
+      }
     })();
   </script>
 </body>
