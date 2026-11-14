@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BhashaParichay | Choose a Language</title>
+  <meta name="description" content="BhashaParichay is a playful multilingual learning space for children. Choose Sanskrit, Spanish, or Portuguese.">
+  <link rel="stylesheet" href="../assets/styles.css?v=20261114u3">
+</head>
+<body class="page-bhasha-home">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/bhashaparichay/">Bhasha Home</a>
+      <a href="../about.html">About BhashaParichay</a>
+    </nav>
+  </header>
+
+  <main id="main-content" class="page-wrap">
+    <section class="panel language-hero">
+      <div class="language-hero-layout">
+        <div class="language-hero-mithu state-idle" id="languageHeroMithu" aria-hidden="true">
+          <svg viewBox="0 0 240 240" class="mithu-svg" role="presentation">
+            <ellipse class="mithu-shadow" cx="120" cy="205" rx="54" ry="16"></ellipse>
+            <path class="mithu-tail" d="M180 150 L220 180 L180 188 Z"></path>
+            <ellipse class="mithu-body" cx="120" cy="120" rx="64" ry="78"></ellipse>
+            <ellipse class="mithu-belly" cx="120" cy="138" rx="40" ry="48"></ellipse>
+            <path class="mithu-wing-left" d="M78 112 C34 118, 28 168, 72 178 C74 152, 86 132, 98 124 Z"></path>
+            <path class="mithu-wing-right" d="M162 112 C206 118, 212 168, 168 178 C166 152, 154 132, 142 124 Z"></path>
+            <circle class="mithu-eye-left" cx="100" cy="96" r="8"></circle>
+            <circle class="mithu-eye-right" cx="140" cy="96" r="8"></circle>
+            <path class="mithu-beak-top" d="M106 109 C114 103, 126 103, 134 109 C128 118, 118 122, 106 118 Z"></path>
+            <path class="mithu-beak-bottom" d="M108 118 C116 122, 124 122, 132 118 C126 128, 116 131, 108 126 Z"></path>
+            <rect class="mithu-leg-left" x="104" y="184" width="8" height="20" rx="4"></rect>
+            <rect class="mithu-leg-right" x="128" y="184" width="8" height="20" rx="4"></rect>
+            <path class="mithu-crest" d="M104 45 L114 26 L122 44 L130 24 L140 45"></path>
+          </svg>
+        </div>
+        <div class="language-hero-copy">
+          <p class="hero-badge">BhashaParichay</p>
+          <h1>Welcome, Little Explorer!</h1>
+          <p id="languageChooserSpeech" class="mascot-speech">Hi! I'm Mithu. Pick a language adventure to start learning!</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Choose Your Language</h2>
+      <div class="language-grid" aria-label="Language choices">
+        <a class="language-card portal-sanskrit" href="../sanskritparichay/" data-language="sanskrit" data-seamless-nav>
+          <span class="language-illustration language-portal" aria-hidden="true">
+            <span class="portal-country" aria-hidden="true">🇮🇳</span>
+            <span class="portal-ring"></span>
+            <span class="portal-core">
+              <img src="../assets/illustrations/vocab/lotus-india.svg" alt="">
+            </span>
+            <span class="portal-word">भारत</span>
+          </span>
+          <span class="world-title">Sanskrit</span>
+          <span class="world-text">Open SanskritParichay</span>
+        </a>
+        <a class="language-card portal-spanish" href="../spanishparichay/" data-language="spanish" data-seamless-nav>
+          <span class="language-illustration language-portal" aria-hidden="true">
+            <span class="portal-country" aria-hidden="true">🇪🇸</span>
+            <span class="portal-ring"></span>
+            <span class="portal-core">
+              <img src="../assets/illustrations/vocab/spain-symbol.svg" alt="">
+            </span>
+            <span class="portal-word">España</span>
+          </span>
+          <span class="world-title">Spanish</span>
+          <span class="world-text">Open SpanishParichay</span>
+        </a>
+        <a class="language-card portal-portuguese" href="../portugueseparichay/" data-language="portuguese" data-seamless-nav>
+          <span class="language-illustration language-portal" aria-hidden="true">
+            <span class="portal-country" aria-hidden="true">🇵🇹</span>
+            <span class="portal-ring"></span>
+            <span class="portal-core">
+              <img src="../assets/illustrations/vocab/ship.svg" alt="">
+            </span>
+            <span class="portal-word">Portugal</span>
+          </span>
+          <span class="world-title">Portuguese</span>
+          <span class="world-text">Open PortugueseParichay</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Medals</h2>
+      <p>Start with Sanskrit medals now. Spanish and Portuguese medals will unlock when those adventures open.</p>
+      <div class="medal-grid" id="languageMedals" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="../assets/vendor/motion.min.js"></script>
+  <script src="../assets/vendor/canvas-confetti.min.js"></script>
+  <script src="../assets/mithu-follower.js?v=20261113u1"></script>
+  <script src="../assets/shared-nav.js?v=20261113u2"></script>
+  <script src="../assets/site-config.js?v=20261112u5"></script>
+  <script src="../assets/progress-store.js?v=20261112u4"></script>
+  <script src="../assets/multilingual-data.js?v=20261112u2"></script>
+  <script src="../assets/seamless-experience.js?v=20261112u1"></script>
+  <script src="../assets/language-chooser.js?v=20261114u2"></script>
+</body>
+</html>
