@@ -2245,6 +2245,81 @@ th {
   stroke-linejoin: round;
 }
 
+/* Bhasha home: green-yellow Mithu with red crest. */
+body.page-bhasha-home .language-hero-mithu .mithu-body {
+  fill: #47b857;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-belly {
+  fill: #fff3a8;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-tail {
+  fill: #2f8f42;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-wing-left,
+body.page-bhasha-home .language-hero-mithu .mithu-wing-right {
+  fill: #7fd34b;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-crest {
+  stroke: #ff2948;
+}
+
+/* Sanskrit home: pink-purple body with pastel rainbow accents for hero and guide Mithu. */
+body.page-sanskrit-home #mascot .mithu-body,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-body {
+  fill: #d36cff;
+}
+
+body.page-sanskrit-home #mascot .mithu-belly,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-belly {
+  fill: #ffe3ff;
+}
+
+body.page-sanskrit-home #mascot .mithu-tail,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-tail {
+  fill: #8d53f9;
+}
+
+body.page-sanskrit-home #mascot .mithu-wing-left,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-left {
+  fill: #ff8fcb;
+}
+
+body.page-sanskrit-home #mascot .mithu-wing-right,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-right {
+  fill: #8ec8ff;
+}
+
+body.page-sanskrit-home #mascot .mithu-crest,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-crest {
+  stroke: #ff2f55;
+}
+
+/* Cursor-following Mithu: green-yellow with red crest site-wide. */
+.mini-cursor-mithu .mithu-body {
+  fill: #4cbc5a;
+}
+
+.mini-cursor-mithu .mithu-belly {
+  fill: #fff2a6;
+}
+
+.mini-cursor-mithu .mithu-tail {
+  fill: #2f8e45;
+}
+
+.mini-cursor-mithu .mithu-wing-left,
+.mini-cursor-mithu .mithu-wing-right {
+  fill: #89d54c;
+}
+
+.mini-cursor-mithu .mithu-crest {
+  stroke: #ff2547;
+}
+
 .mascot-speech {
   position: relative;
   background: linear-gradient(145deg, #fffdf3, #eef6ff 58%, #f8f1ff);
