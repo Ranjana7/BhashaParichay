@@ -785,7 +785,7 @@
         if (!state.gateLevel) {
           startBtn.disabled = false;
           startBtn.textContent = "Play Level " + state.currentLevel;
-          retryBtn.disabled = false;
+          retryBtn.disabled = !state.playedCurrentLevel;
           retryBtn.textContent = "Retry Level " + state.currentLevel;
           guideStatus.textContent = "Level " + state.currentLevel + " is ready.";
           return;

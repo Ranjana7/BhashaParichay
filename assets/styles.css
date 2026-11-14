@@ -468,6 +468,24 @@ body.lang-theme-portuguese .panel {
   background: linear-gradient(140deg, #7de0b4, #4ea4ff);
 }
 
+.medal-card.coming-soon {
+  opacity: 0.74;
+  filter: saturate(0.72);
+  border-style: dashed;
+  border-color: #c6d5ff;
+  background: linear-gradient(180deg, #f8fbff, #f2f6ff);
+}
+
+.medal-card.medal-comingsoon .medal-art {
+  background: linear-gradient(140deg, #dbe7ff, #b8ccff);
+}
+
+.medal-card.coming-soon:hover,
+.medal-card.coming-soon:focus-within {
+  transform: none;
+  box-shadow: 0 10px 16px rgba(67, 89, 170, 0.14);
+}
+
 .medal-title {
   margin: 0;
   font-size: 1.02rem;

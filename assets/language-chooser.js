@@ -188,9 +188,6 @@
   }
 
   const sanskritSnapshot = getSanskritSnapshot();
-  const langData = window.BHASHA_LANGUAGES || {};
-  const spanish = langData.spanish || null;
-  const portuguese = langData.portuguese || null;
 
   const medals = [
     {
@@ -200,29 +197,23 @@
       description: "Complete Sanskrit Level 1 (Alphabet Forest).",
       art: "🪔",
       earned: isSanskritAlphabetComplete(sanskritSnapshot)
-    },
-    {
-      id: "hola-hero",
-      family: "spanish",
-      title: "Hola Hero",
-      description: "Complete Spanish Level 1.",
-      art: "🌞",
-      earned: isLanguageWorldComplete(spanish, 0)
-    },
-    {
-      id: "ola-hero",
-      family: "portuguese",
-      title: "Olá Hero",
-      description: "Complete Portuguese Level 1.",
-      art: "🌊",
-      earned: isLanguageWorldComplete(portuguese, 0)
     }
   ];
 
+  const upcomingMedalNote = {
+    id: "language-medals-coming-soon",
+    family: "comingsoon",
+    title: "More medals coming soon",
+    description: "Spanish and Portuguese medals will unlock when those adventures open.",
+    art: "🔜",
+    earned: false,
+    isComingSoon: true
+  };
+
   medalsHost.innerHTML = "";
-  medals.forEach(function (medal) {
+  medals.concat(upcomingMedalNote).forEach(function (medal) {
     const card = document.createElement("article");
-    card.className = "medal-card medal-" + medal.family + (medal.earned ? " earned" : " pending");
+    card.className = "medal-card medal-" + medal.family + (medal.earned ? " earned" : " pending") + (medal.isComingSoon ? " coming-soon" : "");
     card.setAttribute("data-medal-id", medal.id);
     card.innerHTML =
       '<div class="medal-art" aria-hidden="true">' + medal.art + "</div>" +
@@ -239,7 +230,9 @@
       { duration: 0.56, delay: index * 0.1, easing: "ease-out" }
     );
     const art = card.querySelector(".medal-art");
-    safeAnimate(art, { rotate: [0, 5, 0, -5, 0] }, { duration: 2.9 + index * 0.3, repeat: Infinity, easing: "ease-in-out" });
+    if (!card.classList.contains("coming-soon")) {
+      safeAnimate(art, { rotate: [0, 5, 0, -5, 0] }, { duration: 2.9 + index * 0.3, repeat: Infinity, easing: "ease-in-out" });
+    }
     card.addEventListener("pointerenter", function () {
       safeAnimate(card, { transform: ["translateY(0px) scale(1)", "translateY(-5px) scale(1.02)"] }, { duration: 0.2, easing: "ease-out" });
       safeAnimate(art, { transform: ["scale(1)", "scale(1.08) rotate(4deg)"] }, { duration: 0.2, easing: "ease-out" });
