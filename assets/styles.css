@@ -148,6 +148,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
+  perspective: 1000px;
 }
 
 .language-card {
@@ -160,9 +161,10 @@ body {
   background: linear-gradient(180deg, #ffffff, #f7fbff);
   padding: 14px 14px 16px;
   box-shadow: 0 10px 22px rgba(44, 62, 120, 0.14);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, filter 0.24s ease;
   position: relative;
   overflow: hidden;
+  transform-style: preserve-3d;
 }
 
 .language-card::after {
@@ -178,9 +180,42 @@ body {
 
 .language-card:hover,
 .language-card:focus-visible {
-  transform: translateY(-3px) scale(1.01);
+  transform: translateY(-3px);
   box-shadow: 0 14px 26px rgba(44, 62, 120, 0.2);
   border-color: #9fb5ff;
+  filter: saturate(1.05);
+}
+
+.language-card.is-language-locked {
+  border-color: #d8dcef;
+  background: linear-gradient(180deg, #fbfcff, #f5f7fc);
+  box-shadow: 0 8px 16px rgba(44, 62, 120, 0.11);
+}
+
+.language-card.is-language-locked:hover,
+.language-card.is-language-locked:focus-visible {
+  transform: none;
+  border-color: #d8dcef;
+  box-shadow: 0 8px 16px rgba(44, 62, 120, 0.11);
+}
+
+.language-lock-badge {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef1fb;
+  border: 1px solid #d8def1;
+  color: #4f5680;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.language-lock-badge[hidden] {
+  display: none !important;
 }
 
 .language-portal {
@@ -213,6 +248,7 @@ body {
   border: 3px solid rgba(255, 255, 255, 0.94);
   overflow: hidden;
   box-shadow: 0 10px 16px rgba(67, 89, 170, 0.24);
+  animation: languagePortalBob 2.8s ease-in-out infinite;
 }
 
 .language-portal .portal-core img {
@@ -229,6 +265,17 @@ body {
   font-weight: 800;
   color: #1e2f72;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  animation: languageWordGlow 2.6s ease-in-out infinite;
+}
+
+.portal-country {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  font-size: 1.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(20, 30, 70, 0.2));
 }
 
 .portal-sanskrit .language-portal {
@@ -280,13 +327,28 @@ body.lang-theme-portuguese .panel {
   animation-duration: 1.5s;
 }
 
+@keyframes languagePortalBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes languageWordGlow {
+  0%, 100% { opacity: 0.9; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 0 0 rgba(77, 104, 216, 0); }
+  50% { opacity: 1; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 0 10px rgba(77, 104, 216, 0.34); }
+}
+
 .language-hero-mithu.state-dancing .mithu-body {
   animation: mithuDance 1s ease-in-out 3;
 }
 
-.language-hero-mithu.state-dancing .mithu-wing-left,
+.language-hero-mithu.state-dancing .mithu-wing-left {
+  transform-origin: 72% 36%;
+  animation: mithuWingFlapLeft 0.2s ease-in-out 7;
+}
+
 .language-hero-mithu.state-dancing .mithu-wing-right {
-  animation: mithuWingFlap 0.2s ease-in-out 7;
+  transform-origin: 28% 36%;
+  animation: mithuWingFlapRight 0.2s ease-in-out 7;
 }
 
 .medal-celebration {
@@ -313,6 +375,7 @@ body.lang-theme-portuguese .panel {
   background: #fff;
   position: relative;
   overflow: hidden;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, filter 0.24s ease;
 }
 
 .medal-card::before {
@@ -335,6 +398,23 @@ body.lang-theme-portuguese .panel {
   box-shadow: 0 10px 16px rgba(255, 199, 57, 0.28);
 }
 
+.medal-card:hover,
+.medal-card:focus-within {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 26px rgba(67, 89, 170, 0.22);
+}
+
+.medal-card.pending:hover,
+.medal-card.pending:focus-within {
+  border-color: #c9d6ff;
+}
+
+.medal-card.earned:hover,
+.medal-card.earned:focus-within {
+  border-color: #ffc73a;
+  filter: saturate(1.08);
+}
+
 .medal-icon {
   margin: 0 0 6px;
   font-size: 1.5rem;
@@ -352,6 +432,7 @@ body.lang-theme-portuguese .panel {
   background: linear-gradient(150deg, #ffe78c, #ffa955);
   font-size: 1.5rem;
   position: relative;
+  animation: medalOrbFloat 3.1s ease-in-out infinite;
 }
 
 .medal-art::before,
@@ -387,6 +468,24 @@ body.lang-theme-portuguese .panel {
   background: linear-gradient(140deg, #7de0b4, #4ea4ff);
 }
 
+.medal-card.coming-soon {
+  opacity: 0.74;
+  filter: saturate(0.72);
+  border-style: dashed;
+  border-color: #c6d5ff;
+  background: linear-gradient(180deg, #f8fbff, #f2f6ff);
+}
+
+.medal-card.medal-comingsoon .medal-art {
+  background: linear-gradient(140deg, #dbe7ff, #b8ccff);
+}
+
+.medal-card.coming-soon:hover,
+.medal-card.coming-soon:focus-within {
+  transform: none;
+  box-shadow: 0 10px 16px rgba(67, 89, 170, 0.14);
+}
+
 .medal-title {
   margin: 0;
   font-size: 1.02rem;
@@ -404,9 +503,36 @@ body.lang-theme-portuguese .panel {
   animation: medalSparkle 0.9s ease-out 1;
 }
 
+.medal-card.unlocking .medal-art {
+  animation: medalUnlockSpin 0.9s ease-out 1, medalOrbFloat 3.1s ease-in-out infinite;
+}
+
+@keyframes medalOrbFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes medalUnlockSpin {
+  0% { transform: scale(1) rotate(0deg); }
+  55% { transform: scale(1.14) rotate(16deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
 @media (max-width: 780px) {
   .language-hero-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-card,
+  .language-card::before,
+  .language-portal .portal-ring,
+  .language-portal .portal-core,
+  .language-portal .portal-word,
+  .medal-art,
+  .medal-card.unlocking .medal-art {
+    animation: none !important;
   }
 }
 
@@ -1401,8 +1527,23 @@ p {
 }
 
 .state-welcome .mithu-body,
+.state-wave .mithu-body,
 .state-idle .mithu-body {
   animation: mithuFloat 2.6s ease-in-out infinite, mithuBreath 2.6s ease-in-out infinite;
+}
+
+.state-welcome .mithu-wing-left,
+.state-wave .mithu-wing-left,
+.state-idle .mithu-wing-left {
+  transform-origin: 72% 36%;
+  animation: mithuWingFlapLeft 0.95s ease-in-out infinite;
+}
+
+.state-welcome .mithu-wing-right,
+.state-wave .mithu-wing-right,
+.state-idle .mithu-wing-right {
+  transform-origin: 28% 36%;
+  animation: mithuWingFlapRight 0.95s ease-in-out infinite;
 }
 
 .state-flying .mithu-body {
@@ -1431,16 +1572,26 @@ p {
 }
 
 .state-celebrating .mithu-body {
-  animation: treeMithuCelebrate 0.9s ease-in-out 2;
+  animation: treeMithuCelebrate 0.8s ease-in-out infinite;
 }
 
 .state-celebrating .mithu-wing-left,
 .state-celebrating .mithu-wing-right {
-  animation: mithuWingFlap 0.24s ease-in-out 5;
+  animation: mithuWingFlap 0.24s ease-in-out infinite;
 }
 
 .state-dancing .mithu-body {
   animation: treeMithuDance 1s ease-in-out infinite;
+}
+
+.state-dancing .mithu-wing-left {
+  transform-origin: 72% 36%;
+  animation: mithuWingFlapLeft 0.32s ease-in-out infinite;
+}
+
+.state-dancing .mithu-wing-right {
+  transform-origin: 28% 36%;
+  animation: mithuWingFlapRight 0.32s ease-in-out infinite;
 }
 
 @keyframes mithuFloat {
@@ -1488,6 +1639,16 @@ p {
 @keyframes mithuWingFlap {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(12deg); }
+}
+
+@keyframes mithuWingFlapLeft {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(-16deg) translateY(-2px); }
+}
+
+@keyframes mithuWingFlapRight {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(16deg) translateY(-2px); }
 }
 
 @keyframes cursorMithuWing {
@@ -2042,20 +2203,20 @@ th {
 }
 
 .mithu-body {
-  fill: #1fbe5d;
+  fill: #1f8fff;
 }
 
 .mithu-belly {
-  fill: #dff8e8;
+  fill: #d8f2ff;
 }
 
 .mithu-tail {
-  fill: #0f8f46;
+  fill: #0b57c8;
 }
 
 .mithu-wing-left,
 .mithu-wing-right {
-  fill: #0f8f46;
+  fill: #1273e6;
 }
 
 .mithu-eye-left,
@@ -2077,10 +2238,116 @@ th {
 }
 
 .mithu-crest {
-  stroke: #26c262;
+  stroke: #ff3b5f;
   stroke-width: 7;
   fill: none;
   stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Bhasha home: pink-purple Mithu with pastel rainbow accents and red crest. */
+body.page-bhasha-home .language-hero-mithu .mithu-body {
+  fill: #d28bff;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-belly {
+  fill: #ffe6ff;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-tail {
+  fill: #9160f4;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-wing-left,
+body.page-bhasha-home .language-hero-mithu .mithu-wing-right {
+  fill: #ff9fd8;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-wing-right {
+  fill: #9fd5ff;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-crest {
+  stroke: #ff2d4f;
+}
+
+/* Sanskrit home: red-blue Mithu. */
+body.page-sanskrit-home #mascot .mithu-body,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-body {
+  fill: #2f7dff;
+}
+
+body.page-sanskrit-home #mascot .mithu-belly,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-belly {
+  fill: #dff0ff;
+}
+
+body.page-sanskrit-home #mascot .mithu-tail,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-tail {
+  fill: #2055c8;
+}
+
+body.page-sanskrit-home #mascot .mithu-wing-left,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-left {
+  fill: #ff4e62;
+}
+
+body.page-sanskrit-home #mascot .mithu-wing-right,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-right {
+  fill: #3f9dff;
+}
+
+body.page-sanskrit-home #mascot .mithu-crest,
+body.page-sanskrit-home .lesson-mascot-floating .mithu-crest {
+  stroke: #ff2747;
+}
+
+/* Sanskrit worlds/about pages: yellow-green Mithu with red crest. */
+body.page-sanskrit-world .mithu-body {
+  fill: #7dcf4c;
+}
+
+body.page-sanskrit-world .mithu-belly {
+  fill: #fff3ac;
+}
+
+body.page-sanskrit-world .mithu-tail {
+  fill: #3e9a49;
+}
+
+body.page-sanskrit-world .mithu-wing-left,
+body.page-sanskrit-world .mithu-wing-right {
+  fill: #9ddf58;
+}
+
+body.page-sanskrit-world .mithu-wing-right {
+  fill: #66c44e;
+}
+
+body.page-sanskrit-world .mithu-crest {
+  stroke: #ff2548;
+}
+
+/* Cursor-following Mithu: yellow-green with red crest site-wide. */
+.mini-cursor-mithu .mithu-body {
+  fill: #92d74f;
+}
+
+.mini-cursor-mithu .mithu-belly {
+  fill: #fff2ad;
+}
+
+.mini-cursor-mithu .mithu-tail {
+  fill: #3f9a49;
+}
+
+.mini-cursor-mithu .mithu-wing-left,
+.mini-cursor-mithu .mithu-wing-right {
+  fill: #71c84d;
+}
+
+.mini-cursor-mithu .mithu-crest {
+  stroke: #ff2446;
 }
 
 .mascot-speech {
@@ -2160,6 +2427,14 @@ th {
   gap: 8px;
 }
 
+.mascot-invite .button {
+  white-space: nowrap;
+  line-height: 1.1;
+  padding-inline: 14px;
+  min-height: 42px;
+  font-size: clamp(0.84rem, 2.4vw, 0.96rem);
+}
+
 @keyframes flowerRainFall {
   0% { transform: translate3d(0, -8px, 0) rotate(0deg); opacity: 0; }
   8% { opacity: 0.95; }
@@ -2182,18 +2457,26 @@ th {
   filter: drop-shadow(0 1px 2px rgba(61, 33, 98, 0.18));
   animation: flowerRainFall linear forwards;
 }
+.parrot-mascot.state-wave .mithu-wing-left,
+.parrot-mascot.state-waving .mithu-wing-left {
+  transform-origin: 72% 36%;
+  animation: mithuWingFlapLeft 0.95s ease-in-out infinite;
 }
 
-.parrot-mascot.state-wave .wing-right {
-  animation: none;
+.parrot-mascot.state-wave .mithu-wing-right,
+.parrot-mascot.state-waving .mithu-wing-right {
+  transform-origin: 28% 36%;
+  animation: mithuWingFlapRight 0.95s ease-in-out infinite;
 }
 
-.parrot-mascot.state-celebrate .parrot-body {
-  animation: none;
+.parrot-mascot.state-celebrate .mithu-body,
+.parrot-mascot.state-celebrating .mithu-body {
+  animation: bounceHappy 0.9s ease-in-out infinite;
 }
 
-.parrot-mascot.state-dance .parrot-body {
-  animation: none;
+.parrot-mascot.state-dance .mithu-body,
+.parrot-mascot.state-dancing .mithu-body {
+  animation: dance 0.76s ease-in-out infinite;
 }
 
 .big-action {
@@ -2633,6 +2916,122 @@ th {
 .preview-panel.wrong {
   border-color: #d37f7f;
   background: #fff5f5;
+}
+
+.shloka-garden {
+  display: grid;
+  gap: 14px;
+}
+
+.shloka-video-wrap {
+  background: linear-gradient(160deg, #f5f9ff, #fff8e8);
+  border: 1px solid #d7e6ff;
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.shloka-video {
+  width: 100%;
+  border-radius: 12px;
+  background: #0f1327;
+  max-height: 340px;
+}
+
+.shloka-subtitle {
+  margin-top: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #deebff;
+  padding: 10px 12px;
+}
+
+.shloka-subtitle .line {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.shloka-subtitle .translit {
+  margin: 4px 0 0;
+  color: #4b5a86;
+  font-weight: 600;
+}
+
+.shloka-subtitle .meaning {
+  margin: 4px 0 0;
+  color: #3f4a6c;
+}
+
+.shloka-scenes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shloka-scene {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #d4e3ff;
+  opacity: 0.8;
+  transform: scale(0.98);
+  transition: transform 0.25s ease, opacity 0.25s ease, border-color 0.25s ease;
+}
+
+.shloka-scene.active {
+  opacity: 1;
+  border-color: #8bc34a;
+  transform: scale(1);
+}
+
+.shloka-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shloka-actions .button {
+  margin: 0;
+}
+
+.recite-privacy-note {
+  margin-top: 0;
+}
+
+.shloka-lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.shloka-line-card {
+  border: 1px solid #d7e6ff;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.shloka-line-card .sa {
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.shloka-line-card .tr {
+  color: #4e5c84;
+  font-weight: 600;
+}
+
+.shloka-line-card .en {
+  color: #3f4a6c;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 860px) {
+  .shloka-scenes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .reset-confirm-modal {
@@ -3113,40 +3512,40 @@ body.page-transitioning .site-header {
   }
 }
 
-/* Force bright rainbow Mithu palette on home, even if old cached HTML is served. */
+/* Force yellow-green Mithu palette on home, even if old cached HTML is served. */
 #homeMithuBodyRainbow stop:nth-of-type(1),
-#guideMithuBodyRainbow stop:nth-of-type(1) { stop-color: #ff2f2f !important; }
+#guideMithuBodyRainbow stop:nth-of-type(1) { stop-color: #fff4a8 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(2),
-#guideMithuBodyRainbow stop:nth-of-type(2) { stop-color: #ff4a4a !important; }
+#guideMithuBodyRainbow stop:nth-of-type(2) { stop-color: #f2ee84 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(3),
-#guideMithuBodyRainbow stop:nth-of-type(3) { stop-color: #ff6b6b !important; }
+#guideMithuBodyRainbow stop:nth-of-type(3) { stop-color: #dae66b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(4),
-#guideMithuBodyRainbow stop:nth-of-type(4) { stop-color: #2f6bff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(4) { stop-color: #b8dc5b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(5),
-#guideMithuBodyRainbow stop:nth-of-type(5) { stop-color: #1f86ff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(5) { stop-color: #93ce4b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(6),
-#guideMithuBodyRainbow stop:nth-of-type(6) { stop-color: #1553d6 !important; }
+#guideMithuBodyRainbow stop:nth-of-type(6) { stop-color: #6dbf42 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(7),
-#guideMithuBodyRainbow stop:nth-of-type(7) { stop-color: #5b3dff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(7) { stop-color: #4aa247 !important; }
 
 #homeMithuWingLeft stop:nth-of-type(1),
-#guideMithuWingLeft stop:nth-of-type(1) { stop-color: #ff2f55 !important; }
+#guideMithuWingLeft stop:nth-of-type(1) { stop-color: #89d857 !important; }
 #homeMithuWingLeft stop:nth-of-type(2),
-#guideMithuWingLeft stop:nth-of-type(2) { stop-color: #ff3a3a !important; }
+#guideMithuWingLeft stop:nth-of-type(2) { stop-color: #71ca4d !important; }
 #homeMithuWingLeft stop:nth-of-type(3),
-#guideMithuWingLeft stop:nth-of-type(3) { stop-color: #ff6a6a !important; }
+#guideMithuWingLeft stop:nth-of-type(3) { stop-color: #53ad43 !important; }
 
 #homeMithuWingRight stop:nth-of-type(1),
-#guideMithuWingRight stop:nth-of-type(1) { stop-color: #4aa3ff !important; }
+#guideMithuWingRight stop:nth-of-type(1) { stop-color: #9de266 !important; }
 #homeMithuWingRight stop:nth-of-type(2),
-#guideMithuWingRight stop:nth-of-type(2) { stop-color: #2d7dff !important; }
+#guideMithuWingRight stop:nth-of-type(2) { stop-color: #82d95a !important; }
 #homeMithuWingRight stop:nth-of-type(3),
-#guideMithuWingRight stop:nth-of-type(3) { stop-color: #2f4dff !important; }
+#guideMithuWingRight stop:nth-of-type(3) { stop-color: #66c54d !important; }
 
 #homeMithuTail stop:nth-of-type(1),
-#guideMithuTail stop:nth-of-type(1) { stop-color: #3a9dff !important; }
+#guideMithuTail stop:nth-of-type(1) { stop-color: #6abe49 !important; }
 #homeMithuTail stop:nth-of-type(2),
-#guideMithuTail stop:nth-of-type(2) { stop-color: #2546cc !important; }
+#guideMithuTail stop:nth-of-type(2) { stop-color: #3d9940 !important; }
 
 .hero .mithu .mithu-crest,
 .journey-guide .mithu-svg .mithu-crest { stroke: #ff1f4a !important; }

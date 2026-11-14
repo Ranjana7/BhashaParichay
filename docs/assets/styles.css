@@ -2245,79 +2245,109 @@ th {
   stroke-linejoin: round;
 }
 
-/* Bhasha home: green-yellow Mithu with red crest. */
+/* Bhasha home: pink-purple Mithu with pastel rainbow accents and red crest. */
 body.page-bhasha-home .language-hero-mithu .mithu-body {
-  fill: #47b857;
+  fill: #d28bff;
 }
 
 body.page-bhasha-home .language-hero-mithu .mithu-belly {
-  fill: #fff3a8;
+  fill: #ffe6ff;
 }
 
 body.page-bhasha-home .language-hero-mithu .mithu-tail {
-  fill: #2f8f42;
+  fill: #9160f4;
 }
 
 body.page-bhasha-home .language-hero-mithu .mithu-wing-left,
 body.page-bhasha-home .language-hero-mithu .mithu-wing-right {
-  fill: #7fd34b;
+  fill: #ff9fd8;
+}
+
+body.page-bhasha-home .language-hero-mithu .mithu-wing-right {
+  fill: #9fd5ff;
 }
 
 body.page-bhasha-home .language-hero-mithu .mithu-crest {
-  stroke: #ff2948;
+  stroke: #ff2d4f;
 }
 
-/* Sanskrit home: pink-purple body with pastel rainbow accents for hero and guide Mithu. */
+/* Sanskrit home: red-blue Mithu. */
 body.page-sanskrit-home #mascot .mithu-body,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-body {
-  fill: #d36cff;
+  fill: #2f7dff;
 }
 
 body.page-sanskrit-home #mascot .mithu-belly,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-belly {
-  fill: #ffe3ff;
+  fill: #dff0ff;
 }
 
 body.page-sanskrit-home #mascot .mithu-tail,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-tail {
-  fill: #8d53f9;
+  fill: #2055c8;
 }
 
 body.page-sanskrit-home #mascot .mithu-wing-left,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-left {
-  fill: #ff8fcb;
+  fill: #ff4e62;
 }
 
 body.page-sanskrit-home #mascot .mithu-wing-right,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-wing-right {
-  fill: #8ec8ff;
+  fill: #3f9dff;
 }
 
 body.page-sanskrit-home #mascot .mithu-crest,
 body.page-sanskrit-home .lesson-mascot-floating .mithu-crest {
-  stroke: #ff2f55;
+  stroke: #ff2747;
 }
 
-/* Cursor-following Mithu: green-yellow with red crest site-wide. */
+/* Sanskrit worlds/about pages: yellow-green Mithu with red crest. */
+body.page-sanskrit-world .mithu-body {
+  fill: #7dcf4c;
+}
+
+body.page-sanskrit-world .mithu-belly {
+  fill: #fff3ac;
+}
+
+body.page-sanskrit-world .mithu-tail {
+  fill: #3e9a49;
+}
+
+body.page-sanskrit-world .mithu-wing-left,
+body.page-sanskrit-world .mithu-wing-right {
+  fill: #9ddf58;
+}
+
+body.page-sanskrit-world .mithu-wing-right {
+  fill: #66c44e;
+}
+
+body.page-sanskrit-world .mithu-crest {
+  stroke: #ff2548;
+}
+
+/* Cursor-following Mithu: yellow-green with red crest site-wide. */
 .mini-cursor-mithu .mithu-body {
-  fill: #4cbc5a;
+  fill: #92d74f;
 }
 
 .mini-cursor-mithu .mithu-belly {
-  fill: #fff2a6;
+  fill: #fff2ad;
 }
 
 .mini-cursor-mithu .mithu-tail {
-  fill: #2f8e45;
+  fill: #3f9a49;
 }
 
 .mini-cursor-mithu .mithu-wing-left,
 .mini-cursor-mithu .mithu-wing-right {
-  fill: #89d54c;
+  fill: #71c84d;
 }
 
 .mini-cursor-mithu .mithu-crest {
-  stroke: #ff2547;
+  stroke: #ff2446;
 }
 
 .mascot-speech {
@@ -2888,6 +2918,122 @@ body.page-sanskrit-home .lesson-mascot-floating .mithu-crest {
   background: #fff5f5;
 }
 
+.shloka-garden {
+  display: grid;
+  gap: 14px;
+}
+
+.shloka-video-wrap {
+  background: linear-gradient(160deg, #f5f9ff, #fff8e8);
+  border: 1px solid #d7e6ff;
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.shloka-video {
+  width: 100%;
+  border-radius: 12px;
+  background: #0f1327;
+  max-height: 340px;
+}
+
+.shloka-subtitle {
+  margin-top: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #deebff;
+  padding: 10px 12px;
+}
+
+.shloka-subtitle .line {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.shloka-subtitle .translit {
+  margin: 4px 0 0;
+  color: #4b5a86;
+  font-weight: 600;
+}
+
+.shloka-subtitle .meaning {
+  margin: 4px 0 0;
+  color: #3f4a6c;
+}
+
+.shloka-scenes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shloka-scene {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #d4e3ff;
+  opacity: 0.8;
+  transform: scale(0.98);
+  transition: transform 0.25s ease, opacity 0.25s ease, border-color 0.25s ease;
+}
+
+.shloka-scene.active {
+  opacity: 1;
+  border-color: #8bc34a;
+  transform: scale(1);
+}
+
+.shloka-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shloka-actions .button {
+  margin: 0;
+}
+
+.recite-privacy-note {
+  margin-top: 0;
+}
+
+.shloka-lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.shloka-line-card {
+  border: 1px solid #d7e6ff;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+}
+
+.shloka-line-card .sa {
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.shloka-line-card .tr {
+  color: #4e5c84;
+  font-weight: 600;
+}
+
+.shloka-line-card .en {
+  color: #3f4a6c;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 860px) {
+  .shloka-scenes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .reset-confirm-modal {
   position: fixed;
   inset: 0;
@@ -3366,40 +3512,40 @@ body.page-transitioning .site-header {
   }
 }
 
-/* Force bright rainbow Mithu palette on home, even if old cached HTML is served. */
+/* Force yellow-green Mithu palette on home, even if old cached HTML is served. */
 #homeMithuBodyRainbow stop:nth-of-type(1),
-#guideMithuBodyRainbow stop:nth-of-type(1) { stop-color: #ff2f2f !important; }
+#guideMithuBodyRainbow stop:nth-of-type(1) { stop-color: #fff4a8 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(2),
-#guideMithuBodyRainbow stop:nth-of-type(2) { stop-color: #ff4a4a !important; }
+#guideMithuBodyRainbow stop:nth-of-type(2) { stop-color: #f2ee84 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(3),
-#guideMithuBodyRainbow stop:nth-of-type(3) { stop-color: #ff6b6b !important; }
+#guideMithuBodyRainbow stop:nth-of-type(3) { stop-color: #dae66b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(4),
-#guideMithuBodyRainbow stop:nth-of-type(4) { stop-color: #2f6bff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(4) { stop-color: #b8dc5b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(5),
-#guideMithuBodyRainbow stop:nth-of-type(5) { stop-color: #1f86ff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(5) { stop-color: #93ce4b !important; }
 #homeMithuBodyRainbow stop:nth-of-type(6),
-#guideMithuBodyRainbow stop:nth-of-type(6) { stop-color: #1553d6 !important; }
+#guideMithuBodyRainbow stop:nth-of-type(6) { stop-color: #6dbf42 !important; }
 #homeMithuBodyRainbow stop:nth-of-type(7),
-#guideMithuBodyRainbow stop:nth-of-type(7) { stop-color: #5b3dff !important; }
+#guideMithuBodyRainbow stop:nth-of-type(7) { stop-color: #4aa247 !important; }
 
 #homeMithuWingLeft stop:nth-of-type(1),
-#guideMithuWingLeft stop:nth-of-type(1) { stop-color: #ff2f55 !important; }
+#guideMithuWingLeft stop:nth-of-type(1) { stop-color: #89d857 !important; }
 #homeMithuWingLeft stop:nth-of-type(2),
-#guideMithuWingLeft stop:nth-of-type(2) { stop-color: #ff3a3a !important; }
+#guideMithuWingLeft stop:nth-of-type(2) { stop-color: #71ca4d !important; }
 #homeMithuWingLeft stop:nth-of-type(3),
-#guideMithuWingLeft stop:nth-of-type(3) { stop-color: #ff6a6a !important; }
+#guideMithuWingLeft stop:nth-of-type(3) { stop-color: #53ad43 !important; }
 
 #homeMithuWingRight stop:nth-of-type(1),
-#guideMithuWingRight stop:nth-of-type(1) { stop-color: #4aa3ff !important; }
+#guideMithuWingRight stop:nth-of-type(1) { stop-color: #9de266 !important; }
 #homeMithuWingRight stop:nth-of-type(2),
-#guideMithuWingRight stop:nth-of-type(2) { stop-color: #2d7dff !important; }
+#guideMithuWingRight stop:nth-of-type(2) { stop-color: #82d95a !important; }
 #homeMithuWingRight stop:nth-of-type(3),
-#guideMithuWingRight stop:nth-of-type(3) { stop-color: #2f4dff !important; }
+#guideMithuWingRight stop:nth-of-type(3) { stop-color: #66c54d !important; }
 
 #homeMithuTail stop:nth-of-type(1),
-#guideMithuTail stop:nth-of-type(1) { stop-color: #3a9dff !important; }
+#guideMithuTail stop:nth-of-type(1) { stop-color: #6abe49 !important; }
 #homeMithuTail stop:nth-of-type(2),
-#guideMithuTail stop:nth-of-type(2) { stop-color: #2546cc !important; }
+#guideMithuTail stop:nth-of-type(2) { stop-color: #3d9940 !important; }
 
 .hero .mithu .mithu-crest,
 .journey-guide .mithu-svg .mithu-crest { stroke: #ff1f4a !important; }
